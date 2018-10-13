@@ -1,0 +1,7 @@
+add_subdirectory(hl2dm/goap/action)
+add_subdirectory(hl2dm/weapon)
+add_subdirectory(hl2dm/player)
+add_subdirectory(dod/player)
+add_subdirectory(dod/goap/action)
+add_subdirectory(dod/weapon)
+add_subdirectory(dod/util)

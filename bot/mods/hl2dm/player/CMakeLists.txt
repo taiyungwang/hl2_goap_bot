@@ -1,0 +1,1 @@
+add_library(hl2dm_player HL2DMBotBuilder.cpp HL2DMWorld.cpp) 

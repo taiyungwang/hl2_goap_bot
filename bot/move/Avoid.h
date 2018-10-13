@@ -1,0 +1,27 @@
+#pragma once
+
+#include "MoveState.h"
+
+class CGameTrace;
+struct edict_t;
+
+/**
+ * Defines the state where a bot is moving toward a point but expects obstacles.
+ */
+class Avoid: public MoveState {
+public:
+	Avoid(MoveStateContext& ctx, MoveState* nextState);
+
+	/**
+	 * Moves toward the given goal, but attempt to avoid any local obstacles.
+	 * Transitions to Straight if no obstacle ahead.  Transitions to StepLeft
+	 * if the bot is stuck.
+	 */
+	virtual MoveState* move(const Vector& currPos);
+
+private:
+
+	MoveState* nextState;
+
+	void trace(CGameTrace& trace, float dist) const;
+};

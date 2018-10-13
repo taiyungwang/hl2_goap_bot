@@ -1,0 +1,1 @@
+add_library(dod_player DODBotBuilder.cpp DODWorld.cpp) 
