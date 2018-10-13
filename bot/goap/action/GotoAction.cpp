@@ -72,7 +72,7 @@ void GoToAction::init() {
 	moveCtx->stop();
 	if (blackboard.getPath() != nullptr
 			&& blackboard.getPath()->Count() > 0) {
-		setDestination(blackboard.getPath()->Top()->GetCenter());
+		moveCtx->setGoal(blackboard.getPath()->Top()->GetCenter());
 	}
 }
 
@@ -154,7 +154,7 @@ void GoToAction::getNextArea() {
 					dest += result.plane.normal
 							* (traceEnd - result.endpos).Length();
 				}
-				setDestination(dest);
+				moveCtx->setGoal(dest);
 				blackboard.setTargetLocation(dest);
 			}
 		}
@@ -170,7 +170,7 @@ void GoToAction::getNextArea() {
 						&& !findLadder(startArea, path.Top(),
 								CNavLadder::LADDER_DOWN)))
 				&& !moveCtx->nextGoalIsLadderStart()) {
-			setDestination(path.Top()->GetCenter());
+			moveCtx->setGoal(path.Top()->GetCenter());
 		}
 	}
 }
@@ -190,15 +190,11 @@ bool GoToAction::findLadder(const CNavArea* from, const CNavArea* to,
 				start = &ladder->m_bottom;
 				end = &ladder->m_top;
 			}
-			setDestination(*start);
+			moveCtx->setGoal(*start);
 			moveCtx->setLadderEnd(*end);
 			moveCtx->setLadderDir(dir);
 			return true;
 		}
 	}
 	return false;
-}
-
-void GoToAction::setDestination(const Vector& dest) {
-	moveCtx->setGoal(dest);
 }

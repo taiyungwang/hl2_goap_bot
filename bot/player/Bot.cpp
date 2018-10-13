@@ -66,8 +66,9 @@ void Bot::think() {
 			}
 			planner->execute();
 			cmd.viewangles = getAngle();
-			ViewFinder::updateAngle(cmd.viewangles,
-					blackboard->getViewTargetAngle());
+			QAngle angle;
+			VectorAngles(blackboard->getViewTarget() - getEyesPos(), angle);
+			ViewFinder::updateAngle(cmd.viewangles, angle);
 			if (cmd.weaponselect != 0) {
 				world->updateState(WorldProp::USING_BEST_WEAP, true);
 			}

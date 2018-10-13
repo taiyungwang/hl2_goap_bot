@@ -34,12 +34,6 @@ Blackboard::~Blackboard() {
 	reset();
 }
 
-QAngle Blackboard::getViewTargetAngle() const {
-	QAngle angle;
-	VectorAngles(viewTarget - self->getEyesPos(), angle);
-	return angle;
-}
-
 void Blackboard::setTargetLocation(const Vector& loc) {
 	targetLocation = UTIL_FindGround(loc);
 }

@@ -41,11 +41,7 @@ public:
 		return viewTarget;
 	}
 
-	QAngle getViewTargetAngle() const;
-
 	bool isOnLadder();
-
-	bool atTarget() const;
 
 	float getTargetRadius() const {
 		return targetRadius;
@@ -56,7 +52,6 @@ public:
 	}
 
 	float getAimAccuracy(const Vector& pos) const;
-
 
 	float getTargetEntDistance() const;
 

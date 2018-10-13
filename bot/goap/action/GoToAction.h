@@ -54,9 +54,4 @@ private:
 	 */
 	bool findLadder(const CNavArea* from, const CNavArea* to,
 			CNavLadder::LadderDirectionType dir);
-
-	/**
-	 * Sets the next goal point.
-	 */
-	void setDestination(const Vector& dest);
 };
