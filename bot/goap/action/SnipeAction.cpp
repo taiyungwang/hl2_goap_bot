@@ -13,6 +13,7 @@ SnipeAction::SnipeAction(Blackboard& blackboard) :
 }
 
 bool SnipeAction::precondCheck() {
+	path.Clear();
 	if (RandomInt(0, 1) == 0) {
 		return false;
 	}
