@@ -234,10 +234,6 @@ float AStar::getEdgeCost(Action * action) const {
 		GoalState goal;
 		goal.m_key = precond.Key(j);
 		goal.m_value = precond[j];
-		if (!efxToActions.IsValidIndex(efxToActions.Find(goal))) {
-			// no actions can satisfy this precondition.
-			return INFINITY;
-		}
 	}
 	return action->getCost();
 }
