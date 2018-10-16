@@ -9,7 +9,8 @@ SwitchWeaponAction::SwitchWeaponAction(Blackboard& blackboard) :
 }
 
 bool SwitchWeaponAction::precondCheck() {
-	return armory.getBestWeaponIdx() != 0;
+	return armory.getBestWeaponIdx() != 0
+			&& armory.getCurrWeaponIdx() != armory.getBestWeaponIdx();
 }
 
 bool SwitchWeaponAction::execute() {
