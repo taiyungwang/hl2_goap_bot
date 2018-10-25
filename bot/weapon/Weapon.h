@@ -83,7 +83,7 @@ public:
 		return deployedCheck != nullptr;
 	}
 
-	bool getMinDeployRange() const {
+	float getMinDeployRange() const {
 		return minDeployRange;
 	}
 

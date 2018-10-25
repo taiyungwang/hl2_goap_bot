@@ -1,8 +1,8 @@
 #pragma once
 
-#include "FindPathAction.h"
+#include "GoToAction.h"
 
-class SnipeAction: public FindPathAction {
+class SnipeAction: public GoToAction {
 public:
 	SnipeAction(Blackboard& blackboard);
 
@@ -11,10 +11,6 @@ public:
 	}
 
 	bool execute();
-
-	bool isInterruptable() const {
-		return true;
-	}
 
 	bool precondCheck();
 

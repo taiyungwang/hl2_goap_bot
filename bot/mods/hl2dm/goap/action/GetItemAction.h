@@ -11,8 +11,6 @@ protected:
 			GoToItemAction(name, "CBaseEntity", "m_fEffects", blackboard) {
 	}
 
-	bool execute();
-
 private:
 	bool isAvailable(edict_t *) const;
 

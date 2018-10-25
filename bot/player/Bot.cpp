@@ -7,6 +7,7 @@
 #include <event/EventInfo.h>
 #include <goap/Planner.h>
 #include <goap/action/GoToAction.h>
+#include <move/Navigator.h>
 #include <weapon/Armory.h>
 #include <weapon/Weapon.h>
 #include <navmesh/nav_mesh.h>
@@ -36,7 +37,7 @@ void Bot::think() {
 		Vector pos = getCurrentPosition();
 		extern CNavMesh* TheNavMesh;
 		TheNavMesh->IncreaseDangerNearby(getTeam(), 5.0f,
-				GoToAction::getCurrentArea(pos), pos, 100.0f);
+				Navigator::getCurrentArea(pos), pos, 100.0f);
 		inGame = false;
 		planner->resetPlanning(true);
 		blackboard->getButtons().tap(IN_ATTACK);

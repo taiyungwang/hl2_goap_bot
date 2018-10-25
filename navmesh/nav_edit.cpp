@@ -229,18 +229,15 @@ bool CNavMesh::FindNavAreaOrLadderAlongRay( const Vector &start, const Vector &e
 		Vector c2 = ladder->m_top + left;
 		Vector c3 = ladder->m_bottom + right;
 		Vector c4 = ladder->m_bottom + left;
-		float dist = IntersectRayWithTriangle( ray, c1, c2, c4, false );
-		if ( dist > 0 && dist < bestDist )
-		{
-			*bestLadder = ladder;
-			bestDist = dist;
-		}
+		for (int i = 0; i < 2; i++) {
+			float dist = IntersectRayWithTriangle( ray, c1, i > 0 ? c4 : c2,
+					i > 0 ? c3 : c4, false );
+			if ( dist > 0 && dist < bestDist )
+			{
+				*bestLadder = ladder;
+				bestDist = dist;
+			}
 
-		dist = IntersectRayWithTriangle( ray, c1, c4, c3, false );
-		if ( dist > 0 && dist < bestDist )
-		{
-			*bestLadder = ladder;
-			bestDist = dist;
 		}
 	}
 
@@ -423,17 +420,8 @@ bool CNavMesh::FindActiveNavArea( void )
 
 			while( yaw < 0.0f )
 				yaw += 360.0f;
-
-			if ((yaw < 45.0f || yaw > 315.0f) || (yaw > 135.0f && yaw < 225.0f))
-			{
-				m_splitEdge = SnapToGrid( result.endpos.y, true );
-				m_splitAlongX = true;
-			}
-			else
-			{
-				m_splitEdge = SnapToGrid( result.endpos.x, true );
-				m_splitAlongX = false;
-			}
+			m_splitAlongX = yaw < 45.0f || yaw > 315.0f || (yaw > 135.0f && yaw < 225.0f);
+			SnapToGrid( m_splitAlongX ? result.endpos.y : result.endpos.x, true );
 		}
 
 		if ( !m_climbableSurface && !IsEditMode( CREATING_LADDER ) )
@@ -443,7 +431,7 @@ bool CNavMesh::FindActiveNavArea( void )
 
 		return true;
 	}
-	else if ( isClippingRayAtFeet )
+	if ( isClippingRayAtFeet )
 	{
 		m_editCursorPos = SnapToGrid( result.endpos );
 	}

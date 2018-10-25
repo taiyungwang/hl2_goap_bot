@@ -15,25 +15,23 @@ DeployMGAction::DeployMGAction(Blackboard& blackboard) :
 }
 
 bool DeployMGAction::precondCheck() {
-	executionTime = 0;
 	if (!armory.getCurrWeapon()->isDeployable()) {
 		return false;
 	}
 	const Player* player = blackboard.getTargetedPlayer();
-	Vector facing;
+	Vector target;
 	if (player != nullptr) {
-		facing = player->getEyesPos();
+		target = player->getEyesPos();
 	} else {
 		edict_t* blocker = blackboard.getBlocker();
 		if (blocker == nullptr) {
 			return false;
 		}
-		facing = blocker->GetCollideable()->GetCollisionOrigin();
+		target = blocker->GetCollideable()->GetCollisionOrigin();
 	}
 	const Player* self = blackboard.getSelf();
 	Vector pos = self->getEyesPos();
-	facing -= pos;
-	float z = self->getCurrentPosition().z;
+	float z = self->getCurrentPosition().z + 1.0f;
 	for (position = 0; position < 3; position++) {
 		if (position == 2) {
 			break;
@@ -43,7 +41,7 @@ bool DeployMGAction::precondCheck() {
 		extern ConVar mybot_debug;
 		edict_t * ground = BasePlayer(self->getEdict()).getGroundEntity();
 		UTIL_TraceHull(pos,
-				pos + facing.Normalized() * halfHull,
+				pos + (target - pos).Normalized() * halfHull,
 				Vector(0.0f, -halfHull, 0.0f),
 				Vector(0.0f, halfHull,z),
 								MASK_NPCSOLID_BRUSHONLY,
@@ -55,6 +53,7 @@ bool DeployMGAction::precondCheck() {
 		}
 		z += HumanCrouchHeight;
 	}
+	blackboard.setViewTarget(target);
 	return true;
 }
 
@@ -63,7 +62,7 @@ bool DeployMGAction::postCondCheck() {
 }
 
 bool DeployMGAction::execute() {
-	if (postCondCheck() || executionTime++ > 180) {
+	if (postCondCheck()) {
 		return true;
 	}
 	Buttons& buttons = blackboard.getButtons();

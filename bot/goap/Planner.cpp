@@ -49,6 +49,7 @@ void Planner::execute() {
 				getNextGoal();
 			} else {
 				state = State::ACTION;
+				actions[plan.Head()]->init();
 			}
 		}
 		break;
@@ -63,6 +64,8 @@ void Planner::execute() {
 			plan.RemoveAtHead();
 			if (!action->postCondCheck()) {
 				getNextGoal();
+			} else if (!plan.IsEmpty()) {
+				actions[plan.Head()]->init();
 			}
 		}
 		break;

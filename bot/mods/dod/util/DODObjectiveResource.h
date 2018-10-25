@@ -17,4 +17,12 @@ public:
 	Vector* getCapturePositions() {
 		return getPtr<Vector>("m_vCPPositions");
 	}
+
+	int* getNumBombsRequired() {
+		return getPtr<int>("m_iBombsRequired");
+	}
+
+	bool* getBombIsPlanted() {
+		return getPtr<bool>("m_bBombPlanted");
+	}
 };

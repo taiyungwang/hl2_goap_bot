@@ -1,6 +1,6 @@
 #include "DestroyObjectAction.h"
 
-#include "FindPathAction.h"
+#include <move/Navigator.h>
 #include <move/MoveStateContext.h>
 #include <player/Blackboard.h>
 #include <player/Player.h>
@@ -82,12 +82,12 @@ bool DestroyObjectAction::execute() {
 		moveCtx->setGoal(
 				(targetLoc - self->getCurrentPosition()).Normalized()
 						* (dist - 25.0f) + self->getCurrentPosition());
-		CNavArea* area = FindPathAction::getArea(selfEnt);
+		CNavArea* area = Navigator::getArea(selfEnt);
 		moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
 		buttons.hold(IN_SPEED);
 	}
 	if (fabs(blackboard.getAimAccuracy(targetLoc))
-			> 1.0f - 30.0f / (dist == 0.0f ? 0.0001f : dist)) {
+			> 1.0f - 30.0f / (dist == 0.0f ? 0.0001f : dist) || weapFunc->isMelee()) {
 		if (!isVisible(targetLoc, targetEnt)) {
 			// aim for feet
 			if (!crouch) {

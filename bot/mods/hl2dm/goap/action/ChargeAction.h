@@ -1,6 +1,6 @@
 #pragma once
 
-#include <goap/action/GoToItemAction.h>
+#include "GoToItemAction.h"
 
 /**
  * Defines the action for using a charger.
@@ -9,9 +9,8 @@ class ChargeAction: public GoToItemAction {
 public:
 	ChargeAction(const char* name, Blackboard& blackboard) :
 			GoToItemAction(name, "CBaseAnimating", "m_flCycle", blackboard) {
+		targetRadius = 50.0f;
 	}
-
-	void init();
 
 	float getCost() const {
 		return 2.0f + GoToItemAction::getCost();

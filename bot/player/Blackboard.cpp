@@ -2,6 +2,7 @@
 
 #include <player/Button.h>
 #include <player/Player.h>
+#include <move/Navigator.h>
 #include <weapon/Weapon.h>
 #include <util/BaseEntity.h>
 #include <util/UtilTrace.h>
@@ -25,17 +26,15 @@ Blackboard::Blackboard(const CUtlMap<int, Player*>& players,
 void Blackboard::reset() {
 	blocker = nullptr;
 	targetedPlayer = nullptr;
-	targetRadius = 0.0f;
 	armory.reset();
 }
 
 Blackboard::~Blackboard() {
 	delete entInstance;
+	if (navigator != nullptr) {
+		delete navigator;
+	}
 	reset();
-}
-
-void Blackboard::setTargetLocation(const Vector& loc) {
-	targetLocation = UTIL_FindGround(loc);
 }
 
 float Blackboard::getAimAccuracy(const Vector& pos) const {

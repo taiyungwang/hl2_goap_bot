@@ -1,10 +1,8 @@
 #pragma once
 
 #include "Action.h"
-#include <navmesh/nav_ladder.h>
 #include <utlstack.h>
 
-class MoveStateContext;
 class CNavArea;
 
 /**
@@ -13,45 +11,29 @@ class CNavArea;
 class GoToAction: public Action {
 public:
 
-	/**
-	 * Gets the current area the agent is in.
-	 */
-	static CNavArea* getCurrentArea(const Vector& pos);
-
-	GoToAction(Blackboard& blackboard);
-
-	~GoToAction();
-
-	bool execute();
+	virtual bool execute();
 
 	void init();
 
-	bool postCondCheck();
+	virtual bool precondCheck();
 
-	bool isInterruptable() const {
+	virtual float getCost() const {
+		return path.Count();
+	}
+
+	virtual bool postCondCheck();
+
+	virtual bool isInterruptable() const {
 		return true;
 	}
 
 protected:
-	virtual bool canMove();
+	CUtlStack<CNavArea*> path;
 
-private:
-	static bool isConnectionOnFloor(const CNavArea* from, const CNavArea* to);
+	Vector targetLoc;
 
-	Vector currentGoal;
+	float targetRadius = 25.0f;
 
-	MoveStateContext* moveCtx;
-
-	/**
-	 * Gets the next target area.
-	 */
-	void getNextArea();
-
-	/**
-	 * Checks to see if a ladder is required for traversing the two areas.
-	 * If a ladder is required, moveCtx is updated accordingly.
-	 * @return True if a ladder is required.
-	 */
-	bool findLadder(const CNavArea* from, const CNavArea* to,
-			CNavLadder::LadderDirectionType dir);
+	GoToAction(Blackboard& blackboard): Action(blackboard) {
+	}
 };

@@ -4,6 +4,7 @@
 #include "Bot.h"
 #include "World.h"
 #include "VTableHook.h"
+#include <move/Navigator.h>
 #include <goap/action/AttackAction.h>
 #include <goap/action/FindCoverAction.h>
 #include <goap/action/ReloadWeaponAction.h>
@@ -49,6 +50,7 @@ Bot* BotBuilder::build(const CUtlMap<int, Player*>& players,
 		hookPlayerRunCommand(ent);
 	}
 	Blackboard *blackboard = new Blackboard(players, bot, buildEntity(ent));
+	blackboard->setNavigator(new Navigator(*blackboard));
 	bot->setBlackboard(blackboard);
 	World* world = buildWorld();
 	world->reset();

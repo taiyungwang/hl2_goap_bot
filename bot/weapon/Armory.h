@@ -29,6 +29,12 @@ public:
 		return getWeapon(currWeapIdx);
 	}
 
+	const char* getCurrentWeaponName() const {
+		return getWeaponName(currWeapIdx);
+	}
+
+	const char* getWeaponName(int key) const;
+
 	Weapon* getWeapon(int key) const;
 
 	void setCurrentWeaponIdx(int currentWeapon) {
@@ -58,7 +64,6 @@ public:
 	WeaponBuilderFactory& getWeaponFactory() {
 		return factory;
 	}
-
 
 private:
 	int currWeapIdx, bestWeapIdx, desiredWeapIdx = 0;

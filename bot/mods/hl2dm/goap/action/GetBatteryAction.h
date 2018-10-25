@@ -1,6 +1,6 @@
 #pragma once
 
-#include <goap/action/GetItemAction.h>
+#include "GetItemAction.h"
 
 /**
  * Defines the action for picking up a battery.

@@ -14,5 +14,5 @@ extern EntityClassManager *classManager;
 GoToItemAction::GoToItemAction(const char* name, const char* className,
 		const char* classVar, Blackboard& blackboard) :
 		availability(classManager->getClass(className)->getEntityVar(classVar)),
-		GoToEntityAction(blackboard, name) {
+		GoToConsumableEntityAction(blackboard, name) {
 }

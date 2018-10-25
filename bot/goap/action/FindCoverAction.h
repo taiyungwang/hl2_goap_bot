@@ -1,22 +1,20 @@
 #pragma once
 
-#include "FindPathAction.h"
+#include "GoToAction.h"
 #include <navmesh/nav_pathfind.h>
 
-class FindCoverAction: public FindPathAction, public ISearchSurroundingAreasFunctor {
+class FindCoverAction: public GoToAction, public ISearchSurroundingAreasFunctor {
 public:
 	FindCoverAction(Blackboard& blackboard);
 
 	bool precondCheck();
 
-	bool postCondCheck();
-
-	bool execute() {
-		return true;
+	float getCost() const {
+		return GoToAction::getCost() * 2.0f;
 	}
 
-	float getCost() const {
-		return FindPathAction::getCost() * 2.0f;
+	bool isInterruptable() const {
+		return false;
 	}
 
 	bool operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar );

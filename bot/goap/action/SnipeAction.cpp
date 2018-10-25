@@ -6,9 +6,7 @@
 #include <util/UtilTrace.h>
 #include <vstdlib/random.h>
 
-SnipeAction::SnipeAction(Blackboard& blackboard) :
-	FindPathAction(blackboard) {
-	precond.Insert(WorldProp::AT_LOCATION, true);
+SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 	effects = {WorldProp::ENEMY_SIGHTED, true};
 }
 
@@ -49,7 +47,7 @@ bool SnipeAction::precondCheck() {
 			}
 		}
 		if (hideSpot > -1) {
-			build();
+			GoToAction::precondCheck();
 		}
 		hideAreas.Remove(area);
 	} while (hideAreas.Count() > 0 && path.Count() <= 0);
@@ -83,6 +81,12 @@ bool SnipeAction::precondCheck() {
 }
 
 bool SnipeAction::execute() {
+	if (!GoToAction::execute()) {
+		return false;
+	}
+	if (!GoToAction::postCondCheck()) {
+		return true;
+	}
 	QAngle angle(0.0f, facing, 0.0f);
 	Vector aim;
 	AngleVectors(angle, &aim);

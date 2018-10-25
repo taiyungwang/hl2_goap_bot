@@ -17,6 +17,5 @@ public:
 	}
 
 private:
-	int position = 0,
-	executionTime = 0;
+	int position = 0;
 };

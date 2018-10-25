@@ -12,7 +12,7 @@ bool UseSpecificWeaponAction::precondCheck() {
 	auto& weapons = armory.getWeapons();
 	weapIdx = 0;
 	FOR_EACH_MAP_FAST(weapons, i) {
-		if (canUse(weapons[i]->getEdict()->GetClassName())) {
+		if (canUse(armory.getWeaponName(i))) {
 			weapIdx = weapons.Key(i);
 			return armory.getWeapon(weapIdx) != nullptr;
 		}

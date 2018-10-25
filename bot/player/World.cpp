@@ -8,7 +8,6 @@
 
 void World::reset() {
 	states.RemoveAll();
-	states.Insert(WorldProp::AT_LOCATION, false);
 	states.Insert(WorldProp::USING_DESIRED_WEAPON, false);
 	states.Insert(WorldProp::ENEMY_SIGHTED, false);
 	states.Insert(WorldProp::MULTIPLE_ENEMY_SIGHTED, false);

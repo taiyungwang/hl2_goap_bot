@@ -1,15 +1,15 @@
 #pragma once
 
-#include "GoToEntityAction.h"
+#include <goap/action/GoToConsumableEntityAction.h>
 
 class EntityVar;
-struct edict_t;
 
 /**
  * Defines an action to pick up or use a consumable item on
- * the map.
+ * the map. The availability of the item is defined by
+ * properties of an entity.
  */
-class GoToItemAction: public GoToEntityAction {
+class GoToItemAction: public GoToConsumableEntityAction {
 public:
 	GoToItemAction(const char* name, const char* className,
 			const char* classVar, Blackboard& blackboard);

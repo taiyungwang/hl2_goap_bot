@@ -4,7 +4,6 @@
 #include <utlcommon.h>
 
 enum class WorldProp {
-	AT_LOCATION,
 	ENEMY_SIGHTED,
 	MULTIPLE_ENEMY_SIGHTED,
 	USING_BEST_WEAP,
@@ -16,7 +15,10 @@ enum class WorldProp {
 	HURT,
 	// DOD
 	ROUND_STARTED,
+	POINTS_DEFENDED,
 	ALL_POINTS_CAPTURED,
+	HAS_BOMB,
+	BOMB_DEFUSED,
 	// HL2DM
 	ARMOR_FULL,
 	PROP_COUNT

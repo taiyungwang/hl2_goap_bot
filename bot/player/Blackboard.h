@@ -4,11 +4,11 @@
 #include "Buttons.h"
 #include <eiface.h>
 #include <iplayerinfo.h>
-#include <utlstack.h>
 
 class EntityInstance;
 class Player;
 class CNavArea;
+class Navigator;
 struct edict_t;
 
 class Blackboard {
@@ -23,12 +23,6 @@ public:
 
 	~Blackboard();
 
-	void setTargetLocation(const Vector& loc);
-
-	const Vector& getTargetLocation() const {
-		return targetLocation;
-	}
-
 	Buttons& getButtons() {
 		return buttons;
 	}
@@ -42,14 +36,6 @@ public:
 	}
 
 	bool isOnLadder();
-
-	float getTargetRadius() const {
-		return targetRadius;
-	}
-
-	void setTargetRadius(float targetRadius) {
-		this->targetRadius = targetRadius;
-	}
 
 	float getAimAccuracy(const Vector& pos) const;
 
@@ -87,16 +73,16 @@ public:
 		return cmd;
 	}
 
-	CUtlStack<CNavArea*>* getPath() const {
-		return path;
-	}
-
-	void setPath(CUtlStack<CNavArea*>* path) {
-		this->path = path;
-	}
-
 	Armory& getArmory() {
 		return armory;
+	}
+
+	Navigator* getNavigator() {
+		return navigator;
+	}
+
+	void setNavigator(Navigator* navigator) {
+		this->navigator = navigator;
 	}
 
 private:
@@ -105,19 +91,17 @@ private:
 
 	const Player* self, *targetedPlayer;
 
-	CUtlStack<CNavArea*>* path = nullptr;
-
 	CUtlVector<Player*> visibleEnemies;
 
 	const CUtlMap<int, Player*>& players;
 
 	CBotCmd cmd;
 
+	Navigator* navigator;
+
 	edict_t* blocker;
 
-	float targetRadius;
-
-	Vector targetLocation, viewTarget;
+	Vector viewTarget;
 
 	Buttons buttons;
 

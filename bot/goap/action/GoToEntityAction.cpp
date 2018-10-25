@@ -3,63 +3,36 @@
 #include <player/Blackboard.h>
 #include <player/Player.h>
 #include <util/EntityUtils.h>
-#include <util/EntityClassManager.h>
-#include <util/EntityClass.h>
-#include <util/EntityVar.h>
 #include <edict.h>
-#include <in_buttons.h>
 
 GoToEntityAction::GoToEntityAction(Blackboard& blackboard, const char* itemName) :
-FindPathAction(blackboard) {
-	findEntWithSubStrInName(itemName, items);
-	precond.Insert(WorldProp::AT_LOCATION, true);
+GoToAction(blackboard) {
+	findEntWithMatchingName(itemName, items);
 }
 
-void GoToEntityAction::init() {
-	blackboard.setTargetRadius(25.0f);
-	FindPathAction::init();
-}
-
-bool GoToEntityAction::execute() {
-	if (item == nullptr) {
-		return true;
-	}
-	if (isDepleted()) {
-		depleted.AddToTail(item);
-		return true;
-	}
-	return false;
+bool GoToEntityAction::precondCheck() {
+	selectItem(items);
+	return buildPathToEntity();
 }
 
 bool GoToEntityAction::postCondCheck() {
 	item = nullptr;
-	return true;
+	return GoToAction::postCondCheck();
 }
 
-bool GoToEntityAction::precondCheck() {
-	CUtlLinkedList<edict_t*> active;
-	FOR_EACH_LL(items, i)
-	{
-		auto j = depleted.Find(items[i]);
-		bool available = isAvailable(items[i]);
-		if (!available && allItemsVisible) {
-			depleted.AddToTail(items[i]);
-		}
-		if ((!depleted.IsValidIndex(j) && !allItemsVisible)
-				|| (allItemsVisible && available)) {
-			active.AddToTail(items[i]);
-		}
-		if (available && depleted.IsValidIndex(j)) {
-			depleted.Remove(j);
-		}
-	}
-	selectItem(active);
+bool GoToEntityAction::buildPathToEntity() {
 	bool foundItem = item != nullptr;
 	if (foundItem) {
 		targetLoc = item->GetCollideable()->GetCollisionOrigin();
-		build();
+		if (targetLoc.x == 0 && targetLoc.y == 0 && targetLoc.z == 0) {
+			// look for trigger zone
+			Vector min, max;
+			item->GetCollideable()->WorldSpaceTriggerBounds(&min, &max);
+			targetLoc = (min + max) / 2.0f;
+			targetLoc.z = min.z;
+		}
 	}
-	return foundItem && path.Count() > 0;
+	return foundItem && GoToAction::precondCheck();
 }
 
 void GoToEntityAction::selectItem(CUtlLinkedList<edict_t*>& active) {

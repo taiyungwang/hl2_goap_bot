@@ -9,7 +9,6 @@
 #include <mods/hl2dm/goap/action/UseGravityGunAction.h>
 #include <mods/hl2dm/weapon/AR2Builder.h>
 #include <mods/hl2dm/weapon/CrossbowBuilder.h>
-#include <mods/hl2dm/weapon/GravityGunBuilder.h>
 #include <mods/hl2dm/weapon/ShotgunFunction.h>
 #include <mods/hl2dm/weapon/SMGBuilder.h>
 #include <mods/hl2dm/weapon/MagnumBuilder.h>
@@ -20,10 +19,11 @@
 #include <weapon/PistolBuilder.h>
 #include <weapon/RPGBuilder.h>
 #include <weapon/WeaponBuilderFactory.h>
+#include <weapon/UtilityToolBuilder.h>
+
 
 void HL2DMBotBuilder::updatePlanner(Planner& planner,
 		Blackboard& blackboard) const {
-	planner.addAction<GoToAction>(0.0f);
 	planner.addAction<ChargeArmorAction>(0.51f);
 	planner.addAction<GetBatteryAction>(0.5f);
 	planner.addAction<UseGravityGunAction>(0.9f);
@@ -41,7 +41,7 @@ void HL2DMBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {
 	weaponFac.addInstance("weapon_crossbow", new CrossbowBuilder());
 	weaponFac.addInstance("weapon_frag", new GrenadeBuilder());
 	weaponFac.addInstance("weapon_rpg", new RPGBuilder());
-	weaponFac.addInstance("weapon_physcannon", new GravityGunBuilder());
+	weaponFac.addInstance("weapon_physcannon", new UtilityToolBuilder(768.0f));
 }
 
 EntityInstance* HL2DMBotBuilder::buildEntity(edict_t* ent) const {

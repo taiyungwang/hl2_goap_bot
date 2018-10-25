@@ -3,45 +3,49 @@
 #include <navmesh/nav_ladder.h>
 #include <utlstack.h>
 
+class Blackboard;
 class MoveStateContext;
 class CNavArea;
-class Blackboard;
 
 /**
- * Defines the action for going to a location on the map.
+ * Handles navigation based on the navmesh.
  */
 class Navigator {
 public:
 
-	static CNavArea* getArea(edict_t* ent);
-
 	/**
-	 * Gets the current area the agent is in.
+	 * Gets the current area the given position is in.
 	 */
 	static CNavArea* getCurrentArea(const Vector& pos);
 
-	Navigator(Blackboard& blackboard, float targetRadius);
+	/**
+	 * Get the current area the entity is in.
+	 */
+	static CNavArea* getArea(edict_t* ent);
+
+	Navigator(Blackboard& blackboard);
 
 	virtual ~Navigator();
 
-	bool navigate();
+	bool step();
 
-	bool buildPath(const Vector& targetLoc);
+	bool reachedGoal() const;
 
-	bool reachedGoal();
+	void start(CUtlStack<CNavArea*>* path, const Vector& goal, 	float targetRadius);
 
-	const CUtlStack<CNavArea*>& getPath() const {
-		return path;
-	}
+	bool buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) const;
+
+protected:
+	Blackboard& blackboard;
+
+	virtual bool checkCanMove();
 
 private:
 	static bool isConnectionOnFloor(const CNavArea* from, const CNavArea* to);
 
 	Vector currentGoal, finalGoal;
 
-	float targetRadius;
-
-	CUtlStack<CNavArea*> path;
+	CUtlStack<CNavArea*>* path = nullptr;
 
 	MoveStateContext* moveCtx;
 
@@ -57,4 +61,6 @@ private:
 	 */
 	bool findLadder(const CNavArea* from, const CNavArea* to,
 			CNavLadder::LadderDirectionType dir);
+
+	float targetRadius = 25.0f;
 };

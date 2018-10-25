@@ -7,13 +7,12 @@
 #include <edict.h>
 #include <in_buttons.h>
 
-void ChargeAction::init() {
-	GoToItemAction::init();
-	blackboard.setTargetRadius(50.0f);
-}
 
 bool ChargeAction::execute() {
-	if (GoToItemAction::execute() || isFinished()) {
+	if (!GoToItemAction::execute()) {
+		return false;
+	}
+	if (isDepleted() || isFinished()) {
 		return true;
 	}
 	Vector itemPos = UTIL_FindGround(

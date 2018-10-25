@@ -35,6 +35,14 @@ edict_t * findNearestEntity(const CUtlLinkedList<edict_t*>& entities, const Vect
 
 edict_t * findEntWithSubStrInNetClassName(const char* name);
 
+/**
+ * Find all entities with the given class name.
+ */
+void findEntWithMatchingName(const char* name, CUtlLinkedList<edict_t*>& result);
+
+/**
+ * Find all entities with class name containing the given substring.
+ */
 void findEntWithSubStrInName(const char* name, CUtlLinkedList<edict_t*>& result);
 
 /**

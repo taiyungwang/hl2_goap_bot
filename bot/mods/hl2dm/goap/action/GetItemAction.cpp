@@ -6,8 +6,3 @@
 bool GetItemAction::isAvailable(edict_t* ent) const {
 	return (availability.get<int>(ent) & EF_NODRAW) == 0;
 }
-
-bool GetItemAction::execute() {
-	GoToItemAction::execute();
-	return true;
-}

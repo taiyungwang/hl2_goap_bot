@@ -10,9 +10,8 @@ void HL2DMWorld::addStates() {
 
 bool HL2DMWorld::update(Blackboard& blackboard) {
 	updateState(WorldProp::ARMOR_FULL, blackboard.getSelf()->getArmor() >= 100);
-	extern IVEngineServer* engine;
 	if (CUtlString("weapon_physcannon")
-			== engine->PEntityOfEntIndex(blackboard.getArmory().getCurrWeaponIdx())->GetClassName()) {
+			== blackboard.getArmory().getCurrentWeaponName()) {
 		updateState(WorldProp::WEAPON_LOADED, true);
 	}
 	return false;

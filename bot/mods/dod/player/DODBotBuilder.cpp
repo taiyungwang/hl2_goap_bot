@@ -7,6 +7,9 @@
 #include <goap/action/GoToAction.h>
 #include <goap/action/DestroyObjectAction.h>
 #include <mods/dod/goap/action/CapturePointAction.h>
+#include <mods/dod/goap/action/DODBombTargetAction.h>
+#include <mods/dod/goap/action/DODDefendPointAction.h>
+#include <mods/dod/goap/action/DODDefuseBombAction.h>
 #include <mods/dod/goap/action/DeployMGAction.h>
 #include <mods/dod/goap/action/DODUseFragGrenadeAction.h>
 #include <mods/dod/weapon/DODSMGBuilder.h>
@@ -18,8 +21,10 @@
 #include <weapon/WeaponBuilderFactory.h>
 #include <weapon/SimpleWeaponBuilder.h>
 #include <weapon/MeleeWeaponBuilder.h>
+#include <weapon/UtilityToolBuilder.h>
 #include <player/Bot.h>
 #include <player/Blackboard.h>
+#include <move/Navigator.h>
 #include <util/EntityClassManager.h>
 #include <util/EntityClass.h>
 #include <util/EntityVar.h>
@@ -35,7 +40,6 @@ static const char* CLASSES[2][CLASS_COUNT] {
 
 DODBotBuilder::DODBotBuilder() :
 		EventHandler() {
-
 	Bot::setClasses(&CLASSES);
 	extern EntityClassManager *classManager;
 }
@@ -57,14 +61,21 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 		}
 
 	};
-	class DODGoToAction: public GoToAction {
+	class DODGetBombAction: public GoToEntityAction {
 	public:
-		DODGoToAction(Blackboard& blackboard) : GoToAction(blackboard) {
+		DODGetBombAction(Blackboard& blackboard) :
+			GoToEntityAction(blackboard, "dod_bomb_dispenser") {
+			effects = {WorldProp::HAS_BOMB, true};
+			targetRadius = 40.0f;
+		}
+	};
+	class DODNavigator: public Navigator {
+	public:
+		DODNavigator(Blackboard& blackboard) : Navigator(blackboard) {
 		}
 
-	private:
-		bool canMove() {
-			if (!GoToAction::canMove()) {
+		bool checkCanMove() {
+			if (!Navigator::checkCanMove()) {
 				return false;
 			}
 			if (DODPlayer(blackboard.getSelf()->getEdict()).isProne()) {
@@ -74,10 +85,16 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 			return true;
 		}
 	};
-	planner.addAction<DODGoToAction>(0.0f);
+	// TODO: hacky way of overriding the default navigator
+	delete blackboard.getNavigator();
+	blackboard.setNavigator(new DODNavigator(blackboard));
+	planner.addAction<DODGetBombAction>(0.0f);
 	planner.addAction<DeployMGAction>(0.0f);
 	planner.addAction<DODDestroyObjectAction>(0.9f);
-	planner.addAction<CapturePointAction>(0.6f);
+	planner.addAction<DODBombTargetAction>(0.62f);
+	planner.addAction<DODDefuseBombAction>(0.63f);
+	planner.addAction<CapturePointAction>(0.61f);
+	planner.addAction<DODDefendPointAction>(0.6f);
 	planner.addAction<DODUseFragGrenadeAction>(0.92f);
 	planner.addAction<DODUseSmokeGrenadeAction>(0.91f);
 	planner.addAction<DODUseRifleGrenadeAction>(0.92f);
@@ -145,7 +162,6 @@ void DODBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {
 			return weapon;
 		}
 	};
-
 	weaponFac.addInstance("weapon_riflegren_us", new GrenadeLauncherBuilder(2.0f));
 	weaponFac.addInstance("weapon_riflegren_ger", new GrenadeLauncherBuilder(2.0f));
 	weaponFac.addInstance("weapon_amerknife", new MeleeWeaponBuilder());
@@ -178,6 +194,8 @@ void DODBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {
 	weaponFac.addInstance("weapon_bazooka", new AntiTankBuilder());
 	weaponFac.addInstance("weapon_m1carbine", new PistolBuilder(0.4f));
 	weaponFac.addInstance("weapon_c96", new C96Builder());
+	weaponFac.addInstance("weapon_basebomb", new UtilityToolBuilder());
+
 }
 
 World* DODBotBuilder::buildWorld() const {

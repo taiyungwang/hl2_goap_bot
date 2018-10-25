@@ -45,14 +45,31 @@ edict_t * findEntWithSubStrInNetClassName(const char* name) {
 	return result[0];
 }
 
-void findEntWithSubStrInName(const char* name,
+template<typename Func>
+void findEntWithName(const char* name, const Func& match,
 		CUtlLinkedList<edict_t*>& result) {
-	forAllEntities([name, &result](edict_t* ent) -> void {
+	forAllEntities([match, name, &result](edict_t* ent) -> void {
 		const char* className = ent->GetClassName();
-		if (name == className || Q_stristr(className, name) != nullptr) {
+		if (name == className || match(name, className)) {
 			result.AddToTail(ent);
 		}
 	});
+}
+
+void findEntWithMatchingName(const char* name,
+		CUtlLinkedList<edict_t*>& result) {
+	findEntWithName(name,
+			[name, &result] (const char* name, const char* className) -> bool {
+				return Q_strcmp(className, name) == 0;
+			}, result);
+}
+
+void findEntWithSubStrInName(const char* name,
+		CUtlLinkedList<edict_t*>& result) {
+	findEntWithName(name,
+			[name, &result] (const char* name, const char* className) -> bool {
+				return Q_stristr(className, name) != nullptr;
+			}, result);
 }
 
 edict_t * findNearestEntity(const CUtlLinkedList<edict_t*>& ent,

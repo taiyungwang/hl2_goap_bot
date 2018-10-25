@@ -3,17 +3,18 @@
 #include <player/Blackboard.h>
 #include <player/Player.h>
 #include <player/Vision.h>
+#include <move/Navigator.h>
 #include <edict.h>
 
 FindCoverAction::FindCoverAction(Blackboard& blackboard) :
-		FindPathAction(blackboard) {
-	precond.Insert(WorldProp::AT_LOCATION, true);
+		GoToAction(blackboard) {
+	precond.Insert(WorldProp::WEAPON_LOADED, false);
 	effects = {WorldProp::ENEMY_SIGHTED, false};
 }
 
 bool FindCoverAction::operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar ) {
 	edict_t* target = getTarget();
-	bool isVisible = area->IsPotentiallyVisible(getArea(target))
+	bool isVisible = area->IsPotentiallyVisible(Navigator::getArea(target))
 			&& UTIL_IsVisible(area->GetCenter(),blackboard, target);
 	if (!isVisible) {
 		this->hideArea = area;
@@ -27,10 +28,16 @@ bool FindCoverAction::precondCheck() {
 		return false;
 	}
 	this->hideArea = nullptr;
-	CNavArea* area = getArea(blackboard.getSelf()->getEdict());
+	CNavArea* area = Navigator::getArea(blackboard.getSelf()->getEdict());
 	SearchSurroundingAreas(area, *this);
-	if (hideArea == nullptr) {
+	if (hideArea == nullptr || !GoToAction::precondCheck()) {
 		return false;
+	}
+	CNavArea* targetArea = Navigator::getArea(target);
+	for (int i = 0; i < path.Count(); i++)  {
+		if (path[i] == targetArea) {
+			return false;
+		}
 	}
 	return true;
 }
@@ -38,12 +45,7 @@ bool FindCoverAction::precondCheck() {
 void FindCoverAction::PostSearch( void ) {
 	if (hideArea != nullptr) {
 		targetLoc = hideArea->GetCenter();
-		build();
 	}
-}
-
-bool FindCoverAction::postCondCheck() {
-	return !UTIL_IsVisible(blackboard.getSelf()->getEyesPos(), blackboard, getTarget());
 }
 
 edict_t* FindCoverAction::getTarget() const {

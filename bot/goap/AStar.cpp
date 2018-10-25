@@ -154,7 +154,6 @@ void AStar::getPath(CUtlQueue<int>& path) const {
 		}
 	}
 	for (int i = start[lowestStart]->id; i != nodes.Count() - 1; i = nodes[i].parent) {
-		actions[nodes[i].id]->init();
 		path.Insert(nodes[i].id);
 	}
 }
