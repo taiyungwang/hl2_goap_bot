@@ -1,7 +1,6 @@
 #include "Bot.h"
 
 #include "Blackboard.h"
-#include "ViewFinder.h"
 #include "Vision.h"
 #include "World.h"
 #include <event/EventInfo.h>
@@ -34,6 +33,7 @@ Bot::~Bot() {
 void Bot::think() {
 	CBotCmd& cmd = blackboard->getCmd();
 	if (isDead()) {
+		targeter.reset();
 		Vector pos = getCurrentPosition();
 		extern CNavMesh* TheNavMesh;
 		TheNavMesh->IncreaseDangerNearby(getTeam(), 5.0f,
@@ -69,7 +69,7 @@ void Bot::think() {
 			cmd.viewangles = getAngle();
 			QAngle angle;
 			VectorAngles(blackboard->getViewTarget() - getEyesPos(), angle);
-			ViewFinder::updateAngle(cmd.viewangles, angle);
+			targeter.updateAngle(cmd.viewangles, angle);
 			if (cmd.weaponselect != 0) {
 				world->updateState(WorldProp::USING_BEST_WEAP, true);
 			}

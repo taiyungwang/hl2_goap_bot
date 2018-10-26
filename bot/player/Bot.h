@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ViewFinder.h"
 #include "Player.h"
 #include <event/EventHandler.h>
 #include <utlvector.h>
@@ -75,6 +76,8 @@ private:
 	Planner* planner = nullptr;
 
 	World* world = nullptr;
+
+	ViewFinder targeter;
 
 	bool inGame = false, hookEnabled = false, resetPlanner = false;
 };
