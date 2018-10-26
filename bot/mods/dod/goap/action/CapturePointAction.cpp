@@ -67,6 +67,7 @@ void CapturePointAction::startRound() {
 }
 
 void CapturePointAction::endRound() {
+	isDetonationMap = false;
 	if (objectiveResource != nullptr) {
 		delete objectiveResource;
 		objectiveResource = nullptr;
