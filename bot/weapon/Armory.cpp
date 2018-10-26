@@ -14,6 +14,12 @@
 #include <eiface.h>
 #include <shareddefs.h>
 
+const char* Armory::getWeaponName(int key) {
+	extern IVEngineServer* engine;
+	edict_t* weap = engine->PEntityOfEntIndex(key);
+	return weap == nullptr || weap->IsFree() ? nullptr: weap->GetClassName();
+}
+
 Armory::Armory()  {
 	SetDefLessFunc(weapons);
 	reset();
@@ -110,8 +116,3 @@ Weapon* Armory::getWeapon(int key) const {
 	return weapons.IsValidIndex(index) ? weapons[index] : nullptr;
 }
 
-const char* Armory::getWeaponName(int key) const {
-	extern IVEngineServer* engine;
-	edict_t* weap = engine->PEntityOfEntIndex(key);
-	return weap == nullptr || weap->IsFree() ? nullptr: weap->GetClassName();
-}

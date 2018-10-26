@@ -5,11 +5,6 @@
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
 
-DODUseSmokeGrenadeAction::DODUseSmokeGrenadeAction(Blackboard& blackboard) :
-		UseSpecificWeaponAction(blackboard) {
-	effects = {WorldProp::ENEMY_SIGHTED, false};
-}
-
 bool DODUseSmokeGrenadeAction::precondCheck() {
 	return UseSpecificWeaponAction::precondCheck()
 			&& blackboard.getTargetedPlayer() != nullptr

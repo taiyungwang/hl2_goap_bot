@@ -129,6 +129,7 @@ bool AStar::searchStep() {
 		if (tentativeGScore >= neighbor.gScore) {
 			continue;
 		}
+		action->init(); // TODO: hack to get switchdesireweapon to work.
 		neighbor.parent = current.id;
 		neighbor.gScore = tentativeGScore;
 		neighbor.fScore = neighbor.gScore + getHeuristicCost(neighbor);

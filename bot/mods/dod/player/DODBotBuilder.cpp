@@ -90,7 +90,7 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 	blackboard.setNavigator(new DODNavigator(blackboard));
 	planner.addAction<DODGetBombAction>(0.0f);
 	planner.addAction<DeployMGAction>(0.0f);
-	planner.addAction<DODDestroyObjectAction>(0.9f);
+	planner.addAction<DODDestroyObjectAction>(0.8f);
 	planner.addAction<DODBombTargetAction>(0.62f);
 	planner.addAction<DODDefuseBombAction>(0.63f);
 	planner.addAction<CapturePointAction>(0.61f);

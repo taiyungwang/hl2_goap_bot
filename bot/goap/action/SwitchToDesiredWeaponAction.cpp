@@ -5,7 +5,8 @@
 #include <weapon/Weapon.h>
 
 bool SwitchToDesiredWeaponAction::precondCheck() {
-	return armory.getDesiredWeaponIdx() != 0;
+	auto idx = armory.getDesiredWeaponIdx();
+	return idx != 0 && armory.getWeapon(idx) != nullptr;
 }
 
 bool SwitchToDesiredWeaponAction::execute() {

@@ -60,7 +60,7 @@ Bot* BotBuilder::build(const CUtlMap<int, Player*>& players,
 	Planner *planner = new Planner(world->getStates(), *blackboard);
 	planner->addAction<SwitchToDesiredWeaponAction>(0.0f);
 	planner->addAction<FindCoverAction>(0.1f);
-	planner->addAction<AttackAction>(0.91f);
+	planner->addAction<AttackAction>(0.9f);
 	planner->addAction<SwitchWeaponAction>(0.81f);
 	planner->addAction<SwitchToBestLoadedWeaponAction>(0.0f);
 	planner->addAction<ReloadWeaponAction>(0.82f);

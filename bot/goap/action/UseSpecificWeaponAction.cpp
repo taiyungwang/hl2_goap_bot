@@ -12,7 +12,8 @@ bool UseSpecificWeaponAction::precondCheck() {
 	auto& weapons = armory.getWeapons();
 	weapIdx = 0;
 	FOR_EACH_MAP_FAST(weapons, i) {
-		if (canUse(armory.getWeaponName(i))) {
+		const char* name = Armory::getWeaponName(weapons.Key(i));
+		if (name != nullptr && canUse(name)) {
 			weapIdx = weapons.Key(i);
 			return armory.getWeapon(weapIdx) != nullptr;
 		}

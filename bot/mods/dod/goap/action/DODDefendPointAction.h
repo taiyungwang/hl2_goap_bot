@@ -7,7 +7,7 @@ public:
 	DODDefendPointAction(Blackboard& blackboard) :
 		CapturePointAction(blackboard) {
 		effects = {WorldProp::POINTS_DEFENDED, true};
-		targetRadius = 50.0f;
+		targetRadius = 100.0f;
 	}
 
 	virtual bool precondCheck();

@@ -8,7 +8,6 @@ class DODUseRifleGrenadeAction: public DODUseSmokeGrenadeAction {
 public:
 	DODUseRifleGrenadeAction(Blackboard& blackboard) :
 			DODUseSmokeGrenadeAction(blackboard) {
-		effects = {WorldProp::MULTIPLE_ENEMY_SIGHTED, false};
 	}
 
 	virtual bool precondCheck();

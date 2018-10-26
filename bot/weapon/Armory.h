@@ -10,6 +10,8 @@ typedef bool (*WeaponFilter)(const Weapon*, Blackboard& blackboard, float dist);
 
 class Armory {
 public:
+	static const char* getWeaponName(int key);
+
 	Armory();
 
 	int getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) const;
@@ -32,8 +34,6 @@ public:
 	const char* getCurrentWeaponName() const {
 		return getWeaponName(currWeapIdx);
 	}
-
-	const char* getWeaponName(int key) const;
 
 	Weapon* getWeapon(int key) const;
 
