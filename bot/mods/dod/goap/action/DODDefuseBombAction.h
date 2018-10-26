@@ -8,6 +8,12 @@ public:
 
 	virtual bool execute();
 
+	virtual bool isInterruptable() const {
+		return interruptable;
+	}
+
 protected:
 	virtual bool isAvailable(int idx) const;
+
+	bool interruptable = true;
 };

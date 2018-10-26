@@ -14,7 +14,8 @@ void DODWorld::addStates() {
 
 bool DODWorld::handle(EventInfo* event) {
 	CUtlString name(event->getName());
-	if (name == "dod_point_captured") {
+	if (name == "dod_point_captured"
+			|| name == "dod_bomb_planted") {
 		reset = true;
 		return false;
 	}

@@ -18,8 +18,10 @@ bool DODDefuseBombAction::execute() {
 		return false;
 	}
 	if (!GoToAction::postCondCheck() || isDepleted()) {
+		interruptable = true;
 		return true;
 	}
+	interruptable = false;
 	Vector itemPos = UTIL_FindGround(
 			item->GetCollideable()->GetCollisionOrigin());
 	itemPos.z += HumanHeight - 15.0f;
