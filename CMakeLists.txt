@@ -7,7 +7,7 @@ add_definitions(-DRAD_TELEMETRY_DISABLED)
 
 set (SRC_HOME $ENV{HOMEPATH})
 set( steam_root "c:/Program Files (x86)/steam" )
-set(HL2SDK_DIR "../hl2sdk")
+set(HL2SDK_DIR "${PROJECT_SOURCE_DIR}/../hl2sdk")
 set (HL2SDK_LIBS ${HL2SDK_DIR}/lib/public)
 set (CXX_TEST_GEN cxxtestgen)
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -73,23 +73,6 @@ endif (NOT DEFINED src_dir)
 
 set(PLUGIN_NAME my_bot)
 
-
-add_library(tier1 STATIC ${HL2SDK_DIR}/tier1/bitbuf.cpp ${HL2SDK_DIR}/tier1/datamanager.cpp  ${HL2SDK_DIR}/tier1/lzmaDecoder.cpp             ${HL2SDK_DIR}/tier1/qsort_s.cpp                ${HL2SDK_DIR}/tier1/stringpool.cpp        ${HL2SDK_DIR}/tier1/utlbuffer.cpp
-	${HL2SDK_DIR}/tier1/byteswap.cpp       ${HL2SDK_DIR}/tier1/diff.cpp         ${HL2SDK_DIR}/tier1/mempool.cpp                 ${HL2SDK_DIR}/tier1/rangecheckedvar.cpp        ${HL2SDK_DIR}/tier1/strtools.cpp         ${HL2SDK_DIR}/tier1/utlbufferutil.cpp
-	${HL2SDK_DIR}/tier1/characterset.cpp   ${HL2SDK_DIR}/tier1/fileio.cpp       ${HL2SDK_DIR}/tier1/memstack.cpp                ${HL2SDK_DIR}/tier1/reliabletimer.cpp          ${HL2SDK_DIR}/tier1/strtools_unicode.cpp  ${HL2SDK_DIR}/tier1/utlstring.cpp
-	${HL2SDK_DIR}/tier1/checksum_crc.cpp   ${HL2SDK_DIR}/tier1/generichash.cpp  ${HL2SDK_DIR}/tier1/NetAdr.cpp                  ${HL2SDK_DIR}/tier1/snappy.cpp                 ${HL2SDK_DIR}/tier1/tier1.cpp             ${HL2SDK_DIR}/tier1/utlsymbol.cpp
-	${HL2SDK_DIR}/tier1/checksum_md5.cpp   ${HL2SDK_DIR}/tier1/ilocalize.cpp    ${HL2SDK_DIR}/tier1/newbitbuf.cpp               ${HL2SDK_DIR}/tier1/snappy-sinksource.cpp      ${HL2SDK_DIR}/tier1/tokenreader.cpp
-	${HL2SDK_DIR}/tier1/checksum_sha1.cpp  ${HL2SDK_DIR}/tier1/interface.cpp    ${HL2SDK_DIR}/tier1/pathmatch.cpp               ${HL2SDK_DIR}/tier1/snappy-stubs-internal.cpp  ${HL2SDK_DIR}/tier1/undiff.cpp
-	${HL2SDK_DIR}/tier1/commandbuffer.cpp  ${HL2SDK_DIR}/tier1/KeyValues.cpp    ${HL2SDK_DIR}/tier1/sparsematrix.cpp           ${HL2SDK_DIR}/tier1/uniqueid.cpp
-	${HL2SDK_DIR}/tier1/convar.cpp         ${HL2SDK_DIR}/tier1/kvpacker.cpp     ${HL2SDK_DIR}/tier1/splitstring.cpp            ${HL2SDK_DIR}/tier1/utlbinaryblock.cpp
-)
-
-add_library(mathlib ${HL2SDK_DIR}/mathlib/color_conversion.cpp  ${HL2SDK_DIR}/mathlib/lightdesc.cpp     ${HL2SDK_DIR}/mathlib/quantize.cpp                  ${HL2SDK_DIR}/mathlib/spherical.cpp  
-	${HL2SDK_DIR}/mathlib/almostequal.cpp  ${HL2SDK_DIR}/mathlib/halton.cpp            ${HL2SDK_DIR}/mathlib/mathlib_base.cpp  ${HL2SDK_DIR}/mathlib/randsse.cpp                   ${HL2SDK_DIR}/mathlib/sseconst.cpp   ${HL2SDK_DIR}/mathlib/vmatrix.cpp
-	${HL2SDK_DIR}/mathlib/anorms.cpp       ${HL2SDK_DIR}/mathlib/IceKey.cpp            ${HL2SDK_DIR}/mathlib/polyhedron.cpp    ${HL2SDK_DIR}/mathlib/simdvectormatrix.cpp ${HL2SDK_DIR}/mathlib/sse.cpp  ${HL2SDK_DIR}/mathlib/3dnow.cpp
-	${HL2SDK_DIR}/mathlib/bumpvects.cpp    ${HL2SDK_DIR}/mathlib/imagequant.cpp        ${HL2SDK_DIR}/mathlib/powsse.cpp        ${HL2SDK_DIR}/mathlib/sparse_convolution_noise.cpp  ${HL2SDK_DIR}/mathlib/ssenoise.cpp
-)
-
 add_library(public STATIC ${HL2SDK_DIR}/public/collisionutils.cpp)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bot)
@@ -97,13 +80,12 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/util)
 add_subdirectory(${PROJECT_SOURCE_DIR}/navmesh)
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 
-find_file(tier2 tier2${CMAKE_STATIC_LIBRARY_SUFFIX} ${HL2SDK_LIBS})
+set(CMAKE_SHARED_LIBRARY_PREFIX "")
 add_library(${PLUGIN_NAME} SHARED  VSPlugin.cpp)
 target_link_libraries(${PLUGIN_NAME}  
 	 bot_main dod_player dod_weapon dod_goap_actions dod_util hl2dm_player hl2dm_weapon hl2dm_goap_actions player goap goap_actions weapon_sys 
 	 event bot_move valve_navmesh plugin_util 
-	 tier1 mathlib vstdlib public tier0 ${tier2} ${LEGACY_STDIO})
-
+	 :tier1.a  :mathlib.a vstdlib public tier0 :tier2.a ${LEGACY_STDIO})
 
 foreach(mod_dir ${mod_dirs})
 	if (EXISTS ${mod_dir}/addons)
