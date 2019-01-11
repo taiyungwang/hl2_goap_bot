@@ -8,25 +8,6 @@
 #include <iplayerinfo.h>
 #include <utlmap.h>
 
-
-void botKick(const CCommand &args) {
-	if (args.ArgC() < 1) {
-		Msg("Usage: mybot_kick <name>");
-		return;
-	}
-	extern PlayerManager *playerManager;
-	int id = playerManager->getIdByName(args.Arg(1));
-	if (id > -1) {
-		extern IVEngineServer* engine;
-		engine->ServerCommand((CUtlString("kickid ") + id + "\n").Get());
-		return;
-	}
-	Msg("Bot name not found.\n");
-}
-
-static ConCommand mybot_come("mybot_kick", &botKick,
-		"Have all bots come to this location");
-
 /*
  extern PlayerManager *playerManager;
 
