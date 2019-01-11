@@ -70,11 +70,6 @@ WeaponFunction* Weapon::chooseWeaponFunc(edict_t* self, float dist) const {
 
 template<typename Func>
 bool Weapon::checkAmmo(const Func& getAmmo) const {
-	if (function[0]->isMelee()) {
-		if (function[1] != nullptr) {
-			return !function[1]->isMelee() && getAmmo(function[1]) == 0;
-		}
-		return false;
-	}
-	return getAmmo(function[0]) == 0;
+	return (!function[0]->isMelee() && getAmmo(function[0]) == 0)
+		|| (function[1] != nullptr && !function[1]->isMelee() && getAmmo(function[1]) == 0);
 }

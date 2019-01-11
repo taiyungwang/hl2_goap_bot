@@ -32,6 +32,8 @@ public:
 
 	int getTeam() const;
 
+	const char* getWeaponName() const;
+
 	virtual void think() {
 	}
 

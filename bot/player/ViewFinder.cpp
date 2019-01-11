@@ -3,7 +3,7 @@
 #include "Blackboard.h"
 #include <convar.h>
 
-ConVar mybot_mouse_speed("mybot_mouse_speed", "0.3f", 0, "0.1 to 1.0");
+ConVar mybot_mouse_speed("mybot_mouse_speed", "0.3f", 0, "0.0 to 1.0 exclusive");
 
 float ViewFinder::getActualSpeed(float ideal, float current) {
 	float anglespeed = 0.21f;

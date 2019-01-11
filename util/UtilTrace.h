@@ -102,7 +102,6 @@ protected:
 };
 
 class FilterSelf: public FilterSelfAndTarget {
-private:
 public:
 	FilterSelf(const IHandleEntity *passentity1,
 			const IHandleEntity *passentity2) :

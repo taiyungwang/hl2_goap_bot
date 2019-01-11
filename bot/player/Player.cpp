@@ -24,6 +24,10 @@ Vector Player::getCurrentPosition() const {
 	return ent->GetCollideable()->GetCollisionOrigin();
 }
 
+const char* Player::getWeaponName() const {
+	return info->GetWeaponName();
+}
+
 bool Player::isDead() const {
 	return info->IsDead() || info->GetHealth() <= 0;
 }

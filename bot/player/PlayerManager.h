@@ -16,9 +16,6 @@ public:
 
 	void addPlayer(edict_t *ent);
 
-	template<typename U>
-	bool fireEvent(U* event);
-
 	void removePlayer(edict_t *ent);
 
 	Player* getPlayer(edict_t *ent);

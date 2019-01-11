@@ -7,25 +7,38 @@
 #include <eiface.h>
 #include <ivdebugoverlay.h>
 
-bool FilterSelfAndEnemies::ShouldHitEntity(IHandleEntity *pHandleEntity,
-		int contentsMask) {
-	auto& players = blackboard.getPlayers();
-	if (target != nullptr && pHandleEntity == target->GetIServerEntity()) {
-		return true;
+class FilterSelfAndEnemies: public CTraceFilter {
+public:
+	FilterSelfAndEnemies(const Blackboard& blackboard, edict_t* self,
+			edict_t* target) :
+			blackboard(blackboard), self(self), target(target) {
 	}
-	if (pHandleEntity == self->GetIServerEntity()) {
-		return false;
+
+	virtual ~FilterSelfAndEnemies() {
 	}
-	FOR_EACH_MAP_FAST(players, i) {
-		int team = players[i]->getTeam();
-		if (!players[i]->isDead()
-				&& players[i]->getEdict()->GetIServerEntity()
-						== pHandleEntity) {
+
+	bool ShouldHitEntity(IHandleEntity *pHandleEntity, int contentsMask) {
+		auto& players = blackboard.getPlayers();
+		if (target != nullptr && pHandleEntity == target->GetIServerEntity()) {
+			return true;
+		}
+		if (pHandleEntity == self->GetIServerEntity()) {
 			return false;
 		}
+		FOR_EACH_MAP_FAST(players, i) {
+			if (!players[i]->isDead()
+					&& players[i]->getEdict()->GetIServerEntity()
+							== pHandleEntity) {
+				return false;
+			}
+		}
+		return true;
 	}
-	return true;
-}
+
+private:
+	const Blackboard& blackboard;
+	edict_t* self, *target;
+};
 
 bool UTIL_IsVisible(const Vector &vecAbsEnd,
 		Blackboard& blackboard, edict_t* target) {
@@ -34,29 +47,14 @@ bool UTIL_IsVisible(const Vector &vecAbsEnd,
 	}
 	trace_t result;
 	result.fraction = 0.0f;
-	Vector start = blackboard.getSelf()->getEyesPos();
-	for (edict_t* ignore = blackboard.getSelf()->getEdict();;
-			start = result.endpos) {
-		FilterSelfAndEnemies filter(blackboard, ignore, target);
-		UTIL_TraceHull(start, vecAbsEnd, Vector(0.0f, -1.0f, -1.0f),
-				Vector(0.0f, 1.0f, 1.0f), MASK_SHOT | MASK_VISIBLE, filter,
-				&result);
-		if (result.fraction >= 1.0f) {
-			return true;
-		}
-		if (result.allsolid || result.startsolid) {
-			break;
-		}
-		if (result.m_pEnt == target->GetUnknown()->GetBaseEntity()) {
-			return true;
-		}
-		ignore =
-				reinterpret_cast<IServerUnknown*>(result.m_pEnt)->GetNetworkable()->GetEdict();
-		if (!(result.contents & CONTENTS_WINDOW) || !isBreakable(ignore)) {
-			break;
-		}
-	}
-	return false;
+	auto self = blackboard.getSelf();
+	Vector start = self->getEyesPos();
+	CTraceFilterWorldAndPropsOnly filter;
+	UTIL_TraceLine(start, vecAbsEnd, MASK_SOLID_BRUSHONLY | CONTENTS_OPAQUE,
+			&filter, &result);
+	return result.fraction >= 1.0
+			|| (result.m_pEnt != nullptr && result.m_pEnt
+			== target->GetUnknown()->GetBaseEntity());
 }
 
 void Vision::updateVisiblity(Blackboard& blackboard) {

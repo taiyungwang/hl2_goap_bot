@@ -16,9 +16,9 @@ public:
 	void updateAngle(QAngle& angle, QAngle targetAngle);
 
 private:
-	float getActualSpeed(float idealSpeed, float currentSpeed);
-
 	static void clamp180(QAngle& angle);
 
 	float momentum = 0.0f;
+
+	float getActualSpeed(float idealSpeed, float currentSpeed);
 };

@@ -16,7 +16,7 @@
 #include <mods/dod/weapon/DODAssaultRifleBuilder.h>
 #include <mods/dod/weapon/DODMGBuilder.h>
 #include <mods/dod/weapon/DODFragGrenadeFunction.h>
-#include <mods/dod/util/DODPlayer.h>
+#include <mods/dod/util/DodPlayer.h>
 #include <weapon/PistolBuilder.h>
 #include <weapon/WeaponBuilderFactory.h>
 #include <weapon/SimpleWeaponBuilder.h>
@@ -78,7 +78,7 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 			if (!Navigator::checkCanMove()) {
 				return false;
 			}
-			if (DODPlayer(blackboard.getSelf()->getEdict()).isProne()) {
+			if (DodPlayer(blackboard.getSelf()->getEdict()).isProne()) {
 				blackboard.getButtons().tap(IN_ALT1);
 				return false;
 			}
@@ -205,10 +205,10 @@ World* DODBotBuilder::buildWorld() const {
 void DODBotBuilder::modHandleCommand(const CCommand &command) {
 	classType = RandomInt(0, CLASS_COUNT - 1);
 	if (command.ArgC() > 3) {
-		classType = atoi(command.Arg(3)) % CLASS_COUNT;
+		classType = atoi(command.Arg(3)) % CLASS_COUNT - 1;
 	}
 }
 
 void DODBotBuilder::update(Bot *bot) const {
-	bot->setPlayerClassVar<DODPlayer>();
+	bot->setPlayerClassVar<DodPlayer>();
 }

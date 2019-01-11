@@ -2,9 +2,9 @@
 
 #include <util/EntityInstance.h>
 
-class DODPlayer: public EntityInstance {
+class DodPlayer: public EntityInstance {
 public:
-	DODPlayer(edict_t *ent) :
+	DodPlayer(edict_t *ent) :
 			EntityInstance(ent, "CDODPlayer") {
 	}
 

@@ -1,8 +1,9 @@
 #include "DeployMGAction.h"
 
-#include <mods/dod/util/DODPlayer.h>
+#include <mods/dod/util/DodPlayer.h>
 #include <player/Blackboard.h>
 #include <player/Player.h>
+#include <player/Vision.h>
 #include <weapon/Weapon.h>
 #include <navmesh/nav.h>
 #include <util/BasePlayer.h>
@@ -31,48 +32,59 @@ bool DeployMGAction::precondCheck() {
 	}
 	const Player* self = blackboard.getSelf();
 	Vector pos = self->getEyesPos();
-	float z = self->getCurrentPosition().z + 1.0f;
-	for (position = 0; position < 3; position++) {
-		if (position == 2) {
-			break;
-		}
-		float halfHull = 17.0f;
+	static float DELTA_Z[] = {HumanCrouchEyeHeight - HumanEyeHeight, -20.0f, 0};
+	for (position = 0; position < 2; position++) {
+		static float halfHull = 17.0f;
 		trace_t result;
 		extern ConVar mybot_debug;
 		edict_t * ground = BasePlayer(self->getEdict()).getGroundEntity();
 		UTIL_TraceHull(pos,
 				pos + (target - pos).Normalized() * halfHull,
-				Vector(0.0f, -halfHull, 0.0f),
-				Vector(0.0f, halfHull,z),
+				Vector(0.0f, -halfHull, DELTA_Z[position]),
+				Vector(0.0f, halfHull, 0.0f),
 								MASK_NPCSOLID_BRUSHONLY,
 								FilterSelf(self->getEdict()->GetIServerEntity(),
 										ground == nullptr ? nullptr : ground->GetIServerEntity()),
 										&result, mybot_debug.GetBool());
-		if (result.fraction == 1.0f) {
+		if (result.DidHit()) {
 			break;
 		}
-		z += HumanCrouchHeight;
 	}
-	blackboard.setViewTarget(target);
 	return true;
 }
 
 bool DeployMGAction::postCondCheck() {
-	return armory.getCurrWeapon()->isDeployed();
+	if (!armory.getCurrWeapon()->isDeployed()) {
+		return false;
+	}
+	const Player* player = blackboard.getTargetedPlayer();
+	Vector end;
+	edict_t* target;
+	if (player != nullptr) {
+		target = player->getEdict();
+		end = player->getEyesPos();
+	} else {
+		target = blackboard.getBlocker();
+		if (target == nullptr) {
+			return false;
+		}
+		end = target->GetCollideable()->GetCollisionOrigin();
+	}
+	return UTIL_IsVisible(end, blackboard, target);
 }
 
 bool DeployMGAction::execute() {
-	if (postCondCheck()) {
+	if (armory.getCurrWeapon()->isDeployed()) {
 		return true;
 	}
 	Buttons& buttons = blackboard.getButtons();
-	if (position == 0) {
-		if (!DODPlayer(blackboard.getSelf()->getEdict()).isProne()) {
+	if (position == 2) {
+		if (!DodPlayer(blackboard.getSelf()->getEdict()).isProne()) {
 			buttons.tap(IN_ALT1);
 		}
 	} else if (position == 1) {
 		buttons.hold(IN_DUCK);
 	}
 	buttons.tap(IN_ATTACK2);
-	return false;
+	return true;
 }

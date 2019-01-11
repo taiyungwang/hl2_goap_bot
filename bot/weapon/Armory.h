@@ -31,10 +31,6 @@ public:
 		return getWeapon(currWeapIdx);
 	}
 
-	const char* getCurrentWeaponName() const {
-		return getWeaponName(currWeapIdx);
-	}
-
 	Weapon* getWeapon(int key) const;
 
 	void setCurrentWeaponIdx(int currentWeapon) {

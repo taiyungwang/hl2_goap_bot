@@ -77,7 +77,7 @@ void Armory::update(Blackboard& blackboard) {
 					"m_hMyWeapons").getPtr<CBaseHandle>(self);
 	auto current = weapons.InvalidIndex();
 	for (int i = 0; i < MAX_WEAPONS; i++) {
-		int entIdx = (&weapList[i])->GetEntryIndex();
+		int entIdx = weapList[i].GetEntryIndex();
 		edict_t* weaponEnt = engine->PEntityOfEntIndex(entIdx);
 		if (weaponEnt == nullptr || weaponEnt->IsFree()) {
 			continue;
