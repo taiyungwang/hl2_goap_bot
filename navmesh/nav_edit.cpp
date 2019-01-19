@@ -3235,8 +3235,9 @@ void CNavMesh::CommandNavCornerPlaceOnGround( const CCommand &args )
 
 		if ( m_selectedArea )
 		{
-			m_markedArea->PlaceOnGround(
-					m_markedArea ? m_markedCorner : NUM_CORNERS, inset);
+			bool areaMarked = m_markedArea != nullptr;
+			(areaMarked ? m_markedArea : m_selectedArea)->PlaceOnGround(
+					areaMarked ? m_markedCorner : NUM_CORNERS, inset);
 			EmitSound(player, "EDIT_MOVE_CORNER.MarkedArea" );
 		}
 		else

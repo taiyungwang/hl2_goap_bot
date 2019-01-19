@@ -54,45 +54,42 @@ public:
 			// first area in path, no cost
 			return 0.0f;
 		}
+		// compute distance traveled along path so far
+		float dist;
+
+		if ( ladder )
+		{
+			dist = ladder->m_length;
+		}
+		else if ( length > 0.0 )
+		{
+			dist = length;
+		}
 		else
 		{
-			// compute distance traveled along path so far
-			float dist;
-
-			if ( ladder )
-			{
-				dist = ladder->m_length;
-			}
-			else if ( length > 0.0 )
-			{
-				dist = length;
-			}
-			else
-			{
-				dist = ( area->GetCenter() - fromArea->GetCenter() ).Length();
-			}
-
-			float cost = dist + fromArea->GetCostSoFar();
-			if (team > 0) {
-				cost += area->GetDanger(team);
-			}
-
-			// if this is a "crouch" area, add penalty
-			if ( area->GetAttributes() & NAV_MESH_CROUCH )
-			{
-				const float crouchPenalty = 20.0f;		// 10
-				cost += crouchPenalty * dist;
-			}
-
-			// if this is a "jump" area, add penalty
-			if ( area->GetAttributes() & NAV_MESH_JUMP )
-			{
-				const float jumpPenalty = 5.0f;
-				cost += jumpPenalty * dist;
-			}
-
-			return cost;
+			dist = ( area->GetCenter() - fromArea->GetCenter() ).Length();
 		}
+
+		float cost = dist + fromArea->GetCostSoFar();
+		if (team > 0) {
+			cost += area->GetDanger(team);
+		}
+
+		// if this is a "crouch" area, add penalty
+		if ( area->GetAttributes() & NAV_MESH_CROUCH )
+		{
+			const float crouchPenalty = 20.0f;		// 10
+			cost += crouchPenalty * dist;
+		}
+
+		// if this is a "jump" area, add penalty
+		if ( area->GetAttributes() & NAV_MESH_JUMP )
+		{
+			const float jumpPenalty = 5.0f;
+			cost += jumpPenalty * dist;
+		}
+
+		return cost;
 	}
 private:
 	int team;
