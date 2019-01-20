@@ -50,6 +50,13 @@ bool DeployMGAction::precondCheck() {
 			break;
 		}
 	}
+	if (position == 2) {
+		animationCounter = 90;
+	} else if (position == 1) {
+		animationCounter = 10;
+	} else {
+		animationCounter = 0;
+	}
 	return true;
 }
 
@@ -79,12 +86,16 @@ bool DeployMGAction::execute() {
 	}
 	Buttons& buttons = blackboard.getButtons();
 	if (position == 2) {
-		if (!DodPlayer(blackboard.getSelf()->getEdict()).isProne()) {
+		if (!DodPlayer(blackboard.getSelf()->getEdict()).isProne()
+				&& animationCounter == 90) {
 			buttons.tap(IN_ALT1);
 		}
 	} else if (position == 1) {
 		buttons.hold(IN_DUCK);
 	}
-	buttons.tap(IN_ATTACK2);
-	return true;
+	if (--animationCounter < 0) {
+		buttons.tap(IN_ATTACK2);
+		return true;
+	}
+	return false;
 }

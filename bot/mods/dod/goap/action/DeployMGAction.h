@@ -18,4 +18,6 @@ public:
 
 private:
 	int position = 0;
+	int animationCounter = 0;
+
 };
