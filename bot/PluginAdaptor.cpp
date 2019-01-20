@@ -104,7 +104,6 @@ void PluginAdaptor::levelShutdown() {
 		delete playerManager;
 		playerManager = nullptr;
 	}
-	TheNavMesh->Reset();
 }
 
 template
