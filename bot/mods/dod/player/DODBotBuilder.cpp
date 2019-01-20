@@ -74,6 +74,7 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 		DODNavigator(Blackboard& blackboard) : Navigator(blackboard) {
 		}
 
+	private:
 		bool checkCanMove() {
 			if (!Navigator::checkCanMove()) {
 				return false;

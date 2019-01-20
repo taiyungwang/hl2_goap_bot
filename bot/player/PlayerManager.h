@@ -20,7 +20,7 @@ public:
 
 	Player* getPlayer(edict_t *ent);
 
-	int getIdByName(const char* name) const;
+	Player* getPlayer(int userId);
 
 	void think();
 

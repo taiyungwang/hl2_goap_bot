@@ -58,14 +58,13 @@ Player* PlayerManager::getPlayer(edict_t *ent) {
 }
 
 
-int PlayerManager::getIdByName(const char* name) const {
+Player* PlayerManager::getPlayer(int userId) {
 	FOR_EACH_MAP_FAST(players, i) {
-		Bot* bot = dynamic_cast<Bot*>(players[i]);
-		if (bot != nullptr && Q_strcmp(name, bot->getName()) == 0) {
-			return bot->getUserId();
+		if (players[i]->getUserId() == userId) {
+			return players[i];
 		}
 	}
-	return -1;
+	return nullptr;
 }
 
 void PlayerManager::removePlayer(edict_t *ent) {

@@ -3,19 +3,28 @@
 #include <event/EventInfo.h>
 #include <weapon/Weapon.h>
 #include <player/Blackboard.h>
+#include <player/PlayerManager.h>
+#include <player/Player.h>
 #include <utlstring.h>
 
 void DODWorld::addStates() {
 	states.Insert(WorldProp::ALL_POINTS_CAPTURED, false);
-	states.Insert(WorldProp::POINTS_DEFENDED, false);
+	states.Insert(WorldProp::POINTS_DEFENDED, true);
 	states.Insert(WorldProp::HAS_BOMB, false);
 	states.Insert(WorldProp::BOMB_DEFUSED, false);
 }
 
 bool DODWorld::handle(EventInfo* event) {
 	CUtlString name(event->getName());
-	if (name == "dod_point_captured"
-			|| name == "dod_bomb_planted") {
+	bool bombPlanted = name == "dod_bomb_planted";
+	if (name == "dod_point_captured" || bombPlanted
+			|| name == "dod_bomb_exploded" || name == "dod_bomb_defused") {
+		if (bombPlanted) {
+			extern PlayerManager *playerManager;
+			bombPlantTeam = playerManager->getPlayer(event->getInt("userid"))->getTeam();
+		} else {
+			bombPlantTeam = 1;
+		}
 		reset = true;
 		return false;
 	}
@@ -24,6 +33,7 @@ bool DODWorld::handle(EventInfo* event) {
 			reset = true;
 		}
 		roundStarted = true;
+		bombPlantTeam = 1;
 	} else if (name == "dod_round_win" || name == "dod_game_over") {
 		roundStarted = false;
 	}
@@ -48,6 +58,8 @@ bool DODWorld::update(Blackboard& blackboard) {
 		}
 	}
 	updateState(WorldProp::HAS_BOMB, hasBomb);
+	updateState(WorldProp::POINTS_DEFENDED, bombPlantTeam == 1
+			|| bombPlantTeam == blackboard.getSelf()->getTeam());
 	if (reset) {
 		reset = false;
 		return true;
