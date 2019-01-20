@@ -39,12 +39,9 @@ bool SnipeAction::precondCheck() {
 		int hideSpot = -1;
 		for (int i = 0; i < hidingSpots->Count(); i++) {
 			auto* spot = hidingSpots->Element(i);
-			if (spot->IsIdealSniperSpot()
-					&& !spot->IsExposed()) {
-				hideSpot = i;
-				targetLoc = spot->GetPosition();
-				break;
-			}
+			hideSpot = i;
+			targetLoc = hidingSpots->Element(i)->GetPosition();
+			break;
 		}
 		if (hideSpot > -1) {
 			GoToAction::precondCheck();
