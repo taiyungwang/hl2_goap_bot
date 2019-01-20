@@ -3,7 +3,7 @@
 #include "MoveStateContext.h"
 #include "player/Blackboard.h"
 #include <player/Buttons.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <ivdebugoverlay.h>
 #include <in_buttons.h>
 

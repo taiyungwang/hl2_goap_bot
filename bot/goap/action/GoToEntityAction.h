@@ -14,7 +14,7 @@ public:
 
 	virtual bool precondCheck();
 
-	bool postCondCheck();
+	virtual bool postCondCheck();
 
 protected:
 	GoToEntityAction(Blackboard& blackboard, const char* itemName);

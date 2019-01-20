@@ -1,7 +1,7 @@
 #include "World.h"
 
 #include "Blackboard.h"
-#include "Player.h"
+#include "Bot.h"
 #include <weapon/Weapon.h>
 #include <util/BaseEntity.h>
 #include <eiface.h>

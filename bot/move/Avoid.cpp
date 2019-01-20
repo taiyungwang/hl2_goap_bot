@@ -7,7 +7,7 @@
 #include "Jump.h"
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
 #include <util/BasePlayer.h>

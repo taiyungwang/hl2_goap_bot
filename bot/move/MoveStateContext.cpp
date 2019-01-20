@@ -1,9 +1,9 @@
 #include "MoveStateContext.h"
 
 #include "Stopped.h"
+#include <player/Bot.h>
 #include <player/Blackboard.h>
 #include <player/Button.h>
-#include <player/Player.h>
 #include <edict.h>
 
 const float MoveStateContext::TARGET_OFFSET = GenerationStepSize / 2.0f;

@@ -3,7 +3,7 @@
 #include <mods/dod/util/DODObjectiveResource.h>
 #include <event/EventInfo.h>
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <util/EntityUtils.h>
 #include <vstdlib/random.h>
 #include <in_buttons.h>

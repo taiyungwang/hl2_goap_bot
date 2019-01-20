@@ -1,7 +1,7 @@
 #include "DODUseFragGrenadeAction.h"
 
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <player/Vision.h>
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>

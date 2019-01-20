@@ -1,7 +1,7 @@
 #include "AttackAction.h"
 
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <player/Vision.h>
 #include <weapon/WeaponFunction.h>
 #include <weapon/Weapon.h>

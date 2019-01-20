@@ -1,7 +1,7 @@
 #include "GetBatteryAction.h"
 
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 
 bool GetBatteryAction::precondCheck() {
 	return !GoToItemAction::precondCheck()

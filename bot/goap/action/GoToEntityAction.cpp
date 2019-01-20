@@ -1,7 +1,7 @@
 #include "GoToEntityAction.h"
 
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <util/EntityUtils.h>
 #include <edict.h>
 

@@ -1,7 +1,7 @@
 #include "SnipeAction.h"
 
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <navmesh/nav_mesh.h>
 #include <util/UtilTrace.h>
 #include <vstdlib/random.h>

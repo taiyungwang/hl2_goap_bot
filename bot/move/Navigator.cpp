@@ -3,7 +3,7 @@
 #include <move/MoveStateContext.h>
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <weapon/Weapon.h>
 #include <navmesh/nav_mesh.h>
 #include <navmesh/nav_pathfind.h>

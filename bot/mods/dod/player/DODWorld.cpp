@@ -4,7 +4,7 @@
 #include <weapon/Weapon.h>
 #include <player/Blackboard.h>
 #include <player/PlayerManager.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <utlstring.h>
 
 void DODWorld::addStates() {

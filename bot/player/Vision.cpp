@@ -1,6 +1,6 @@
 #include "Vision.h"
 
-#include "Player.h"
+#include "Bot.h"
 #include "Blackboard.h"
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>

@@ -1,7 +1,7 @@
 #include "FindCoverAction.h"
 
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <player/Vision.h>
 #include <move/Navigator.h>
 #include <edict.h>

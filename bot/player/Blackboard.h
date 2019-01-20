@@ -7,6 +7,7 @@
 
 class EntityInstance;
 class Player;
+class Bot;
 class CNavArea;
 class Navigator;
 struct edict_t;
@@ -16,7 +17,7 @@ public:
 
 	static float clamp180(float angle);
 
-	Blackboard(const CUtlMap<int, Player*>& players, Player* player,
+	Blackboard(const CUtlMap<int, Player*>& players, Bot* player,
 			EntityInstance* entInstance);
 
 	void reset();
@@ -41,7 +42,7 @@ public:
 
 	float getTargetEntDistance() const;
 
-	const Player* getSelf() const {
+	const Bot* getSelf() const {
 		return self;
 	}
 
@@ -86,14 +87,15 @@ public:
 	}
 
 private:
+	const Bot* self;
+
+	const CUtlMap<int, Player*>& players;
 
 	Armory armory;
 
-	const Player* self, *targetedPlayer;
+	const Player *targetedPlayer;
 
 	CUtlVector<Player*> visibleEnemies;
-
-	const CUtlMap<int, Player*>& players;
 
 	CBotCmd cmd;
 

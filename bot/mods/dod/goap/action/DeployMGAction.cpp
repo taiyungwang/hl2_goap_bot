@@ -2,7 +2,7 @@
 
 #include <mods/dod/util/DodPlayer.h>
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <player/Vision.h>
 #include <weapon/Weapon.h>
 #include <navmesh/nav.h>
@@ -33,7 +33,7 @@ bool DeployMGAction::precondCheck() {
 	const Player* self = blackboard.getSelf();
 	Vector pos = self->getEyesPos();
 	static float DELTA_Z[] = {HumanCrouchEyeHeight - HumanEyeHeight, -20.0f, 0};
-	for (position = 0; position < 2; position++) {
+	for (position = 0; position < 3; position++) {
 		static float halfHull = 17.0f;
 		trace_t result;
 		extern ConVar mybot_debug;
@@ -49,6 +49,9 @@ bool DeployMGAction::precondCheck() {
 		if (result.DidHit()) {
 			break;
 		}
+	}
+	if (position == 3) {
+		return false;
 	}
 	if (position == 2) {
 		animationCounter = 90;

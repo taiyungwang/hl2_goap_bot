@@ -2,7 +2,7 @@
 
 #include <mods/dod/util/DODObjectiveResource.h>
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <navmesh/nav.h>
 #include <util/UtilTrace.h>
 #include <in_buttons.h>

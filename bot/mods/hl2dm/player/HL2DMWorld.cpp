@@ -2,7 +2,7 @@
 
 #include <goap/WorldCond.h>
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 
 void HL2DMWorld::addStates() {
 	states.Insert(WorldProp::ARMOR_FULL, false);

@@ -3,7 +3,7 @@
 #include <mods/dod/util/DODObjectiveResource.h>
 #include <mods/dod/util/DODBombTarget.h>
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 
 bool DODDefendPointAction::precondCheck() {
 	duration = 0;

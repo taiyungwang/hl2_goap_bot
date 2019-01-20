@@ -1,7 +1,7 @@
 #include "Blackboard.h"
 
 #include <player/Button.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <move/Navigator.h>
 #include <weapon/Weapon.h>
 #include <util/BaseEntity.h>
@@ -18,7 +18,7 @@ float Blackboard::clamp180(float angle) {
 }
 
 Blackboard::Blackboard(const CUtlMap<int, Player*>& players,
-		Player* self, EntityInstance* entInstance) : players(players),
+		Bot* self, EntityInstance* entInstance) : players(players),
 		self(self), entInstance(entInstance) {
 	reset();
 }

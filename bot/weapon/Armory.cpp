@@ -5,7 +5,7 @@
 #include "WeaponFunction.h"
 #include "WeaponBuilderFactory.h"
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <util/EntityClassManager.h>
 #include <util/EntityClass.h>
 #include <util/SimpleException.h>

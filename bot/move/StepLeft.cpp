@@ -6,7 +6,7 @@
 #include "Jump.h"
 #include "MoveStateContext.h"
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 
 StepLeft::StepLeft(MoveStateContext& ctx) :
 		MoveState(ctx) {

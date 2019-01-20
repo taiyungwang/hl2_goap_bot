@@ -1,7 +1,7 @@
 #include "DODBombTargetAction.h"
 
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <mods/dod/util/DODObjectiveResource.h>
 
 DODBombTargetAction::DODBombTargetAction(Blackboard& blackboard) :
