@@ -415,7 +415,7 @@ bool CNavMesh::FindActiveNavArea( void )
 			while( yaw < 0.0f )
 				yaw += 360.0f;
 			m_splitAlongX = yaw < 45.0f || yaw > 315.0f || (yaw > 135.0f && yaw < 225.0f);
-			SnapToGrid( m_splitAlongX ? result.endpos.y : result.endpos.x, true );
+			m_splitEdge = SnapToGrid( m_splitAlongX ? result.endpos.y : result.endpos.x, true );
 		}
 
 		if ( !m_climbableSurface && !IsEditMode( CREATING_LADDER ) )
