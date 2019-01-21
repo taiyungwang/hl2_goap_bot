@@ -13,7 +13,7 @@ public:
 	 * @param angle Current angle
 	 * @param targetAngle desired angle
 	 */
-	void updateAngle(QAngle& angle, QAngle targetAngle);
+	void updateAngle(QAngle& target, const QAngle& current);
 
 private:
 	static void clamp180(QAngle& angle);

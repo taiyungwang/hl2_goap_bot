@@ -6,6 +6,7 @@
 ConVar mybot_mouse_speed("mybot_mouse_speed", "0.3f", 0, "0.0 to 1.0 exclusive");
 
 float ViewFinder::getActualSpeed(float ideal, float current) {
+	ideal = Blackboard::clamp180(ideal);
 	float anglespeed = 0.21f;
 	float alphaspeed = mybot_mouse_speed.GetFloat();
 	float delta = alphaspeed * anglespeed * Blackboard::clamp180(ideal - current)
@@ -20,10 +21,7 @@ float ViewFinder::getActualSpeed(float ideal, float current) {
 	return Blackboard::clamp180(current + delta);
 }
 
-void ViewFinder::updateAngle(QAngle& angle, QAngle targetAngle) {
-	targetAngle.x = Blackboard::clamp180(targetAngle.x);
-	targetAngle.y = Blackboard::clamp180(targetAngle.y);
-	angle.x = getActualSpeed(targetAngle.x, angle.x);
-	angle.y = getActualSpeed(targetAngle.y, angle.y);
-	angle.x = Clamp(angle.x, -89.0f, 89.0f);
+void ViewFinder::updateAngle(QAngle& target, const QAngle& current) {
+	target.y = getActualSpeed(target.y, current.y);
+	target.x = Clamp(getActualSpeed(target.x, current.x), -89.0f, 89.0f);
 }
