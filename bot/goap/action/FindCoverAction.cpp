@@ -14,7 +14,8 @@ FindCoverAction::FindCoverAction(Blackboard& blackboard) :
 
 bool FindCoverAction::operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar ) {
 	edict_t* target = getTarget();
-	bool isVisible = area->IsPotentiallyVisible(Navigator::getArea(target))
+	bool isVisible = currentArea != area
+			&& area->IsPotentiallyVisible(Navigator::getArea(target))
 			&& UTIL_IsVisible(area->GetCenter(),blackboard, target);
 	if (!isVisible) {
 		this->hideArea = area;
@@ -28,8 +29,8 @@ bool FindCoverAction::precondCheck() {
 		return false;
 	}
 	this->hideArea = nullptr;
-	CNavArea* area = Navigator::getArea(blackboard.getSelf()->getEdict());
-	SearchSurroundingAreas(area, *this);
+	currentArea = Navigator::getArea(blackboard.getSelf()->getEdict());
+	SearchSurroundingAreas(currentArea, *this);
 	if (hideArea == nullptr || !GoToAction::precondCheck()) {
 		return false;
 	}

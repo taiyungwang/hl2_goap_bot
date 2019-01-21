@@ -22,7 +22,7 @@ public:
 	void PostSearch( void );
 
 private:
-	CNavArea* hideArea = nullptr;
+	CNavArea* hideArea = nullptr, *currentArea = nullptr;
 
 	edict_t* getTarget() const;
 };
