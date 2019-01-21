@@ -79,8 +79,9 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 				|| (team > 0 && team == target->getTeam())) {
 			continue;
 		}
-		Vector targetPos = target->getCurrentPosition(), targetDir = targetPos
-				- selfEyes;
+		Vector targetPos = target->getCurrentPosition();
+		targetPos.z += 31.0f;
+		Vector targetDir = targetPos - selfEyes;
 		// check target is in FOV cone or in PVS
 		float dist = targetDir.LengthSqr();
 		if (dist <= 1.0f
