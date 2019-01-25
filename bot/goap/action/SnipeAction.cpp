@@ -54,16 +54,15 @@ bool SnipeAction::precondCheck() {
 	Vector pos = targetLoc;
 	pos.z += HumanHeight;
 	float furthest = 0.0f;
-	for (float currFacing = 0.0f; currFacing < 360.0f; currFacing += 20.0f) {
+	for (float currFacing = -180.0f; currFacing < 180.0f; currFacing += 20.0f) {
 		QAngle angle(0.0f, currFacing, 0.0f);
 		Vector aim;
 		AngleVectors(angle, &aim);
 		trace_t result;
-		UTIL_TraceHull(pos, pos + aim * 2000.0f, Vector(0.0f, -1.0f, -1.0f),
-				Vector(0.0f, 1.0f, 1.0f), MASK_SHOT | MASK_VISIBLE,
-				FilterSelfAndTarget(blackboard.getSelf()->getEdict()->GetIServerEntity(),
-						nullptr), &result);
-		if (result.fraction >= 1.0f) {
+		CTraceFilterWorldAndPropsOnly filter;
+		UTIL_TraceLine(pos, pos + aim * 2000.0f, MASK_SOLID_BRUSHONLY | CONTENTS_OPAQUE,
+				&filter, &result);
+		if (!result.DidHit()) {
 			facing = currFacing;
 			break;
 		}
