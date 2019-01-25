@@ -24,12 +24,8 @@ public:
 	virtual bool postCondCheck();
 
 protected:
-	virtual bool isVisible(const Vector& end, edict_t* target) const {
-		return true;
-	}
 
-	virtual void getAdjustedTargetPos(Vector& targetLoc,
-			WeaponFunction* weapFunc) const;
+
 
 	virtual edict_t* getTargetedEdict() const;
 
@@ -40,9 +36,8 @@ protected:
 private:
 	CUtlLinkedList<CUtlString> objectNames;
 
-	int waitTime, maxWaitTime;
-
 	MoveStateContext* moveCtx;
 
 	bool crouch;
 };
+

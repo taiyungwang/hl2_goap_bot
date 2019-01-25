@@ -79,21 +79,32 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 				|| (team > 0 && team == target->getTeam())) {
 			continue;
 		}
-		Vector targetPos = target->getCurrentPosition();
-		targetPos.z += 31.0f;
+		edict_t* targetEnt = target->getEdict();
+		Vector targetMin, targetMax;
+		targetEnt->GetCollideable()->WorldSpaceSurroundingBounds(&targetMin, &targetMax);
+		Vector targetPos = target->getEyesPos();
 		Vector targetDir = targetPos - selfEyes;
 		// check target is in FOV cone or in PVS
 		float dist = targetDir.LengthSqr();
 		if (dist <= 1.0f
-				|| !engine->CheckOriginInPVS(targetPos, pvs, sizeof(pvs))
-				|| targetDir.Normalized().Dot(facing) <= 0.0f
-				|| !UTIL_IsVisible(targetPos, blackboard, target->getEdict())) {
+				|| !engine->CheckBoxInPVS(targetMin, targetMax, pvs, sizeof(pvs))
+				|| targetDir.Normalized().Dot(facing) <= 0.0f) {
 			continue;
+		}
+		if (!UTIL_IsVisible(targetPos, blackboard, target->getEdict())) {
+			targetPos = target->getCurrentPosition();
+			targetPos.z += 31.0f; // center mass
+			targetDir = targetPos - selfEyes;
+			float dist = targetDir.LengthSqr();
+			if (!UTIL_IsVisible(targetPos, blackboard, target->getEdict())) {
+				continue;
+			}
 		}
 		visibleEnemies.AddToTail(target);
 		if (dist < closest) {
 			closest = dist;
 			closestPlayer = target;
+			blackboard.setViewTarget(targetPos);
 		}
 	}
 	blackboard.setTargetedPlayer(closestPlayer);

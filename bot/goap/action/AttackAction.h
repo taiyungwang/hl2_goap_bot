@@ -11,10 +11,6 @@ public:
 	virtual bool postCondCheck();
 
 private:
-	bool isVisible(const Vector& end, edict_t* target) const;
-
-	void getAdjustedTargetPos(Vector& targetLoc,
-			WeaponFunction* weapFunc) const;
 
 	edict_t* getTargetedEdict() const;
 

@@ -73,7 +73,6 @@ public:
 	 */
 	WeaponFunction* chooseWeaponFunc(edict_t* self, float dist) const;
 
-
 	void setDeployable(EntityVar* deployableCheck, float minDeployRange) {
 		this->deployedCheck = deployableCheck;
 		this->minDeployRange = minDeployRange;

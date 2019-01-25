@@ -4,6 +4,7 @@
 #include <move/MoveStateContext.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
+#include <player/Vision.h>
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
 #include <util/UtilTrace.h>
@@ -17,7 +18,6 @@
 
 DestroyObjectAction::DestroyObjectAction(Blackboard& blackboard) :
 		Action(blackboard) {
-	maxWaitTime = waitTime = 0;
 	moveCtx = new MoveStateContext(blackboard);
 	crouch = false;
 	effects = {WorldProp::IS_BLOCKED, false};
@@ -48,7 +48,7 @@ bool DestroyObjectAction::execute() {
 	const Player* self = blackboard.getSelf();
 	edict_t* selfEnt = self->getEdict();
 	edict_t* targetEnt = getTargetedEdict();
-	Vector targetLoc = targetEnt->GetCollideable()->GetCollisionOrigin();
+	Vector targetLoc = blackboard.getViewTarget();
 	Vector eyes = self->getEyesPos();
 	float dist = targetLoc.DistTo(self->getCurrentPosition());
 	Buttons& buttons = blackboard.getButtons();
@@ -58,21 +58,19 @@ bool DestroyObjectAction::execute() {
 		return false;
 	}
 	WeaponFunction* weapFunc = weapon->chooseWeaponFunc(selfEnt, dist);
-	if (!weapFunc->isExplosive()) {
-		targetLoc.z += (targetEnt->GetCollideable()->OBBMaxs().z - targetLoc.z)
-				* 0.5f;
+	if (weapFunc->isExplosive()) {
+		targetLoc = targetEnt->GetCollideable()->GetCollisionOrigin();
 	}
-	getAdjustedTargetPos(targetLoc, weapFunc);
+	targetLoc = weapFunc->getAim(targetLoc, eyes);
 	if ((!weapFunc->isMelee() && weapFunc->getClip() != -1
 			&& weapFunc->getClip() < 1) || !weapFunc->isInRange(dist)) {
 		return true;
 	}
-	maxWaitTime = 10.0f * dist / weapFunc->getRange()[1];
 	blackboard.setViewTarget(targetLoc);
 	extern ConVar mybot_debug;
 	if (!crouch) {
 		crouch = (weapFunc->isMelee()
-				&& fabs(targetLoc.z - eyes.z) > HumanCrouchHeight);
+				&& fabs(eyes.z - targetLoc.z) > 40.0f);
 	}
 	if (crouch) {
 		buttons.hold(IN_DUCK);
@@ -88,30 +86,25 @@ bool DestroyObjectAction::execute() {
 		}
 		buttons.hold(IN_SPEED);
 	}
-	if (fabs(blackboard.getAimAccuracy(targetLoc))
-			> 1.0f - 10.0f / (dist == 0.0f ? 0.0001f : dist) || weapFunc->isMelee()) {
-		if (!isVisible(targetLoc, targetEnt)) {
-			// aim for feet
-			if (!crouch) {
-				// try crouching
-				crouch = true;
-			} else {
-				// target blocked.
-				return true;
-			}
-			return false; 		// adjusted aim is blocked
-		}
-		if (waitTime-- <= 0) {
-			waitTime = maxWaitTime;
-			weapFunc->attack(buttons, dist);
-		}
-	}
 	if (mybot_debug.GetBool()) {
 		extern IVDebugOverlay *debugoverlay;
 		debugoverlay->AddLineOverlay(eyes, targetLoc, 255, 0, 255, true,
 		NDEBUG_PERSIST_TILL_NEXT_SERVER);
 		debugoverlay->AddLineOverlay(eyes, eyes + self->getFacing() * dist, 0, 255, 0, true,
 		NDEBUG_PERSIST_TILL_NEXT_SERVER);
+	}
+	if (fabs(blackboard.getAimAccuracy(targetLoc))
+			> 1.0f - (weapFunc->isMelee() ? 30.0f : 10.0f) / max(dist, 0.1f)) {
+		if (!UTIL_IsVisible(targetLoc, blackboard, targetEnt)) {
+			if (!crouch) {
+				// try crouching
+				crouch = true;
+				return false;
+			}
+			// target blocked.
+			return true;
+		}
+		weapFunc->attack(buttons, dist);
 	}
 	return false;
 }
@@ -129,9 +122,4 @@ bool DestroyObjectAction::postCondCheck() {
 
 edict_t* DestroyObjectAction::getTargetedEdict() const {
 	return blackboard.getBlocker();
-}
-
-void DestroyObjectAction::getAdjustedTargetPos(Vector& targetLoc,
-		WeaponFunction* weapFunc) const {
-	targetLoc = weapFunc->getAim(targetLoc, blackboard.getSelf()->getEyesPos());
 }
