@@ -9,7 +9,7 @@ Weapon* MeleeWeaponBuilder::build(edict_t* weap) {
 	weapon->setUnderWater(true);
 	primary->setMelee(true);
 	primary->setFullAuto(true);
-	primary->getRange()[1] = 50.0f;
+	primary->getRange()[1] = 100.0f;
 	weapon->setPrimary(primary);
 	return weapon;
 }
