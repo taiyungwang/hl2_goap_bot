@@ -20,6 +20,7 @@ CNavMesh* TheNavMesh = nullptr;
 bool navMeshLoadAttempted;
 
 ConVar mybot_debug("my_bot_debug", "0");
+ConVar mybot_var("mybot_var", "0.5");
 
 extern IPlayerInfoManager *playerinfomanager;
 

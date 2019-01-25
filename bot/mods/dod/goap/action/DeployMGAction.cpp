@@ -13,6 +13,7 @@
 DeployMGAction::DeployMGAction(Blackboard& blackboard) :
 		WeaponAction(blackboard) {
 	effects = {WorldProp::NEED_TO_DEPLOY_WEAPON, false};
+	precond.Insert(WorldProp::USING_BEST_WEAP, true);
 }
 
 bool DeployMGAction::precondCheck() {
@@ -33,7 +34,7 @@ bool DeployMGAction::precondCheck() {
 	const Player* self = blackboard.getSelf();
 	Vector pos = self->getEyesPos();
 	static float DELTA_Z[] = {HumanCrouchEyeHeight - HumanEyeHeight, -20.0f, 0};
-	for (position = 0; position < 3; position++) {
+	for (position = 0; position < 2; position++) {
 		static float halfHull = 17.0f;
 		trace_t result;
 		extern ConVar mybot_debug;
@@ -49,9 +50,6 @@ bool DeployMGAction::precondCheck() {
 		if (result.DidHit()) {
 			break;
 		}
-	}
-	if (position == 3) {
-		return false;
 	}
 	if (position == 2) {
 		animationCounter = 90;
@@ -84,8 +82,28 @@ bool DeployMGAction::postCondCheck() {
 }
 
 bool DeployMGAction::execute() {
+	if (!armory.getCurrWeapon()->isDeployable()) {
+		return true;
+	}
+	const Player* player = blackboard.getTargetedPlayer();
+	Vector end;
+	edict_t* target;
+	if (player != nullptr) {
+		target = player->getEdict();
+		end = player->getEyesPos();
+	} else {
+		target = blackboard.getBlocker();
+		if (target == nullptr) {
+			return true;
+		}
+		end = target->GetCollideable()->GetCollisionOrigin();
+	}
 	if (armory.getCurrWeapon()->isDeployed()) {
 		return true;
+	}
+	extern ConVar mybot_var;
+	if (blackboard.getAimAccuracy(end) < mybot_var.GetFloat()) {
+		return false;
 	}
 	Buttons& buttons = blackboard.getButtons();
 	if (position == 2) {
