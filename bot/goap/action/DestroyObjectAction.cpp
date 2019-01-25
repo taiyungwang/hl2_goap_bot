@@ -70,10 +70,9 @@ bool DestroyObjectAction::execute() {
 	maxWaitTime = 10.0f * dist / weapFunc->getRange()[1];
 	blackboard.setViewTarget(targetLoc);
 	extern ConVar mybot_debug;
-	Vector aimTarget = eyes + self->getFacing() * dist;
 	if (!crouch) {
 		crouch = (weapFunc->isMelee()
-				&& eyes.z - targetLoc.z > HumanCrouchHeight);
+				&& fabs(targetLoc.z - eyes.z) > HumanCrouchHeight);
 	}
 	if (crouch) {
 		buttons.hold(IN_DUCK);
@@ -84,10 +83,13 @@ bool DestroyObjectAction::execute() {
 						* (dist - 25.0f) + self->getCurrentPosition());
 		CNavArea* area = Navigator::getArea(selfEnt);
 		moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
+		if (moveCtx->isStuck()) {
+			return true;
+		}
 		buttons.hold(IN_SPEED);
 	}
 	if (fabs(blackboard.getAimAccuracy(targetLoc))
-			> 1.0f - 30.0f / (dist == 0.0f ? 0.0001f : dist) || weapFunc->isMelee()) {
+			> 1.0f - 10.0f / (dist == 0.0f ? 0.0001f : dist) || weapFunc->isMelee()) {
 		if (!isVisible(targetLoc, targetEnt)) {
 			// aim for feet
 			if (!crouch) {
@@ -106,7 +108,9 @@ bool DestroyObjectAction::execute() {
 	}
 	if (mybot_debug.GetBool()) {
 		extern IVDebugOverlay *debugoverlay;
-		debugoverlay->AddLineOverlay(eyes, aimTarget, 255, 0, 255, true,
+		debugoverlay->AddLineOverlay(eyes, targetLoc, 255, 0, 255, true,
+		NDEBUG_PERSIST_TILL_NEXT_SERVER);
+		debugoverlay->AddLineOverlay(eyes, eyes + self->getFacing() * dist, 0, 255, 0, true,
 		NDEBUG_PERSIST_TILL_NEXT_SERVER);
 	}
 	return false;
