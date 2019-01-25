@@ -100,6 +100,13 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 				continue;
 			}
 		}
+		extern ConVar mybot_debug;
+		if (mybot_debug.GetBool()) {
+			extern IVDebugOverlay *debugoverlay;
+			debugoverlay->AddLineOverlay(selfEyes, targetPos, 0,
+					255, 0, true,
+					NDEBUG_PERSIST_TILL_NEXT_SERVER);
+		}
 		visibleEnemies.AddToTail(target);
 		if (dist < closest) {
 			closest = dist;
@@ -108,12 +115,5 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 		}
 	}
 	blackboard.setTargetedPlayer(closestPlayer);
-	extern ConVar mybot_debug;
-	if (closestPlayer != nullptr && mybot_debug.GetBool()) {
-		extern IVDebugOverlay *debugoverlay;
-		debugoverlay->AddLineOverlay(selfEyes, closestPlayer->getEyesPos(), 0,
-				255, 0, true,
-				NDEBUG_PERSIST_TILL_NEXT_SERVER);
-	}
 }
 

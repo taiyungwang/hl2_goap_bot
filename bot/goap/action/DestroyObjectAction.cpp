@@ -68,22 +68,15 @@ bool DestroyObjectAction::execute() {
 	}
 	blackboard.setViewTarget(targetLoc);
 	extern ConVar mybot_debug;
-	if (!crouch) {
-		crouch = (weapFunc->isMelee()
-				&& fabs(eyes.z - targetLoc.z) > 40.0f);
-	}
 	if (crouch) {
 		buttons.hold(IN_DUCK);
 	}
-	if (weapFunc->isMelee()) {
+	if (weapFunc->isMelee() && !crouch) {
 		moveCtx->setGoal(
 				(targetLoc - self->getCurrentPosition()).Normalized()
 						* (dist - 25.0f) + self->getCurrentPosition());
 		CNavArea* area = Navigator::getArea(selfEnt);
 		moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
-		if (moveCtx->isStuck()) {
-			return true;
-		}
 		buttons.hold(IN_SPEED);
 	}
 	if (mybot_debug.GetBool()) {
@@ -95,7 +88,8 @@ bool DestroyObjectAction::execute() {
 	}
 	if (fabs(blackboard.getAimAccuracy(targetLoc))
 			> 1.0f - (weapFunc->isMelee() ? 30.0f : 10.0f) / max(dist, 0.1f)) {
-		if (!UTIL_IsVisible(targetLoc, blackboard, targetEnt)) {
+		if (!UTIL_IsVisible(targetLoc, blackboard, targetEnt)
+				|| weapFunc->getRange()[0] > dist) {
 			if (!crouch) {
 				// try crouching
 				crouch = true;
