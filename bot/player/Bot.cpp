@@ -16,6 +16,8 @@
 
 PlayerClasses Bot::CLASSES = nullptr;
 
+ConVar mybot_rot_speed("mybot_rot_speed", "8", 0, "determines rotational acceleration rate in degrees");
+
 Bot::Bot(edict_t* ent) :
 		EventHandler(), Player(ent) {
 	extern IPlayerInfoManager *playerinfomanager;
@@ -33,7 +35,6 @@ Bot::~Bot() {
 void Bot::think() {
 	CBotCmd& cmd = blackboard->getCmd();
 	if (isDead()) {
-		targeter.reset();
 		Vector pos = getCurrentPosition();
 		extern CNavMesh* TheNavMesh;
 		TheNavMesh->IncreaseDangerNearby(getTeam(), 5.0f,
@@ -66,8 +67,18 @@ void Bot::think() {
 				world->updateState(WorldProp::USING_BEST_WEAP, false);
 			}
 			planner->execute();
-			VectorAngles(blackboard->getViewTarget() - getEyesPos(), cmd.viewangles);
-			targeter.updateAngle(cmd.viewangles, getAngle());
+			VectorAngles((blackboard->getViewTarget() - getEyesPos()).Normalized(), cmd.viewangles);
+			QAngle currentAngle = getAngle();
+			float accel = mybot_rot_speed.GetFloat();
+			cmd.viewangles.y = rotY.getUpdatedPosition(cmd.viewangles.y, currentAngle.y,
+					accel);
+			cmd.viewangles.x = rotX.getUpdatedPosition(cmd.viewangles.x, currentAngle.x,
+					accel);
+			if (cmd.viewangles.x > 89.0f) {
+				cmd.viewangles.x = 181.0f - cmd.viewangles.x;
+			} else if (cmd.viewangles.x < -89.0f) {
+				cmd.viewangles.x = -181.0f - cmd.viewangles.x;
+			}
 			if (cmd.weaponselect != 0) {
 				world->updateState(WorldProp::USING_BEST_WEAP, true);
 			}

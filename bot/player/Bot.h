@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ViewFinder.h"
 #include "Player.h"
 #include <event/EventHandler.h>
+#include <move/RotationManager.h>
 #include <utlvector.h>
 #include <utlqueue.h>
 
@@ -81,7 +81,7 @@ private:
 
 	World* world = nullptr;
 
-	ViewFinder targeter;
+	RotationManager rotX, rotY;
 
 	bool inGame = false, hookEnabled = false, resetPlanner = false;
 };
