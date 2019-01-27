@@ -6,7 +6,7 @@ bool GoToConsumableEntityAction::execute() {
 	if (!GoToEntityAction::execute()) {
 		return false;
 	}
-	if (isDepleted()) {
+	if (isDepleted() && depleted.Find(item) == depleted.InvalidIndex()) {
 		depleted.AddToTail(item);
 	}
 	return true;
