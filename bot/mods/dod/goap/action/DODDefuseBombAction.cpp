@@ -14,12 +14,12 @@ DODDefuseBombAction::DODDefuseBombAction(Blackboard& blackboard) :
 }
 
 bool DODDefuseBombAction::execute() {
+	if (!GoToConsumableEntityAction::execute()) {
+		return false;
+	}
 	if (!GoToAction::postCondCheck() || isDepleted()) {
 		interruptable = true;
 		return true;
-	}
-	if (!GoToConsumableEntityAction::execute()) {
-		return false;
 	}
 	interruptable = false;
 	Vector itemPos = UTIL_FindGround(
