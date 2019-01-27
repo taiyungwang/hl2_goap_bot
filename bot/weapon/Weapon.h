@@ -2,6 +2,7 @@
 
 class EntityVar;
 class WeaponFunction;
+class Deployer;
 struct edict_t;
 
 /**
@@ -78,12 +79,16 @@ public:
 		this->minDeployRange = minDeployRange;
 	}
 
-	bool isDeployable() const {
-		return deployedCheck != nullptr;
-	}
-
 	float getMinDeployRange() const {
 		return minDeployRange;
+	}
+
+	Deployer* getDeployer() const {
+		return deployer;
+	}
+
+	void setDeployer(Deployer* deployer) {
+		this->deployer = deployer;
 	}
 
 private:
@@ -98,6 +103,8 @@ private:
 	bool underWater, grenade;
 
 	edict_t* weap;
+
+	Deployer* deployer = nullptr;
 
 	void setWeaponFunc(int i, WeaponFunction* func);
 

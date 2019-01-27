@@ -1,6 +1,7 @@
 #include "Weapon.h"
 
 #include "WeaponFunction.h"
+#include "Deployer.h"
 #include <util/BaseCombatWeapon.h>
 #include <edict.h>
 
@@ -17,6 +18,9 @@ Weapon::~Weapon() {
 			delete function[i];
 			function[i] = nullptr;
 		}
+	}
+	if (deployer != nullptr) {
+		delete deployer;
 	}
 }
 

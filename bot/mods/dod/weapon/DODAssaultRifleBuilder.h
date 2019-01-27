@@ -2,7 +2,7 @@
 
 #include <weapon/DeployableWeaponBuilder.h>
 
-class DODAssaultRifleBuilder: public DeployableWeaponBuilder {
+class DODAssaultRifleBuilder: public DeployableWeaponBuilder<> {
 public:
 	DODAssaultRifleBuilder() :
 			DeployableWeaponBuilder(0.8f, 100.0f, 1600.0f,

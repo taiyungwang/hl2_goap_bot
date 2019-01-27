@@ -17,7 +17,6 @@ void World::reset() {
 	states.Insert(WorldProp::WEAPON_LOADED, true);
 	states.Insert(WorldProp::OUT_OF_AMMO, false);
 	states.Insert(WorldProp::ROUND_STARTED, roundStarted);
-	states.Insert(WorldProp::NEED_TO_DEPLOY_WEAPON, false);
 	addStates();
 }
 

@@ -7,6 +7,7 @@
 #include <player/Vision.h>
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
+#include <weapon/Deployer.h>
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
 #include <util/BaseEntity.h>
@@ -22,7 +23,6 @@ DestroyObjectAction::DestroyObjectAction(Blackboard& blackboard) :
 	crouch = false;
 	effects = {WorldProp::IS_BLOCKED, false};
 	precond.Insert(WorldProp::WEAPON_LOADED, true);
-	precond.Insert(WorldProp::NEED_TO_DEPLOY_WEAPON, false);
 }
 
 DestroyObjectAction::~DestroyObjectAction() {
@@ -52,9 +52,9 @@ bool DestroyObjectAction::execute() {
 	Vector eyes = self->getEyesPos();
 	float dist = targetLoc.DistTo(self->getCurrentPosition());
 	Buttons& buttons = blackboard.getButtons();
-	if (weapon->isDeployable() && !weapon->isDeployed()
-			&& weapon->getMinDeployRange() < dist) {
-		buttons.tap(IN_ATTACK2);
+	if (weapon->getDeployer() != nullptr
+			&& weapon->getMinDeployRange() < dist
+			&& !weapon->getDeployer()->deploy(blackboard)) {
 		return false;
 	}
 	WeaponFunction* weapFunc = weapon->chooseWeaponFunc(selfEnt, dist);

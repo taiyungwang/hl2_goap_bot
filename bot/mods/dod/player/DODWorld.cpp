@@ -47,8 +47,6 @@ bool DODWorld::update(Blackboard& blackboard) {
 	int currentWeap = armory.getCurrWeaponIdx();
 	if (currentWeap > 0) {
 		Weapon* currWeap = armory.getCurrWeapon();
-		updateState(WorldProp::NEED_TO_DEPLOY_WEAPON, currWeap->isDeployable()
-			&& currWeap->getMinDeployRange() < 0.0f && !currWeap->isDeployed());
 	}
 	bool hasBomb = false;
 	FOR_EACH_MAP_FAST(weapons, i) {

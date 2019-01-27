@@ -2,7 +2,7 @@
 
 #include <weapon/DeployableWeaponBuilder.h>
 
-class CrossbowBuilder: public DeployableWeaponBuilder {
+class CrossbowBuilder: public DeployableWeaponBuilder<> {
 public:
 	CrossbowBuilder();
 

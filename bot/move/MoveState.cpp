@@ -34,7 +34,7 @@ void MoveState::moveStraight(const Vector& destination) const {
 	int mvType = ctx.getType();
 	Blackboard& blackboard = ctx.getBlackboard();
 	Buttons& buttons = blackboard.getButtons();
-	float speed = 320.0f; // jog speed
+	float speed = 450.0f; // jog speed
 	if (mvType & NAV_MESH_WALK) {
 		buttons.hold(IN_WALK); // walk speed
 	}
