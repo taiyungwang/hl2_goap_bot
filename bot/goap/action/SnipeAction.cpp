@@ -52,7 +52,7 @@ bool SnipeAction::precondCheck() {
 		return false;
 	}
 	Vector pos = targetLoc;
-	pos.z += HumanHeight;
+	pos.z += HumanEyeHeight;
 	float furthest = 0.0f;
 	for (float currFacing = -180.0f; currFacing < 180.0f; currFacing += 20.0f) {
 		QAngle angle(0.0f, currFacing, 0.0f);
