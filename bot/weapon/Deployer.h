@@ -1,18 +1,14 @@
 #pragma once
 
-class Blackboard;
-class Weapon;
+#include "WeaponActor.h"
 
-class Deployer {
+class Deployer: public WeaponActor {
 public:
-	Deployer(const Weapon& weapon): weapon(weapon) {
+	Deployer(const Weapon& weapon): WeaponActor(weapon) {
 	}
 
 	virtual ~Deployer() {
 	}
 
-	virtual bool deploy(Blackboard& blackboard);
-
-protected:
-	const Weapon& weapon;
+	virtual bool execute(Blackboard& blackboard);
 };

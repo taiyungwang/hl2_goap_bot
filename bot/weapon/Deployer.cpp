@@ -5,7 +5,7 @@
 #include <player/Buttons.h>
 #include <in_buttons.h>
 
-bool Deployer::deploy(Blackboard& blackboard) {
+bool Deployer::execute(Blackboard& blackboard) {
 	if (!weapon.isDeployed()) {
 		blackboard.getButtons().tap(IN_ATTACK2);
 	}

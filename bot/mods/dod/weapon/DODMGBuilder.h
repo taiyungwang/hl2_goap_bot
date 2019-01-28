@@ -1,9 +1,10 @@
 #pragma once
 
 #include "DODMGDeployer.h"
+#include "DODMGReloader.h"
 #include <weapon/DeployableWeaponBuilder.h>
 
-class DODMGBuilder: public DeployableWeaponBuilder<DODMGDeployer> {
+class DODMGBuilder: public DeployableWeaponBuilder<DODMGReloader, DODMGDeployer> {
 public:
 	DODMGBuilder() :
 			DeployableWeaponBuilder(0.8f, 300.0f, 3600.0f, "CDODBipodWeapon",

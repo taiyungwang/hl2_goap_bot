@@ -1,8 +1,9 @@
 #pragma once
 
+#include <weapon/Reloader.h>
 #include <weapon/DeployableWeaponBuilder.h>
 
-class CrossbowBuilder: public DeployableWeaponBuilder<> {
+class CrossbowBuilder: public DeployableWeaponBuilder<Reloader> {
 public:
 	CrossbowBuilder();
 

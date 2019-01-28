@@ -49,10 +49,9 @@ bool Navigator::step() {
 		// look at the farthest visible area.
 		const Player* self = blackboard.getSelf();
 		Vector eyePos = self->getEyesPos();
-		float eyeHt = eyePos.DistTo(self->getCurrentPosition());
 		for (int i = 0; i < path->Count(); i++) {
 			Vector targetView = path->Element(i)->GetCenter();
-			targetView.z += eyeHt;
+			targetView.z += HumanEyeHeight;
 			trace_t result;
 			UTIL_TraceHull(eyePos, targetView, Vector(0.0f, -1.0f, -1.0f),
 					Vector(0.0f, 1.0f, 1.0f), MASK_SHOT | MASK_VISIBLE,

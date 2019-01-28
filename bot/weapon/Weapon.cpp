@@ -2,6 +2,7 @@
 
 #include "WeaponFunction.h"
 #include "Deployer.h"
+#include "Reloader.h"
 #include <util/BaseCombatWeapon.h>
 #include <edict.h>
 
@@ -21,6 +22,9 @@ Weapon::~Weapon() {
 	}
 	if (deployer != nullptr) {
 		delete deployer;
+	}
+	if (reloader != nullptr) {
+		delete reloader;
 	}
 }
 

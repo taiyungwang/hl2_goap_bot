@@ -1,6 +1,9 @@
-#include <goap/action/ReloadWeaponAction.h>
+#include "ReloadWeaponAction.h"
+
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
+#include <weapon/Reloader.h>
+#include <weapon/Weapon.h>
 #include <in_buttons.h>
 
 ReloadWeaponAction::ReloadWeaponAction(Blackboard& blackboard) :
@@ -11,6 +14,6 @@ ReloadWeaponAction::ReloadWeaponAction(Blackboard& blackboard) :
 }
 
 bool ReloadWeaponAction::execute() {
-	blackboard.getButtons().tap(IN_RELOAD);
-	return true;
+	Reloader* reloader = blackboard.getArmory().getCurrWeapon()->getReloader();
+	return reloader == nullptr || reloader->execute(blackboard);
 }

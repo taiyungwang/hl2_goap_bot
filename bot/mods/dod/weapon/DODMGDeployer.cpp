@@ -11,11 +11,10 @@
 #include <util/BasePlayer.h>
 #include <in_buttons.h>
 
-bool DODMGDeployer::deploy(Blackboard& blackboard) {
+bool DODMGDeployer::execute(Blackboard& blackboard) {
 	if (animationCounter < 0) {
 		reset(blackboard);
 	}
-	const Player* player = blackboard.getTargetedPlayer();
 	if (weapon.isDeployed()) {
 		animationCounter = -1;
 		return true;
@@ -28,6 +27,12 @@ bool DODMGDeployer::deploy(Blackboard& blackboard) {
 	if (position == 2) {
 		if (!DodPlayer(blackboard.getSelf()->getEdict()).isProne()
 				&& animationCounter == 90) {
+			if (blackboard.getTargetedPlayer() == nullptr
+					&& blackboard.getBlocker() == nullptr) {
+				Vector view = blackboard.getViewTarget();
+				view.z = view.z - 2 * HumanEyeHeight + HumanHeight;
+				blackboard.setViewTarget(view);
+			}
 			buttons.tap(IN_ALT1);
 		}
 	} else if (position == 1) {

@@ -3,6 +3,7 @@
 class EntityVar;
 class WeaponFunction;
 class Deployer;
+class Reloader;
 struct edict_t;
 
 /**
@@ -91,6 +92,14 @@ public:
 		this->deployer = deployer;
 	}
 
+	Reloader* getReloader() const {
+		return reloader;
+	}
+
+	void setReloader(Reloader* reloader) {
+		this->reloader = reloader;
+	}
+
 private:
 	WeaponFunction* function[2];
 
@@ -105,6 +114,8 @@ private:
 	edict_t* weap;
 
 	Deployer* deployer = nullptr;
+
+	Reloader* reloader = nullptr;
 
 	void setWeaponFunc(int i, WeaponFunction* func);
 

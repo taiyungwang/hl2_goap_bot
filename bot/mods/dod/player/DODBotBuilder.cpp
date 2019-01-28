@@ -146,7 +146,7 @@ void DODBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {
 		float zMultiplier;
 	};
 
-	class AntiTankBuilder: public DeployableWeaponBuilder<> {
+	class AntiTankBuilder: public DeployableWeaponBuilder<Reloader> {
 	public:
 		AntiTankBuilder() :
 				DeployableWeaponBuilder(0.9f, 500.0f, 2000.0f, "CDODBaseRocketWeapon",
@@ -177,10 +177,10 @@ void DODBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {
 	weaponFac.addInstance("weapon_amerknife", new MeleeWeaponBuilder());
 	weaponFac.addInstance("weapon_spade", new MeleeWeaponBuilder());
 	weaponFac.addInstance("weapon_garand",
-			new DeployableWeaponBuilder<>(0.8f, 100.0f, 1600.0f, "CWeaponGarand",
+			new DeployableWeaponBuilder<Reloader>(0.8f, 100.0f, 1600.0f, "CWeaponGarand",
 					"m_bZoomed", 1000.0f));
 	weaponFac.addInstance("weapon_k98",
-			new DeployableWeaponBuilder<>(0.8f, 100.0f, 1600.0f,
+			new DeployableWeaponBuilder<Reloader>(0.8f, 100.0f, 1600.0f,
 					"CWeaponK98", "m_bZoomed", 1000.0f));
 	weaponFac.addInstance("weapon_thompson", new DODSMGBuilder());
 	weaponFac.addInstance("weapon_mp40", new DODSMGBuilder());
@@ -193,10 +193,10 @@ void DODBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {
 	weaponFac.addInstance("weapon_bar", new DODAssaultRifleBuilder());
 	weaponFac.addInstance("weapon_mp44", new DODAssaultRifleBuilder());
 	weaponFac.addInstance("weapon_spring",
-			new DeployableWeaponBuilder<>(0.8f, 500.0f, 3600.0f,
+			new DeployableWeaponBuilder<Reloader>(0.8f, 500.0f, 3600.0f,
 					"CDODSniperWeapon", "m_bZoomed"));
 	weaponFac.addInstance("weapon_k98_scoped",
-			new DeployableWeaponBuilder<>(0.8f, 500.0f, 3600.0f,
+			new DeployableWeaponBuilder<Reloader>(0.8f, 500.0f, 3600.0f,
 					"CDODSniperWeapon", "m_bZoomed"));
 	weaponFac.addInstance("weapon_mg42", new DODMGBuilder());
 	weaponFac.addInstance("weapon_30cal", new DODMGBuilder());

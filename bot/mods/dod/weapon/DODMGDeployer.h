@@ -7,7 +7,7 @@ public:
 	DODMGDeployer(const Weapon& weapon): Deployer(weapon) {
 	}
 
-	bool deploy(Blackboard& blackboard);
+	bool execute(Blackboard& blackboard);
 
 private:
 

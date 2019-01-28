@@ -54,7 +54,7 @@ bool DestroyObjectAction::execute() {
 	Buttons& buttons = blackboard.getButtons();
 	if (weapon->getDeployer() != nullptr
 			&& weapon->getMinDeployRange() < dist
-			&& !weapon->getDeployer()->deploy(blackboard)) {
+			&& !weapon->getDeployer()->execute(blackboard)) {
 		return false;
 	}
 	WeaponFunction* weapFunc = weapon->chooseWeaponFunc(selfEnt, dist);

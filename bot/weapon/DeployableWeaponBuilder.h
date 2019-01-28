@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SemiAutoBuilder.h"
+#include "ReloadableWeaponBuilder.h"
 #include "Weapon.h"
 #include "WeaponFunction.h"
 #include "Deployer.h"
@@ -11,22 +11,27 @@
 /**
  * Builds weapons that are zoomable, deployable, or have an alternate fire.
  */
-template<typename T = Deployer>
-class DeployableWeaponBuilder: public SemiAutoBuilder {
+template<typename T, typename U = Deployer>
+class DeployableWeaponBuilder: public ReloadableWeaponBuilder<T> {
 public:
 	DeployableWeaponBuilder(float damage, float minRange, float maxRange,
 			const char* className, const char* varName, float zoomDist = 0.0f) :
-			SemiAutoBuilder(damage), minRange(minRange), maxRange(maxRange),
+			damage(damage), minRange(minRange), maxRange(maxRange),
 			zoomDist(zoomDist) {
 		extern EntityClassManager* classManager;
 		deployableCheck = &classManager->getClass(className)->getEntityVar(
 				varName);
 	}
 
+	virtual ~DeployableWeaponBuilder() {
+	}
+
 	virtual Weapon* build(edict_t* weap) {
-		Weapon* weapon = SemiAutoBuilder::build(weap);
+		Weapon* weapon = ReloadableWeaponBuilder<T>::build(weap);
+		weapon->setPrimary(new WeaponFunction(damage));
+		weapon->getPrimary()->getRange()[1] = 1000.0f;
 		weapon->setDeployable(deployableCheck, zoomDist);
-		weapon->setDeployer(new T(*weapon));
+		weapon->setDeployer(new U(*weapon));
 		float* ranges = weapon->getPrimary()->getRange();
 		ranges[0] = minRange;
 		ranges[1] = maxRange;
@@ -36,5 +41,5 @@ public:
 private:
 	EntityVar* deployableCheck;
 
-	float zoomDist, minRange, maxRange;
+	float damage, zoomDist, minRange, maxRange;
 };

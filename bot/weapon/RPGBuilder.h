@@ -1,8 +1,8 @@
 #pragma once
 
-#include "WeaponBuilder.h"
+#include "ReloadableWeaponBuilder.h"
 
-class RPGBuilder: public WeaponBuilder {
+class RPGBuilder: public ReloadableWeaponBuilder<> {
 public:
 	Weapon* build(edict_t* weap);
 };
