@@ -19,6 +19,8 @@ public:
 
 	bool operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar );
 
+	bool ShouldSearch( CNavArea *adjArea, CNavArea *currentArea, float travelDistanceSoFar );
+
 	void PostSearch( void );
 
 private:
