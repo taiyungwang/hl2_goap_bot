@@ -15,6 +15,7 @@ public:
 	bool precondCheck();
 
 private:
+	bool deployed = false;
 
 	float facing = 0;
 

@@ -1,25 +1,29 @@
 #include "SnipeAction.h"
 
 #include <player/Blackboard.h>
+#include <player/Buttons.h>
 #include <player/Bot.h>
+#include <weapon/Weapon.h>
+#include <weapon/Deployer.h>
 #include <navmesh/nav_mesh.h>
 #include <util/UtilTrace.h>
 #include <vstdlib/random.h>
+#include <in_buttons.h>
 
 SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 	effects = {WorldProp::ENEMY_SIGHTED, true};
 }
 
 bool SnipeAction::precondCheck() {
+	deployed = false;
 	path.Clear();
 	if (RandomInt(0, 1) == 0) {
 		return false;
 	}
 	extern CNavMesh* TheNavMesh;
 	NavAreaCollector collector;
-	float maxDist = 5000.0f;
 	targetLoc = blackboard.getSelf()->getCurrentPosition();
-	if (!TheNavMesh->ForAllAreasInRadius(collector, targetLoc, maxDist)) {
+	if (!TheNavMesh->ForAllAreasInRadius(collector, targetLoc, 5000.0f)) {
 		return false;
 	}
 	CUtlVector<CNavArea*> hideAreas;
@@ -52,7 +56,7 @@ bool SnipeAction::precondCheck() {
 		return false;
 	}
 	Vector pos = targetLoc;
-	pos.z += HumanEyeHeight;
+	pos.z += HumanCrouchHeight;
 	float furthest = 0.0f;
 	for (float currFacing = -180.0f; currFacing < 180.0f; currFacing += 20.0f) {
 		QAngle angle(0.0f, currFacing, 0.0f);
@@ -60,32 +64,47 @@ bool SnipeAction::precondCheck() {
 		AngleVectors(angle, &aim);
 		trace_t result;
 		CTraceFilterWorldAndPropsOnly filter;
-		UTIL_TraceLine(pos, pos + aim * 2000.0f, MASK_SOLID_BRUSHONLY | CONTENTS_OPAQUE,
-				&filter, &result);
-		if (!result.DidHit()) {
+		UTIL_TraceLine(pos, pos + aim * 2000.0f,
+				CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_PLAYERCLIP,
+				NULL, COLLISION_GROUP_NONE, &result);
+		if (!result.DidHit() && !result.startsolid) {
+			furthest = 4000000.0f;
 			facing = currFacing;
 			break;
 		}
-		float dist = result.endpos.DistTo(result.startpos);
+		float dist = result.endpos.DistToSqr(pos);
 		if (dist > furthest) {
 			furthest = dist;
 			facing = currFacing;
 		}
+	}
+	if (furthest < 1000000.0) {
+		return false;
 	}
 	duration = 300;
 	return true;
 }
 
 bool SnipeAction::execute() {
-	if (!GoToAction::execute()) {
+	if (!GoToAction::postCondCheck() && !GoToAction::execute()) {
+		if (path.Count() == 1) {
+			QAngle angle(0.0f, facing, 0.0f);
+			Vector aim;
+			AngleVectors(angle, &aim);
+			blackboard.setViewTarget(aim);
+		}
 		return false;
 	}
 	if (!GoToAction::postCondCheck()) {
 		return true;
 	}
-	QAngle angle(0.0f, facing, 0.0f);
-	Vector aim;
-	AngleVectors(angle, &aim);
-	blackboard.setViewTarget(aim);
-	return --duration <= 0;
+	Deployer* deployer = blackboard.getArmory().getCurrWeapon()->getDeployer();
+	if (deployer == nullptr) {
+		blackboard.getButtons().hold(IN_DUCK);
+		deployed = true;
+	} else if (!deployed && blackboard.getAimAccuracy(blackboard.getViewTarget()) > 0.9f) {
+		deployed = deployer->execute(blackboard);
+	}
+	blackboard.lookStraight();
+	return deployed && --duration <= 0;
 }
