@@ -37,8 +37,10 @@ void Bot::think() {
 	if (isDead()) {
 		Vector pos = getCurrentPosition();
 		extern CNavMesh* TheNavMesh;
-		TheNavMesh->IncreaseDangerNearby(getTeam(), 5.0f,
-				Navigator::getCurrentArea(pos), pos, 100.0f);
+		CNavArea* area = Navigator::getCurrentArea(pos);
+		if (area != nullptr) {
+			area->IncreaseDanger(getTeam(), 1.0f);
+		}
 		inGame = false;
 		planner->resetPlanning(true);
 		blackboard->getButtons().tap(IN_ATTACK);
