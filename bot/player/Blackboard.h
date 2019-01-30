@@ -86,6 +86,8 @@ public:
 		this->navigator = navigator;
 	}
 
+	void lookStraight();
+
 private:
 	const Bot* self;
 

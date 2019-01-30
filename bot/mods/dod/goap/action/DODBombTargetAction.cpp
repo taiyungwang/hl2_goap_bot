@@ -10,6 +10,14 @@ DODDefuseBombAction(blackboard) {
 	precond.Insert(WorldProp::HAS_BOMB, true);
 }
 
+bool DODBombTargetAction::execute() {
+	bool planted = DODDefuseBombAction::execute();
+	if (planted) {
+		blackboard.lookStraight();
+	}
+	return planted && (!GoToAction::postCondCheck() || duration++ >= 1000);
+}
+
 bool DODBombTargetAction::isAvailable(int idx) const {
 	return isDetonationMap
 			&& blackboard.getSelf()->getTeam()

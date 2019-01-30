@@ -30,6 +30,7 @@ bool CapturePointAction::execute() {
 	if (!GoToAction::postCondCheck() || isDepleted()) {
 		return true;
 	}
+	blackboard.lookStraight();
 	blackboard.getButtons().hold(IN_DUCK);
 	return false;
 }

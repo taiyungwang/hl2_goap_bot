@@ -11,6 +11,8 @@
 #include <util/BasePlayer.h>
 #include <in_buttons.h>
 
+#define PRONE_ANIM 180
+
 bool DODMGDeployer::execute(Blackboard& blackboard) {
 	if (animationCounter < 0) {
 		reset(blackboard);
@@ -26,12 +28,10 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 	Buttons& buttons = blackboard.getButtons();
 	if (position == 2) {
 		if (!DodPlayer(blackboard.getSelf()->getEdict()).isProne()
-				&& animationCounter == 90) {
+				&& animationCounter == PRONE_ANIM) {
 			if (blackboard.getTargetedPlayer() == nullptr
 					&& blackboard.getBlocker() == nullptr) {
-				Vector view = blackboard.getViewTarget();
-				view.z = view.z - 2 * HumanEyeHeight + HumanHeight;
-				blackboard.setViewTarget(view);
+				blackboard.lookStraight();
 			}
 			buttons.tap(IN_ALT1);
 		}
@@ -67,7 +67,7 @@ void DODMGDeployer::reset(Blackboard& blackboard) {
 		}
 	}
 	if (position == 2) {
-		animationCounter = 90;
+		animationCounter = PRONE_ANIM;
 	} else if (position == 1) {
 		animationCounter = 10;
 	} else {

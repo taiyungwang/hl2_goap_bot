@@ -52,3 +52,7 @@ float Blackboard::getTargetEntDistance() const {
 					- self->getCurrentPosition()).Length();
 }
 
+void Blackboard::lookStraight() {
+	this->viewTarget.z = this->self->getEyesPos().z;
+}
+
