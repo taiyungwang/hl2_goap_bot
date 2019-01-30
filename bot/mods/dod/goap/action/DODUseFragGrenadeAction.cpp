@@ -16,12 +16,14 @@ bool DODUseFragGrenadeAction::precondCheck() {
 
 // TODO: change to using player index in case of player logging off.
 bool DODUseFragGrenadeAction::execute() {
-	if (target->getEdict()->IsFree() || target->isDead()) {
+	Weapon* weapon = armory.getWeapon(weapIdx);
+	if (target->getEdict()->IsFree() || target->isDead()
+			|| weapon == nullptr) {
 		return true;
 	}
 	float dist = blackboard.getTargetEntDistance();
 	const Player* self = blackboard.getSelf();
-	WeaponFunction* grenade = armory.getWeapon(weapIdx)->chooseWeaponFunc(
+	WeaponFunction* grenade = weapon->chooseWeaponFunc(
 			self->getEdict(), dist);
 	blackboard.setViewTarget(
 			grenade->getAim(target->getCurrentPosition(), self->getEyesPos()));
