@@ -4,7 +4,7 @@
 #include "WeaponFunction.h"
 
 Weapon* SemiAutoBuilder::build(edict_t* weap) {
-	Weapon* weapon = new Weapon(weap);
+	Weapon* weapon = ReloadableWeaponBuilder::build(weap);
 	weapon->setPrimary(new WeaponFunction(damage1));
 	weapon->getPrimary()->getRange()[1] = 1000.0f;
 	return weapon;

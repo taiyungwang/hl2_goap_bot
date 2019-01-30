@@ -10,7 +10,7 @@ template<typename T>
 class SimpleWeaponBuilder: public ReloadableWeaponBuilder<> {
 public:
 	Weapon* build(edict_t* weap) {
-		Weapon* weapon = new Weapon(weap);
+		Weapon* weapon = ReloadableWeaponBuilder::build(weap);
 		weapon->setPrimary(new T());
 		return weapon;
 	}

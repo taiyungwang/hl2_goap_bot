@@ -4,7 +4,7 @@
 #include "WeaponFunction.h"
 
 Weapon* RPGBuilder::build(edict_t* weap) {
-	Weapon* weapon = new Weapon(weap);
+	Weapon* weapon = ReloadableWeaponBuilder::build(weap);
 	WeaponFunction *primary = new WeaponFunction(0.91f);
 	primary->setExplosive(true);
 	primary->getRange()[0] = 400.0f;

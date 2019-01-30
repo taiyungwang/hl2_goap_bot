@@ -4,6 +4,9 @@
 #include "Reloader.h"
 #include "Weapon.h"
 
+/**
+ * Builds a weapon that requires reloading.
+ */
 template<typename T= Reloader>
 class ReloadableWeaponBuilder: public WeaponBuilder {
 public:

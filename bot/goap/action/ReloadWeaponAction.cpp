@@ -4,6 +4,7 @@
 #include <player/Buttons.h>
 #include <weapon/Reloader.h>
 #include <weapon/Weapon.h>
+#include <util/SimpleException.h>
 #include <in_buttons.h>
 
 ReloadWeaponAction::ReloadWeaponAction(Blackboard& blackboard) :
@@ -14,6 +15,14 @@ ReloadWeaponAction::ReloadWeaponAction(Blackboard& blackboard) :
 }
 
 bool ReloadWeaponAction::execute() {
-	Reloader* reloader = blackboard.getArmory().getCurrWeapon()->getReloader();
-	return reloader == nullptr || reloader->execute(blackboard);
+	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
+	if (weapon == nullptr) {
+		return true;
+	}
+	Reloader* reloader = weapon->getReloader();
+	if (reloader == nullptr) {
+		throw new SimpleException(CUtlString("Reloader not set for ")
+				+ weapon->getEdict()->GetClassName());
+	}
+	return reloader->execute(blackboard);
 }
