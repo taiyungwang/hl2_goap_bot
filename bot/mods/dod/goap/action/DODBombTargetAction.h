@@ -10,4 +10,6 @@ public:
 
 private:
 	bool isAvailable(int idx) const;
+
+	bool isTeamMateActingOnBomb(DodPlayer& teammate) const;
 };

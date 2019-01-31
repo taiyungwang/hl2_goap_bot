@@ -15,4 +15,12 @@ public:
 	bool isProne() {
 		return get<bool>("m_bProne");
 	}
+
+	bool isDefusing() {
+		return get<bool>("m_bDefusing");
+	}
+
+	bool isPlanting() {
+		return get<bool>("m_bPlanting");
+	}
 };

@@ -2,6 +2,8 @@
 
 #include "DODDefendPointAction.h"
 
+class DodPlayer;
+
 class DODDefuseBombAction : public DODDefendPointAction {
 public:
 	DODDefuseBombAction(Blackboard& blackboard);
@@ -13,7 +15,11 @@ public:
 	}
 
 protected:
-	virtual bool isAvailable(int idx) const;
-
 	bool interruptable = true;
+
+	virtual bool isTeamMateActingOnBomb(DodPlayer& teammate) const;
+
+	virtual bool isAvailable(int idx) const;
+private:
+	bool isAvailable(edict_t* ent) const;
 };

@@ -1,8 +1,9 @@
 #include "DODBombTargetAction.h"
 
+#include <mods/dod/util/DODObjectiveResource.h>
+#include <mods/dod/util/DodPlayer.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <mods/dod/util/DODObjectiveResource.h>
 
 DODBombTargetAction::DODBombTargetAction(Blackboard& blackboard) :
 DODDefuseBombAction(blackboard) {
@@ -26,3 +27,6 @@ bool DODBombTargetAction::isAvailable(int idx) const {
 			&& isBombInState(idx, 1);
 }
 
+bool DODBombTargetAction::isTeamMateActingOnBomb(DodPlayer& teammate) const {
+	return teammate.isPlanting();
+}
