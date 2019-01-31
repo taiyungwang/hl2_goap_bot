@@ -66,17 +66,6 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 		DODGetBombAction(Blackboard& blackboard) :
 			GoToEntityAction(blackboard, "dod_bomb_dispenser") {
 			effects = {WorldProp::HAS_BOMB, true};
-			targetRadius = 40.0f;
-		}
-
-		bool execute() {
-			return blackboard.getSelf()->getWorld()->getState(WorldProp::HAS_BOMB)
-					|| GoToAction::execute();
-		}
-
-		bool postCondCheck() {
-			return GoToEntityAction::postCondCheck()
-			|| blackboard.getSelf()->getWorld()->getState(WorldProp::HAS_BOMB);
 		}
 	};
 	class DODNavigator: public Navigator {

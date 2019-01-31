@@ -41,10 +41,6 @@ public:
 
 	void setWorld(World* world);
 
-	const World* getWorld() const {
-		return world;
-	}
-
 	void setPlanner(Planner* planner) {
 		this->planner = planner;
 	}

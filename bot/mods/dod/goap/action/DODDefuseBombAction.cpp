@@ -12,7 +12,6 @@
 DODDefuseBombAction::DODDefuseBombAction(Blackboard& blackboard) :
 		DODDefendPointAction(blackboard) {
 	effects = {WorldProp::BOMB_DEFUSED, true};
-	targetRadius = 40.0f;
 }
 
 bool DODDefuseBombAction::execute() {
