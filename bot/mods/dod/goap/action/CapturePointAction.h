@@ -35,8 +35,8 @@ protected:
 		return !isAvailable(item);
 	}
 
+	virtual bool isAvailable(edict_t* ent) const;
 private:
-	bool isAvailable(edict_t* ent) const;
 
 	void selectItem(CUtlLinkedList<edict_t*>& active);
 
