@@ -208,14 +208,6 @@ bool CNavLadder::IsConnected( const CNavArea *area, LadderDirectionType dir ) co
 			|| area == m_topBehindArea;
 }
 
-inline void UTIL_TraceLine(const Vector& vecAbsStart, const Vector& vecAbsEnd,
-		unsigned int mask, const IHandleEntity *ignore, int collisionGroup,
-		trace_t *ptr) {
-	Ray_t ray;
-	ray.Init(vecAbsStart, vecAbsEnd);
-	UTIL_Trace(ray, mask, CTraceFilterSimple(ignore, collisionGroup), ptr);
-}
-
 //--------------------------------------------------------------------------------------------------------------
 void CNavLadder::SetDir( NavDirType dir )
 {

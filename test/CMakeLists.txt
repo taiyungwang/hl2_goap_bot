@@ -1,4 +1,5 @@
 include_directories(${CMAKE_SOURCE_DIR}/bot)
+include_directories(${CXX_DIR})
 
 # Adds a cxx test. Suites are a list of test suites to be added to the test.  This macro
 # assumes that the suite header and source names are identical and located in the same path. 
@@ -19,4 +20,4 @@ macro(add_cxxtest test_name suites libs)
 endmacro(add_cxxtest)
 
 add_subdirectory(goap)
-add_cxxtest(sdk_test "ValveSDKTest" ":tier1.a;tier0")
+add_cxxtest(sdk_test "ValveSDKTest" "${tier1};tier0")

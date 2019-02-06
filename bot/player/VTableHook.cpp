@@ -10,6 +10,9 @@
 #include <utlstring.h>
 #ifndef _WIN32
 #include <sys/mman.h>
+#else 
+#include <Windows.h>
+#include <winnt.h>
 #endif
 
 DWORD* player_vtable = nullptr;
