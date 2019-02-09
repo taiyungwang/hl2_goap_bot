@@ -2709,8 +2709,7 @@ void CNavMesh::CreateNavAreasFromNodes(void) {
 	/// @TODO: incremental generation doesn't create ladders yet
 	if (m_generationMode != GENERATE_INCREMENTAL) {
 		for (int i = 0; i < m_ladders.Count(); ++i) {
-			CNavLadder *ladder = m_ladders[i];
-			ladder->ConnectGeneratedLadder(0.0f);
+			m_ladders[i]->ConnectGeneratedLadder(0.0f);
 		}
 	}
 }
@@ -3316,7 +3315,6 @@ CNavNode *CNavMesh::AddNode(const Vector &destPos, const Vector &normal,
 		OnNodeAdded(node);
 		useNew = true;
 	}
-
 	// connect source node to new node
 	source->ConnectTo(node, dir, obstacleHeight, obstacleStartDist,
 			obstacleEndDist);
@@ -3652,7 +3650,7 @@ bool CNavMesh::SampleStep(void) {
 							UTIL_TraceHull(start, end, NavTraceMins,
 									NavTraceMaxs, GetGenerationTraceMask(),
 									filter, &tr);
-							if (tr.fraction < 1.0f) {
+							if (tr.fraction < 1.0f || to.z - m_currentNode->GetPosition()->z > JumpCrouchHeight) {
 								break;
 							}
 
@@ -3660,42 +3658,33 @@ bool CNavMesh::SampleStep(void) {
 							obstacleHeight = height;
 							success = true;
 							break;
-						} else {
-							// Could not trace from node to node at this height, something is in the way.
-							// Trace in the other direction to see if we hit something
-							Vector vecToObstacleStart = tr.endpos - start;
-							Assert(
-									vecToObstacleStart.LengthSqr() <= Square( GenerationStepSize ));
-							if (vecToObstacleStart.LengthSqr()
-									<= Square(GenerationStepSize)) {
-								UTIL_TraceHull(end, start, NavTraceMins,
-										NavTraceMaxs, GetGenerationTraceMask(),
-										filter, &tr);
-								if (!tr.startsolid && tr.fraction < 1.0) {
-									// We hit something going the other direction.  There is some obstacle between the two nodes.
-									Vector vecToObstacleEnd = tr.endpos - start;
-									Assert(
-											vecToObstacleEnd.LengthSqr() <= Square( GenerationStepSize ));
-									if (vecToObstacleEnd.LengthSqr()
-											<= Square(GenerationStepSize)) {
-										// Remember the distances to start and end of the obstacle (with respect to the "from" node).
-										// Keep track of the last distances to obstacle as we keep increasing the height we do a trace for.
-										// If we do eventually clear the obstacle, these values will be the start and end distance to the
-										// very tip of the obstacle.
-										obstacleStartDist =
-												vecToObstacleStart.Length();
-										obstacleEndDist =
-												vecToObstacleEnd.Length();
-										if (obstacleEndDist == 0) {
-											obstacleEndDist =
-													GenerationStepSize;
-										}
+						}
+						// Could not trace from node to node at this height, something is in the way.
+						// Trace in the other direction to see if we hit something
+						Vector vecToObstacleStart = tr.endpos - start;
+						Assert(vecToObstacleStart.LengthSqr() <= Square( GenerationStepSize ));
+						if (vecToObstacleStart.LengthSqr() <= Square(GenerationStepSize)) {
+							UTIL_TraceHull(end, start, NavTraceMins,
+									NavTraceMaxs, GetGenerationTraceMask(),
+									filter, &tr);
+							if (!tr.startsolid && tr.fraction < 1.0) {
+								// We hit something going the other direction.  There is some obstacle between the two nodes.
+								Vector vecToObstacleEnd = tr.endpos - start;
+								Assert(vecToObstacleEnd.LengthSqr() <= Square( GenerationStepSize ));
+								if (vecToObstacleEnd.LengthSqr() <= Square(GenerationStepSize)) {
+									// Remember the distances to start and end of the obstacle (with respect to the "from" node).
+									// Keep track of the last distances to obstacle as we keep increasing the height we do a trace for.
+									// If we do eventually clear the obstacle, these values will be the start and end distance to the
+									// very tip of the obstacle.
+									obstacleStartDist = vecToObstacleStart.Length();
+									obstacleEndDist = vecToObstacleEnd.Length();
+									if (obstacleEndDist == 0) {
+										obstacleEndDist = GenerationStepSize;
 									}
 								}
 							}
 						}
 					}
-
 					if (!success) {
 						return true;
 					}
@@ -3749,8 +3738,7 @@ bool CNavMesh::SampleStep(void) {
 				// (meaning the obstacle was just the height change to get to the destination node, no extra obstacle between the two), clear obstacle height
 				// and distances
 				if ((obstacleHeight < MaxTraversableHeight)
-						|| (to.z - m_currentNode->GetPosition()->z
-								> (obstacleHeight - 2.0f))) {
+						|| (to.z - m_currentNode->GetPosition()->z > (obstacleHeight - 2.0f))) {
 					obstacleHeight = 0;
 					obstacleStartDist = 0;
 					obstacleEndDist = GenerationStepSize;
