@@ -406,9 +406,10 @@ bool CNavMesh::FindActiveNavArea( void )
 			}
 		}
 
-		if ( m_selectedArea )
+		auto player = playerinfomanager->GetPlayerInfo(ent);
+		if ( m_selectedArea && player != nullptr)
 		{
-			float yaw = playerinfomanager->GetPlayerInfo(ent)->GetAbsAngles().y;
+			float yaw = player->GetAbsAngles().y;
 			while( yaw > 360.0f )
 				yaw -= 360.0f;
 
@@ -692,7 +693,7 @@ void CNavMesh::DrawEditMode( void )
 	if (ent == NULL)
 		return;
 	IPlayerInfo* player = playerinfomanager->GetPlayerInfo(ent);
-	if ( IsGenerating() )
+	if ( player == nullptr || IsGenerating() )
 		return;
 
 	// TODO: remove this when host_thread_mode 1 stops breaking NDEBUG_PERSIST_TILL_NEXT_SERVER overlays
