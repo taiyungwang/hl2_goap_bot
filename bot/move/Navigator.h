@@ -33,7 +33,7 @@ public:
 
 	void start(CUtlStack<CNavArea*>* path, const Vector& goal, 	float targetRadius);
 
-	bool buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) const;
+	bool buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path);
 
 protected:
 	Blackboard& blackboard;
@@ -49,6 +49,11 @@ private:
 
 	MoveStateContext* moveCtx;
 
+	float targetRadius = 25.0f;
+
+	// Used to track start areas for chained GoToActions.
+	CNavArea* startArea = nullptr;
+
 	/**
 	 * Gets the next target area.
 	 */
@@ -61,6 +66,4 @@ private:
 	 */
 	bool findLadder(const CNavArea* from, const CNavArea* to,
 			CNavLadder::LadderDirectionType dir);
-
-	float targetRadius = 25.0f;
 };

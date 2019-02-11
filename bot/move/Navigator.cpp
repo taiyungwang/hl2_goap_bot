@@ -73,6 +73,7 @@ void Navigator::start(CUtlStack<CNavArea*>* path, const Vector& goal, float targ
 	moveCtx->stop();
 	if (path->Count() > 0) {
 		moveCtx->setGoal(path->Top()->GetCenter());
+		startArea = nullptr;
 	}
 }
 
@@ -116,7 +117,7 @@ CNavArea* Navigator::getCurrentArea(const Vector& pos) {
 	return startArea;
 }
 
-bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) const {
+bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	const Player* self = blackboard.getSelf();
 	CNavArea* area = TheNavMesh->GetNavArea(targetLoc);
 	if (area == nullptr) {
@@ -127,7 +128,9 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) c
 	}
 	path.Clear();
 	path.Push(area);
-	CNavArea* startArea = getArea(self->getEdict());
+	if (startArea == nullptr) {
+		startArea = getArea(self->getEdict());
+	}
 	if (!NavAreaBuildPath(startArea, path.Top(), nullptr,
 			ShortestPathCost(self->getTeam()))) {
 		path.Top()->Draw();
@@ -139,14 +142,15 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) c
 			area != startArea && area != nullptr; area = area->GetParent()) {
 		path.Push(area);
 	}
+	startArea = area;
 	return true;
 }
 
 void Navigator::getNextArea() {
-	CNavArea* startArea = getCurrentArea(
+	CNavArea* currentArea = getCurrentArea(
 			blackboard.getSelf()->getCurrentPosition());
 	bool canGetNextArea = path->Count() > 0 && !moveCtx->nextGoalIsLadderStart()
-			&& startArea == path->Top();
+			&& currentArea == path->Top();
 	if (canGetNextArea && path->Count() > 2) {
 		int nextAreaAttr = path->Element(1)->GetAttributes();
 		canGetNextArea = moveCtx->hasGoal() || !(nextAreaAttr & NAV_MESH_JUMP)
@@ -195,9 +199,9 @@ void Navigator::getNextArea() {
 			path->Top()->Draw();
 		}
 		if ((moveCtx->nextGoalIsLadderStart() || blackboard.isOnLadder()
-				|| isConnectionOnFloor(startArea, path->Top())
-				|| (!findLadder(startArea, path->Top(), CNavLadder::LADDER_UP)
-						&& !findLadder(startArea, path->Top(),
+				|| isConnectionOnFloor(currentArea, path->Top())
+				|| (!findLadder(currentArea, path->Top(), CNavLadder::LADDER_UP)
+						&& !findLadder(currentArea, path->Top(),
 								CNavLadder::LADDER_DOWN)))
 				&& !moveCtx->nextGoalIsLadderStart()) {
 			moveCtx->setGoal(path->Top()->GetCenter());
