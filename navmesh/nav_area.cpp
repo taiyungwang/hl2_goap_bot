@@ -1390,76 +1390,89 @@ void CNavArea::FinishSplitEdit(CNavArea *newArea, NavDirType ignoreEdge) {
 	}
 }
 
-bool CNavArea::connectNewArea(CNavArea *other, NavDirType dir, const Vector& nw,
-		const Vector& ne, const Vector& se, const Vector& sw) {
-	NavDirType opposite = static_cast<NavDirType>((dir + 2) % NUM_DIRECTIONS);
-	CNavArea* newArea = TheNavMesh->CreateArea();
-	if (newArea == NULL) {
-		Warning("SpliceEdit: Out of memory.\n");
-		return false;
-	}
-	newArea->Build(nw, ne, se, sw);
-	ConnectTo(newArea, dir);
-	newArea->ConnectTo(this, opposite);
-	other->ConnectTo(newArea, opposite);
-	newArea->ConnectTo(other, dir);
-	newArea->InheritAttributes(this, other);
-	TheNavAreas.AddToTail(newArea);
-	TheNavMesh->AddNavArea(newArea);
-	TheNavMesh->OnEditCreateNotify(newArea);
-	return true;
-}
-
 //--------------------------------------------------------------------------------------------------------------
 /**
  * Create a new area between this area and given area 
  */
-bool CNavArea::SpliceEdit(CNavArea *other) {
+bool CNavArea::SpliceEdit(CNavArea *other)
+{
 	Vector nw, ne, se, sw;
-	CNavArea *start = other, *end = this;
+	CNavArea *start = this,
+		*end = other;
 	NavDirType dir = NUM_DIRECTIONS;
-	if (m_nwCorner.x > other->m_seCorner.x) {
+	if (m_nwCorner.x > other->m_seCorner.x)
+	{
 		// 'this' is east of 'other'
+		start = other;
+		end = this;
 		dir = WEST;
-	} else if (m_seCorner.x < other->m_nwCorner.x) {
-		dir = EAST;
-		start = this;
-		end = other;
 	}
-	if (dir != NUM_DIRECTIONS) {
-		nw.x = start->m_seCorner.x;
+	else if (m_seCorner.x < other->m_nwCorner.x)
+	{
+		// 'this' is west of 'other'
+		dir = EAST;
+	}
+	if (dir != NUM_DIRECTIONS) 
+	{
+		nw.x = end->m_seCorner.x;
 		nw.y = MAX(m_nwCorner.y, other->m_nwCorner.y);
-		nw.z = start->GetZ(nw);
-		se.x = m_nwCorner.x;
+		se.x = end->m_nwCorner.x;
 		se.y = MIN(m_seCorner.y, other->m_seCorner.y);
-		se.z = end->GetZ(se);
-	} else {
+		ne.z = end->GetZ(ne);
+		sw.z = start->GetZ(sw);
+	} 
+	else {
 		// 'this' overlaps in X
-		if (m_nwCorner.y > other->m_seCorner.y) {
+		if (m_nwCorner.y > other->m_seCorner.y)
+		{
+			// 'this' is south of 'other'
 			dir = NORTH;
-		} else if (m_seCorner.y < other->m_nwCorner.y) {
+			start = other;
+			end = this;
+		}
+		else if (m_seCorner.y < other->m_nwCorner.y)
+		{
 			dir = SOUTH;
-			// 'this' is north of 'other'
-			start = this;
-			end = other;
-		} else {
+		}
+		else {
 			// areas overlap
 			return false;
 		}
 		nw.x = MAX(m_nwCorner.x, other->m_nwCorner.x);
-		nw.y = m_seCorner.y;
-		nw.z = end->GetZ(nw);
+		nw.y = start->m_seCorner.y;
 		se.x = MIN(m_seCorner.x, other->m_seCorner.x);
-		se.y = start->m_nwCorner.y;
-		se.z = start->GetZ(se);
+		se.y = end->m_nwCorner.y;
+		ne.z = start->GetZ(ne);
+		sw.z = end->GetZ(sw);
 	}
+	nw.z = start->GetZ(nw);
+	se.z = end->GetZ(se);
 	ne.x = se.x;
 	ne.y = nw.y;
-	ne.z = end->GetZ(ne);
 	sw.x = nw.x;
-	sw.y = se.y;
-	sw.z = start->GetZ(sw);
-	return connectNewArea(start, dir, nw, ne, se, sw);
+	sw.y = se.y;	
+	CNavArea* newArea = TheNavMesh->CreateArea();
+	if (newArea == NULL)
+	{
+		Warning("SpliceEdit: Out of memory.\n");
+		return false;
+	}
+
+	newArea->Build(nw, ne, se, sw);
+
+	this->ConnectTo(newArea, dir);
+	newArea->ConnectTo(this, OppositeDirection(dir));
+
+	other->ConnectTo(newArea, OppositeDirection(dir));
+	newArea->ConnectTo(other, dir);
+	newArea->InheritAttributes(this, other);
+
+	TheNavAreas.AddToTail(newArea);
+	TheNavMesh->AddNavArea(newArea);
+
+	TheNavMesh->OnEditCreateNotify(newArea);
+
+	return true;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -2371,8 +2384,7 @@ void CNavArea::Draw(void) const {
 	}
 
 	int bgcolor[4];
-	if (4
-			== sscanf(nav_area_bgcolor.GetString(), "%d %d %d %d",
+	if (4 == sscanf(nav_area_bgcolor.GetString(), "%d %d %d %d",
 					&(bgcolor[0]), &(bgcolor[1]), &(bgcolor[2]),
 					&(bgcolor[3]))) {
 		for (int i = 0; i < 4; ++i)

@@ -691,9 +691,6 @@ private:
 
 	void addLadder(CNavLadder* ladder, CNavLadder::LadderDirectionType dir);
 
-	bool connectNewArea(CNavArea *other, NavDirType dir, const Vector& nw,
-			const Vector& ne, const Vector& se, const Vector& sw);
-
 	void build();
 
 	void buildFromNodes();
