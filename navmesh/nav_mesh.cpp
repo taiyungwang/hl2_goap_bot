@@ -1478,6 +1478,27 @@ void CNavMesh::IncreaseDangerNearby( int teamID, float amount, CNavArea *startAr
 	}
 }
 
+void commandNavAddJumpAreas() {
+	if (!UTIL_IsCommandIssuedByServerAdmin())
+		return;
+	FOR_EACH_VEC(TheNavAreas, i) {
+		bool canWalkTo = false;
+		for (int j = 0; !canWalkTo && j < NUM_DIRECTIONS; j++) {
+			const auto& neighbors = *TheNavAreas[i]->GetAdjacentAreas(static_cast<NavDirType>(j));
+			FOR_EACH_VEC(neighbors, k) {
+				if (neighbors[k].area->ComputeAdjacentConnectionHeightChange(TheNavAreas[i]) <= StepHeight) {
+					canWalkTo = true;
+					break;
+				}
+			}
+		}
+		if (!canWalkTo) {
+			TheNavAreas[i]->SetAttributes(NAV_MESH_JUMP);
+		}
+	}
+}
+
+static ConCommand nav_add_jump_areas("nav_add_jump_areas", commandNavAddJumpAreas, "Add jump flag to areas reachable only by jumping.", FCVAR_GAMEDLL | FCVAR_CHEAT);
 
 //--------------------------------------------------------------------------------------------------------------
 void CommandNavRemoveJumpAreas( void )
