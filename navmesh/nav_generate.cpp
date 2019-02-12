@@ -353,12 +353,9 @@ public:
 		for (int i = 0; i < NUM_DIRECTIONS; ++i) {
 			NavDirType incomingDir = (NavDirType) i;
 			NavDirType outgoingDir = OppositeDirection(incomingDir);
-			const NavConnectVector *dest = jumpArea->GetAdjacentAreas(
-					outgoingDir);
-			TryToConnect(jumpArea, jumpArea->GetIncomingConnections(
-					incomingDir), dest, outgoingDir);
-			TryToConnect(jumpArea, jumpArea->GetAdjacentAreas(
-					incomingDir), dest, outgoingDir);
+			const NavConnectVector *dest = jumpArea->GetAdjacentAreas(outgoingDir);
+			TryToConnect(jumpArea, jumpArea->GetIncomingConnections(incomingDir), dest, outgoingDir);
+			TryToConnect(jumpArea, jumpArea->GetAdjacentAreas(incomingDir), dest, outgoingDir);
 		}
 
 		return true;
@@ -1868,19 +1865,10 @@ void CNavMesh::FixConnections(void) {
 				// From the stair's perspective, we can't go up more than step height to reach the adjacent area.
 				// Also, if the adjacent area has to jump up higher than StepHeight above the stair area to reach the stairs,
 				// there's an obstruction close to the adjacent area that could prevent walking from the stairs down.
-				if (node->GetGroundHeightAboveNode(cornerType[0])
-						> StepHeight) {
-					areasToDisconnect.AddToTail(adjArea);
-				} else if (node->GetGroundHeightAboveNode(cornerType[1])
-						> StepHeight) {
-					areasToDisconnect.AddToTail(adjArea);
-				} else if (adjPos.z
-						+ adjNode->GetGroundHeightAboveNode(adjCornerType[0])
-						> pos.z + StepHeight) {
-					areasToDisconnect.AddToTail(adjArea);
-				} else if (adjPos.z
-						+ adjNode->GetGroundHeightAboveNode(adjCornerType[1])
-						> pos.z + StepHeight) {
+				if (node->GetGroundHeightAboveNode(cornerType[0]) > StepHeight
+					|| node->GetGroundHeightAboveNode(cornerType[1]) > StepHeight
+					|| adjPos.z + adjNode->GetGroundHeightAboveNode(adjCornerType[0]) > pos.z + StepHeight
+					|| adjPos.z + adjNode->GetGroundHeightAboveNode(adjCornerType[1]) > pos.z + StepHeight) {
 					areasToDisconnect.AddToTail(adjArea);
 				}
 			}
