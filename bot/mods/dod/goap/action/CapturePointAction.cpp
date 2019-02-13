@@ -92,9 +92,27 @@ void CapturePointAction::selectItem(CUtlLinkedList<edict_t*>& active) {
 	if (active.Count() == 0) {
 		return;
 	}
-	if (RandomInt(0, 1) == 0) {
-		GoToEntityAction::selectItem(active);
+	if (active.Count() == 1) {
+		item = active[0];
 		return;
 	}
-	item = active[RandomInt(0, active.Count() - 1)];
+	float totalDist = 0.0f;
+	CUtlLinkedList<float> prob;
+	FOR_EACH_LL(active, i) {
+		prob.AddToTail(active[i]->GetCollideable()->GetCollisionOrigin().DistTo(blackboard.getSelf()->getCurrentPosition()));
+		totalDist += prob.Tail();
+	}
+	FOR_EACH_LL(prob, i) {
+		prob[i] = (totalDist - prob[i]) / totalDist;
+		if (i > 0) {
+			prob[i] += prob[i - 1];
+		}
+	}
+	float choice = RandomFloat(0, 1.0f);
+	FOR_EACH_LL(prob, i) {
+		if (choice < prob[i]) {
+			item = active[i];
+			break;
+		}
+	}
 }
