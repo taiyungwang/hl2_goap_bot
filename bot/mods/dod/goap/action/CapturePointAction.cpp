@@ -100,10 +100,10 @@ void CapturePointAction::selectItem(CUtlLinkedList<edict_t*>& active) {
 	CUtlLinkedList<float> prob;
 	FOR_EACH_LL(active, i) {
 		prob.AddToTail(active[i]->GetCollideable()->GetCollisionOrigin().DistTo(blackboard.getSelf()->getCurrentPosition()));
-		totalDist += prob.Tail();
+		totalDist += prob[prob.Tail()];
 	}
 	FOR_EACH_LL(prob, i) {
-		prob[i] = (totalDist - prob[i]) / totalDist;
+		prob[i] = (totalDist - prob[i]) / totalDist / 2.0f;
 		if (i > 0) {
 			prob[i] += prob[i - 1];
 		}
