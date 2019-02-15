@@ -59,8 +59,7 @@ void DODMGDeployer::reset(Blackboard& blackboard) {
 				Vector(0.0f, -halfHull, DELTA_Z[position]),
 				Vector(0.0f, halfHull, 0.0f),
 								MASK_NPCSOLID_BRUSHONLY,
-								FilterSelf(self->getEdict()->GetIServerEntity(),
-										ground == nullptr ? nullptr : ground->GetIServerEntity()),
+								FilterSelf(self->getEdict()->GetIServerEntity()),
 										&result, mybot_debug.GetBool());
 		if (result.DidHit()) {
 			break;

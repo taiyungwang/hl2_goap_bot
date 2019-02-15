@@ -49,12 +49,9 @@ bool UTIL_IsVisible(const Vector &vecAbsEnd,
 	result.fraction = 0.0f;
 	auto self = blackboard.getSelf();
 	Vector start = self->getEyesPos();
-	CTraceFilterWorldAndPropsOnly filter;
-	UTIL_TraceLine(start, vecAbsEnd, MASK_SOLID_BRUSHONLY | CONTENTS_OPAQUE,
-			&filter, &result);
-	return result.fraction >= 1.0
-			|| (result.m_pEnt != nullptr && result.m_pEnt
-			== target->GetUnknown()->GetBaseEntity());
+	FilterSelfAndTarget filter(blackboard.getSelf()->getEdict()->GetIServerEntity(), target->GetIServerEntity());
+	UTIL_TraceLine(start, vecAbsEnd, MASK_ALL, &filter, &result);
+	return !result.DidHit();
 }
 
 void Vision::updateVisiblity(Blackboard& blackboard) {
