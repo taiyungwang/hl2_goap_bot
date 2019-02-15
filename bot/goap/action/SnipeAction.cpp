@@ -39,12 +39,11 @@ bool SnipeAction::precondCheck() {
 	}
 	do {
 		int area = RandomInt(0, hideAreas.Count() - 1);
-		auto* hidingSpots = hideAreas[area]->GetHidingSpots();
+		const auto& hidingSpots = *hideAreas[area]->GetHidingSpots();
 		int hideSpot = -1;
-		for (int i = 0; i < hidingSpots->Count(); i++) {
-			auto* spot = hidingSpots->Element(i);
+		FOR_EACH_VEC(hidingSpots, i) {
 			hideSpot = i;
-			targetLoc = hidingSpots->Element(i)->GetPosition();
+			targetLoc = hidingSpots[i]->GetPosition();
 			break;
 		}
 		if (hideSpot > -1) {
@@ -63,7 +62,7 @@ bool SnipeAction::precondCheck() {
 		Vector aim;
 		AngleVectors(angle, &aim);
 		trace_t result;
-		CTraceFilterWorldAndPropsOnly filter;
+		FilterSelf filter(blackboard.getSelf()->getEdict()->GetIServerEntity());
 		UTIL_TraceLine(pos, pos + aim * 2000.0f,
 				CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_PLAYERCLIP,
 				NULL, COLLISION_GROUP_NONE, &result);
