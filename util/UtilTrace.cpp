@@ -243,16 +243,6 @@ void UTIL_TraceHull(const Vector &vecAbsStart,
 			CTraceFilterSimple(ignore, collisionGroup), ptr, draw);
 }
 
-bool UTIL_IsTargetHit(const Vector& start, const Vector& end, edict_t* self,
-		edict_t* target) {
-	FilterSelf filter(self->GetIServerEntity(), target->GetIServerEntity());
-	trace_t result;
-	UTIL_TraceLine(start, end, MASK_SHOT | MASK_VISIBLE, &filter, &result);
-	return result.fraction < 1.0f
-			&& reinterpret_cast<IServerEntity*>(result.m_pEnt)
-					== target->GetIServerEntity() && result.hitbox > 0;
-}
-
 Vector UTIL_FindGround(const Vector& loc) {
 	CTraceFilterWalkableEntities filter( NULL, COLLISION_GROUP_PLAYER_MOVEMENT,
 	WALK_THRU_EVERYTHING);

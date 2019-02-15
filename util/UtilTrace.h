@@ -103,17 +103,13 @@ protected:
 
 class FilterSelf: public FilterSelfAndTarget {
 public:
-	FilterSelf(const IHandleEntity *passentity1,
-			const IHandleEntity *passentity2) :
-			FilterSelfAndTarget(passentity1, passentity2) {
+	FilterSelf(const IHandleEntity *passentity1) :
+			FilterSelfAndTarget(passentity1, nullptr) {
 	}
 
 	// It does have a base, but we'll never network anything below here..
 	bool ShouldHitEntity(IHandleEntity *pHandleEntity, int contentsMask) {
-		if (pHandleEntity == m_pPassEnt1) {
-			return false;
-		}
-		return pHandleEntity == m_pPassEnt2;
+		return pHandleEntity != m_pPassEnt1;
 	}
 };
 
@@ -147,8 +143,5 @@ void UTIL_TraceHull(const Vector &vecAbsStart,
 		bool draw = false);
 
 Vector UTIL_FindGround(const Vector& loc);
-
-bool UTIL_IsTargetHit(const Vector& start, const Vector& end, edict_t* self,
-		edict_t* target);
 
 #endif /* UTILS_VALVE_NAVMESH_UTIL_UTILTRACE_H_ */
