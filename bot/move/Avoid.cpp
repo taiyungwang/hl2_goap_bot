@@ -71,8 +71,7 @@ void Avoid::trace(CGameTrace& result, float dist) const {
 	heading.z += 5.0f;
 	heading -= pos;
 	extern ConVar mybot_debug;
-	edict_t* ground =
-			BasePlayer(self->getEdict()).getGroundEntity();
+	edict_t* ground = BasePlayer(self->getEdict()).getGroundEntity();
 	UTIL_TraceHull(pos,
 			pos + heading.Normalized() * min(heading.Length(), dist - 6.0f),
 			Vector(0.0f, -halfHull, 0.0f),
@@ -80,7 +79,7 @@ void Avoid::trace(CGameTrace& result, float dist) const {
 					self->getEyesPos().DistTo(pos)
 							+ (ctx.getGoal() - pos).Normalized().z * halfHull),
 							MASK_NPCSOLID_BRUSHONLY,
-							FilterSelfAndTarget(blackboard.getSelf()->getEdict()->GetIServerEntity(),
+							FilterSelfAndTarget(self->getEdict()->GetIServerEntity(),
 									ground == nullptr ? nullptr : ground->GetIServerEntity()),
 									&result, mybot_debug.GetBool());
 	edict_t* blocker =

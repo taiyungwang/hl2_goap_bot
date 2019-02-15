@@ -147,8 +147,9 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 }
 
 void Navigator::getNextArea() {
-	CNavArea* currentArea = getCurrentArea(
-			blackboard.getSelf()->getCurrentPosition());
+	const auto self = blackboard.getSelf();
+	auto loc = self->getCurrentPosition();
+	CNavArea* currentArea = getCurrentArea(loc);
 	bool canGetNextArea = path->Count() > 0 && !moveCtx->nextGoalIsLadderStart()
 			&& currentArea == path->Top();
 	if (canGetNextArea && path->Count() > 2) {
@@ -160,8 +161,7 @@ void Navigator::getNextArea() {
 	if (canGetNextArea) {
 		path->Pop();
 		if (path->Count() == 0) {
-			const Vector& loc = blackboard.getSelf()->getCurrentPosition();
-			const Vector& dir = finalGoal - loc;
+			const Vector dir = finalGoal - loc;
 			float dist = dir.Length() - targetRadius;
 			if (dist > 0.0f) {
 				Vector dest = dir.Normalized() * dist + loc;
@@ -190,7 +190,7 @@ void Navigator::getNextArea() {
 	extern ConVar mybot_debug;
 	if (mybot_debug.GetBool()) {
 		extern IVDebugOverlay *debugoverlay;
-		debugoverlay->AddLineOverlay(blackboard.getSelf()->getEyesPos(),
+		debugoverlay->AddLineOverlay(self->getEyesPos(),
 				finalGoal, 255, 255, 255, true,
 				NDEBUG_PERSIST_TILL_NEXT_SERVER);
 	}
