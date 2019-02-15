@@ -8,7 +8,6 @@
 #include <goap/action/DestroyObjectAction.h>
 #include <mods/dod/goap/action/CapturePointAction.h>
 #include <mods/dod/goap/action/DODBombTargetAction.h>
-#include <mods/dod/goap/action/DODDefendPointAction.h>
 #include <mods/dod/goap/action/DODDefuseBombAction.h>
 #include <mods/dod/goap/action/DODUseFragGrenadeAction.h>
 #include <mods/dod/weapon/DODSMGBuilder.h>
@@ -93,7 +92,6 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 	planner.addAction<DODBombTargetAction>(0.62f);
 	planner.addAction<DODDefuseBombAction>(0.63f);
 	planner.addAction<CapturePointAction>(0.61f);
-	planner.addAction<DODDefendPointAction>(0.6f);
 	planner.addAction<DODUseFragGrenadeAction>(0.92f);
 	planner.addAction<DODUseSmokeGrenadeAction>(0.91f);
 	planner.addAction<DODUseRifleGrenadeAction>(0.92f);
