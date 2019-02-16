@@ -10,6 +10,7 @@ class Player;
 class Planner;
 class WeaponBuilderFactory;
 class World;
+class HidingSpotSelector;
 struct edict_t;
 
 class BotBuilder: public ICommandCallback {
@@ -29,6 +30,12 @@ public:
 	}
 
 	void CommandCallback(const CCommand &command);
+
+	virtual void onNavMeshLoad();
+
+	HidingSpotSelector* getHidingSpotSelector() const {
+		return hidingSpotSelector;
+	}
 
 protected:
 	bool enableHook = false;
@@ -52,4 +59,6 @@ protected:
 
 private:
 	ConCommand* command;
+
+	HidingSpotSelector* hidingSpotSelector = nullptr;
 };

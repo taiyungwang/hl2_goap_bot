@@ -57,6 +57,11 @@ public:
 		return false;
 	}
 
+	/**
+	 * Called when an action is interrupted.
+	 */
+	virtual void abort() {
+	}
 protected:
 	Blackboard& blackboard;
 

@@ -4,6 +4,7 @@
 #include "Bot.h"
 #include "World.h"
 #include "VTableHook.h"
+#include "HidingSpotSelector.h"
 #include <move/Navigator.h>
 #include <goap/action/AttackAction.h>
 #include <goap/action/FindCoverAction.h>
@@ -19,6 +20,9 @@ BotBuilder::~BotBuilder() {
 	delete command;
 	if (enableHook) {
 		unhookPlayerRunCommand();
+	}
+	if (hidingSpotSelector != nullptr) {
+		delete hidingSpotSelector;
 	}
 }
 
@@ -42,6 +46,12 @@ void BotBuilder::CommandCallback(const CCommand &command) {
 	playerinfomanager->GetPlayerInfo(pEdict)->ChangeTeam(team);
 	modHandleCommand(command);
 }
+
+void BotBuilder::onNavMeshLoad() {
+	hidingSpotSelector = new HidingSpotSelector();
+	SnipeAction::setSpotSelector(hidingSpotSelector);
+}
+
 
 Bot* BotBuilder::build(const CUtlMap<int, Player*>& players,
 		edict_t* ent) const {

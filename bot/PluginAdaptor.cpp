@@ -68,6 +68,7 @@ void PluginAdaptor::gameFrame(bool simulating) {
 	}
 	if (!navMeshLoadAttempted) {
 		if (TheNavMesh->Load() == NAV_OK) {
+			botBuilder->onNavMeshLoad();
 			Msg("Loaded Navigation mesh.\n");
 		}
 		if (Q_stristr(modPath, "dod")) {

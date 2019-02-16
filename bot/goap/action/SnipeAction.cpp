@@ -3,12 +3,15 @@
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
+#include <player/HidingSpotSelector.h>
 #include <weapon/Weapon.h>
 #include <weapon/Deployer.h>
 #include <navmesh/nav_mesh.h>
 #include <util/UtilTrace.h>
 #include <vstdlib/random.h>
 #include <in_buttons.h>
+
+HidingSpotSelector* SnipeAction::selector = nullptr;
 
 SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 	effects = {WorldProp::ENEMY_SIGHTED, true};
@@ -20,38 +23,16 @@ bool SnipeAction::precondCheck() {
 	if (RandomInt(0, 1) == 0) {
 		return false;
 	}
-	extern CNavMesh* TheNavMesh;
-	NavAreaCollector collector;
-	targetLoc = blackboard.getSelf()->getCurrentPosition();
-	if (!TheNavMesh->ForAllAreasInRadius(collector, targetLoc, 5000.0f)) {
+	auto self = blackboard.getSelf();
+	int team = self->getTeam();
+	selectorId = selector->select(targetLoc, team);
+	if (selectorId < 0) {
 		return false;
 	}
-	CUtlVector<CNavArea*> hideAreas;
-	FOR_EACH_VEC(collector.m_area, i)
-	{
-		if (!(collector.m_area[i]->GetAttributes() & NAV_MESH_DONT_HIDE)
-				&& collector.m_area[i]->GetHidingSpots()->Count() > 0) {
-			hideAreas.AddToTail(collector.m_area[i]);
-		}
-	}
-	if (hideAreas.IsEmpty()) {
-		return false;
-	}
-	do {
-		int area = RandomInt(0, hideAreas.Count() - 1);
-		const auto& hidingSpots = *hideAreas[area]->GetHidingSpots();
-		int hideSpot = -1;
-		FOR_EACH_VEC(hidingSpots, i) {
-			hideSpot = i;
-			targetLoc = hidingSpots[i]->GetPosition();
-			break;
-		}
-		if (hideSpot > -1) {
-			GoToAction::precondCheck();
-		}
-		hideAreas.Remove(area);
-	} while (hideAreas.Count() > 0 && path.Count() <= 0);
+	GoToAction::precondCheck();
 	if (path.Count() == 0) {
+		// count unreachable spots as failures.
+		selector->update(selectorId, team, false);
 		return false;
 	}
 	Vector pos = targetLoc;
@@ -62,7 +43,7 @@ bool SnipeAction::precondCheck() {
 		Vector aim;
 		AngleVectors(angle, &aim);
 		trace_t result;
-		FilterSelf filter(blackboard.getSelf()->getEdict()->GetIServerEntity());
+		FilterSelf filter(self->getEdict()->GetIServerEntity());
 		UTIL_TraceLine(pos, pos + aim * 2000.0f,
 				CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_PLAYERCLIP,
 				NULL, COLLISION_GROUP_NONE, &result);
@@ -78,6 +59,8 @@ bool SnipeAction::precondCheck() {
 		}
 	}
 	if (furthest < 1000000.0) {
+		// count spots with short range as failures.
+		selector->update(selectorId, team, false);
 		return false;
 	}
 	duration = 300;
@@ -106,4 +89,29 @@ bool SnipeAction::execute() {
 	}
 	blackboard.lookStraight();
 	return deployed && --duration <= 0;
+}
+
+bool SnipeAction::postCondCheck() {
+	int team = blackboard.getSelf()->getTeam();
+	if (path.Count() == 0) {
+		// if we are at our location, and we didn't see an enemy, then count it as failure
+		selector->update(selectorId, team, 
+			blackboard.getTargetedPlayer() != nullptr);
+	}
+	selector->resetInUse(selectorId, team);
+	return true;
+}
+
+void SnipeAction::abort() {
+	auto self = blackboard.getSelf();
+	int team = self->getTeam();
+	selector->resetInUse(selectorId, team);
+	if (self->isDead()) {
+		// if we died, then it's probably not an ideal spot to try for.
+		selector->update(selectorId, team, false);
+	} else if (blackboard.getTargetedPlayer() != nullptr
+		&& path.Count() == 0) {
+		// if we see an enemy at our spot, then it's successful.
+		selector->update(selectorId, team, true);
+	}
 }

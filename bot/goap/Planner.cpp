@@ -25,6 +25,9 @@ Planner::~Planner() {
 void Planner::resetPlanning(bool force) {
 	if (force || state != State::ACTION || plan.IsEmpty()
 			|| actions[plan.Head()]->isInterruptable()) {
+		if (state == State::ACTION && !plan.IsEmpty()) {
+			actions[plan.Head()]->abort();
+		}
 		reset();
 	}
 }
