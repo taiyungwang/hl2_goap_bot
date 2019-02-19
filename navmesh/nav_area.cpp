@@ -155,7 +155,7 @@ ConVar nav_selected_set_border_color("nav_selected_set_border_color",
 
 float CountdownTimer::Now(void) const {
 	// work-around since client header doesn't like inlined gpGlobals->curtime
-	return playerinfomanager->GetGlobalVars()->curtime;
+	return gpGlobals->curtime;
 }
 
 void Extent::Init(edict_t *entity) {
@@ -300,7 +300,7 @@ CNavArea::CNavArea(unsigned int place) {
 
 //--------------------------------------------------------------------------------------------------------------
 inline void CNavArea::MarkAsDamaging(float duration) {
-	m_damagingTickCount = playerinfomanager->GetGlobalVars()->tickcount + TIME_TO_TICKS(duration);
+	m_damagingTickCount = gpGlobals->tickcount + TIME_TO_TICKS(duration);
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -1646,7 +1646,7 @@ public:
 		m_myZ = me->GetZ(pos);
 	}
 
-	bool operator()(CNavArea *area) {
+	bool operator()(CNavArea *area) const {
 		float theirZ = area->GetZ(m_pos);
 		// skip self
 		return area == m_me
@@ -3842,7 +3842,6 @@ void CNavArea::MarkAsBlocked(int teamID, edict_t* blocker,
 		wasBlocked |= m_isBlocked[teamIdx];
 		m_isBlocked[teamIdx] = true;
 	}
-	IPlayerInfo* player = playerinfomanager->GetPlayerInfo(blocker);
 	if (!wasBlocked) {
 		if (bGenerateEvent) {
 			IGameEvent * event = gameeventmanager->CreateEvent(
@@ -3857,7 +3856,7 @@ void CNavArea::MarkAsBlocked(int teamID, edict_t* blocker,
 		if (nav_debug_blocked.GetBool()) {
 			if (blocker) {
 				ConColorMsg(Color(0, 255, 128, 255), "%s %d blocked area %d\n",
-						player->GetName(), engine->IndexOfEdict(blocker),
+						blocker->GetClassName(), engine->IndexOfEdict(blocker),
 						GetID());
 			} else {
 				ConColorMsg(Color(0, 255, 128, 255),
@@ -3868,7 +3867,7 @@ void CNavArea::MarkAsBlocked(int teamID, edict_t* blocker,
 	} else if (nav_debug_blocked.GetBool()) {
 		if (blocker) {
 			ConColorMsg(Color(0, 255, 128, 255),
-					"DUPE: %s %d blocked area %d\n", player->GetName(),
+					"DUPE: %s %d blocked area %d\n", blocker->GetClassName(),
 					engine->IndexOfEdict(blocker), GetID());
 		} else {
 			ConColorMsg(Color(0, 255, 128, 255),
@@ -4524,9 +4523,7 @@ void CNavArea::ComputeVisibilityDelta(const IsFound& isFound,
 		if (m_potentiallyVisibleAreas[i].area) {
 			bool found = false;
 			// is my visible area also in adjacent area's vis list
-			for (int j = 0;
-					j < !found && other->m_potentiallyVisibleAreas.Count();
-					++j) {
+			for (int j = 0; !found && j < other->m_potentiallyVisibleAreas.Count();++j) {
 				found = isFound(m_potentiallyVisibleAreas[i],
 						other->m_potentiallyVisibleAreas[j]);
 			}
@@ -4809,12 +4806,11 @@ Vector CNavArea::GetRandomPoint(void) const {
 
 //--------------------------------------------------------------------------------------------------------------
 inline void CNavArea::SetClearedTimestamp(int teamID) {
-	m_clearedTimestamp[teamID % MAX_NAV_TEAMS] =
-			playerinfomanager->GetGlobalVars()->curtime;
+	m_clearedTimestamp[teamID % MAX_NAV_TEAMS] = gpGlobals->curtime;
 }
 
 //--------------------------------------------------------------------------------------------------------------
 inline bool CNavArea::IsDamaging(void) const {
-	return (playerinfomanager->GetGlobalVars()->tickcount <= m_damagingTickCount);
+	return gpGlobals->tickcount <= m_damagingTickCount;
 }
 
