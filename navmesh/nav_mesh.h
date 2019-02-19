@@ -24,8 +24,6 @@
 #include <generichash.h>
 #include <GameEventListener.h>
 
-class CBreakable;
-
 HidingSpot *GetHidingSpotByID( unsigned int id );
 //--------------------------------------------------------------------------------------------------------
 class NavAreaCollector
@@ -593,8 +591,7 @@ public:
 					// mark as visited
 					area->m_nearNavSearchMarker = searchMarker;
 					area->GetExtent( &areaExtent );
-					if ( extent.IsOverlapping( areaExtent )
-							&& !func( area )) {
+					if ( extent.IsOverlapping( areaExtent ) && !func( area )) {
 						return false;
 					}
 				}
@@ -1106,7 +1103,7 @@ private:
 
 	bool FindLadderCorners( Vector *c1, Vector *c2, Vector *c3 );	// computes the other corners of a ladder given m_ladderAnchor, m_editCursorPos, and m_ladderNormal
 
-	void GetEditVectors( Vector *pos, Vector *forward );		// Gets the eye position and view direction of the editing player
+	static void GetEditVectors( Vector *pos, Vector *forward );		// Gets the eye position and view direction of the editing player
 
 	CountdownTimer m_showAreaInfoTimer;							// Timer that controls how long area info is displayed
 	
