@@ -1,7 +1,6 @@
 #include "HidingSpotSelector.h"
 
 #include <navmesh/nav_area.h>
-#include <util/beta_distribution.h>
 
 HidingSpotSelector::HidingSpotSelector() {
 	extern NavAreaVector TheNavAreas;
@@ -15,14 +14,14 @@ HidingSpotSelector::HidingSpotSelector() {
 }
 
 int HidingSpotSelector::select(Vector& pos, int team) {
-	std::random_device rd;
-	std::mt19937 gen(rd());
 	float max = 0.0f;
 	int selected = -1;
 	int scoreIdx = team > 1 ? team - 2 : 0;
 	FOR_EACH_VEC(spots, i) {
 		const auto& score = spots[i].score[scoreIdx];
-		float sample = beta_distribution<>(score.success, score.fail)(gen);
+		// Beta sampling.
+		float sample = tgammaf(score.success);
+		sample /= sample + tgammaf(score.fail);
 		if (sample > max && !score.inUse) {
 			selected = i;
 			max = sample;
