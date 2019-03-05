@@ -3,7 +3,6 @@
 #include <mods/dod/util/DODObjectiveResource.h>
 #include <mods/dod/util/DodPlayer.h>
 #include <player/Blackboard.h>
-#include <player/PlayerManager.h>
 #include <player/Bot.h>
 #include <navmesh/nav.h>
 #include <util/UtilTrace.h>
