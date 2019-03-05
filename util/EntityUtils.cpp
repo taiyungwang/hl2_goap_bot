@@ -122,10 +122,7 @@ FORCEINLINE bool NamesMatch(const char *pszQuery, string_t nameToMatch) {
 bool FClassnameIs(edict_t *pEntity, const char *szClassname) {
 	Assert(pEntity);
 	castable_string_t className(pEntity->GetClassName());
-	if (IDENT_STRINGS(className, szClassname)) {
-		return true;
-	}
-	return NamesMatch(szClassname, className);
+	return IDENT_STRINGS(className, szClassname) || NamesMatch(szClassname, className);
 }
 
 bool isBreakable(edict_t* target) {
@@ -155,10 +152,10 @@ bool IsEntityWalkable(edict_t *entity, unsigned int flags) {
 		}
 #endif // _DEBUG
 
-		return (flags & WALK_THRU_FUNC_DOORS) ? true : false;
+		return (flags & WALK_THRU_FUNC_DOORS);
 	}
 	if (FClassnameIs(entity, "prop_door*")) {
-		return (flags & WALK_THRU_PROP_DOORS) ? true : false;
+		return (flags & WALK_THRU_PROP_DOORS);
 	}
 	extern EntityClassManager *classManager;
 	// if we hit a clip brush, ignore it if it is not BRUSHSOLID_ALWAYS
