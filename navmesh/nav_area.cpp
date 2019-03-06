@@ -1398,79 +1398,93 @@ bool CNavArea::SpliceEdit(CNavArea *other)
 {
 	Vector nw, ne, se, sw;
 	CNavArea *start = this,
-		*end = other;
+			*end = other;
 	NavDirType dir = NUM_DIRECTIONS;
 	if (m_nwCorner.x > other->m_seCorner.x)
 	{
 		// 'this' is east of 'other'
-		start = other;
-		end = this;
 		dir = WEST;
 	}
 	else if (m_seCorner.x < other->m_nwCorner.x)
 	{
 		// 'this' is west of 'other'
 		dir = EAST;
+		start = other;
+		end = this;
 	}
-	if (dir != NUM_DIRECTIONS) 
-	{
+	if (dir != NUM_DIRECTIONS) {
 		nw.x = end->m_seCorner.x;
-		nw.y = MAX(m_nwCorner.y, other->m_nwCorner.y);
-		se.x = end->m_nwCorner.x;
-		se.y = MIN(m_seCorner.y, other->m_seCorner.y);
-		ne.z = end->GetZ(ne);
-		sw.z = start->GetZ(sw);
-	} 
-	else {
-		// 'this' overlaps in X
+		nw.y = MAX( m_nwCorner.y, other->m_nwCorner.y );
+		nw.z = end->GetZ( nw );
+
+		se.x = start->m_nwCorner.x;
+		se.y = MIN( m_seCorner.y, other->m_seCorner.y );
+		se.z = start->GetZ( se );
+
+		ne.x = se.x;
+		ne.y = nw.y;
+		ne.z = start->GetZ( ne );
+
+		sw.x = nw.x;
+		sw.y = se.y;
+		sw.z = end->GetZ( sw );
+	} else	// 'this' overlaps in X
+	{
 		if (m_nwCorner.y > other->m_seCorner.y)
 		{
 			// 'this' is south of 'other'
 			dir = NORTH;
-			start = other;
-			end = this;
 		}
 		else if (m_seCorner.y < other->m_nwCorner.y)
 		{
+			// 'this' is north of 'other'
 			dir = SOUTH;
+			start = other;
+			end = this;
 		}
-		else {
+		if (dir != NUM_DIRECTIONS) {
+			nw.x = MAX( m_nwCorner.x, other->m_nwCorner.x );
+			nw.y = end->m_seCorner.y;
+			nw.z = end->GetZ( nw );
+
+			se.x = MIN( m_seCorner.x, other->m_seCorner.x );
+			se.y = start->m_nwCorner.y;
+			se.z = start->GetZ( se );
+
+			ne.x = se.x;
+			ne.y = nw.y;
+			ne.z = end->GetZ( ne );
+
+			sw.x = nw.x;
+			sw.y = se.y;
+			sw.z = start->GetZ( sw );
+		} else
+		{
 			// areas overlap
 			return false;
 		}
-		nw.x = MAX(m_nwCorner.x, other->m_nwCorner.x);
-		nw.y = start->m_seCorner.y;
-		se.x = MIN(m_seCorner.x, other->m_seCorner.x);
-		se.y = end->m_nwCorner.y;
-		ne.z = start->GetZ(ne);
-		sw.z = end->GetZ(sw);
 	}
-	nw.z = start->GetZ(nw);
-	se.z = end->GetZ(se);
-	ne.x = se.x;
-	ne.y = nw.y;
-	sw.x = nw.x;
-	sw.y = se.y;	
-	CNavArea* newArea = TheNavMesh->CreateArea();
+	CNavArea *newArea = TheNavMesh->CreateArea();
 	if (newArea == NULL)
 	{
-		Warning("SpliceEdit: Out of memory.\n");
+		Warning( "SpliceEdit: Out of memory.\n" );
 		return false;
 	}
 
-	newArea->Build(nw, ne, se, sw);
+	newArea->Build( nw, ne, se, sw );
 
-	this->ConnectTo(newArea, dir);
-	newArea->ConnectTo(this, OppositeDirection(dir));
+	this->ConnectTo( newArea, dir );
+	newArea->ConnectTo( this, OppositeDirection(dir) );
 
-	other->ConnectTo(newArea, OppositeDirection(dir));
-	newArea->ConnectTo(other, dir);
-	newArea->InheritAttributes(this, other);
+	other->ConnectTo( newArea, OppositeDirection(dir) );
+	newArea->ConnectTo( other, dir );
 
-	TheNavAreas.AddToTail(newArea);
-	TheNavMesh->AddNavArea(newArea);
+	newArea->InheritAttributes( this, other );
 
-	TheNavMesh->OnEditCreateNotify(newArea);
+	TheNavAreas.AddToTail( newArea );
+	TheNavMesh->AddNavArea( newArea );
+
+	TheNavMesh->OnEditCreateNotify( newArea );
 
 	return true;
 }
