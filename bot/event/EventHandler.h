@@ -6,16 +6,11 @@ class EventInfo;
 class CUtlString;
 class EventHandler;
 
-typedef CUtlLinkedList<EventHandler*> EventListeners;
 
 class EventHandler {
 public:
 
 	static void notifyListeners(EventInfo* event);
-
-	static void resetHandlers() {
-		listeners.RemoveAll();
-	}
 
 	EventHandler() {
 		listeners.AddToTail(this);
@@ -30,6 +25,8 @@ public:
 	 */
 	virtual bool handle(EventInfo* event) = 0;
 private:
+	typedef CUtlLinkedList<EventHandler*> EventListeners;
+
 	static EventListeners listeners;
 };
 

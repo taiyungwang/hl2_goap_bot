@@ -1,12 +1,12 @@
 #include "PluginAdaptor.h"
 
-#include "event/EventHandler.h"
 #include "event/EventInfo.h"
 #include "mods/hl2dm/player/HL2DMBotBuilder.h"
 #include "mods/dod/player/DODBotBuilder.h"
 #include "player/PlayerManager.h"
 #include "util/EntityClassManager.h"
-#include "navmesh/nav_mesh.h"
+#include "util/BaseEntity.h"
+#include "navmesh/nav_entities.h"
 
 #include <eiface.h>
 #include <iplayerinfo.h>
@@ -22,7 +22,10 @@ bool navMeshLoadAttempted;
 ConVar mybot_debug("my_bot_debug", "0");
 ConVar mybot_var("mybot_var", "0.5");
 
+CUtlVector<NavEntity*> blockers;
+
 extern IPlayerInfoManager *playerinfomanager;
+extern IVEngineServer* engine;
 
 PluginAdaptor::PluginAdaptor() {
 	// TODO: consider moving constructor initializations into init callback.
@@ -31,7 +34,6 @@ PluginAdaptor::PluginAdaptor() {
 	gpGlobals = playerinfomanager->GetGlobalVars();
 	TheNavMesh = new CNavMesh;
 	playerManager = nullptr;
-	extern IVEngineServer* engine;
 	engine->GetGameDir(modPath, 256);
 	// TODO: make mod checking more stringent.
 	if (Q_stristr(modPath, "hl2mp")) {
@@ -46,7 +48,6 @@ PluginAdaptor::PluginAdaptor() {
 }
 
 PluginAdaptor::~PluginAdaptor() {
-	EventHandler::resetHandlers();
 	delete TheNavMesh;
 	TheNavMesh = nullptr;
 	delete classManager;
@@ -70,6 +71,13 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		if (TheNavMesh->Load() == NAV_OK) {
 			botBuilder->onNavMeshLoad();
 			Msg("Loaded Navigation mesh.\n");
+			for (int i = gpGlobals->maxClients; i < gpGlobals->maxEntities; i++) {
+				edict_t* ent = engine->PEntityOfEntIndex(i);
+				if (ent != nullptr && !ent->IsFree() && ent->GetIServerEntity() != nullptr
+						&& Q_strcmp("prop_dynamic", ent->GetClassName()) == 0) {
+					blockers.AddToTail(new CFuncNavBlocker(ent));
+				}
+			}
 		}
 		if (Q_stristr(modPath, "dod")) {
 			TheNavMesh->SetPlayerSpawnName("info_player_axis");
@@ -80,6 +88,13 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		navMeshLoadAttempted = true;
 	}
 	if (TheNavMesh != nullptr) {
+		FOR_EACH_VEC(blockers, i) {
+			if (!BaseEntity(blockers[i]->getEntity()).isDestroyedOrUsed()) {
+				blockers[i]->InputEnable();
+			} else {
+				blockers[i]->InputDisable();
+			}
+		}
 		TheNavMesh->Update();
 	}
 	FOR_EACH_LL(thinkers, i)
@@ -106,6 +121,7 @@ void PluginAdaptor::levelShutdown() {
 		delete playerManager;
 		playerManager = nullptr;
 	}
+	blockers.Purge();
 }
 
 template
@@ -120,3 +136,10 @@ void PluginAdaptor::handEvent(T* event) {
 	EventHandler::notifyListeners(dynamic_cast<EventInfo*>(&wrapper));
 }
 
+bool PluginAdaptor::handle(EventInfo* event) {
+	if (Q_strcmp("nav_generate", event->getName()) == 0) {
+		blockers.Purge();
+		return true;
+	}
+	return false;
+}

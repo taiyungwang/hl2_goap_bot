@@ -15,6 +15,8 @@
 
 extern CNavMesh* TheNavMesh;
 
+extern ConVar mybot_debug;
+
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
 	moveCtx = new MoveStateContext(blackboard);
@@ -120,8 +122,8 @@ CNavArea* Navigator::getCurrentArea(const Vector& pos) {
 bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	const Player* self = blackboard.getSelf();
 	CNavArea* area = TheNavMesh->GetNavArea(targetLoc);
-	if (area == nullptr) {
-		area = TheNavMesh->GetNearestNavArea(targetLoc, 1000.0f, false, false);
+	if (area == nullptr || area->IsBlocked(self->getTeam())) {
+		area = TheNavMesh->GetNearestNavArea(targetLoc, 1000.0f, true, false);
 		if (area == nullptr) {
 			return false;
 		}
@@ -133,7 +135,9 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	}
 	if (!NavAreaBuildPath(startArea, path.Top(), nullptr,
 			ShortestPathCost(self->getTeam()))) {
-		path.Top()->Draw();
+		if (mybot_debug.GetBool()) {
+			path.Top()->Draw();
+		}
 		Warning("Could not reach area %d.\n", path.Top()->GetID());
 		path.Pop();
 		return false;
@@ -187,7 +191,6 @@ void Navigator::getNextArea() {
 			}
 		}
 	}
-	extern ConVar mybot_debug;
 	if (mybot_debug.GetBool()) {
 		extern IVDebugOverlay *debugoverlay;
 		debugoverlay->AddLineOverlay(self->getEyesPos(),

@@ -2,7 +2,7 @@
 
 #include <utlstring.h>
 
-EventListeners EventHandler::listeners;
+EventHandler::EventListeners EventHandler::listeners;
 
 EventHandler::~EventHandler() {
 	FOR_EACH_LL(listeners, i)

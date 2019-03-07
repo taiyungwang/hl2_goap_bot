@@ -1,6 +1,6 @@
 #pragma once
 
-#include <utllinkedlist.h>
+#include "event/EventHandler.h"
 
 class Thinker;
 class BotBuilder;
@@ -9,7 +9,7 @@ struct edict_t;
 /**
  * Allows the use of either the VSDK Plugin or MetaMod Plugin.
  */
-class PluginAdaptor {
+class PluginAdaptor : public EventHandler {
 public:
 
 	PluginAdaptor();
@@ -34,6 +34,8 @@ public:
 
 	template<typename T>
 	void handEvent(T* event);
+
+	bool handle(EventInfo* event);
 
 private:
 	BotBuilder* botBuilder;
