@@ -4515,8 +4515,8 @@ const CNavArea::CAreaBindInfoArray &CNavArea::ComputeVisibilityDelta(
 					const CNavArea::AreaBindInfo& otherInfo) -> bool {
 					return isAreaInBoth(thisInfo, otherInfo)
 							&& thisInfo.attributes == otherInfo.attributes;
-					}, addToDelta,
-			delta, other);
+					},
+					addToDelta, delta, other);
 	// add explicit NOT_VISIBLE references to areas in 'others' list that are NOT in mine
 	other->ComputeVisibilityDelta(isAreaInBoth,
 			[](CUtlVectorConservative<CNavArea::AreaBindInfo>& delta,
@@ -4525,7 +4525,8 @@ const CNavArea::CAreaBindInfoArray &CNavArea::ComputeVisibilityDelta(
 				info.area = thisInfo.area;
 				info.attributes = CNavArea::NOT_VISIBLE;
 				addToDelta(delta, info);
-	}, delta, this);
+	},
+	delta, this);
 	return delta;
 }
 
@@ -4541,7 +4542,7 @@ void CNavArea::ComputeVisibilityDelta(const IsFound& isFound,
 				found = isFound(m_potentiallyVisibleAreas[i],
 						other->m_potentiallyVisibleAreas[j]);
 			}
-			if (found) {
+			if (!found) {
 				updateDelta(delta, m_potentiallyVisibleAreas[i]);
 			}
 		}
