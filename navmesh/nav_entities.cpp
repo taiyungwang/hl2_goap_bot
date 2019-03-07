@@ -12,6 +12,7 @@
 #include "nav_entities.h"
 
 #include <util/UtilTrace.h>
+#include <util/BaseEntity.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
 #include <collisionutils.h>
@@ -33,19 +34,9 @@ CountdownTimer CFuncNavCost::gm_dirtyTimer;
 
 #define UPDATE_DIRTY_TIME 0.2f
 
-void CFuncNavCost::SetCollisionGroup( int collisionGroup )
-{
-	if ( (int)m_CollisionGroup != collisionGroup )
-	{
-		m_CollisionGroup = collisionGroup;
-		// TODO: CollisionRulesChanged();
-	}
-}
-
 //--------------------------------------------------------------------------------------------------------
-CFuncNavCost::CFuncNavCost( edict_t* pEnt ): NavEntity(pEnt)
+CFuncNavCost::CFuncNavCost( edict_t* pEnt ): NavEntity(pEnt), m_isDisabled(true)
 {
-
 	gm_masterCostVector.AddToTail( this );
 	gm_dirtyTimer.Start( UPDATE_DIRTY_TIME );
 /**TODO
@@ -436,7 +427,8 @@ void CFuncNavBlocker::UpdateOnRemove( void )
 }
 
 //--------------------------------------------------------------------------------------------------------
-CFuncNavBlocker::CFuncNavBlocker( edict_t* pEnt ) : NavEntity(pEnt)
+CFuncNavBlocker::CFuncNavBlocker( edict_t* pEnt ) : NavEntity(pEnt),
+		m_bDisabled(false), m_blockedTeamNumber(BaseEntity(pEnt).getTeam())
 {
 	gm_NavBlockers.AddToTail( this );
 
@@ -501,7 +493,7 @@ void CFuncNavBlocker::setBlockedTeam(bool block) {
 // functor that blocks areas in our extent
 bool CFuncNavBlocker::operator()( CNavArea *area ) const
 {
-	area->MarkAsBlocked( m_blockedTeamNumber, this->pEnt, false );
+	area->MarkAsBlocked( m_blockedTeamNumber, pEnt, false );
 	return true;
 }
 

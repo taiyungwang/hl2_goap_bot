@@ -23,6 +23,9 @@ public:
 	NavEntity(edict_t* pEnt) : pEnt(pEnt) {
 	}
 
+	virtual ~NavEntity() {
+	}
+
 	virtual void InputEnable() = 0;
 
 	virtual void InputDisable() = 0;
@@ -65,13 +68,10 @@ protected:
 	bool m_isDisabled;
 	string_t m_iszTags;
 
-	int m_CollisionGroup;
-
 	static CUtlVector< CHandle< CFuncNavCost > > gm_masterCostVector;
 	static CountdownTimer gm_dirtyTimer;
 	void UpdateAllNavCostDecoration( CNavMesh* TheNavMesh );
 
-	void SetCollisionGroup( int collisionGroup );
 
 	CUtlVector< CFmtStr > m_tags;
 	bool HasTag( const char *groupname ) const;
