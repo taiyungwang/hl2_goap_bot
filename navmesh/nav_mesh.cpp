@@ -15,6 +15,7 @@
 #include "nav_area.h"
 #include "nav_node.h"
 #include <util/EntityUtils.h>
+#include <util/BaseEntity.h>
 #include <util/UtilTrace.h>
 #include <ivdebugoverlay.h>
 #include <eiface.h>
@@ -731,21 +732,19 @@ CNavArea *CNavMesh::GetNavArea( edict_t *pEntity, int nFlags, float flBeneathLim
 	if ( !m_grid.Count() )
 		return NULL;
 
-	IPlayerInfo *pBCC = playerinfomanager->GetPlayerInfo(pEntity);
-	if (pBCC == nullptr) {
-		return nullptr;
-	}
-	Vector testPos = pBCC->GetAbsOrigin();
-
+	Vector testPos = pEntity->GetCollideable()->GetCollisionOrigin();
 	float flStepHeight = 1e-3;
+	IPlayerInfo *pBCC = playerinfomanager->GetPlayerInfo(pEntity);
 	// Check if we're still in the last area
-	if (pLastNavArea && pLastNavArea->IsOverlapping(testPos)) {
-		float flZ = pLastNavArea->GetZ(testPos);
-		if ((flZ <= testPos.z + StepHeight)
-				&& (flZ >= testPos.z - StepHeight))
-			return pLastNavArea;
+	if (pBCC != nullptr) {
+		if (pLastNavArea && pLastNavArea->IsOverlapping(testPos)) {
+			float flZ = pLastNavArea->GetZ(testPos);
+			if ((flZ <= testPos.z + StepHeight)
+					&& (flZ >= testPos.z - StepHeight))
+				return pLastNavArea;
+		}
+		flStepHeight = StepHeight;
 	}
-	flStepHeight = StepHeight;
 
 	// get list in cell that contains position
 	int x = WorldToGridX( testPos.x );
@@ -764,7 +763,7 @@ CNavArea *CNavMesh::GetNavArea( edict_t *pEntity, int nFlags, float flBeneathLim
 		// check if position is within 2D boundaries of this area
 		if (!pArea->IsOverlapping(testPos)
 		// don't consider blocked areas
-				|| (bSkipBlockedAreas && pArea->IsBlocked(pBCC->GetTeamIndex()))
+				|| (bSkipBlockedAreas && pArea->IsBlocked(BaseEntity(pEntity).getTeam()))
 				// project position onto area to get Z
 				// if area is above us, skip it
 				|| z > testPos.z + flStepHeight
@@ -958,7 +957,7 @@ CNavArea *CNavMesh::GetNearestNavArea( const Vector &pos, float maxDist, bool ch
 // Used to find initial area if we start off of the mesh.
 // @todo Make sure area is not on the other side of the wall from goal.
 //----------------------------------------------------------------------------
-CNavArea *CNavMesh::GetNearestNavArea( edict_t *pEntity, int nFlags, float maxDist ) const
+CNavArea *CNavMesh::GetNearestNavArea( edict_t *pEntity, int nFlags, float maxDist, CNavArea* pLastNavArea) const
 {
 	VPROF( "CNavMesh::GetNearestNavArea [ent]" );
 
@@ -966,16 +965,12 @@ CNavArea *CNavMesh::GetNearestNavArea( edict_t *pEntity, int nFlags, float maxDi
 		return NULL;
 
 	// quick check
-	CNavArea *pClose = GetNavArea( pEntity, nFlags );
+	CNavArea *pClose = GetNavArea( pEntity, nFlags, maxDist, pLastNavArea );
 	if ( pClose )
 		return pClose;
-	IPlayerInfo *player = playerinfomanager->GetPlayerInfo(pEntity);
-	if (player == nullptr) {
-		return nullptr;
-	}
-	return GetNearestNavArea(player->GetAbsOrigin(), maxDist,
+	return GetNearestNavArea(pEntity->GetCollideable()->GetCollisionOrigin(), maxDist,
 			(nFlags & GETNAVAREA_CHECK_LOS) != 0,
-			(nFlags & GETNAVAREA_CHECK_GROUND) != 0, player->GetTeamIndex());
+			(nFlags & GETNAVAREA_CHECK_GROUND) != 0, BaseEntity(pEntity).getTeam());
 }
 
 
