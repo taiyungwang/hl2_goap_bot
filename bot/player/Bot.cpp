@@ -19,7 +19,7 @@ PlayerClasses Bot::CLASSES = nullptr;
 ConVar mybot_rot_speed("mybot_rot_speed", "8", 0, "determines rotational acceleration rate in degrees");
 
 Bot::Bot(edict_t* ent) :
-		EventHandler(), Player(ent) {
+		Player(ent) {
 	extern IPlayerInfoManager *playerinfomanager;
 }
 

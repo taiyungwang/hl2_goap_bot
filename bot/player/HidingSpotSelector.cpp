@@ -19,10 +19,13 @@ int HidingSpotSelector::select(Vector& pos, int team) {
 	int scoreIdx = team > 1 ? team - 2 : 0;
 	FOR_EACH_VEC(spots, i) {
 		const auto& score = spots[i].score[scoreIdx];
+		if (score.inUse) {
+			continue;
+		}
 		// Beta sampling.
 		float sample = tgammaf(score.success);
 		sample /= sample + tgammaf(score.fail);
-		if (sample > max && !score.inUse) {
+		if (sample > max) {
 			selected = i;
 			max = sample;
 			pos = spots[i].pos;

@@ -37,8 +37,7 @@ static const char* CLASSES[2][CLASS_COUNT] {
 	{ "cls_mk98", "cls_mp40", "cls_mp44", "cls_k98s", "cls_mg42", "cls_pschreck"}
 };
 
-DODBotBuilder::DODBotBuilder() :
-		EventHandler() {
+DODBotBuilder::DODBotBuilder() {
 	Bot::setClasses(&CLASSES);
 	extern EntityClassManager *classManager;
 }

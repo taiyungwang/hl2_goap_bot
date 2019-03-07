@@ -6,7 +6,7 @@
 class DODWorld: public World, public EventHandler {
 public:
 	DODWorld(bool roundStarted) :
-			World(roundStarted), EventHandler() {
+			World(roundStarted) {
 	}
 
 	bool handle(EventInfo* event);
