@@ -15,6 +15,7 @@ HidingSpotSelector* SnipeAction::selector = nullptr;
 
 SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 	effects = {WorldProp::ENEMY_SIGHTED, true};
+	targetRadius = 0.0f;
 }
 
 bool SnipeAction::precondCheck() {
@@ -69,22 +70,20 @@ bool SnipeAction::precondCheck() {
 
 bool SnipeAction::execute() {
 	if (!GoToAction::postCondCheck() && !GoToAction::execute()) {
-		if (path.Count() == 1) {
-			QAngle angle(0.0f, facing, 0.0f);
-			Vector aim;
-			AngleVectors(angle, &aim);
-			blackboard.setViewTarget(aim);
-		}
 		return false;
 	}
 	if (!GoToAction::postCondCheck()) {
 		return true;
 	}
+	QAngle angle(0.0f, facing, 0.0f);
+	Vector aim;
+	AngleVectors(angle, &aim);
+	blackboard.setViewTarget(aim * 100.0f + blackboard.getSelf()->getCurrentPosition());
 	Deployer* deployer = blackboard.getArmory().getCurrWeapon()->getDeployer();
 	if (deployer == nullptr) {
 		blackboard.getButtons().hold(IN_DUCK);
 		deployed = true;
-	} else if (!deployed && blackboard.getAimAccuracy(blackboard.getViewTarget()) > 0.9f) {
+	} else if (!deployed && blackboard.getAimAccuracy(blackboard.getViewTarget()) > 0.8f) {
 		deployed = deployer->execute(blackboard);
 	}
 	blackboard.lookStraight();
