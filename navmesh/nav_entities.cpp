@@ -12,7 +12,6 @@
 #include "nav_entities.h"
 
 #include <util/UtilTrace.h>
-#include <util/BaseEntity.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
 #include <collisionutils.h>
@@ -35,7 +34,8 @@ CountdownTimer CFuncNavCost::gm_dirtyTimer;
 #define UPDATE_DIRTY_TIME 0.2f
 
 //--------------------------------------------------------------------------------------------------------
-CFuncNavCost::CFuncNavCost( edict_t* pEnt ): NavEntity(pEnt), m_isDisabled(true)
+CFuncNavCost::CFuncNavCost( edict_t* pEnt ): NavEntity(pEnt), m_isDisabled(true),
+		m_team(0)
 {
 	gm_masterCostVector.AddToTail( this );
 	gm_dirtyTimer.Start( UPDATE_DIRTY_TIME );
@@ -428,7 +428,7 @@ void CFuncNavBlocker::UpdateOnRemove( void )
 
 //--------------------------------------------------------------------------------------------------------
 CFuncNavBlocker::CFuncNavBlocker( edict_t* pEnt ) : NavEntity(pEnt),
-		m_bDisabled(false), m_blockedTeamNumber(BaseEntity(pEnt).getTeam())
+		m_bDisabled(false), m_blockedTeamNumber(0)
 {
 	gm_NavBlockers.AddToTail( this );
 

@@ -121,6 +121,10 @@ public:
 		UnblockNav();
 	}
 
+	void setBlockedTeam(int team) {
+		m_blockedTeamNumber = team;
+	}
+
 	bool IsBlockingNav( int teamNumber ) const;
 
 	int DrawDebugTextOverlays( void );
