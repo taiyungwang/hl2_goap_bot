@@ -48,6 +48,9 @@ bool DestroyObjectAction::execute() {
 	const Player* self = blackboard.getSelf();
 	edict_t* selfEnt = self->getEdict();
 	edict_t* targetEnt = getTargetedEdict();
+	if (targetEnt == nullptr || targetEnt->IsFree()) {
+		return true;
+	}
 	Vector targetLoc = blackboard.getViewTarget();
 	Vector eyes = self->getEyesPos();
 	float dist = targetLoc.DistTo(self->getCurrentPosition());
@@ -89,14 +92,12 @@ bool DestroyObjectAction::execute() {
 	if (fabs(blackboard.getAimAccuracy(targetLoc))
 			> 1.0f - (weapFunc->isMelee() ? 30.0f : 10.0f) / max(dist, 0.1f)) {
 		if (!UTIL_IsVisible(targetLoc, blackboard, targetEnt)
-				|| weapFunc->getRange()[0] > dist) {
+				|| (weapFunc->isMelee() && dist > 10.0f)) {
 			if (!crouch) {
 				// try crouching
 				crouch = true;
 				return false;
 			}
-			// target blocked.
-			return true;
 		}
 		weapFunc->attack(buttons, dist);
 	}
