@@ -30,7 +30,8 @@ bool Navigator::step() {
 	if (!checkCanMove()) {
 		return false;
 	}
-	CNavArea* currentArea = getCurrentArea(blackboard.getSelf()->getCurrentPosition());
+	const Player* self = blackboard.getSelf();
+	CNavArea* currentArea = getCurrentArea(self->getCurrentPosition());
 	if (path->Count() > 0
 			&& currentArea != path->Top() && moveCtx->isStuck()) {
 		if (!buildPath(finalGoal, *path)) {
@@ -49,7 +50,6 @@ bool Navigator::step() {
 			&& blackboard.getTargetedPlayer() == nullptr
 			&& !moveCtx->nextGoalIsLadderStart() && !blackboard.isOnLadder()) {
 		// look at the farthest visible area.
-		const Player* self = blackboard.getSelf();
 		Vector eyePos = self->getEyesPos();
 		for (int i = 0; i < path->Count(); i++) {
 			Vector targetView = path->Element(i)->GetCenter();
@@ -75,7 +75,8 @@ void Navigator::start(CUtlStack<CNavArea*>* path, const Vector& goal, float targ
 	moveCtx->stop();
 	if (path->Count() > 0) {
 		moveCtx->setGoal(path->Top()->GetCenter());
-		startArea = nullptr;
+	} else {
+		Msg("No path available.\n");
 	}
 }
 
@@ -120,6 +121,7 @@ CNavArea* Navigator::getCurrentArea(const Vector& pos) {
 }
 
 bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
+	path.Clear();
 	const Player* self = blackboard.getSelf();
 	CNavArea* area = TheNavMesh->GetNavArea(targetLoc);
 	if (area == nullptr || area->IsBlocked(self->getTeam())) {
@@ -128,11 +130,12 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 			return false;
 		}
 	}
-	path.Clear();
 	path.Push(area);
+	CNavArea* startArea = blackboard.getStartArea();
 	if (startArea == nullptr) {
 		startArea = getArea(self->getEdict());
 	}
+	blackboard.setStartArea(nullptr);
 	if (!NavAreaBuildPath(startArea, path.Top(), nullptr,
 			ShortestPathCost(self->getTeam()))) {
 		if (mybot_debug.GetBool()) {
@@ -146,7 +149,6 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 			area != startArea && area != nullptr; area = area->GetParent()) {
 		path.Push(area);
 	}
-	startArea = area;
 	return true;
 }
 

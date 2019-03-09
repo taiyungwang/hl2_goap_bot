@@ -88,6 +88,14 @@ public:
 
 	void lookStraight();
 
+	void setStartArea(CNavArea* startArea) {
+		this->startArea = startArea;
+	}
+
+	CNavArea* getStartArea() const {
+		return startArea;
+	}
+
 private:
 	const Bot* self;
 
@@ -110,4 +118,7 @@ private:
 	Buttons buttons;
 
 	EntityInstance* entInstance;
+
+	// Used to track start areas for chained GoToActions.
+	CNavArea* startArea = nullptr;
 };

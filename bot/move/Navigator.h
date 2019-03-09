@@ -31,7 +31,7 @@ public:
 
 	bool reachedGoal() const;
 
-	void start(CUtlStack<CNavArea*>* path, const Vector& goal, 	float targetRadius);
+	void start(CUtlStack<CNavArea*>* path, const Vector& goal, float targetRadius);
 
 	bool buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path);
 
@@ -50,9 +50,6 @@ private:
 	MoveStateContext* moveCtx;
 
 	float targetRadius = 25.0f;
-
-	// Used to track start areas for chained GoToActions.
-	CNavArea* startArea = nullptr;
 
 	/**
 	 * Gets the next target area.
