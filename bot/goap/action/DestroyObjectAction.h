@@ -25,7 +25,7 @@ public:
 
 protected:
 
-
+	bool adjustAim = true;
 
 	virtual edict_t* getTargetedEdict() const;
 

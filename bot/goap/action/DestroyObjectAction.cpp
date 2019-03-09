@@ -35,6 +35,7 @@ bool DestroyObjectAction::precondCheck() {
 		return false;
 	}
 	const char* className = blocker->GetClassName();
+	adjustAim = true;
 	return Q_stristr(className, "breakable") != nullptr
 			|| Q_strcmp(className, "player") == 0
 			|| isBreakable(blocker);
@@ -64,7 +65,10 @@ bool DestroyObjectAction::execute() {
 	if (weapFunc->isExplosive()) {
 		targetLoc = targetEnt->GetCollideable()->GetCollisionOrigin();
 	}
-	targetLoc = weapFunc->getAim(targetLoc, eyes);
+	if (adjustAim) {
+		targetLoc = weapFunc->getAim(targetLoc, eyes);
+		adjustAim = false;
+	}
 	if ((!weapFunc->isMelee() && weapFunc->getClip() != -1
 			&& weapFunc->getClip() < 1) || !weapFunc->isInRange(dist)) {
 		return true;
@@ -92,7 +96,7 @@ bool DestroyObjectAction::execute() {
 	if (fabs(blackboard.getAimAccuracy(targetLoc))
 			> 1.0f - (weapFunc->isMelee() ? 30.0f : 10.0f) / max(dist, 0.1f)) {
 		if (!UTIL_IsVisible(targetLoc, blackboard, targetEnt)
-				|| (weapFunc->isMelee() && dist > 10.0f)) {
+				|| (weapFunc->isMelee() && eyes.z - targetLoc.z > 20.0f)) {
 			if (!crouch) {
 				// try crouching
 				crouch = true;
