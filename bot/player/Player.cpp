@@ -1,6 +1,5 @@
 #include "Player.h"
 
-#include <util/BaseEntity.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
 
@@ -17,7 +16,7 @@ const char* Player::getName() const {
 }
 
 int Player::getTeam() const {
-	return BaseEntity(ent).getTeam();
+	return info->GetTeamIndex();
 }
 
 Vector Player::getCurrentPosition() const {

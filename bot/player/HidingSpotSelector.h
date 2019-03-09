@@ -30,8 +30,7 @@ private:
 			bool inUse = false;
 			float success = 0.01f,
 				fail = 0.01f;
-		};
-		Team score[2];
+		} score[2];
 	};
 
 	CUtlVector<Spot> spots;
