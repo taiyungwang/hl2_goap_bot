@@ -39,8 +39,9 @@ void MoveStateContext::move(int type) {
 		look.z += blackboard.getSelf()->getEyesPos().DistTo(pos);
 	}
 	if (blackboard.getBlocker() != nullptr) {
-		blackboard.setViewTarget(
-				blackboard.getBlocker()->GetCollideable()->GetCollisionOrigin());
+		Vector mins, maxs;
+		blackboard.getBlocker()->GetCollideable()->WorldSpaceTriggerBounds(&mins, &maxs);
+		blackboard.setViewTarget((maxs + mins) / 2.0f);
 	} else if (blackboard.getTargetedPlayer() == nullptr || nextGoalIsLadderStart()
 			|| blackboard.isOnLadder()) {
 		blackboard.setViewTarget(look);
