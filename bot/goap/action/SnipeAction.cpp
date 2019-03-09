@@ -20,7 +20,6 @@ SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 
 bool SnipeAction::precondCheck() {
 	deployed = false;
-	path.Clear();
 	if (RandomInt(0, 1) == 0) {
 		return false;
 	}
@@ -32,8 +31,6 @@ bool SnipeAction::precondCheck() {
 	}
 	GoToAction::precondCheck();
 	if (path.Count() == 0) {
-		// count unreachable spots as failures.
-		selector->update(selectorId, team, false);
 		return false;
 	}
 	Vector pos = targetLoc;
@@ -60,8 +57,6 @@ bool SnipeAction::precondCheck() {
 		}
 	}
 	if (furthest < 1000000.0) {
-		// count spots with short range as failures.
-		selector->update(selectorId, team, false);
 		return false;
 	}
 	duration = 300;
@@ -69,7 +64,7 @@ bool SnipeAction::precondCheck() {
 }
 
 bool SnipeAction::execute() {
-	if (!GoToAction::postCondCheck() && !GoToAction::execute()) {
+	if (!GoToAction::execute()) {
 		return false;
 	}
 	if (!GoToAction::postCondCheck()) {
@@ -92,13 +87,14 @@ bool SnipeAction::execute() {
 
 bool SnipeAction::postCondCheck() {
 	int team = blackboard.getSelf()->getTeam();
-	if (path.Count() == 0) {
+	selector->resetInUse(selectorId, team);
+	if (GoToAction::postCondCheck()) {
 		// if we are at our location, and we didn't see an enemy, then count it as failure
 		selector->update(selectorId, team, 
 			blackboard.getTargetedPlayer() != nullptr);
+		return true;
 	}
-	selector->resetInUse(selectorId, team);
-	return true;
+	return false;
 }
 
 void SnipeAction::abort() {
@@ -109,7 +105,7 @@ void SnipeAction::abort() {
 		// if we died, then it's probably not an ideal spot to try for.
 		selector->update(selectorId, team, false);
 	} else if (blackboard.getTargetedPlayer() != nullptr
-		&& path.Count() == 0) {
+		&& GoToAction::postCondCheck()) {
 		// if we see an enemy at our spot, then it's successful.
 		selector->update(selectorId, team, true);
 	}
