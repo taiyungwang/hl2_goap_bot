@@ -32,7 +32,6 @@ void Planner::resetPlanning(bool force) {
 	}
 }
 
-
 void Planner::execute() {
 	switch (state) {
 	case State::PLANNING: {
@@ -52,7 +51,6 @@ void Planner::execute() {
 				getNextGoal();
 			} else {
 				state = State::ACTION;
-				actions[plan.Head()]->init();
 			}
 		}
 		break;
