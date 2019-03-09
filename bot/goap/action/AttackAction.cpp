@@ -9,6 +9,7 @@ AttackAction::AttackAction(Blackboard& blackboard) :
 }
 
 bool AttackAction::precondCheck() {
+	adjustAim = true;
 	return blackboard.getTargetedPlayer() != nullptr;
 }
 
