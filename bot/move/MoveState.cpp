@@ -7,7 +7,7 @@
 #include <ivdebugoverlay.h>
 #include <in_buttons.h>
 
-static ConVar mybot_speed_factor("mybot_speed_factor", "7.0f");
+static ConVar mybot_speed_factor("mybot_speed_factor", "9.0f");
 
 MoveState::MoveState(MoveStateContext& ctx) :
 		ctx(ctx) {
@@ -24,7 +24,7 @@ bool MoveState::checkStuck(const Vector& currentPos) {
 	float moved = currentPos.DistTo(prevPos);
 	prevPos = currentPos;
 	return moved < ((ctx.getType() & NAV_MESH_CROUCH) ? 0.01f : 0.1f)
-			|| moveDur-- <= 0.0f;
+			|| moveDur-- < 1;
 }
 
 void MoveState::moveStraight(const Vector& destination) const {
