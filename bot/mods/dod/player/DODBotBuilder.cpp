@@ -65,6 +65,14 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 			GoToEntityAction(blackboard, "dod_bomb_dispenser") {
 			effects = {WorldProp::HAS_BOMB, true};
 		}
+
+		bool precondCheck() {
+			if (GoToEntityAction::precondCheck()) {
+				blackboard.setStartArea(path[path.Count() - 1]);
+				return true;
+			}
+			return false;
+		}
 	};
 	class DODNavigator: public Navigator {
 	public:
