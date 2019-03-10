@@ -5,6 +5,7 @@
 #include "mods/dod/player/DODBotBuilder.h"
 #include "player/PlayerManager.h"
 #include "util/EntityClassManager.h"
+#include "util/EntityUtils.h"
 #include "util/BaseEntity.h"
 #include "navmesh/nav_entities.h"
 
@@ -74,7 +75,7 @@ void PluginAdaptor::gameFrame(bool simulating) {
 			for (int i = gpGlobals->maxClients; i < gpGlobals->maxEntities; i++) {
 				edict_t* ent = engine->PEntityOfEntIndex(i);
 				if (ent != nullptr && !ent->IsFree() && ent->GetIServerEntity() != nullptr
-						&& Q_strcmp("prop_dynamic", ent->GetClassName()) == 0) {
+						&& FClassnameIs(ent, "prop_dynamic")) {
 					blockers.AddToTail(new CFuncNavBlocker(ent));
 				}
 			}
@@ -88,11 +89,16 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		navMeshLoadAttempted = true;
 	}
 	if (TheNavMesh != nullptr) {
-		FOR_EACH_VEC(blockers, i) {
-			if (!BaseEntity(blockers[i]->getEntity()).isDestroyedOrUsed()) {
-				blockers[i]->InputEnable();
-			} else {
-				blockers[i]->InputDisable();
+		static unsigned int poll = 0;
+		if (poll-- < 1) {
+			poll = 120;
+			FOR_EACH_VEC(blockers, i) {
+				if (!FClassnameIs(blockers[i]->getEntity(), "prop_dynamic")
+						|| !BaseEntity(blockers[i]->getEntity()).isDestroyedOrUsed()) {
+					blockers[i]->InputEnable();
+				} else {
+					blockers[i]->InputDisable();
+				}
 			}
 		}
 		TheNavMesh->Update();
