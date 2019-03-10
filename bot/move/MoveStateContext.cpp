@@ -22,6 +22,7 @@ MoveStateContext::MoveStateContext(Blackboard& blackboard) :
 
 void MoveStateContext::stop() {
 	delete state;
+	stuck = false;
 	state = new Stopped(*this);
 }
 
