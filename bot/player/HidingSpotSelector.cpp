@@ -6,11 +6,43 @@ HidingSpotSelector::HidingSpotSelector() {
 	extern NavAreaVector TheNavAreas;
 	FOR_EACH_VEC(TheNavAreas, i) {
 		const auto& hideSpots = *TheNavAreas[i]->GetHidingSpots();
+		if (TheNavAreas[i]->IsBlocked(TEAM_ANY)) {
+			continue;
+		}
 		FOR_EACH_VEC(hideSpots, j) {
 			spots.AddToTail();
 			spots.Tail().pos = hideSpots[j]->GetPosition();
+			for (int i = 0; i < 2; i++) {
+				if (TheNavAreas[i]->IsBlocked(i)) {
+					spots.Tail().score[i].inUse = true;
+				}
+			}
 		}
 	}
+}
+
+/**
+ * Borrowed from https://jamesmccaffrey.wordpress.com/2017/11/01/more-on-sampling-from-the-beta-distribution-using-c/
+ */
+float beta_sample(float a, float b) {
+	float alpha = a + b,
+			beta =
+			MIN(a, b) <= 1.0f ?
+					MAX(1.0f / a, 1.0f / b) :
+					sqrtf((alpha - 2.0f) / (2.0f * a * b - alpha)),
+			w = 0.0f,
+			gamma = a + 1.0f / beta;
+	for (;;) {
+		float u1 = RandomFloat(0, 1.0f),
+				u2 = RandomFloat(0, 1.0f),
+				v = beta * logf(u1 / (1.0f - u1));
+		w = a * exp(v);
+		if (alpha * logf(alpha / (b + w)) + (gamma * v) - 1.3862944
+				>= logf(u1 * u1 * u2)) {
+			break;
+		}
+	}
+	return w / (b + w);
 }
 
 int HidingSpotSelector::select(Vector& pos, int team) {
@@ -22,9 +54,7 @@ int HidingSpotSelector::select(Vector& pos, int team) {
 		if (score.inUse) {
 			continue;
 		}
-		// Beta sampling.
-		float sample = tgammaf(score.success);
-		sample /= sample + tgammaf(score.fail);
+		float sample = beta_sample(score.success, score.fail);
 		if (sample > max) {
 			selected = i;
 			max = sample;
