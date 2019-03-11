@@ -27,6 +27,8 @@ protected:
 
 	bool adjustAim = true;
 
+	unsigned int dur = 0;
+
 	virtual edict_t* getTargetedEdict() const;
 
 	virtual bool isBreakable(edict_t* object) const {

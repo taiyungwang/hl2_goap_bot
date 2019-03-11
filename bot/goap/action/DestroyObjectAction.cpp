@@ -34,6 +34,7 @@ bool DestroyObjectAction::precondCheck() {
 	if (blocker == nullptr) {
 		return false;
 	}
+	dur = 200;
 	const char* className = blocker->GetClassName();
 	adjustAim = true;
 	return Q_stristr(className, "breakable") != nullptr
@@ -42,6 +43,9 @@ bool DestroyObjectAction::precondCheck() {
 }
 
 bool DestroyObjectAction::execute() {
+	if (dur-- < 1) {
+		return true;
+	}
 	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
 	if (postCondCheck() || weapon->isClipEmpty()) {
 		return true;
