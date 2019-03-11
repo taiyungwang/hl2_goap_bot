@@ -11,7 +11,7 @@
 #include <util/BasePlayer.h>
 #include <in_buttons.h>
 
-#define PRONE_ANIM 180
+#define PRONE_ANIM 120
 
 bool DODMGDeployer::execute(Blackboard& blackboard) {
 	if (animationCounter < 0) {
