@@ -40,9 +40,14 @@ void MoveStateContext::move(int type) {
 		look.z += blackboard.getSelf()->getEyesPos().DistTo(pos);
 	}
 	if (blackboard.getBlocker() != nullptr) {
-		Vector mins, maxs;
+		Vector mins, maxs, blocker;
 		blackboard.getBlocker()->GetCollideable()->WorldSpaceTriggerBounds(&mins, &maxs);
-		blackboard.setViewTarget((maxs + mins) / 2.0f);
+		blocker = (maxs + mins) / 2.0f;
+		if (blocker.DistTo(pos) < 130.0f) {
+			blackboard.setViewTarget(blocker);
+		} else {
+			blackboard.setBlocker(nullptr);
+		}
 	} else if (blackboard.getTargetedPlayer() == nullptr || nextGoalIsLadderStart()
 			|| blackboard.isOnLadder()) {
 		blackboard.setViewTarget(look);

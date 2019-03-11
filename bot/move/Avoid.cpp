@@ -8,9 +8,7 @@
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
-#include <navmesh/nav_entities.h>
 #include <util/UtilTrace.h>
-#include <util/EntityUtils.h>
 #include <util/BasePlayer.h>
 #include <eiface.h>
 #include <in_buttons.h>
@@ -34,42 +32,15 @@ MoveState* Avoid::move(const Vector& pos) {
 	Blackboard& blackboard = ctx.getBlackboard();
 	trace_t result;
 	trace(result, mybot_trace_move_factor.GetFloat());
-	edict_t* blocker =
-			result.m_pEnt == nullptr ?
+	ctx.setBlocker(result.m_pEnt == nullptr ?
 					nullptr :
-					reinterpret_cast<IServerEntity*>(result.m_pEnt)->GetNetworkable()->GetEdict();
-	blackboard.setBlocker(blocker != nullptr &&
-					(Q_stristr(blocker->GetClassName(), "breakable") != nullptr
-					|| Q_stristr(blocker->GetClassName(), "physics") != nullptr) ?
-					blocker: nullptr);
-	int team = blackboard.getSelf()->getTeam();
-	if (blocker != nullptr && blackboard.getBlocker() == nullptr) {
-		auto& players = blackboard.getPlayers();
-		FOR_EACH_MAP_FAST(players, i) {
-			if (blocker == players[i]->getEdict()
-					&& (team <= 0 || team != players[i]->getTeam())) {
-				blackboard.setBlocker(blocker);
-				break;
-			}
-		}
-	}
+					reinterpret_cast<IServerEntity*>(result.m_pEnt)->GetNetworkable()->GetEdict());
 	if (checkStuck(pos)) {
 		if (!ctx.nextGoalIsLadderStart() && blackboard.isOnLadder()) {
 			return new MoveLadder(ctx);
 		}
 		if (dynamic_cast<Stopped*>(nextState) != nullptr) {
 			ctx.setStuck(true);
-		}
-		if (blackboard.getBlocker() != nullptr) {
-			delete nextState;
-			return new Stopped(ctx);
-		}
-		if (blocker != nullptr
-				&& Q_stristr(blocker->GetClassName(), "func_team") != nullptr) {
-			extern CUtlVector<NavEntity*> blockers;
-			CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
-			navBlocker->setBlockedTeam(blackboard.getSelf()->getTeam());
-			blockers.AddToTail(navBlocker);
 		}
 		return nextState;
 	}

@@ -81,6 +81,14 @@ public:
 		this->stuck = stuck;
 	}
 
+	void setBlocker(edict_t* blocker) {
+		this->blocker = blocker;
+	}
+
+	edict_t* getBlocker() const {
+		return blocker;
+	}
+
 private:
 
 	bool stuck;
@@ -89,4 +97,6 @@ private:
 	Vector goal, ladderEnd;
 	CNavLadder::LadderDirectionType ladderDir;
 	MoveState* state;
+
+	edict_t* blocker = nullptr;
 };

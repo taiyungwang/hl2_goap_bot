@@ -214,7 +214,6 @@ void Navigator::getNextArea() {
 	}
 }
 
-
 bool Navigator::reachedGoal() const {
 	return path->Count() == 0
 				&& (blackboard.getSelf()->getCurrentPosition()
