@@ -64,10 +64,10 @@ bool SnipeAction::precondCheck() {
 }
 
 bool SnipeAction::execute() {
-	if (!GoToAction::execute()) {
-		return false;
-	}
 	if (!GoToAction::postCondCheck()) {
+		if (!GoToAction::execute()) {
+			return false;
+		}
 		return true;
 	}
 	QAngle angle(0.0f, facing, 0.0f);
