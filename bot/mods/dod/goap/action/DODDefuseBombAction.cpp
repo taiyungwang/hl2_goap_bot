@@ -25,9 +25,7 @@ bool DODDefuseBombAction::execute() {
 	Vector itemPos = UTIL_FindGround(
 			item->GetCollideable()->GetCollisionOrigin());
 	itemPos.z += HumanHeight - 15.0f;
-	if (blackboard.getAimAccuracy(itemPos) > 0.9f) {
-		blackboard.getButtons().hold(IN_USE);
-	}
+	blackboard.getButtons().hold(IN_USE);
 	blackboard.setViewTarget(itemPos);
 	return false;
 }
