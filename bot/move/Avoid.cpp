@@ -48,9 +48,8 @@ MoveState* Avoid::move(const Vector& pos) {
 	if (!result.startsolid && result.fraction < 1.0f) {
 		if (result.plane.normal.Length() <= 0.0f) {
 			result.plane.normal
-			= (reinterpret_cast<IServerEntity*>(result.m_pEnt)
-			->GetNetworkable()->GetEdict()->GetCollideable()->GetCollisionOrigin()
-			- result.endpos).Normalized();
+			= (result.endpos - reinterpret_cast<IServerEntity*>(result.m_pEnt)
+			->GetNetworkable()->GetEdict()->GetCollideable()->GetCollisionOrigin()).Normalized();
 		}
 		goal += result.plane.normal * mybot_avoid_move_factor.GetFloat()
 				/ max(0.01f, result.startpos.DistTo(result.endpos));
@@ -63,10 +62,10 @@ void Avoid::trace(CGameTrace& result, float dist) const {
 	Blackboard& blackboard = ctx.getBlackboard();
 	const Player* self = blackboard.getSelf();
 	Vector pos = self->getCurrentPosition();
-	pos.z += 5.0f;
-	float halfHull = 17.0f;
+	pos.z += StepHeight;
+	static float halfHull = 17.0f;
 	Vector heading = ctx.getGoal();
-	heading.z += 5.0f;
+	heading.z += StepHeight;
 	heading -= pos;
 	extern ConVar mybot_debug;
 	edict_t* ground = BasePlayer(self->getEdict()).getGroundEntity();
