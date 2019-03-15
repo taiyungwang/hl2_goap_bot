@@ -72,9 +72,7 @@ void Avoid::trace(CGameTrace& result, float dist) const {
 	UTIL_TraceHull(pos,
 			pos + heading.Normalized() * min(heading.Length(), dist - 6.0f),
 			Vector(0.0f, -halfHull, 0.0f),
-			Vector(halfHull, halfHull,
-					self->getEyesPos().DistTo(pos)
-							+ (ctx.getGoal() - pos).Normalized().z * halfHull),
+			Vector(halfHull, halfHull, self->getEyesPos().z - pos.z),
 							MASK_NPCSOLID_BRUSHONLY,
 							FilterSelfAndTarget(self->getEdict()->GetIServerEntity(),
 									ground == nullptr ? nullptr : ground->GetIServerEntity()),
