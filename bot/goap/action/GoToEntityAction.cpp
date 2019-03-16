@@ -36,7 +36,7 @@ bool GoToEntityAction::buildPathToEntity() {
 		}
 		if (min.DistTo(max) > 0.0f) {
 			max.z = min.z;
-			targetRadius = max.DistTo(min) * PYTHAG_CONST;
+			targetRadius = MAX(25.0f, max.DistTo(min) * PYTHAG_CONST);
 		}
 	}
 	return foundItem && GoToAction::precondCheck();
