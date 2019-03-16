@@ -20,6 +20,8 @@ bool GoToEntityAction::postCondCheck() {
 	return GoToAction::postCondCheck();
 }
 
+static const float PYTHAG_CONST = M_SQRT1_2 / 2.0f;
+
 bool GoToEntityAction::buildPathToEntity() {
 	bool foundItem = item != nullptr;
 	if (foundItem) {
@@ -34,7 +36,7 @@ bool GoToEntityAction::buildPathToEntity() {
 		}
 		if (min.DistTo(max) > 0.0f) {
 			max.z = min.z;
-			targetRadius = max.DistTo(min) * M_SQRT2;
+			targetRadius = max.DistTo(min) * PYTHAG_CONST;
 		}
 	}
 	return foundItem && GoToAction::precondCheck();
