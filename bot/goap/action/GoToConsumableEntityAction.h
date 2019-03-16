@@ -15,6 +15,8 @@ public:
 
 	virtual bool precondCheck();
 
+	virtual bool postCondCheck();
+
 protected:
 	/**
 	 * All items that are used.

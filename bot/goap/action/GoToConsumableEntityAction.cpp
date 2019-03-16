@@ -11,6 +11,15 @@ bool GoToConsumableEntityAction::execute() {
 	}
 	return true;
 }
+bool GoToConsumableEntityAction::postCondCheck() {
+	if (!GoToEntityAction::postCondCheck()) {
+		return false;
+	}
+	if (item != nullptr && isDepleted()) {
+		depleted.AddToTail(item);
+	}
+	return true;
+}
 
 bool GoToConsumableEntityAction::precondCheck() {
 	CUtlLinkedList<edict_t*> active;
