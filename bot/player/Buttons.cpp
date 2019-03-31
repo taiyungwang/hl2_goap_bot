@@ -13,8 +13,7 @@ Buttons::Buttons() {
 }
 
 bool Buttons::jump() {
-	bool pressed = buttons[buttons.Find(IN_JUMP)].press(20, 20);
-	if (pressed) {
+	if (buttons[buttons.Find(IN_JUMP)].press(10, 20)) {
 		buttons[buttons.Find(IN_DUCK)].press(10, 20);
 		return true;
 	}

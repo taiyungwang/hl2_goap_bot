@@ -22,8 +22,7 @@ bool Button::checkPressed() {
 	}
 	if (duration > 0) {
 		duration--;
-	}
-	if (coolDown > 0) {
+	} else if (coolDown > 0) {
 		coolDown--;
 	}
 	return ret;
