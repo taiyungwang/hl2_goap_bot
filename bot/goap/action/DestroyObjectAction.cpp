@@ -22,6 +22,7 @@ DestroyObjectAction::DestroyObjectAction(Blackboard& blackboard) :
 	moveCtx = new MoveStateContext(blackboard);
 	crouch = false;
 	effects = {WorldProp::IS_BLOCKED, false};
+	precond.Insert(WorldProp::WEAPON_IN_RANGE, true);
 	precond.Insert(WorldProp::WEAPON_LOADED, true);
 }
 

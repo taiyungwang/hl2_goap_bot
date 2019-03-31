@@ -16,23 +16,32 @@ void World::reset() {
 	states.Insert(WorldProp::USING_BEST_WEAP, false);
 	states.Insert(WorldProp::WEAPON_LOADED, true);
 	states.Insert(WorldProp::OUT_OF_AMMO, false);
+	states.Insert(WorldProp::WEAPON_IN_RANGE, false);
 	states.Insert(WorldProp::ROUND_STARTED, roundStarted);
 	addStates();
 }
 
 bool World::think(Blackboard& blackboard) {
 	bool& enemySighted = states[states.Find(WorldProp::ENEMY_SIGHTED)];
-	bool noEnemy = !enemySighted;
-	enemySighted = blackboard.getTargetedPlayer() != nullptr;
 	updateState(WorldProp::MULTIPLE_ENEMY_SIGHTED,
 			blackboard.getVisibleEnemies().Count() > 1);
 	Armory& armory = blackboard.getArmory();
 	updateState(WorldProp::USING_BEST_WEAP,
 			armory.getBestWeaponIdx() == armory.getCurrWeaponIdx());
 	edict_t* blocker = blackboard.getBlocker();
+	bool inRange = true;
+	const Player* enemy = blackboard.getTargetedPlayer();
+	const Vector& pos = blackboard.getSelf()->getCurrentPosition();
+	const Weapon* weap = armory.getCurrWeapon();
+	if (enemy == nullptr) {
+		inRange = true;
+	} else if (weap != nullptr) {
+		inRange = weap->isInRange(pos.DistTo(enemy->getCurrentPosition()));
+	}
 	if (blocker != nullptr) {
 		if (BaseEntity(blocker).isDestroyedOrUsed()) {
 			blackboard.setBlocker(nullptr);
+			inRange = true;
 		} else {
 			extern IVEngineServer* engine;
 			auto& players = blackboard.getPlayers();
@@ -40,9 +49,16 @@ bool World::think(Blackboard& blackboard) {
 			auto i = players.Find(entIndx);
 			if (players.IsValidIndex(i) && players[i]->isDead()) {
 				blackboard.setBlocker(nullptr);
+				inRange = true;
 			}
 		}
+		if (!inRange && weap != nullptr) {
+			inRange = weap->isInRange(pos.DistTo(blocker->GetCollideable()->GetCollisionOrigin()));
+		}
+	} else if (enemy == nullptr) {
+		inRange = true;
 	}
+	updateState(WorldProp::WEAPON_IN_RANGE, inRange);
 	auto& weapons = armory.getWeapons();
 	int currentWeap = armory.getCurrWeaponIdx();
 	if (currentWeap > 0) {
@@ -55,6 +71,8 @@ bool World::think(Blackboard& blackboard) {
 	updateState(WorldProp::HURT, false);
 	updateState(WorldProp::IS_BLOCKED, blackboard.getBlocker() != nullptr);
 	// reset planner if this is first time we see enemy.
+	bool noEnemy = !enemySighted;
+	enemySighted = enemy != nullptr;
 	return update(blackboard) || (noEnemy && enemySighted)
 			|| states[states.Find(WorldProp::HURT)];
 }
