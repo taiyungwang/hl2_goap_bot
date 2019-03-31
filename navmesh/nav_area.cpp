@@ -1396,10 +1396,13 @@ void CNavArea::FinishSplitEdit(CNavArea *newArea, NavDirType ignoreEdge) {
  */
 bool CNavArea::SpliceEdit(CNavArea *other)
 {
+	CNavArea *newArea = NULL;
 	Vector nw, ne, se, sw;
-	CNavArea *start = this,
-			*end = other;
+
 	NavDirType dir = NUM_DIRECTIONS;
+	CNavArea* start = other, *end = this;
+	float top = MAX( m_nwCorner.y, other->m_nwCorner.y );
+	float bottom = MIN( m_seCorner.y, other->m_seCorner.y );
 	if (m_nwCorner.x > other->m_seCorner.x)
 	{
 		// 'this' is east of 'other'
@@ -1409,27 +1412,30 @@ bool CNavArea::SpliceEdit(CNavArea *other)
 	{
 		// 'this' is west of 'other'
 		dir = EAST;
-		start = other;
-		end = this;
+		start = this;
+		end = other;
 	}
 	if (dir != NUM_DIRECTIONS) {
-		nw.x = end->m_seCorner.x;
-		nw.y = MAX( m_nwCorner.y, other->m_nwCorner.y );
-		nw.z = end->GetZ( nw );
+		nw.x = start->m_seCorner.x;
+		nw.y = top;
+		nw.z = start->GetZ( nw );
 
-		se.x = start->m_nwCorner.x;
-		se.y = MIN( m_seCorner.y, other->m_seCorner.y );
-		se.z = start->GetZ( se );
+		se.x = end->m_nwCorner.x;
+		se.y = bottom;
+		se.z = end->GetZ( se );
 
 		ne.x = se.x;
 		ne.y = nw.y;
-		ne.z = start->GetZ( ne );
+		ne.z = end->GetZ( ne );
 
 		sw.x = nw.x;
 		sw.y = se.y;
-		sw.z = end->GetZ( sw );
-	} else	// 'this' overlaps in X
+		sw.z = start->GetZ( sw );
+
+	} else // 'this' overlaps in X
 	{
+		float left = MAX( m_nwCorner.x, other->m_nwCorner.x );
+		float right = MIN( m_seCorner.x, other->m_seCorner.x );
 		if (m_nwCorner.y > other->m_seCorner.y)
 		{
 			// 'this' is south of 'other'
@@ -1439,32 +1445,33 @@ bool CNavArea::SpliceEdit(CNavArea *other)
 		{
 			// 'this' is north of 'other'
 			dir = SOUTH;
-			start = other;
-			end = this;
+			start = this;
+			end = other;
 		}
 		if (dir != NUM_DIRECTIONS) {
-			nw.x = MAX( m_nwCorner.x, other->m_nwCorner.x );
-			nw.y = end->m_seCorner.y;
-			nw.z = end->GetZ( nw );
+			nw.x = left;
+			nw.y = start->m_seCorner.y;
+			nw.z = start->GetZ( nw );
 
-			se.x = MIN( m_seCorner.x, other->m_seCorner.x );
-			se.y = start->m_nwCorner.y;
-			se.z = start->GetZ( se );
+			se.x = right;
+			se.y = end->m_nwCorner.y;
+			se.z = end->GetZ( se );
 
 			ne.x = se.x;
 			ne.y = nw.y;
-			ne.z = end->GetZ( ne );
+			ne.z = start->GetZ( ne );
 
 			sw.x = nw.x;
 			sw.y = se.y;
-			sw.z = start->GetZ( sw );
-		} else
+			sw.z = end->GetZ( sw );
+		}
+		else
 		{
 			// areas overlap
 			return false;
 		}
 	}
-	CNavArea *newArea = TheNavMesh->CreateArea();
+	newArea = TheNavMesh->CreateArea();
 	if (newArea == NULL)
 	{
 		Warning( "SpliceEdit: Out of memory.\n" );
@@ -1478,7 +1485,6 @@ bool CNavArea::SpliceEdit(CNavArea *other)
 
 	other->ConnectTo( newArea, OppositeDirection(dir) );
 	newArea->ConnectTo( other, dir );
-
 	newArea->InheritAttributes( this, other );
 
 	TheNavAreas.AddToTail( newArea );
@@ -1487,6 +1493,7 @@ bool CNavArea::SpliceEdit(CNavArea *other)
 	TheNavMesh->OnEditCreateNotify( newArea );
 
 	return true;
+
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -4483,12 +4490,6 @@ CNavArea::VisibilityType CNavArea::ComputeVisibility(const CNavArea *area,
 	return (VisibilityType) vis;
 }
 
-bool isAreaInBoth(const CNavArea::AreaBindInfo& thisInfo,
-		const CNavArea::AreaBindInfo& otherInfo) {
-	// 'other' has area in their list that we don't - mark it explicitly NOT_VISIBLE
-	return thisInfo.area == otherInfo.area;
-}
-
 void addToDelta(CUtlVectorConservative<CNavArea::AreaBindInfo>& delta,
 		const CNavArea::AreaBindInfo& thisInfo) {
 	// my vis area not in adjacent area's vis list or has different visibility attributes - add to delta
@@ -4499,8 +4500,7 @@ void addToDelta(CUtlVectorConservative<CNavArea::AreaBindInfo>& delta,
 /**
  * Return a list of the delta between our visibility list and the given adjacent area
  */
-const CNavArea::CAreaBindInfoArray &CNavArea::ComputeVisibilityDelta(
-		const CNavArea *other) const {
+const CNavArea::CAreaBindInfoArray &CNavArea::ComputeVisibilityDelta(const CNavArea *other) const {
 	static CAreaBindInfoArray delta;
 	delta.RemoveAll();
 	// do not delta from a delta - if 'other' is already inheriting, use its inherited source directly
@@ -4510,37 +4510,35 @@ const CNavArea::CAreaBindInfoArray &CNavArea::ComputeVisibilityDelta(
 		return delta;
 	}
 	// add any visible areas in my list that are not in 'others' list into the delta
-	ComputeVisibilityDelta(
+	ComputeVisibilityDelta(delta,
 			[](const CNavArea::AreaBindInfo& thisInfo,
 					const CNavArea::AreaBindInfo& otherInfo) -> bool {
-					return isAreaInBoth(thisInfo, otherInfo)
-							&& thisInfo.attributes == otherInfo.attributes;
-					},
-					addToDelta, delta, other);
+					return thisInfo.attributes == otherInfo.attributes;
+					}, addToDelta, other);
 	// add explicit NOT_VISIBLE references to areas in 'others' list that are NOT in mine
-	other->ComputeVisibilityDelta(isAreaInBoth,
-			[](CUtlVectorConservative<CNavArea::AreaBindInfo>& delta,
+	other->ComputeVisibilityDelta(delta, [](const CNavArea::AreaBindInfo& thisInfo,
+			const CNavArea::AreaBindInfo& otherInfo) -> bool {return true;},
+			[](CAreaBindInfoArray& delta,
 					const CNavArea::AreaBindInfo& thisInfo) {
 				CNavArea::AreaBindInfo info;
 				info.area = thisInfo.area;
 				info.attributes = CNavArea::NOT_VISIBLE;
 				addToDelta(delta, info);
-	},
-	delta, this);
+			}, this);
 	return delta;
 }
 
 template<typename IsFound, typename UpdateDelta>
-void CNavArea::ComputeVisibilityDelta(const IsFound& isFound,
-		const UpdateDelta& updateDelta, CAreaBindInfoArray& delta,
+void CNavArea::ComputeVisibilityDelta(CAreaBindInfoArray& delta, const IsFound& isFound,
+		const UpdateDelta& updateDelta,
 		const CNavArea *other) const {
 	for (int i = 0; i < m_potentiallyVisibleAreas.Count(); ++i) {
 		if (m_potentiallyVisibleAreas[i].area) {
 			bool found = false;
 			// is my visible area also in adjacent area's vis list
 			for (int j = 0; !found && j < other->m_potentiallyVisibleAreas.Count();++j) {
-				found = isFound(m_potentiallyVisibleAreas[i],
-						other->m_potentiallyVisibleAreas[j]);
+				found = m_potentiallyVisibleAreas[i] == other->m_potentiallyVisibleAreas[j]
+					&& isFound(m_potentiallyVisibleAreas[i], other->m_potentiallyVisibleAreas[j]);
 			}
 			if (!found) {
 				updateDelta(delta, m_potentiallyVisibleAreas[i]);

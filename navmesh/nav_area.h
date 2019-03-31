@@ -783,8 +783,8 @@ private:
 	const CAreaBindInfoArray &ComputeVisibilityDelta( const CNavArea *other ) const;	// return a list of the delta between our visibility list and the given adjacent area
 
 	template<typename IsFound, typename UpdateDelta>
-	void ComputeVisibilityDelta(const IsFound& isFound, const UpdateDelta& func,
-			CAreaBindInfoArray& delta, const CNavArea *other) const;
+	void ComputeVisibilityDelta(CAreaBindInfoArray& delta, const IsFound& isFound, const UpdateDelta& func,
+			const CNavArea *other) const;
 
 	uint32 m_nVisTestCounter;
 	static uint32 s_nCurrVisTestCounter;
