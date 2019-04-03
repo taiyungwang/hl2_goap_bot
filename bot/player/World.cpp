@@ -68,11 +68,11 @@ bool World::think(Blackboard& blackboard) {
 		updateState(WorldProp::OUT_OF_AMMO,
 				currWeap->isOutOfAmmo(blackboard.getSelf()->getEdict()));
 	}
+	bool hurt = states[states.Find(WorldProp::HURT)];
 	updateState(WorldProp::HURT, false);
 	updateState(WorldProp::IS_BLOCKED, blackboard.getBlocker() != nullptr);
 	// reset planner if this is first time we see enemy.
 	bool noEnemy = !enemySighted;
 	enemySighted = enemy != nullptr;
-	return update(blackboard) || (noEnemy && enemySighted)
-			|| states[states.Find(WorldProp::HURT)];
+	return update(blackboard) || (noEnemy && enemySighted) || hurt;
 }
