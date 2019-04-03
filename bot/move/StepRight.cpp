@@ -5,21 +5,6 @@
 #include "Avoid.h"
 #include "MoveStateContext.h"
 
-MoveState* StepRight::move(const Vector& currPos) {
-	if (checkStuck(currPos, ctx.getGoal())) {
-		if (startPos.DistTo(currPos) < ctx.getTargetOffset()) {
-			return new Jump(ctx);
-		}
-		return buildAvoidState(currPos);
-	}
-	if (arrived(currPos, distance)) {
-		return buildAvoidState(currPos);
-	}
-	moveStraight(currPos + inverse2D(perpLeft2D(ctx.getGoal(), currPos)) * distance);
-	return nullptr;
-}
-
-
 Vector StepRight::inverse2D(const Vector& dir) {
 	Vector inv(dir);
 	inv.Negate();
@@ -27,6 +12,10 @@ Vector StepRight::inverse2D(const Vector& dir) {
 	return inv;
 }
 
-Avoid* StepRight::buildAvoidState(const Vector& currPos) const {
-	return new Avoid(ctx, new Jump(ctx));
+MoveState* StepRight::buildFailedState(const Vector& currPos) const {
+	return new Jump(ctx);
+}
+
+Vector StepRight::buildDir(const Vector& currPos) const {
+	return inverse2D(perpLeft2D(ctx.getGoal(), currPos)) * distance;
 }

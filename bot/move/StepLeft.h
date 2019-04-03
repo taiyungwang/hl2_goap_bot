@@ -1,25 +1,20 @@
 #pragma once
 
-#include "MoveState.h"
-#include <vector.h>
-
-class Avoid;
+#include "StepBack.h"
 
 /**
  * Defines a state where a bot has to step left from its intended goal.
  */
-class StepLeft: public MoveState {
+class StepLeft: public StepBack {
 public:
-	StepLeft(MoveStateContext& ctx);
+	StepLeft(MoveStateContext& ctx) :
+		StepBack(ctx) {
+	}
 
-	virtual MoveState* move(const Vector& currPos);
 protected:
-
 	static Vector perpLeft2D(const Vector& end, const Vector& start);
 
-	Vector startPos;
+	virtual MoveState* buildFailedState(const Vector& currPos) const;
 
-	bool arrived(const Vector& currPos, float expectedDist) const;
-
-	virtual Avoid* buildAvoidState(const Vector& currPos) const;
+	virtual Vector buildDir(const Vector& currPos) const;
 };

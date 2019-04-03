@@ -3,7 +3,7 @@
 #include "MoveStateContext.h"
 #include "MoveLadder.h"
 #include "Avoid.h"
-#include "StepLeft.h"
+#include "StepBack.h"
 #include "Jump.h"
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
@@ -11,7 +11,7 @@
 
 MoveState* Stopped::move(const Vector& currPos) {
 	if (!ctx.reachedGoal()) {
-		return new Avoid(ctx, new StepLeft(ctx));
+		return new Avoid(ctx, new StepBack(ctx));
 	}
 	if (ctx.nextGoalIsLadderStart()) {
 		return new MoveLadder(ctx);

@@ -11,13 +11,13 @@ public:
 			StepLeft(ctx), distance(distance) {
 	}
 
-	MoveState* move(const Vector& currPos);
-
 private:
 	static Vector inverse2D(const Vector& dir);
 
 	float distance;
 
-	Avoid* buildAvoidState(const Vector& currPos) const;
+	MoveState* buildFailedState(const Vector& currPos) const;
+
+	Vector buildDir(const Vector& currPos) const;
 
 };
