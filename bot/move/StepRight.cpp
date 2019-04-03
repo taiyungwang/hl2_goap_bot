@@ -6,18 +6,27 @@
 #include "MoveStateContext.h"
 
 MoveState* StepRight::move(const Vector& currPos) {
-	if (arrived(currPos)) {
-		return new Avoid(ctx, new Jump(ctx));
-	}
-	if (checkStuck(currPos)) {
-		if (ctx.getType() & NAV_MESH_CROUCH) {
-			return new Avoid(ctx, new Jump(ctx));
+	if (checkStuck(currPos, ctx.getGoal())) {
+		if (startPos.DistTo(currPos) < ctx.getTargetOffset()) {
+			return new Jump(ctx);
 		}
-		return new Jump(ctx);
+		return buildAvoidState(currPos);
 	}
-	Vector dest = perpLeft2D(ctx.getGoal(), currPos);
-	dest.x = -dest.x;
-	dest.y = -dest.y;
-	moveStraight(currPos + dest);
+	if (arrived(currPos, distance)) {
+		return buildAvoidState(currPos);
+	}
+	moveStraight(currPos + inverse2D(perpLeft2D(ctx.getGoal(), currPos)) * distance);
 	return nullptr;
+}
+
+
+Vector StepRight::inverse2D(const Vector& dir) {
+	Vector inv(dir);
+	inv.Negate();
+	inv.z = -inv.z;
+	return inv;
+}
+
+Avoid* StepRight::buildAvoidState(const Vector& currPos) const {
+	return new Avoid(ctx, new Jump(ctx));
 }

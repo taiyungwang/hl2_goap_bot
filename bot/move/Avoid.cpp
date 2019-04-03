@@ -8,20 +8,19 @@
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
+#include <navmesh/nav_entities.h>
 #include <util/UtilTrace.h>
-#include <util/BasePlayer.h>
+#include <util/EntityUtils.h>
 #include <eiface.h>
 #include <in_buttons.h>
 
-// how far ahead to look for blockers
-static ConVar mybot_trace_move_factor("mybot_trace_move_factor", "30.0f");
 // how much should blocker push back against our movement.
-static ConVar mybot_avoid_move_factor("mybot_avoid_move_factor", "10.0f");
+static ConVar mybot_avoid_move_factor("mybot_avoid_move_factor", "5");
 
-
-Avoid::Avoid(MoveStateContext& ctx, MoveState* nextState) :
-		MoveState(ctx), nextState(nextState) {
-	ctx.setLadderDir(CNavLadder::NUM_LADDER_DIRECTIONS);
+static edict_t* getEdict(const trace_t& result) {
+	return result.m_pEnt == nullptr ?
+					nullptr :
+					reinterpret_cast<IServerEntity*>(result.m_pEnt)->GetNetworkable()->GetEdict();
 }
 
 MoveState* Avoid::move(const Vector& pos) {
@@ -30,14 +29,50 @@ MoveState* Avoid::move(const Vector& pos) {
 		return new Stopped(ctx);
 	}
 	Blackboard& blackboard = ctx.getBlackboard();
-	trace_t result;
-	trace(result, mybot_trace_move_factor.GetFloat());
-	ctx.setBlocker(result.m_pEnt == nullptr ?
-					nullptr :
-					reinterpret_cast<IServerEntity*>(result.m_pEnt)->GetNetworkable()->GetEdict());
-	if (checkStuck(pos)) {
-		if (!ctx.nextGoalIsLadderStart() && blackboard.isOnLadder()) {
-			return new MoveLadder(ctx);
+	const trace_t& result = ctx.getTraceResult();
+	edict_t* currBlocker = getEdict(result);
+	const char* currBlockerName = currBlocker == nullptr ? nullptr: currBlocker->GetClassName();
+	extern IVEngineServer* engine;
+	extern CGlobalVars *gpGlobals;
+	int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
+	if (currBlocker != nullptr
+			&& ((idx > 0 && idx <= gpGlobals->maxClients)
+					|| Q_stristr(currBlockerName, "physics") != nullptr
+					|| Q_stristr(currBlockerName, "breakable") != nullptr
+					|| Q_stristr(currBlockerName, "func_team") != nullptr)) {
+		blocker = currBlocker;
+	}
+	if (checkStuck(pos, ctx.getGoal())) {
+		if (blocker != nullptr && !blocker->IsFree()
+				&& blocker->GetCollideable() != nullptr) {
+			const char* blockerName = blocker->GetClassName();
+			if (Q_stristr(blockerName, "physics") != nullptr
+					|| Q_stristr(blockerName, "breakable") != nullptr) {
+				blackboard.setBlocker(blocker);
+			} else if (Q_stristr(blockerName, "func_team") != nullptr) {
+				extern CUtlVector<NavEntity*> blockers;
+				CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
+				navBlocker->setBlockedTeam(blackboard.getSelf()->getTeam());
+				blockers.AddToTail(navBlocker);
+			} else {
+				int idx = engine->IndexOfEdict(blocker);
+				if (idx <= gpGlobals->maxClients) {
+					auto i = blackboard.getPlayers().Find(idx);
+					if (blackboard.getSelf()->getTeam() < 2
+							|| (blackboard.getPlayers().IsValidIndex(i)
+							&& blackboard.getPlayers()[i]->getTeam() != blackboard.getSelf()->getTeam())) {
+						blackboard.setBlocker(blocker);
+					}
+				}
+			}
+			ctx.setStuck(true);
+			return new Stopped(ctx);
+		}
+		if (blackboard.isOnLadder()) {
+			if (ctx.nextGoalIsLadderStart()) {
+				return new MoveLadder(ctx);
+			}
+			return new Jump(ctx);
 		}
 		if (dynamic_cast<Stopped*>(nextState) != nullptr) {
 			ctx.setStuck(true);
@@ -45,37 +80,16 @@ MoveState* Avoid::move(const Vector& pos) {
 		return nextState;
 	}
 	Vector goal = ctx.getGoal();
-	if (!result.startsolid && result.fraction < 1.0f) {
-		if (result.plane.normal.Length() <= 0.0f) {
-			result.plane.normal
-			= (result.endpos - reinterpret_cast<IServerEntity*>(result.m_pEnt)
-			->GetNetworkable()->GetEdict()->GetCollideable()->GetCollisionOrigin()).Normalized();
-		}
-		goal += result.plane.normal * mybot_avoid_move_factor.GetFloat()
-				/ max(0.01f, result.startpos.DistTo(result.endpos));
+	if (!result.startsolid && result.DidHit()
+			&& currBlocker != nullptr
+			&& Q_stristr(currBlockerName, "func_team") == nullptr) {
+		Vector avoid = currBlocker->GetCollideable()->GetCollisionOrigin();
+		avoid = avoid.x == 0.0f && avoid.y == 0.0f && avoid.z == 0.0f ?
+			result.plane.normal : (result.endpos - avoid).Normalized();
+		goal = result.endpos + avoid * mybot_avoid_move_factor.GetFloat();
 	}
 	moveStraight(goal);
 	return nullptr;
 }
 
-void Avoid::trace(CGameTrace& result, float dist) const {
-	Blackboard& blackboard = ctx.getBlackboard();
-	const Player* self = blackboard.getSelf();
-	Vector pos = self->getCurrentPosition();
-	pos.z += StepHeight;
-	static float halfHull = 17.0f;
-	Vector heading = ctx.getGoal();
-	heading.z += StepHeight;
-	heading -= pos;
-	extern ConVar mybot_debug;
-	edict_t* ground = BasePlayer(self->getEdict()).getGroundEntity();
-	UTIL_TraceHull(pos,
-			pos + heading.Normalized() * min(heading.Length(), dist - 6.0f),
-			Vector(0.0f, -halfHull, 0.0f),
-			Vector(halfHull, halfHull, self->getEyesPos().z - pos.z),
-							MASK_NPCSOLID_BRUSHONLY,
-							FilterSelfAndTarget(self->getEdict()->GetIServerEntity(),
-									ground == nullptr ? nullptr : ground->GetIServerEntity()),
-									&result, mybot_debug.GetBool());
-}
 

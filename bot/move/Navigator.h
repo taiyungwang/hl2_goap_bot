@@ -1,11 +1,11 @@
 #pragma once
 
-#include <navmesh/nav_ladder.h>
 #include <utlstack.h>
 
 class Blackboard;
 class MoveStateContext;
 class CNavArea;
+struct edict_t;
 
 /**
  * Handles navigation based on the navmesh.
@@ -41,16 +41,23 @@ protected:
 	virtual bool checkCanMove();
 
 private:
-	static bool isConnectionOnFloor(const CNavArea* from, const CNavArea* to);
+	/**
+	 * Gets the portal of the to area if it is connected without using a ladder.
+	 * @Return True if it is connected without using a ladder.
+	 */
+	static bool getPortal(Vector& portal, const CNavArea* from, const CNavArea* to);
 
-	Vector currentGoal, finalGoal;
+	Vector finalGoal;
 
 	CUtlStack<CNavArea*>* path = nullptr;
+
+	CNavArea* lastArea = nullptr;
 
 	MoveStateContext* moveCtx;
 
 	float targetRadius = 25.0f;
 
+	bool canMoveTo(Vector to) const;
 	/**
 	 * Gets the next target area.
 	 */
@@ -61,6 +68,5 @@ private:
 	 * If a ladder is required, moveCtx is updated accordingly.
 	 * @return True if a ladder is required.
 	 */
-	bool findLadder(const CNavArea* from, const CNavArea* to,
-			CNavLadder::LadderDirectionType dir);
+	bool findLadder(const CNavArea* from, const CNavArea* to);
 };

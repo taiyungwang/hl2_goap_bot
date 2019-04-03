@@ -14,18 +14,21 @@ StepLeft::StepLeft(MoveStateContext& ctx) :
 }
 
 MoveState* StepLeft::move(const Vector& currPos) {
-	if (arrived(currPos)) {
-		return new Avoid(ctx, new Jump(ctx));
+	if (checkStuck(currPos, startPos)) {
+		if (startPos.DistTo(currPos) < ctx.getTargetOffset()) {
+			return new StepRight(ctx, 2.0f * GenerationStepSize);
+		}
+		return buildAvoidState(currPos);
 	}
-	if (checkStuck(currPos)) {
-		return new StepRight(ctx);
+	if (arrived(currPos, GenerationStepSize)) {
+		return buildAvoidState(currPos);
 	}
-	moveStraight(perpLeft2D(ctx.getGoal(), currPos) + currPos);
+	moveStraight(perpLeft2D(ctx.getGoal(), currPos) * GenerationStepSize + currPos);
 	return nullptr;
 }
 
-bool StepLeft::arrived(const Vector& currPos) const {
-	return (currPos - startPos).Length() >= GenerationStepSize;
+bool StepLeft::arrived(const Vector& currPos, float expectedDist) const {
+	return (currPos - startPos).Length() >= expectedDist;
 }
 
 Vector StepLeft::perpLeft2D(const Vector& end, const Vector& start) {
@@ -36,10 +39,7 @@ Vector StepLeft::perpLeft2D(const Vector& end, const Vector& start) {
 	return perp;
 }
 
-Vector StepLeft::inverse2D(const Vector& dir) {
-	Vector inv(dir);
-	inv.Negate();
-	inv.z = -inv.z;
-	return inv;
+Avoid* StepLeft::buildAvoidState(const Vector& currPos) const {
+	return new Avoid(ctx, new StepRight(ctx, GenerationStepSize + startPos.DistTo(currPos)));
 }
 

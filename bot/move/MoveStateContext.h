@@ -1,6 +1,7 @@
 #pragma once
 
 #include <navmesh/nav_ladder.h>
+#include <gametrace.h>
 
 class MoveState;
 class EntityInstance;
@@ -12,12 +13,13 @@ class CBotCmd;
  */
 class MoveStateContext {
 public:
-	static const float TARGET_OFFSET;
-
 	/**
 	 * @param pos Current position
 	 */
-	MoveStateContext(Blackboard& blackboard);
+	MoveStateContext(Blackboard& blackboard) :
+			blackboard(blackboard) {
+		stop();
+	}
 
 	~MoveStateContext();
 
@@ -81,22 +83,36 @@ public:
 		this->stuck = stuck;
 	}
 
-	void setBlocker(edict_t* blocker) {
-		this->blocker = blocker;
+	void setTargetOffset(float offset) {
+		targetOffset = offset;
 	}
 
-	edict_t* getBlocker() const {
-		return blocker;
+	float getTargetOffset() const {
+		return targetOffset;
+	}
+
+	/**
+	 * Traces from current position to final goal.  Assumes that final goal
+	 * and current position are latest.
+	 */
+	void traceMove() {
+		trace(goal);
+	}
+
+	const trace_t& trace(Vector goal, edict_t* ignore = nullptr);
+
+	const trace_t& getTraceResult() const {
+		return traceResult;
 	}
 
 private:
-
+	float targetOffset;
 	bool stuck;
 	Blackboard& blackboard;
 	int type;
 	Vector goal, ladderEnd;
 	CNavLadder::LadderDirectionType ladderDir;
-	MoveState* state;
-
+	MoveState* state = nullptr;
 	edict_t* blocker = nullptr;
+	trace_t traceResult;
 };

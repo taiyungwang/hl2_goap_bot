@@ -10,8 +10,9 @@ struct edict_t;
  */
 class Avoid: public MoveState {
 public:
-	Avoid(MoveStateContext& ctx, MoveState* nextState);
-
+	Avoid(MoveStateContext& ctx, MoveState* nextState) :
+			MoveState(ctx), nextState(nextState), blocker(nullptr) {
+	}
 	/**
 	 * Moves toward the given goal, but attempt to avoid any local obstacles.
 	 * Transitions to Straight if no obstacle ahead.  Transitions to StepLeft
@@ -20,8 +21,7 @@ public:
 	virtual MoveState* move(const Vector& currPos);
 
 private:
+	edict_t* blocker;
 
 	MoveState* nextState;
-
-	void trace(CGameTrace& trace, float dist) const;
 };

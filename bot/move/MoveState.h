@@ -20,13 +20,13 @@ protected:
 
 	MoveStateContext& ctx;
 
-	bool checkStuck(const Vector& currentPos);
+	bool checkStuck(const Vector& currentPos, const Vector& goal);
 
 	void moveStraight(const Vector& destination) const;
 
 private:
 
 	Vector prevPos;
-	unsigned int moveDur;
+	unsigned int moveDur = 0, durLimit;
 };
 

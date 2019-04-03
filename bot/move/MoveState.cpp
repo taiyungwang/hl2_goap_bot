@@ -4,27 +4,30 @@
 #include "player/Blackboard.h"
 #include <player/Buttons.h>
 #include <player/Bot.h>
+#include <util/BasePlayer.h>
 #include <ivdebugoverlay.h>
 #include <in_buttons.h>
 
-static ConVar mybot_speed_factor("mybot_speed_factor", "9.0f");
+static ConVar mybot_speed_factor("mybot_speed_factor", "3.0f");
+static ConVar mybot_stuck_threshold("mybot_stuck_threshold", "0.02f");
 
 MoveState::MoveState(MoveStateContext& ctx) :
 		ctx(ctx) {
 	prevPos = Vector(0.0f, 0.0f, 0.0f);
-	moveDur = mybot_speed_factor.GetFloat()
+	durLimit = mybot_speed_factor.GetFloat()
 			* ctx.getGoal().DistTo(
 					ctx.getBlackboard().getSelf()->getCurrentPosition());
 	if (ctx.getType() & NAV_MESH_CROUCH) {
-		moveDur *= 1.6f;
+		durLimit *= 1.6f;
 	}
 }
 
-bool MoveState::checkStuck(const Vector& currentPos) {
-	float moved = currentPos.DistTo(prevPos);
+bool MoveState::checkStuck(const Vector& currentPos, const Vector& goal) {
+	float moved = prevPos.AsVector2D().DistTo(goal.AsVector2D())
+			- currentPos.AsVector2D().DistTo(goal.AsVector2D());
 	prevPos = currentPos;
-	return moved < ((ctx.getType() & NAV_MESH_CROUCH) ? 0.01f : 0.1f)
-			|| moveDur-- < 1;
+	return moveDur++ > durLimit ||
+			(moveDur > 100 && moved < mybot_stuck_threshold.GetFloat());
 }
 
 void MoveState::moveStraight(const Vector& destination) const {

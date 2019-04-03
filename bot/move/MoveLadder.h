@@ -9,7 +9,5 @@ public:
 	MoveState* move(const Vector& currPos);
 
 private:
-	bool shouldBeOnLadder;
-
 	float distance;
 };

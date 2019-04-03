@@ -7,9 +7,17 @@
  */
 class StepRight: public StepLeft {
 public:
-	StepRight(MoveStateContext& ctx) :
-			StepLeft(ctx) {
+	StepRight(MoveStateContext& ctx, float distance) :
+			StepLeft(ctx), distance(distance) {
 	}
 
 	MoveState* move(const Vector& currPos);
+
+private:
+	static Vector inverse2D(const Vector& dir);
+
+	float distance;
+
+	Avoid* buildAvoidState(const Vector& currPos) const;
+
 };

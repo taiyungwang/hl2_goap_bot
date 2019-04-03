@@ -70,6 +70,15 @@ bool DestroyObjectAction::execute() {
 	if (weapFunc->isExplosive()) {
 		targetLoc = targetEnt->GetCollideable()->GetCollisionOrigin();
 	}
+	if (weapFunc->isMelee() && !crouch) {
+		moveCtx->setGoal(
+				(targetLoc - self->getCurrentPosition()).Normalized()
+						* (dist - 25.0f) + self->getCurrentPosition());
+		CNavArea* area = Navigator::getArea(selfEnt);
+		moveCtx->traceMove();
+		moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
+		buttons.hold(IN_SPEED);
+	}
 	if (adjustAim) {
 		targetLoc = weapFunc->getAim(targetLoc, eyes);
 		adjustAim = false;
@@ -82,14 +91,6 @@ bool DestroyObjectAction::execute() {
 	extern ConVar mybot_debug;
 	if (crouch) {
 		buttons.hold(IN_DUCK);
-	}
-	if (weapFunc->isMelee() && !crouch) {
-		moveCtx->setGoal(
-				(targetLoc - self->getCurrentPosition()).Normalized()
-						* (dist - 25.0f) + self->getCurrentPosition());
-		CNavArea* area = Navigator::getArea(selfEnt);
-		moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
-		buttons.hold(IN_SPEED);
 	}
 	if (mybot_debug.GetBool()) {
 		extern IVDebugOverlay *debugoverlay;

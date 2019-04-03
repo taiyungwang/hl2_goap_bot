@@ -4,25 +4,23 @@
 #include <player/Bot.h>
 #include <player/Blackboard.h>
 #include <player/Button.h>
+#include <util/BasePlayer.h>
+#include <util/UtilTrace.h>
+#include <util/EntityUtils.h>
 #include <edict.h>
-
-const float MoveStateContext::TARGET_OFFSET = GenerationStepSize / 2.0f;
 
 MoveStateContext::~MoveStateContext() {
 	delete state;
 }
 
-MoveStateContext::MoveStateContext(Blackboard& blackboard) :
-		blackboard(blackboard) {
-	stuck = false;
-	type = NAV_MESH_INVALID;
-	state = new Stopped(*this);
-	ladderDir = CNavLadder::NUM_LADDER_DIRECTIONS;
-}
-
 void MoveStateContext::stop() {
-	delete state;
+	type = NAV_MESH_INVALID;
+	ladderDir = CNavLadder::NUM_LADDER_DIRECTIONS;
 	stuck = false;
+	targetOffset = 5.0f;
+	if (state != nullptr) {
+		delete state;
+	}
 	state = new Stopped(*this);
 }
 
@@ -59,10 +57,36 @@ const bool MoveStateContext::hasGoal() const {
 }
 
 bool MoveStateContext::reachedGoal() {
-	if ((goal - blackboard.getSelf()->getCurrentPosition()).AsVector2D().Length()
-			<= TARGET_OFFSET || blackboard.isOnLadder()) {
+	if (goal.AsVector2D().DistTo(blackboard.getSelf()->getCurrentPosition().AsVector2D())
+			<= targetOffset) {
 		stuck = false;
 		return true;
 	}
 	return false;
+}
+
+const trace_t& MoveStateContext::trace(Vector goal, edict_t* ignore) {
+	const Player* self = blackboard.getSelf();
+	Vector pos = self->getCurrentPosition();
+	static const float HALF_WIDTH = 16.0f;
+	static const float FOREHEAD = HumanHeight - HumanEyeHeight;
+	extern ConVar mybot_debug;
+	FilterList filter;
+	filter.add(self->getEdict()).add(BasePlayer(self->getEdict()).getGroundEntity())
+					.add(blackboard.getTarget()).add(ignore);
+	Vector mins(-HALF_WIDTH, -HALF_WIDTH, 0);
+	UTIL_TraceHull(pos, goal, mins,
+			Vector(HALF_WIDTH, HALF_WIDTH, self->getEyesPos().z - pos.z + FOREHEAD),
+			MASK_SOLID_BRUSHONLY, filter, &traceResult, mybot_debug.GetBool());
+	if (traceResult.DidHit() && !traceResult.allsolid &&
+			FClassnameIs(reinterpret_cast<IServerEntity*>(traceResult.m_pEnt)->GetNetworkable()->GetEdict()
+					, "worldspawn")) {
+		// check to see if worldspawn hit is below StepHeight (18.0f);
+		pos.z += StepHeight;
+		goal.z += StepHeight;
+		UTIL_TraceHull(pos, goal, mins,
+				Vector(HALF_WIDTH, HALF_WIDTH, self->getEyesPos().z - pos.z + FOREHEAD),
+				MASK_SOLID_BRUSHONLY, filter, &traceResult, mybot_debug.GetBool());
+	}
+	return traceResult;
 }
