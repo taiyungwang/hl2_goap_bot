@@ -51,6 +51,7 @@ void Planner::execute() {
 				getNextGoal();
 			} else {
 				state = State::ACTION;
+				actions[plan.Head()]->init();
 			}
 		}
 		break;

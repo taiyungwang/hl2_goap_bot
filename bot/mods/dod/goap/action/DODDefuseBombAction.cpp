@@ -13,19 +13,31 @@ DODDefuseBombAction::DODDefuseBombAction(Blackboard& blackboard) :
 	effects = {WorldProp::BOMB_DEFUSED, true};
 }
 
+bool DODDefuseBombAction::findTargetLoc() {
+	bool success = CapturePointAction::findTargetLoc();
+	targetRadius = 30.0f;
+	return success;
+}
+
 bool DODDefuseBombAction::execute() {
-	if (!GoToConsumableEntityAction::execute()) {
+	if (isDepleted()) {
+		return true;
+	}
+	if (!GoToEntityAction::execute()) {
 		return false;
 	}
-	if (!GoToAction::postCondCheck() || isDepleted()) {
+	if (!GoToAction::postCondCheck()) {
 		interruptable = true;
 		return true;
 	}
 	interruptable = false;
-	Vector itemPos = UTIL_FindGround(
-			item->GetCollideable()->GetCollisionOrigin());
-	itemPos.z += HumanHeight - 15.0f;
 	blackboard.getButtons().hold(IN_USE);
+	Vector itemPos = UTIL_FindGround(
+				item->GetCollideable()->GetCollisionOrigin());
+	itemPos.z += HumanEyeHeight - 15.0f;
+	if (blackboard.getSelf()->getEyesPos().z - itemPos.z > 10.0f) {
+		blackboard.getButtons().hold(IN_DUCK);
+	}
 	blackboard.setViewTarget(itemPos);
 	return false;
 }

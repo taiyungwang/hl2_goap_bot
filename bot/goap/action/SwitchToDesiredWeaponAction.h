@@ -9,7 +9,5 @@ public:
 		effects = {WorldProp::USING_DESIRED_WEAPON, true};
 	}
 
-	bool precondCheck();
-
 	bool execute();
 };

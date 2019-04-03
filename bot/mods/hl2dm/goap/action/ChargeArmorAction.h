@@ -14,4 +14,6 @@ public:
 
 private:
 	bool isFinished() const;
+
+	bool findTargetLoc();
 };

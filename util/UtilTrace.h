@@ -7,6 +7,7 @@
 #ifndef UTILS_VALVE_NAVMESH_UTIL_UTILTRACE_H_
 #define UTILS_VALVE_NAVMESH_UTIL_UTILTRACE_H_
 
+#include <utllinkedlist.h>
 #include <IEngineTrace.h>
 
 struct edict_t;
@@ -77,6 +78,26 @@ public:
 
 private:
 	unsigned int m_flags;
+};
+
+/**
+ * A filter that maintains a list of entities to ignore;
+ */
+class FilterList: public CTraceFilter {
+public:
+	virtual ~FilterList() {
+	}
+
+	/**
+	 * Adds a new entity to the list.  Null values are ignored.
+	 */
+	FilterList& add(edict_t* ignore);
+
+	virtual bool ShouldHitEntity(IHandleEntity *pHandleEntity,
+			int contentsMask);
+
+protected:
+	CUtlLinkedList<IHandleEntity*> ignore;
 };
 
 class FilterSelfAndTarget: public CTraceFilter {

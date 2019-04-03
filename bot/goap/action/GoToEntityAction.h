@@ -11,12 +11,11 @@ struct edict_t;
  */
 class GoToEntityAction: public GoToAction {
 public:
-
-	virtual bool precondCheck();
-
-	virtual bool postCondCheck();
+	void init();
 
 protected:
+	edict_t* item = nullptr;
+
 	GoToEntityAction(Blackboard& blackboard, const char* itemName);
 
 	/**
@@ -25,6 +24,9 @@ protected:
 	 */
 	CUtlLinkedList<edict_t*> items;
 
+	virtual void selectItem() {
+		selectItem(items);
+	}
 	/**
 	 * Choose the item to go to.  Expected item
 	 * to be set.
@@ -33,9 +35,5 @@ protected:
 	 */
 	virtual void selectItem(CUtlLinkedList<edict_t*>& active);
 
-	bool buildPathToEntity();
-	/**
-	 * Target item.
-	 */
-	edict_t* item = nullptr;
+	virtual bool findTargetLoc();
 };

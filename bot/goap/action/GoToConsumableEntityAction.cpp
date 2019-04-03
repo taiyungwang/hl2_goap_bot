@@ -1,27 +1,21 @@
 #include "GoToConsumableEntityAction.h"
 
+#include <player/Blackboard.h>
 #include <edict.h>
 
 bool GoToConsumableEntityAction::execute() {
 	if (!GoToEntityAction::execute()) {
 		return false;
 	}
-	if (isDepleted() && depleted.Find(item) == depleted.InvalidIndex()) {
-		depleted.AddToTail(item);
-	}
-	return true;
-}
-bool GoToConsumableEntityAction::postCondCheck() {
-	if (!GoToEntityAction::postCondCheck()) {
-		return false;
-	}
-	if (item != nullptr && isDepleted()) {
+	if (GoToAction::postCondCheck()
+		&& isDepleted()
+		&& depleted.Find(item) == depleted.InvalidIndex()) {
 		depleted.AddToTail(item);
 	}
 	return true;
 }
 
-bool GoToConsumableEntityAction::precondCheck() {
+void GoToConsumableEntityAction::selectItem() {
 	CUtlLinkedList<edict_t*> active;
 	FOR_EACH_LL(items, i)
 	{
@@ -39,6 +33,9 @@ bool GoToConsumableEntityAction::precondCheck() {
 			depleted.Remove(j);
 		}
 	}
-	selectItem(active);
-	return buildPathToEntity();
+	GoToEntityAction::selectItem(active);
+}
+
+bool GoToConsumableEntityAction::isDepleted() const {
+	return !isAvailable(item);
 }

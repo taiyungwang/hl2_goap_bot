@@ -16,10 +16,6 @@ public:
 
 	virtual bool execute();
 
-	virtual bool precondCheck() {
-		return objectiveResource != nullptr && GoToConsumableEntityAction::precondCheck();
-	}
-
 protected:
 	static bool isDetonationMap;
 
@@ -31,11 +27,11 @@ protected:
 
 	virtual bool isAvailable(int idx) const;
 
-	bool isDepleted() const {
-		return !isAvailable(item);
-	}
-
 	virtual bool isAvailable(edict_t* ent) const;
+
+	virtual bool findTargetLoc() {
+		return objectiveResource != nullptr && GoToEntityAction::findTargetLoc();
+	}
 private:
 
 	void selectItem(CUtlLinkedList<edict_t*>& active);

@@ -5,11 +5,6 @@
 #include <player/Blackboard.h>
 #include <player/Bot.h>
 
-bool DODDefendPointAction::precondCheck() {
-	duration = 0;
-	return CapturePointAction::precondCheck();
-}
-
 bool DODDefendPointAction::isAvailable(int idx) const {
 	return blackboard.getSelf()->getTeam()
 					== objectiveResource->getOwner()[idx]

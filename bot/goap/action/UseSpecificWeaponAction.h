@@ -8,10 +8,7 @@ public:
 
 	virtual bool precondCheck();
 
-	void init();
-
 protected:
-
 	int weapIdx = 0;
 
 	virtual bool canUse(const char* weaponName) const = 0;

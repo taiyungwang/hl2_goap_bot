@@ -96,6 +96,13 @@ public:
 		return startArea;
 	}
 
+	edict_t* getTarget() const {
+		return target;
+	}
+
+	void setTarget(edict_t* target) {
+		this->target = target;
+	}
 private:
 	const Bot* self;
 
@@ -111,7 +118,8 @@ private:
 
 	Navigator* navigator;
 
-	edict_t* blocker;
+	edict_t* blocker = nullptr,
+		* target = nullptr;
 
 	Vector viewTarget;
 

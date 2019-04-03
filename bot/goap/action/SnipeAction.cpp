@@ -15,33 +15,31 @@ HidingSpotSelector* SnipeAction::selector = nullptr;
 
 SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 	effects = {WorldProp::ENEMY_SIGHTED, true};
-	targetRadius = 0.0f;
+	targetRadius = 16.0f;
 }
 
 bool SnipeAction::precondCheck() {
 	deployed = false;
-	if (RandomInt(0, 1) == 0) {
-		return false;
-	}
-	auto self = blackboard.getSelf();
+	const Bot* self = blackboard.getSelf();
 	int team = self->getTeam();
-	selectorId = selector->select(targetLoc, team);
-	if (selectorId < 0) {
+	// TODO: consider better strategies to determine whether to snipe/camp?
+	if (RandomInt(1, 2) == 2) {
+		selector->resetInUse(selectorId, team);
 		return false;
 	}
-	GoToAction::precondCheck();
-	if (path.Count() == 0) {
+	if (!GoToAction::precondCheck()) {
+		selector->update(selectorId, team, false);
 		return false;
 	}
 	Vector pos = targetLoc;
 	pos.z += HumanCrouchHeight;
 	float furthest = 0.0f;
+	FilterSelf filter(self->getEdict()->GetIServerEntity());
 	for (float currFacing = -180.0f; currFacing < 180.0f; currFacing += 20.0f) {
 		QAngle angle(0.0f, currFacing, 0.0f);
 		Vector aim;
 		AngleVectors(angle, &aim);
 		trace_t result;
-		FilterSelf filter(self->getEdict()->GetIServerEntity());
 		UTIL_TraceLine(pos, pos + aim * 2000.0f,
 				CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_PLAYERCLIP,
 				NULL, COLLISION_GROUP_NONE, &result);
@@ -56,11 +54,15 @@ bool SnipeAction::precondCheck() {
 			facing = currFacing;
 		}
 	}
-	if (furthest < 1000000.0) {
-		return false;
-	}
 	duration = 300;
 	return true;
+}
+
+bool SnipeAction::findTargetLoc() {
+	auto self = blackboard.getSelf();
+	int team = self->getTeam();
+	selectorId = selector->select(targetLoc, team);
+	return selectorId >= 0;
 }
 
 bool SnipeAction::execute() {

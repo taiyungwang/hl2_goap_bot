@@ -12,10 +12,6 @@ public:
 
 	SnipeAction(Blackboard& blackboard);
 
-	virtual float getCost() const {
-		return 5.0f;
-	}
-
 	bool execute();
 
 	bool precondCheck();
@@ -34,4 +30,6 @@ private:
 
 	int duration = 0,
 		selectorId = -1;
+
+	bool findTargetLoc();
 };

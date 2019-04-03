@@ -7,20 +7,31 @@
 #include <edict.h>
 #include <in_buttons.h>
 
+bool ChargeAction::precondCheck() {
+	if (!GoToConsumableEntityAction::precondCheck()) {
+		return false;
+	}
+	targetRadius += 30.0f;
+	return true;
+}
 
 bool ChargeAction::execute() {
 	if (!GoToItemAction::execute()) {
 		return false;
 	}
-	if (isDepleted() || isFinished()) {
+	if (!GoToAction::postCondCheck() || isFinished()) {
+		return true;
+	}
+	if (isDepleted()) {
+		if (depleted.Find(item) == depleted.InvalidIndex()) {
+			depleted.AddToTail(item);
+		}
 		return true;
 	}
 	Vector itemPos = UTIL_FindGround(
 			item->GetCollideable()->GetCollisionOrigin());
 	itemPos.z += HumanHeight - 10.0f;
-	if (blackboard.getAimAccuracy(itemPos) > 0.96f) {
-		blackboard.getButtons().hold(IN_USE);
-	}
+	blackboard.getButtons().hold(IN_USE);
 	blackboard.setViewTarget(itemPos);
 	return false;
 }

@@ -13,10 +13,6 @@ public:
 
 	virtual bool execute();
 
-	virtual bool precondCheck();
-
-	virtual bool postCondCheck();
-
 protected:
 	/**
 	 * All items that are used.
@@ -33,5 +29,7 @@ protected:
 	/**
 	 * Check to see if current entity is depleted
 	 */
-	virtual bool isDepleted() const = 0;
+	virtual bool isDepleted() const;
+
+	virtual void selectItem();
 };

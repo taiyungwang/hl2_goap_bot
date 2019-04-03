@@ -15,12 +15,12 @@ bool UseSpecificWeaponAction::precondCheck() {
 		const char* name = Armory::getWeaponName(weapons.Key(i));
 		if (name != nullptr && canUse(name)) {
 			weapIdx = weapons.Key(i);
-			return armory.getWeapon(weapIdx) != nullptr;
+			if (armory.getWeapon(weapIdx) == nullptr) {
+				return false;
+			}
+			armory.setDesiredWeaponIdx(weapIdx);
+			return true;
 		}
 	}
 	return false;
-}
-
-void UseSpecificWeaponAction::init() {
-	armory.setDesiredWeaponIdx(weapIdx);
 }

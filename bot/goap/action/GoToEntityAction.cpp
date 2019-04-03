@@ -10,36 +10,30 @@ GoToAction(blackboard) {
 	findEntWithMatchingName(itemName, items);
 }
 
-bool GoToEntityAction::precondCheck() {
-	selectItem(items);
-	return buildPathToEntity();
+void GoToEntityAction::init() {
+	GoToAction::init();
+	blackboard.setTarget(item);
 }
 
-bool GoToEntityAction::postCondCheck() {
-	item = nullptr;
-	return GoToAction::postCondCheck();
-}
-
-static const float PYTHAG_CONST = M_SQRT1_2 / 2.0f;
-
-bool GoToEntityAction::buildPathToEntity() {
-	bool foundItem = item != nullptr;
-	if (foundItem) {
-		auto collide = item->GetCollideable();
-		targetLoc = collide->GetCollisionOrigin();
-		Vector min, max;
-		collide->WorldSpaceTriggerBounds(&min, &max);
-		if (targetLoc.x == 0 && targetLoc.y == 0 && targetLoc.z == 0) {
-			// look for trigger zone
-			targetLoc = (min + max) / 2.0f;
-			targetLoc.z = min.z;
-		}
-		if (min.DistTo(max) > 0.0f) {
-			max.z = min.z;
-			targetRadius = MAX(25.0f, max.DistTo(min) * PYTHAG_CONST);
-		}
+bool GoToEntityAction::findTargetLoc() {
+	selectItem();
+	if (item == nullptr) {
+		return false;
 	}
-	return foundItem && GoToAction::precondCheck();
+	auto collide = item->GetCollideable();
+	targetLoc = collide->GetCollisionOrigin();
+	Vector min, max;
+	collide->WorldSpaceTriggerBounds(&min, &max);
+	if (targetLoc.x == 0 && targetLoc.y == 0 && targetLoc.z == 0) {
+		// look for trigger zone
+		targetLoc = (min + max) / 2.0f;
+		targetLoc.z = min.z;
+	}
+	if (min.DistTo(max) > 0.0f) {
+		max.z = min.z;
+		targetRadius = max.DistTo(min) / 2.0f;
+	}
+	return true;
 }
 
 void GoToEntityAction::selectItem(CUtlLinkedList<edict_t*>& active) {

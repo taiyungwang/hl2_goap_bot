@@ -90,6 +90,7 @@ bool CapturePointAction::isAvailable(int idx) const {
 
 void CapturePointAction::selectItem(CUtlLinkedList<edict_t*>& active) {
 	if (active.Count() == 0) {
+		item = nullptr;
 		return;
 	}
 	if (active.Count() == 1) {

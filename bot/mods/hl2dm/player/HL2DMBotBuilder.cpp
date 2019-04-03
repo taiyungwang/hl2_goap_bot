@@ -24,10 +24,9 @@
 
 void HL2DMBotBuilder::updatePlanner(Planner& planner,
 		Blackboard& blackboard) const {
+	planner.addAction<UseGravityGunAction>(0.7f);
 	planner.addAction<ChargeArmorAction>(0.51f);
 	planner.addAction<GetBatteryAction>(0.5f);
-	planner.addAction<UseGravityGunAction>(0.9f);
-	planner.addAction<DestroyObjectAction>(0.9f);
 }
 
 void HL2DMBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {

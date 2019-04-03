@@ -12,5 +12,5 @@ public:
 		effects = {WorldProp::ARMOR_FULL, true};
 	}
 
-	bool precondCheck();
+	bool findTargetLoc();
 };

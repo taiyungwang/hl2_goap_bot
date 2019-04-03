@@ -8,7 +8,6 @@
 
 FindCoverAction::FindCoverAction(Blackboard& blackboard) :
 		GoToAction(blackboard) {
-	precond.Insert(WorldProp::WEAPON_LOADED, false);
 	effects = {WorldProp::ENEMY_SIGHTED, false};
 }
 
@@ -30,6 +29,19 @@ bool FindCoverAction::operator() ( CNavArea *area, CNavArea *priorArea, float tr
 }
 
 bool FindCoverAction::precondCheck() {
+	if(!GoToAction::precondCheck()) {
+		return false;
+	}
+	CNavArea* targetArea = Navigator::getArea(getTarget());
+	for (int i = 0; i < path.Count(); i++)  {
+		if (path[i] == targetArea) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool FindCoverAction::findTargetLoc() {
 	edict_t* target = getTarget();
 	if (target == nullptr) {
 		return false;
@@ -37,16 +49,7 @@ bool FindCoverAction::precondCheck() {
 	this->hideArea = nullptr;
 	currentArea = Navigator::getArea(blackboard.getSelf()->getEdict());
 	SearchSurroundingAreas(currentArea, *this);
-	if (hideArea == nullptr || !GoToAction::precondCheck()) {
-		return false;
-	}
-	CNavArea* targetArea = Navigator::getArea(target);
-	for (int i = 0; i < path.Count(); i++)  {
-		if (path[i] == targetArea) {
-			return false;
-		}
-	}
-	return true;
+	return hideArea != nullptr;
 }
 
 void FindCoverAction::PostSearch( void ) {

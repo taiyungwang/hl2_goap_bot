@@ -13,13 +13,11 @@ public:
 
 	virtual bool execute();
 
-	void init();
+	virtual void init();
 
 	virtual bool precondCheck();
 
-	virtual float getCost() const {
-		return path.Count();
-	}
+	virtual float getCost();
 
 	virtual bool postCondCheck();
 
@@ -32,8 +30,10 @@ protected:
 
 	Vector targetLoc;
 
-	float targetRadius = 25.0f;
+	float targetRadius = 5.0f;
 
 	GoToAction(Blackboard& blackboard): Action(blackboard) {
 	}
+
+	virtual bool findTargetLoc() = 0;
 };

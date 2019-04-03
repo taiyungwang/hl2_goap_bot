@@ -11,9 +11,11 @@ public:
 			GoToItemAction(name, "CBaseAnimating", "m_flCycle", blackboard) {
 	}
 
-	float getCost() const {
-		return 2.0f + GoToItemAction::getCost();
+	float getCost() {
+		return 2.0f + GoToAction::getCost();
 	}
+
+	bool precondCheck();
 
 	bool execute();
 

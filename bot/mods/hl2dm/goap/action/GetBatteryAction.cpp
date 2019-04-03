@@ -3,7 +3,6 @@
 #include <player/Blackboard.h>
 #include <player/Bot.h>
 
-bool GetBatteryAction::precondCheck() {
-	return !GoToItemAction::precondCheck()
-			|| blackboard.getSelf()->getArmor() < 100;
+bool GetBatteryAction::findTargetLoc() {
+	return blackboard.getSelf()->getArmor() < 100 && GoToEntityAction::findTargetLoc();
 }

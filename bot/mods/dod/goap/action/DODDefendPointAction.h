@@ -9,8 +9,6 @@ public:
 		effects = {WorldProp::POINTS_DEFENDED, true};
 	}
 
-	virtual bool precondCheck();
-
 	virtual bool execute() {
 		return GoToAction::execute() && GoToAction::postCondCheck() && duration++ < 1000;
 	}

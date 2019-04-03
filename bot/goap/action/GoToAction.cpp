@@ -2,7 +2,11 @@
 
 #include <move/Navigator.h>
 #include <player/Blackboard.h>
+#include <player/Bot.h>
 
+float GoToAction::getCost() {
+	return findTargetLoc() ? targetLoc.DistTo(blackboard.getSelf()->getCurrentPosition()) : INFINITY;
+}
 
 bool GoToAction::execute() {
 	return blackboard.getNavigator()->step();

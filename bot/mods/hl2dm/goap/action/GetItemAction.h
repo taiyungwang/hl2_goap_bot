@@ -13,8 +13,4 @@ protected:
 
 private:
 	bool isAvailable(edict_t *) const;
-
-	bool isDepleted() const {
-		return !isAvailable(item);
-	}
 };

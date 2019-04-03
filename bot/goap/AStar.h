@@ -64,7 +64,7 @@ private:
 
 	CUtlPriorityQueue<Node*> openSet;
 
-	CUtlVector<const Node*> start;
+	const Node* start = nullptr;
 
 	/**
 	 * Gets the neighbors for the current node.  Selects the best edge

@@ -8,9 +8,9 @@ public:
 		effects = {WorldProp::IS_BLOCKED, false};
 	}
 
-	virtual bool precondCheck();
+	bool precondCheck();
 
-	virtual bool execute();
+	bool execute();
 
 protected:
 	virtual bool canUse(const char* weaponName) const;

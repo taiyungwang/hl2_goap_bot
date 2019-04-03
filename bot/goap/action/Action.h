@@ -41,7 +41,7 @@ public:
 		return true;
 	}
 
-	virtual float getCost() const {
+	virtual float getCost() {
 		return 1.0f;
 	}
 

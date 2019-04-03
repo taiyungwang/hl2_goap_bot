@@ -2,6 +2,7 @@
 
 #include "action/Action.h"
 #include <util/SimpleException.h>
+#include <utlstring.h>
 
 template<typename T, typename U>
 bool operator==(const CUtlMap<T, U>& m1, const CUtlMap<T, U>& m2) {
@@ -47,7 +48,7 @@ void AStar::addAction(Action* action) {
 
 void AStar::startSearch(const GoalState& goal) {
 	openSet.RemoveAll();
-	start.RemoveAll();
+	start = nullptr;
 	FOR_EACH_VEC(nodes, i)
 	{
 		nodes[i].isOpen = nodes[i].isClosed = false;
@@ -78,14 +79,15 @@ bool AStar::searchStep() {
 			break;
 		}
 	}
+	current.isClosed = true;
+	current.isOpen = false;
 	if (!foundGoal) { // no goals need to be satisfied
-		if (current.parent != -1) {
-			start.AddToTail(&current);
+		if (current.parent != -1
+				&& (start == nullptr || current.gScore < start->gScore)) {
+			start = &current;
 		}
 		return openSet.Count() == 0;
 	}
-	current.isClosed = true;
-	current.isOpen = false;
 	const auto& efxIdx = efxToActions.Find(goal);
 	if (!efxToActions.IsValidIndex(efxIdx)) {
 		// no actions can satisfy this precondition.
@@ -116,20 +118,17 @@ bool AStar::searchStep() {
 					goalState.Insert(prop, precond[j]);
 					currState.Insert(prop, worldState[worldState.Find(prop)]);
 				} else if (precond[j] != goalState[k]) {
+					throw SimpleException(CUtlString("Goal state conflict for prop, ")
+							+ static_cast<int>(prop));
 					goalStateConflict = true;
 					break;
 				}
-			}
-			if (goalStateConflict) {
-				// throw exception ?
-				continue;
 			}
 		}
 		float tentativeGScore = current.gScore + getEdgeCost(action);
 		if (tentativeGScore >= neighbor.gScore) {
 			continue;
 		}
-		action->init(); // TODO: hack to get switchdesireweapon to work.
 		neighbor.parent = current.id;
 		neighbor.gScore = tentativeGScore;
 		neighbor.fScore = neighbor.gScore + getHeuristicCost(neighbor);
@@ -139,22 +138,14 @@ bool AStar::searchStep() {
 
 void AStar::getPath(CUtlQueue<int>& path) const {
 	path.RemoveAll();
-	if (start.IsEmpty()) {
+	if (start == nullptr) {
 		return;
 	}
-	float lowestCost = INFINITY;
-	int lowestStart = -1;
-	FOR_EACH_VEC(start, i) {
-		float cost = 0.0f;
-		for (int j = start[i]->id; j != nodes.Count() - 1; j = nodes[j].parent) {
-			cost += actions[nodes[j].id]->getCost();
+	for (int i = start->id; i != nodes.Count() - 1; i = nodes[i].parent) {
+		if (!actions[nodes[i].id]->precondCheck()) {
+			path.RemoveAll();
+			return;
 		}
-		if (cost < lowestCost) {
-			lowestStart = i;
-			lowestCost = cost;
-		}
-	}
-	for (int i = start[lowestStart]->id; i != nodes.Count() - 1; i = nodes[i].parent) {
 		path.Insert(nodes[i].id);
 	}
 }
@@ -164,9 +155,6 @@ void AStar::getNeighbors(CUtlVector<int>& neighbors,
 	FOR_EACH_VEC(availableNeighbors, i)
 	{
 		Action& availableAction = *(actions[availableNeighbors[i]]);
-		if (!availableAction.precondCheck()) {
-			continue;
-		}
 		bool addAction = true;
 		FOR_EACH_VEC(neighbors, j)
 		{
