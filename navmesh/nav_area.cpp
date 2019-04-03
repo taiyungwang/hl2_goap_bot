@@ -4771,7 +4771,7 @@ bool CNavArea::checkTeamVisibility(int teamIndex, const CNavArea* from,
 		VisCheck visCheck) const {
 	VPROF_BUDGET("CNavArea::IsPotentiallyVisibleToTeam", "NextBot");
 
-	for (int i = 0; i < gpGlobals->maxClients; ++i) {
+	for (int i = 1; i <= gpGlobals->maxClients; ++i) {
 		edict_t *pEnt = engine->PEntityOfEntIndex(i);
 		if (pEnt) {
 			IPlayerInfo* player = playerinfomanager->GetPlayerInfo(pEnt);
