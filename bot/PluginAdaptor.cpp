@@ -72,7 +72,7 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		if (TheNavMesh->Load() == NAV_OK) {
 			botBuilder->onNavMeshLoad();
 			Msg("Loaded Navigation mesh.\n");
-			for (int i = gpGlobals->maxClients; i < gpGlobals->maxEntities; i++) {
+			for (int i = gpGlobals->maxClients + 1; i < gpGlobals->maxEntities; i++) {
 				edict_t* ent = engine->PEntityOfEntIndex(i);
 				if (ent != nullptr && !ent->IsFree() && ent->GetIServerEntity() != nullptr
 						&& FClassnameIs(ent, "prop_dynamic")) {
@@ -80,12 +80,14 @@ void PluginAdaptor::gameFrame(bool simulating) {
 				}
 			}
 		}
+		/*
+		 * TODO: figure out why setting spawn name causes nav_mark_walkable to fail.
 		if (Q_stristr(modPath, "dod")) {
 			TheNavMesh->SetPlayerSpawnName("info_player_axis");
 			TheNavMesh->AddWalkableSeeds();
 			TheNavMesh->SetPlayerSpawnName("info_player_allies");
 			// allied walkable seed will be added if nav is generated.
-		}
+		}**/
 		navMeshLoadAttempted = true;
 	}
 	if (TheNavMesh != nullptr) {
