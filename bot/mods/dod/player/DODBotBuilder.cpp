@@ -68,7 +68,7 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 
 		bool precondCheck() {
 			if (GoToEntityAction::precondCheck()) {
-				blackboard.setStartArea(path[path.Count() - 1]);
+				blackboard.setStartArea(path[0]);
 				return true;
 			}
 			return false;
@@ -85,23 +85,29 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 				return false;
 			}
 			if (DodPlayer(blackboard.getSelf()->getEdict()).isProne()) {
-				blackboard.getButtons().tap(IN_ALT1);
+				if (!unproned) {
+					blackboard.getButtons().tap(IN_ALT1);
+					unproned = true;
+				}
 				return false;
 			}
+			unproned = false;
 			return true;
 		}
+
+		bool unproned = false;
 	};
 	// TODO: hacky way of overriding the default navigator
 	delete blackboard.getNavigator();
 	blackboard.setNavigator(new DODNavigator(blackboard));
-	planner.addAction<DODGetBombAction>(0.0f);
-	planner.addAction<DODDestroyObjectAction>(0.8f);
-	planner.addAction<DODBombTargetAction>(0.62f);
-	planner.addAction<DODDefuseBombAction>(0.63f);
-	planner.addAction<CapturePointAction>(0.61f);
 	planner.addAction<DODUseFragGrenadeAction>(0.92f);
-	planner.addAction<DODUseSmokeGrenadeAction>(0.91f);
 	planner.addAction<DODUseRifleGrenadeAction>(0.92f);
+	planner.addAction<DODUseSmokeGrenadeAction>(0.91f);
+	planner.addAction<DODDestroyObjectAction>(0.7f);
+	planner.addAction<DODDefuseBombAction>(0.63f);
+	planner.addAction<DODBombTargetAction>(0.62f);
+	planner.addAction<CapturePointAction>(0.61f);
+	planner.addAction<DODGetBombAction>(0.0f);
 }
 
 bool DODBotBuilder::handle(EventInfo* event) {
