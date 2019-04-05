@@ -12,6 +12,7 @@ void World::reset() {
 	states.Insert(WorldProp::ENEMY_SIGHTED, false);
 	states.Insert(WorldProp::MULTIPLE_ENEMY_SIGHTED, false);
 	states.Insert(WorldProp::HURT, false);
+	states.Insert(WorldProp::HEALTH_FULL, true);
 	states.Insert(WorldProp::IS_BLOCKED, false);
 	states.Insert(WorldProp::USING_BEST_WEAP, false);
 	states.Insert(WorldProp::WEAPON_LOADED, true);
@@ -31,7 +32,8 @@ bool World::think(Blackboard& blackboard) {
 	edict_t* blocker = blackboard.getBlocker();
 	bool inRange = true;
 	const Player* enemy = blackboard.getTargetedPlayer();
-	const Vector& pos = blackboard.getSelf()->getCurrentPosition();
+	const Bot* self = blackboard.getSelf();
+	const Vector& pos = self->getCurrentPosition();
 	const Weapon* weap = armory.getCurrWeapon();
 	if (enemy == nullptr) {
 		inRange = true;
@@ -66,8 +68,9 @@ bool World::think(Blackboard& blackboard) {
 		updateState(WorldProp::WEAPON_LOADED,
 				!currWeap->isClipEmpty());
 		updateState(WorldProp::OUT_OF_AMMO,
-				currWeap->isOutOfAmmo(blackboard.getSelf()->getEdict()));
+				currWeap->isOutOfAmmo(self->getEdict()));
 	}
+	updateState(WorldProp::HEALTH_FULL, self->getHealth() >= self->getMaxHealth());
 	bool hurt = states[states.Find(WorldProp::HURT)];
 	updateState(WorldProp::HURT, false);
 	updateState(WorldProp::IS_BLOCKED, blackboard.getBlocker() != nullptr);

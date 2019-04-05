@@ -42,6 +42,14 @@ int Player::getArmor() const {
 	return info->GetArmorValue();
 }
 
+int Player::getHealth() const {
+	return info->GetHealth();
+}
+
+int Player::getMaxHealth() const {
+	return info->GetMaxHealth();
+}
+
 QAngle Player::getAngle() const {
 	return info->GetLastUserCommand().viewangles;
 }

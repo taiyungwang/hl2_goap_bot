@@ -6,8 +6,3 @@
 bool ChargeArmorAction::isFinished() const {
 	return blackboard.getSelf()->getArmor() >= 200;
 }
-
-bool ChargeArmorAction::findTargetLoc() {
-	return blackboard.getSelf()->getArmor() < 200
-			&& GoToEntityAction::findTargetLoc();
-}

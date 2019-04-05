@@ -47,6 +47,10 @@ public:
 
 	int getArmor() const;
 
+	int getHealth() const;
+
+	int getMaxHealth() const;
+
 	QAngle getAngle() const;
 
 	Vector getFacing() const;

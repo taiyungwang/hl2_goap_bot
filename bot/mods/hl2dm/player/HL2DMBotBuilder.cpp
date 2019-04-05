@@ -1,6 +1,8 @@
 #include "HL2DMBotBuilder.h"
 
 #include "HL2DMWorld.h"
+#include <player/Blackboard.h>
+#include <player/Bot.h>
 #include <goap/Planner.h>
 #include <goap/action/DestroyObjectAction.h>
 #include <goap/action/GoToAction.h>
@@ -24,7 +26,34 @@
 
 void HL2DMBotBuilder::updatePlanner(Planner& planner,
 		Blackboard& blackboard) const {
+	/**
+	 * Defines the action for using a suit charger
+	 */
+	class ChargeHealthAction: public ChargeAction {
+	public:
+		ChargeHealthAction(Blackboard& blackboard) :
+				ChargeAction("item_healthcharger", blackboard) {
+			effects = {WorldProp::HEALTH_FULL, true};
+		}
+
+	private:
+		bool isFinished() const {
+			return blackboard.getSelf()->getHealth()
+					>= blackboard.getSelf()->getMaxHealth();
+		}
+	};
+
+	class GetHealthKitAction: public GetItemAction {
+	public:
+		GetHealthKitAction(Blackboard& blackboard) :
+				GetItemAction("item_healthkit", blackboard) {
+			effects = {WorldProp::HEALTH_FULL, true};
+		}
+	};
+
 	planner.addAction<UseGravityGunAction>(0.7f);
+	planner.addAction<ChargeHealthAction>(0.53f);
+	planner.addAction<GetHealthKitAction>(0.52f);
 	planner.addAction<ChargeArmorAction>(0.51f);
 	planner.addAction<GetBatteryAction>(0.5f);
 }

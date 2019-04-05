@@ -11,6 +11,4 @@ public:
 			GetItemAction("item_battery", blackboard) {
 		effects = {WorldProp::ARMOR_FULL, true};
 	}
-
-	bool findTargetLoc();
 };
