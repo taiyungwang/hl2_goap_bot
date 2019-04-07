@@ -34,8 +34,7 @@ void GoToEntityAction::setTargetLocAndRadius(edict_t* target) {
 		targetLoc = (min + max) / 2.0f;
 		targetLoc.z = min.z;
 		max.z = min.z;
-		min.x = targetLoc.x;
-		targetRadius = min.DistTo(targetLoc);
+		targetRadius = MIN(targetLoc.x - min.x, targetLoc.y - min.y);
 	}
 }
 
