@@ -9,6 +9,9 @@
 #include <util/EntityUtils.h>
 #include <edict.h>
 
+float MoveStateContext::SELF_RADIUS = 15.0f,
+	MoveStateContext::TARGET_OFFSET = 5.0f;
+
 MoveStateContext::~MoveStateContext() {
 	delete state;
 }
@@ -17,7 +20,7 @@ void MoveStateContext::stop() {
 	type = NAV_MESH_INVALID;
 	ladderDir = CNavLadder::NUM_LADDER_DIRECTIONS;
 	stuck = false;
-	targetOffset = 5.0f;
+	targetOffset = 0.0f;
 	if (state != nullptr) {
 		delete state;
 	}
@@ -33,7 +36,7 @@ void MoveStateContext::move(int type) {
 		state = newState;
 	}
 	// do look
-	Vector look = blackboard.isOnLadder() ? ladderEnd: getGoal();
+	Vector look = ladderDir != CNavLadder::NUM_LADDER_DIRECTIONS ? ladderEnd: getGoal();
 	if (ladderDir != CNavLadder::LADDER_DOWN) {
 		look.z += blackboard.getSelf()->getEyesPos().DistTo(pos);
 	}
@@ -56,9 +59,11 @@ const bool MoveStateContext::hasGoal() const {
 	return dynamic_cast<Stopped*>(state) == nullptr;
 }
 
-bool MoveStateContext::reachedGoal() {
-	if (goal.AsVector2D().DistTo(blackboard.getSelf()->getCurrentPosition().AsVector2D())
-			<= targetOffset) {
+bool MoveStateContext::reachedGoal(float targetOffset) {
+	const Vector& pos = blackboard.getSelf()->getCurrentPosition();
+	if (((goal.z > pos.z && goal.z - pos.z < 20.0f) || pos.z - goal.z < HumanHeight)
+			&& goal.AsVector2D().DistTo(pos.AsVector2D())
+			<= targetOffset + SELF_RADIUS + TARGET_OFFSET) {
 		stuck = false;
 		return true;
 	}

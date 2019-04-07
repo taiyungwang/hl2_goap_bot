@@ -10,4 +10,5 @@ public:
 
 private:
 	float distance;
+	bool startedClimbing = false;
 };

@@ -14,6 +14,15 @@ class CBotCmd;
 class MoveStateContext {
 public:
 	/**
+	 * Radius of bot
+	 */
+	static float SELF_RADIUS,
+	/**
+	 * Margin of error for to consider a position reached.
+	 */
+	TARGET_OFFSET;
+
+	/**
 	 * @param pos Current position
 	 */
 	MoveStateContext(Blackboard& blackboard) :
@@ -57,7 +66,11 @@ public:
 	 */
 	const bool hasGoal() const;
 
-	bool reachedGoal();
+	bool reachedGoal() {
+		return reachedGoal(targetOffset);
+	}
+
+	bool reachedGoal(float targetOffset);
 
 	void setLadderDir(CNavLadder::LadderDirectionType ladderDir) {
 		this->ladderDir = ladderDir;

@@ -21,19 +21,19 @@ protected:
 
 	static DODObjectiveResource *objectiveResource;
 
-	static CUtlMap<edict_t*, int> capPoints;
+	static CUtlMap<edict_t*, int> ctrlPoints;
 
-	static CUtlVector<CCopyableUtlVector<edict_t*>> bombs;
+	static CUtlVector<CCopyableUtlVector<edict_t*>> capTarget;
 
 	virtual bool isAvailable(int idx) const;
 
 	virtual bool isAvailable(edict_t* ent) const;
 
-	virtual bool findTargetLoc() {
-		return objectiveResource != nullptr && GoToEntityAction::findTargetLoc();
-	}
-private:
+	virtual bool findTargetLoc();
 
-	void selectItem(CUtlLinkedList<edict_t*>& active);
+private:
+	static void addCapTarget(const Vector& pos, const CUtlLinkedList<edict_t*>& targets);
+
+	void selectFromActive(CUtlLinkedList<edict_t*>& active);
 
 };

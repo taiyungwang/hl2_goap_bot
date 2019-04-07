@@ -58,14 +58,17 @@ bool Navigator::step() {
 		} else if (getPortal(lastAreaEnd, lastArea, path->Top())) {
 			Vector topAreaStart;
 			path->Top()->GetClosestPointOnArea(lastAreaEnd, &topAreaStart);
-			attributes = path->Top()->GetAttributes();
-			if (!canMoveTo(topAreaStart) || (attributes & NAV_MESH_PRECISE)) {
-				topAreaStart = path->Top()->GetCenter();
+			if (lastArea->GetAttributes() & NAV_MESH_PRECISE) {
+				attributes = lastArea->GetAttributes();
+			}
+			if ((area != lastArea && ((attributes & NAV_MESH_JUMP)
+					|| (attributes & NAV_MESH_PRECISE))) || !canMoveTo(topAreaStart)) {
+				topAreaStart = lastArea->GetCenter();
 				moveCtx->trace(topAreaStart);
 			}
 			// TODO: magic number.  Do we need some sort of logic to see if this is valid?
-			if (topAreaStart.AsVector2D().DistTo(loc.AsVector2D()) > 60.0f
-					&& (attributes & NAV_MESH_JUMP)) {
+			if ((attributes & NAV_MESH_JUMP)
+					&& lastAreaEnd.AsVector2D().DistTo(loc.AsVector2D()) > 40.0f) {
 				attributes = NAV_MESH_INVALID;
 			}
 			moveCtx->setGoal(topAreaStart);
@@ -79,30 +82,6 @@ bool Navigator::step() {
 				moveCtx->getGoal(), 0, 255, 255, true,
 				NDEBUG_PERSIST_TILL_NEXT_SERVER);
 	}
-	/**
-	 * TODO: consider adding repathing for situations where bot is pushed off path.
-	 *
-	Vector end;
-	if (lastArea != nullptr && area != lastArea && area != nullptr
-			&& !getPortal(end, area, lastArea)
-			&& !moveCtx->nextGoalIsLadderStart() && !blackboard.isOnLadder()) {
-		trace_t result;
-		Vector begin = loc;
-		lastArea->GetClosestPointOnArea(loc, &end);
-		begin.z += StepHeight;
-		end.z += StepHeight;
-		FilterSelf filter(self->getEdict()->GetIServerEntity());
-		UTIL_TraceLine(begin, end, MASK_NPCSOLID_BRUSHONLY, &filter, &result);
-		if (result.DidHit()) {
-			if (!buildPath(finalGoal, *path)) {
-				Warning("Repath Failed.\n");
-				return true;
-			}
-			start(path, finalGoal, targetRadius);
-		}
-
-	}
-	 */
 	return false;
 }
 
@@ -230,7 +209,9 @@ void Navigator::getNextArea() {
 			|| moveCtx->nextGoalIsLadderStart()) {
 		return;
 	}
-	if (lastArea == nullptr
+	if (lastArea == nullptr || (lastArea == getArea(self->getEdict())
+			&& !(lastArea->GetAttributes() & NAV_MESH_PRECISE)
+			&& !(path->Top()->GetAttributes() & NAV_MESH_JUMP))
 			|| !moveCtx->hasGoal()) {
 		path->Pop(lastArea);
 		return;
@@ -247,6 +228,8 @@ void Navigator::getNextArea() {
 	if (path->Count() > 1) {
 		CNavArea* nextArea = path->Element(path->Count() - 2);
 		if ((nextArea->GetAttributes() & NAV_MESH_JUMP)
+				// don't skip to an area that is too far below.
+				|| self->getCurrentPosition().z - nextArea->GetCenter().z > 100.0f
 				|| !getPortal(goal, path->Top(), nextArea)
 				|| !canMoveTo(goal)) {
 			return;
@@ -258,11 +241,7 @@ void Navigator::getNextArea() {
 }
 
 bool Navigator::reachedGoal() const {
-	Vector pos = blackboard.getSelf()->getCurrentPosition();
-	return ((finalGoal.z > pos.z && finalGoal.z - pos.z < 20.0f)
-			|| pos.z - finalGoal.z < HumanHeight)
-			&& finalGoal.AsVector2D().DistTo(pos.AsVector2D())
-			<= targetRadius;
+	return path->Count() == 0 && moveCtx->reachedGoal(targetRadius);
 }
 
 bool Navigator::findLadder(const CNavArea* from, const CNavArea* to) {
@@ -285,12 +264,12 @@ bool Navigator::findLadder(const CNavArea* from, const CNavArea* to) {
 					to->GetClosestPointOnArea(*start, &end);
 					end.x = ladder->m_top.x;
 					end.y = ladder->m_top.y;
-					// the top the ladder is guaranteed to be human height
-					end.z += HumanHeight;
+					// the top the ladder is guaranteed to be above human height
+					end.z += 3.0f * HumanHeight;
 				}
 				float delta = end.z - blackboard.getSelf()->getCurrentPosition().z;
 				if ((delta < 0.0f && delta >= -StepHeight)
-						|| delta <= HumanHeight + moveCtx->getTargetOffset()) {
+						|| delta <= HumanHeight + MoveStateContext::TARGET_OFFSET) {
 					// bot already got off the ladder
 					return false;
 				}
@@ -312,7 +291,7 @@ bool Navigator::getPortal(Vector& portal, const CNavArea* from, const CNavArea* 
 		FOR_EACH_VEC(*connections, j)
 		{
 			if (connections->Element(j).area == to) {
-				to->ComputePortal(from, dir, &portal);
+				from->ComputePortal(to, dir, &portal);
 				return true;
 			}
 		}

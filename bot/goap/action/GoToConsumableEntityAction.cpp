@@ -33,7 +33,7 @@ void GoToConsumableEntityAction::selectItem() {
 			depleted.Remove(j);
 		}
 	}
-	GoToEntityAction::selectItem(active);
+	selectFromActive(active);
 }
 
 bool GoToConsumableEntityAction::isDepleted() const {

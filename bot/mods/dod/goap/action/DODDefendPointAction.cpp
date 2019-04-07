@@ -14,7 +14,7 @@ bool DODDefendPointAction::isAvailable(int idx) const {
 }
 
 bool DODDefendPointAction::isBombInState(int idx, int state) const {
-	auto& targets = bombs[idx];
+	auto& targets = capTarget[idx];
 	FOR_EACH_VEC(targets, i) {
 		if (DODBombTarget(targets[i]).getState() == state) {
 			return true;

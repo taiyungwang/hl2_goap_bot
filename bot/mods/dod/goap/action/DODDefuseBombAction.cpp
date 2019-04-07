@@ -14,9 +14,11 @@ DODDefuseBombAction::DODDefuseBombAction(Blackboard& blackboard) :
 }
 
 bool DODDefuseBombAction::findTargetLoc() {
-	bool success = CapturePointAction::findTargetLoc();
+	if (!CapturePointAction::findTargetLoc()) {
+		return false;
+	}
 	targetRadius = 30.0f;
-	return success;
+	return true;
 }
 
 bool DODDefuseBombAction::execute() {

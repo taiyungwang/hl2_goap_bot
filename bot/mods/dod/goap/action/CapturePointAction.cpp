@@ -12,9 +12,9 @@ bool CapturePointAction::isDetonationMap = false;
 
 DODObjectiveResource* CapturePointAction::objectiveResource = nullptr;
 
-CUtlMap<edict_t*, int> CapturePointAction::capPoints;
+CUtlMap<edict_t*, int> CapturePointAction::ctrlPoints;
 
-CUtlVector<CCopyableUtlVector<edict_t*>> CapturePointAction::bombs;
+CUtlVector<CCopyableUtlVector<edict_t*>> CapturePointAction::capTarget;
 
 CapturePointAction::CapturePointAction(Blackboard& blackboard) :
 		GoToConsumableEntityAction(blackboard, "dod_control_point") {
@@ -37,14 +37,15 @@ bool CapturePointAction::execute() {
 
 void CapturePointAction::startRound() {
 	endRound();
-	SetDefLessFunc(capPoints);
+	SetDefLessFunc(ctrlPoints);
 	objectiveResource = new DODObjectiveResource();
 	const Vector* position = objectiveResource->getCapturePositions();
-	CUtlLinkedList<edict_t*> points, bombsOnMap;
+	CUtlLinkedList<edict_t*> points, bombsOnMap, capArea;
 	findEntWithSubStrInName("dod_control_point", points);
 	findEntWithSubStrInName("dod_bomb_target", bombsOnMap);
+	findEntWithSubStrInName("dod_capture_area", capArea);
 	for (int i = 0; i < objectiveResource->numCtrlPts(); i++) {
-		bombs.AddToTail();
+		capTarget.AddToTail();
 		FOR_EACH_LL(points, j)
 		{
 			ICollideable* collideable = points[j]->GetCollideable();
@@ -52,17 +53,30 @@ void CapturePointAction::startRound() {
 					&& position[i] == collideable->GetCollisionOrigin()) {
 				if (objectiveResource->getNumBombsRequired()[i] > 0) {
 					isDetonationMap = true;
-					FOR_EACH_LL(bombsOnMap, k) {
-						ICollideable* collideable = bombsOnMap[k]->GetCollideable();
-						if (collideable != nullptr
-								&& position[i].DistTo(collideable->GetCollisionOrigin())
-								< 400.0f) {
-							bombs.Tail().AddToTail(bombsOnMap[k]);
-						}
-					}
+					addCapTarget(position[i], bombsOnMap);
+				} else {
+					addCapTarget(position[i], capArea);
 				}
-				capPoints.Insert(points[j], i);
+				ctrlPoints.Insert(points[j], i);
 			}
+		}
+	}
+}
+
+void CapturePointAction::addCapTarget(const Vector& pos,
+		const CUtlLinkedList<edict_t*>& targets) {
+	FOR_EACH_LL(targets, k) {
+		ICollideable* collideable = targets[k]->GetCollideable();
+		if (collideable != nullptr) {
+			Vector targetPos = collideable->GetCollisionOrigin();
+			if (targetPos.LengthSqr() == 0.0f) {
+				Vector mins, maxs;
+				collideable->WorldSpaceTriggerBounds(&mins, &maxs);
+				targetPos = (maxs + mins) / 2.0f;
+			}
+			if (pos.DistTo(targetPos) < 400.0f) {
+			capTarget.Tail().AddToTail(targets[k]);
+				}
 		}
 	}
 }
@@ -72,14 +86,26 @@ void CapturePointAction::endRound() {
 	if (objectiveResource != nullptr) {
 		delete objectiveResource;
 		objectiveResource = nullptr;
-		capPoints.RemoveAll();
-		bombs.Purge();
+		ctrlPoints.RemoveAll();
+		capTarget.Purge();
 	}
 }
 
 bool CapturePointAction::isAvailable(edict_t* ent) const {
-	auto key = capPoints.Find(ent);
-	return capPoints.IsValidIndex(key) && isAvailable(capPoints[key]);
+	auto key = ctrlPoints.Find(ent);
+	return ctrlPoints.IsValidIndex(key) && isAvailable(ctrlPoints[key]);
+}
+
+bool CapturePointAction::findTargetLoc() {
+	if (objectiveResource == nullptr) {
+		return false;
+	}
+	selectItem();
+	if (item == nullptr) {
+		return false;
+	}
+	setTargetLocAndRadius(capTarget[ctrlPoints[ctrlPoints.Find(item)]][0]);
+	return true;
 }
 
 bool CapturePointAction::isAvailable(int idx) const {
@@ -87,8 +113,7 @@ bool CapturePointAction::isAvailable(int idx) const {
 				&& blackboard.getSelf()->getTeam() != objectiveResource->getOwner()[idx];
 }
 
-
-void CapturePointAction::selectItem(CUtlLinkedList<edict_t*>& active) {
+void CapturePointAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
 	if (active.Count() == 0) {
 		item = nullptr;
 		return;

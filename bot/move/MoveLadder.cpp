@@ -17,20 +17,29 @@ MoveState* MoveLadder::move(const Vector& currPos) {
 	float prevDist = distance;
 	CNavLadder::LadderDirectionType dir = ctx.getLadderDir();
 	Buttons& buttons = ctx.getBlackboard().getButtons();
-	if (ctx.getBlackboard().isOnLadder()) {
+	bool onLadder = ctx.getBlackboard().isOnLadder();
+	if (onLadder && !startedClimbing) {
+		startedClimbing = true;
+	}
+	if (startedClimbing) {
 		distance = ctx.getLadderEnd().DistTo(currPos);
-		if (distance <= (dir == CNavLadder::LADDER_UP ? HumanHeight : StepHeight)
-				|| (prevDist >= 0.0f && prevDist - distance <= 0.0f
-						&& distance <= HumanHeight + ctx.getTargetOffset())) {
-			buttons.tap(IN_USE);
+		if (prevDist >= 0.0f && prevDist - distance <= 0.0f) {
+			if (onLadder) {
+				buttons.tap(IN_USE);
+			}
 			ctx.setLadderDir(CNavLadder::NUM_LADDER_DIRECTIONS);
+			if (!distance <= (dir == CNavLadder::LADDER_UP ? 3.0f * HumanHeight : StepHeight)
+					+ MoveStateContext::TARGET_OFFSET) {
+				ctx.setStuck(true);
+			}
 			return new Stopped(ctx);
 		}
-	}
-	if (!ctx.getBlackboard().isOnLadder()) {
+	} else if (!ctx.getBlackboard().isOnLadder()) {
 		buttons.tap(IN_USE);
-	} else if (ctx.getBlackboard().getAimAccuracy(ctx.getLadderEnd()) >= 0.7f) {
+	}
+	if (ctx.getBlackboard().getAimAccuracy(ctx.getLadderEnd()) >= 0.7f) {
 		buttons.hold(IN_FORWARD);
+		moveStraight(ctx.getLadderEnd());
 	}
 	return nullptr;
 }

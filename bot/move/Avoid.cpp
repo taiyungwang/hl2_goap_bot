@@ -18,9 +18,11 @@
 static ConVar mybot_avoid_move_factor("mybot_avoid_move_factor", "5");
 
 static edict_t* getEdict(const trace_t& result) {
-	return result.m_pEnt == nullptr ?
-					nullptr :
-					reinterpret_cast<IServerEntity*>(result.m_pEnt)->GetNetworkable()->GetEdict();
+	if (result.m_pEnt == nullptr) {
+		return nullptr;
+	}
+	extern IServerGameEnts *servergameents;
+	return servergameents->BaseEntityToEdict(result.m_pEnt);
 }
 
 MoveState* Avoid::move(const Vector& pos) {
@@ -31,7 +33,7 @@ MoveState* Avoid::move(const Vector& pos) {
 	Blackboard& blackboard = ctx.getBlackboard();
 	const trace_t& result = ctx.getTraceResult();
 	edict_t* currBlocker = getEdict(result);
-	const char* currBlockerName = currBlocker == nullptr ? nullptr: currBlocker->GetClassName();
+	const char* currBlockerName = currBlocker == nullptr || currBlocker->IsFree() ? nullptr: currBlocker->GetClassName();
 	extern IVEngineServer* engine;
 	extern CGlobalVars *gpGlobals;
 	int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
@@ -65,8 +67,10 @@ MoveState* Avoid::move(const Vector& pos) {
 					}
 				}
 			}
-			ctx.setStuck(true);
-			return new Stopped(ctx);
+			if (blackboard.getBlocker() != nullptr) {
+				ctx.setStuck(true);
+				return new Stopped(ctx);
+			}
 		}
 		if (blackboard.isOnLadder()) {
 			if (ctx.nextGoalIsLadderStart()) {
@@ -80,9 +84,14 @@ MoveState* Avoid::move(const Vector& pos) {
 		return nextState;
 	}
 	Vector goal = ctx.getGoal();
+	extern ConVar nav_slope_limit;
 	if (!result.startsolid && result.DidHit()
 			&& currBlocker != nullptr
-			&& Q_stristr(currBlockerName, "func_team") == nullptr) {
+			&& Q_stristr(currBlockerName, "func_team") == nullptr
+			&& goal.AsVector2D().DistTo(result.endpos.AsVector2D())
+			> MoveStateContext::SELF_RADIUS
+			&& (result.plane.normal.LengthSqr() == 0.0f
+			|| result.plane.normal.z > nav_slope_limit.GetFloat())) {
 		Vector avoid = currBlocker->GetCollideable()->GetCollisionOrigin();
 		avoid = avoid.x == 0.0f && avoid.y == 0.0f && avoid.z == 0.0f ?
 			result.plane.normal : (result.endpos - avoid).Normalized();

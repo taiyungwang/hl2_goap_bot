@@ -20,23 +20,26 @@ bool GoToEntityAction::findTargetLoc() {
 	if (item == nullptr) {
 		return false;
 	}
-	auto collide = item->GetCollideable();
-	targetLoc = collide->GetCollisionOrigin();
-	Vector min, max;
-	collide->WorldSpaceTriggerBounds(&min, &max);
-	if (targetLoc.x == 0 && targetLoc.y == 0 && targetLoc.z == 0) {
-		// look for trigger zone
-		targetLoc = (min + max) / 2.0f;
-		targetLoc.z = min.z;
-	}
-	if (min.DistTo(max) > 0.0f) {
-		max.z = min.z;
-		targetRadius = max.DistTo(min) / 2.0f;
-	}
+	setTargetLocAndRadius(item);
 	return true;
 }
 
-void GoToEntityAction::selectItem(CUtlLinkedList<edict_t*>& active) {
+void GoToEntityAction::setTargetLocAndRadius(edict_t* target) {
+	auto collide = target->GetCollideable();
+	targetLoc = collide->GetCollisionOrigin();
+	Vector min, max;
+	collide->WorldSpaceTriggerBounds(&min, &max);
+	if (min.LengthSqr() > 0.0f || max.LengthSqr() > 0.0f) {
+		// look for trigger zone
+		targetLoc = (min + max) / 2.0f;
+		targetLoc.z = min.z;
+		max.z = min.z;
+		min.x = targetLoc.x;
+		targetRadius = min.DistTo(targetLoc);
+	}
+}
+
+void GoToEntityAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
 	item = findNearestEntity(active,
 			blackboard.getSelf()->getCurrentPosition());
 }
