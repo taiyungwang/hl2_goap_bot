@@ -22,11 +22,6 @@ bool SnipeAction::precondCheck() {
 	deployed = false;
 	const Bot* self = blackboard.getSelf();
 	int team = self->getTeam();
-	// TODO: consider better strategies to determine whether to snipe/camp?
-	if (RandomInt(1, 2) == 2) {
-		selector->resetInUse(selectorId, team);
-		return false;
-	}
 	if (!GoToAction::precondCheck()) {
 		selector->update(selectorId, team, false);
 		return false;
@@ -104,8 +99,7 @@ void SnipeAction::abort() {
 	int team = self->getTeam();
 	selector->resetInUse(selectorId, team);
 	if (self->isDead()) {
-		// if we died, then it's probably not an ideal spot to try for.
-		selector->update(selectorId, team, false);
+		selector->resetInUse(selectorId, team);
 	} else if (blackboard.getTargetedPlayer() != nullptr
 		&& GoToAction::postCondCheck()) {
 		// if we see an enemy at our spot, then it's successful.
