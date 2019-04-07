@@ -2,7 +2,7 @@
 
 #include "MoveStateContext.h"
 #include "Avoid.h"
-#include "StepLeft.h"
+#include "Stopped.h"
 #include "player/Blackboard.h"
 #include "player/Bot.h"
 
@@ -32,7 +32,7 @@ Avoid* StepBack::buildAvoidState(const Vector& currPos) const {
 }
 
 MoveState* StepBack::buildFailedState(const Vector& currPos) const {
-	return new StepLeft(ctx);
+	return new Stopped(ctx);
 }
 
 Vector StepBack::buildDir(const Vector& currPos) const {

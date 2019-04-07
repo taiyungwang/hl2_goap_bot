@@ -9,7 +9,7 @@
 #include <util/EntityUtils.h>
 #include <edict.h>
 
-float MoveStateContext::SELF_RADIUS = 15.0f,
+float MoveStateContext::SELF_RADIUS = 16.0f,
 	MoveStateContext::TARGET_OFFSET = 5.0f;
 
 MoveStateContext::~MoveStateContext() {

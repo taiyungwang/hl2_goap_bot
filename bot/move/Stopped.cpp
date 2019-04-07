@@ -11,7 +11,7 @@
 
 MoveState* Stopped::move(const Vector& currPos) {
 	if (!ctx.reachedGoal()) {
-		return new Avoid(ctx, new StepBack(ctx));
+		return new Avoid(ctx, new Jump(ctx));
 	}
 	if (ctx.nextGoalIsLadderStart()) {
 		return new MoveLadder(ctx);
