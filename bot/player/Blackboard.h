@@ -66,7 +66,7 @@ public:
 		return players;
 	}
 
-	CUtlVector<Player*>& getVisibleEnemies() {
+	CUtlVector<int>& getVisibleEnemies() {
 		return visibleEnemies;
 	}
 
@@ -112,7 +112,7 @@ private:
 
 	const Player *targetedPlayer;
 
-	CUtlVector<Player*> visibleEnemies;
+	CUtlVector<int> visibleEnemies;
 
 	CBotCmd cmd;
 
