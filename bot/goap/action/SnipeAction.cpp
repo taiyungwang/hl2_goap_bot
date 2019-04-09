@@ -98,9 +98,7 @@ void SnipeAction::abort() {
 	auto self = blackboard.getSelf();
 	int team = self->getTeam();
 	selector->resetInUse(selectorId, team);
-	if (self->isDead()) {
-		selector->resetInUse(selectorId, team);
-	} else if (blackboard.getTargetedPlayer() != nullptr
+	if (blackboard.getTargetedPlayer() != nullptr
 		&& GoToAction::postCondCheck()) {
 		// if we see an enemy at our spot, then it's successful.
 		selector->update(selectorId, team, true);
