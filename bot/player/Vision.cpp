@@ -66,21 +66,23 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 	}
 	float closest = INFINITY;
 	const auto& players = blackboard.getPlayers();
-	const Player* closestPlayer = nullptr;
 	auto& visibleEnemies = blackboard.getVisibleEnemies();
 	visibleEnemies.RemoveAll();
 	int team = self->getTeam();
+	struct Visible {
+		const Player* player;
+		float dist;
+	};
+	CUtlVector<Visible> visibles;
 	FOR_EACH_MAP_FAST(players, i) {
 		auto* target = players[i];
 		if (target == self || target->isDead()
 				|| (team > 0 && team == target->getTeam())) {
 			continue;
 		}
-		edict_t* targetEnt = target->getEdict();
 		Vector targetMin, targetMax;
-		targetEnt->GetCollideable()->WorldSpaceSurroundingBounds(&targetMin, &targetMax);
-		Vector targetPos = target->getEyesPos();
-		Vector targetDir = targetPos - selfEyes;
+		target->getEdict()->GetCollideable()->WorldSpaceSurroundingBounds(&targetMin, &targetMax);
+		Vector targetDir = target->getEyesPos() - selfEyes;
 		// check target is in FOV cone or in PVS
 		float dist = targetDir.LengthSqr();
 		if (dist <= 1.0f
@@ -88,14 +90,30 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 				|| targetDir.Normalized().Dot(facing) <= 0.0f) {
 			continue;
 		}
+		visibles.AddToTail();
+		visibles.Tail().player = target;
+		visibles.Tail().dist = dist;
+	}
+	visibles.Sort([] (const Visible* v1, const Visible* v2) {
+			if (v2->dist == v2->dist) {
+				return 0;
+			}
+			return v2->dist > v1->dist ? -1: 1;
+		});
+	blackboard.setTargetedPlayer(nullptr);
+	FOR_EACH_VEC(visibles, i) {
+		const Player* target = visibles[i].player;
+		Vector targetPos = target->getEyesPos();
 		if (!UTIL_IsVisible(targetPos, blackboard, target->getEdict())) {
 			targetPos = target->getCurrentPosition();
 			targetPos.z += 31.0f; // center mass
-			targetDir = targetPos - selfEyes;
-			float dist = targetDir.LengthSqr();
 			if (!UTIL_IsVisible(targetPos, blackboard, target->getEdict())) {
 				continue;
 			}
+		}
+		if (blackboard.getTargetedPlayer() == nullptr) {
+			blackboard.setViewTarget(targetPos);
+			blackboard.setTargetedPlayer(target);
 		}
 		extern ConVar mybot_debug;
 		if (mybot_debug.GetBool()) {
@@ -105,12 +123,6 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 					NDEBUG_PERSIST_TILL_NEXT_SERVER);
 		}
 		visibleEnemies.AddToTail(target->getUserId());
-		if (dist < closest) {
-			closest = dist;
-			closestPlayer = target;
-			blackboard.setViewTarget(targetPos);
-		}
 	}
-	blackboard.setTargetedPlayer(closestPlayer);
 }
 
