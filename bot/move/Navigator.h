@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utlvector.h>
+#include <shareddefs.h>
 #include <utlstack.h>
 
 class Blackboard;
@@ -14,9 +16,9 @@ class Navigator {
 public:
 
 	/**
-	 * Gets the current area the given position is in.
+	 * Gets the encompassing or closest area given the position.
 	 */
-	static CNavArea* getCurrentArea(const Vector& pos);
+	static CNavArea* getCurrentArea(const Vector& pos, int team = TEAM_ANY);
 
 	/**
 	 * Get the current area the entity is in.

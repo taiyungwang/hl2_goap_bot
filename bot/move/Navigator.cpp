@@ -122,14 +122,14 @@ NavDirType getConnectedDir(const CNavArea* from, const CNavArea* to) {
 }
 
 CNavArea* Navigator::getArea(edict_t* ent) {
-	CNavArea* area = TheNavMesh->GetNavArea(ent, GETNAVAREA_CHECK_GROUND);
+	CNavArea* area = TheNavMesh->GetNavArea(ent->GetCollideable()->GetCollisionOrigin());
 	return area == nullptr ? TheNavMesh->GetNearestNavArea(ent) : area;
 }
 
-CNavArea* Navigator::getCurrentArea(const Vector& pos) {
+CNavArea* Navigator::getCurrentArea(const Vector& pos, int team) {
 	CNavArea* startArea = TheNavMesh->GetNavArea(pos);
 	if (startArea == nullptr || startArea->GetCenter().z - pos.z > JumpHeight) {
-		startArea = TheNavMesh->GetNearestNavArea(pos, 120.0f);
+		startArea =TheNavMesh->GetNearestNavArea(pos, 10000.0f, false, false, team);
 	}
 	return startArea;
 }
@@ -139,13 +139,10 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	const Player* self = blackboard.getSelf();
 	CNavArea* startArea = blackboard.getStartArea();
 	if (startArea == nullptr) {
-		startArea = getArea(self->getEdict());
+		startArea = getCurrentArea(self->getCurrentPosition());
 	}
 	blackboard.setStartArea(nullptr);
-	CNavArea* goalArea = TheNavMesh->GetNavArea(targetLoc);
-	if (goalArea == nullptr) {
-		goalArea = TheNavMesh->GetNearestNavArea(targetLoc, 10000.0f, false, false, self->getTeam());
-	}
+	CNavArea* goalArea = getCurrentArea(targetLoc, self->getTeam());
 	if (goalArea == nullptr) {
 		Warning("Unable to find area for location.\n");
 		if (mybot_debug.GetBool()) {
@@ -209,7 +206,8 @@ void Navigator::getNextArea() {
 			|| moveCtx->nextGoalIsLadderStart()) {
 		return;
 	}
-	if (lastArea == nullptr || (lastArea == getArea(self->getEdict())
+	const Vector& loc = self->getCurrentPosition();
+	if (lastArea == nullptr || (lastArea == getCurrentArea(loc)
 			&& !(lastArea->GetAttributes() & NAV_MESH_PRECISE)
 			&& !(path->Top()->GetAttributes() & NAV_MESH_JUMP))
 			|| !moveCtx->hasGoal()) {
@@ -229,7 +227,7 @@ void Navigator::getNextArea() {
 		CNavArea* nextArea = path->Element(path->Count() - 2);
 		if ((nextArea->GetAttributes() & NAV_MESH_JUMP)
 				// don't skip to an area that is too far below.
-				|| self->getCurrentPosition().z - nextArea->GetCenter().z > 100.0f
+				|| loc.z - nextArea->GetCenter().z > 100.0f
 				|| !getPortal(goal, path->Top(), nextArea)
 				|| !canMoveTo(goal)) {
 			return;
