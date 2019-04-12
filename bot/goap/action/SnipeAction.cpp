@@ -22,6 +22,9 @@ bool SnipeAction::precondCheck() {
 	deployed = false;
 	const Bot* self = blackboard.getSelf();
 	int team = self->getTeam();
+	if (RandomInt(1, 2) == 1) {
+		return false;
+	}
 	if (!GoToAction::precondCheck()) {
 		selector->update(selectorId, team, false);
 		return false;
@@ -52,6 +55,11 @@ bool SnipeAction::precondCheck() {
 	duration = 300;
 	return true;
 }
+void SnipeAction::init() {
+	GoToAction::init();
+	selector->setInUse(selectorId, blackboard.getSelf()->getTeam(), true);
+}
+
 
 bool SnipeAction::findTargetLoc() {
 	auto self = blackboard.getSelf();
@@ -84,7 +92,7 @@ bool SnipeAction::execute() {
 
 bool SnipeAction::postCondCheck() {
 	int team = blackboard.getSelf()->getTeam();
-	selector->resetInUse(selectorId, team);
+	selector->setInUse(selectorId, team, false);
 	if (GoToAction::postCondCheck()) {
 		// if we are at our location, and we didn't see an enemy, then count it as failure
 		selector->update(selectorId, team, 
@@ -97,7 +105,7 @@ bool SnipeAction::postCondCheck() {
 void SnipeAction::abort() {
 	auto self = blackboard.getSelf();
 	int team = self->getTeam();
-	selector->resetInUse(selectorId, team);
+	selector->setInUse(selectorId, team, false);
 	if (blackboard.getTargetedPlayer() != nullptr
 		&& GoToAction::postCondCheck()) {
 		// if we see an enemy at our spot, then it's successful.

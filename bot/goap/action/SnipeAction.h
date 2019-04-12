@@ -12,9 +12,11 @@ public:
 
 	SnipeAction(Blackboard& blackboard);
 
-	bool execute();
-
 	bool precondCheck();
+
+	void init();
+
+	bool execute();
 
 	bool postCondCheck();
 
