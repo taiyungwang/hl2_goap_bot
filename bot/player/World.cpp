@@ -63,7 +63,7 @@ bool World::think(Blackboard& blackboard) {
 	updateState(WorldProp::WEAPON_IN_RANGE, inRange);
 	auto& weapons = armory.getWeapons();
 	int currentWeap = armory.getCurrWeaponIdx();
-	if (currentWeap > 0) {
+	if (currentWeap > 0 && weapons.IsValidIndex(weapons.Find(currentWeap))) {
 		Weapon *currWeap = weapons[weapons.Find(currentWeap)];
 		updateState(WorldProp::WEAPON_LOADED,
 				!currWeap->isClipEmpty());
