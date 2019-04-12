@@ -24,6 +24,11 @@ bool GoToEntityAction::findTargetLoc() {
 	return true;
 }
 
+void GoToEntityAction::selectItem() {
+	item = nullptr;
+	selectFromActive(items);
+}
+
 void GoToEntityAction::setTargetLocAndRadius(edict_t* target) {
 	auto collide = target->GetCollideable();
 	targetLoc = collide->GetCollisionOrigin();
@@ -33,7 +38,6 @@ void GoToEntityAction::setTargetLocAndRadius(edict_t* target) {
 		// look for trigger zone
 		targetLoc = (min + max) / 2.0f;
 		targetLoc.z = min.z;
-		max.z = min.z;
 		targetRadius = MIN(targetLoc.x - min.x, targetLoc.y - min.y);
 	}
 }

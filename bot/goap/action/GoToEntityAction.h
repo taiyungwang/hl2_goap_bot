@@ -24,9 +24,7 @@ protected:
 	 */
 	CUtlLinkedList<edict_t*> items;
 
-	virtual void selectItem() {
-		selectFromActive(items);
-	}
+	virtual void selectItem();
 
 	void setTargetLocAndRadius(edict_t* target);
 

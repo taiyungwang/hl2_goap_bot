@@ -9,6 +9,6 @@ public:
 	MoveState* move(const Vector& currPos);
 
 private:
-	float distance;
+	float remainingDist;
 	bool startedClimbing = false;
 };
