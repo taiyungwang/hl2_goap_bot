@@ -67,7 +67,8 @@ bool Navigator::step() {
 				moveCtx->trace(topAreaStart);
 			}
 			// TODO: magic number.  Do we need some sort of logic to see if this is valid?
-			if ((attributes & NAV_MESH_JUMP)
+			if (((attributes & NAV_MESH_JUMP) ||
+					((attributes & NAV_MESH_CROUCH) && !(area->GetAttributes() & NAV_MESH_CROUCH)))
 					&& lastAreaEnd.AsVector2D().DistTo(loc.AsVector2D()) > 40.0f) {
 				attributes = NAV_MESH_INVALID;
 			}
@@ -87,6 +88,7 @@ bool Navigator::step() {
 
 void Navigator::start(CUtlStack<CNavArea*>* path, const Vector& goal, float targetRadius) {
 	finalGoal = goal;
+	blackboard.setStartArea(nullptr);
 	this->targetRadius = targetRadius;
 	this->path = path;
 	lastArea = nullptr;
@@ -129,7 +131,7 @@ CNavArea* Navigator::getArea(edict_t* ent) {
 CNavArea* Navigator::getCurrentArea(const Vector& pos, int team) {
 	CNavArea* startArea = TheNavMesh->GetNavArea(pos);
 	if (startArea == nullptr || startArea->GetCenter().z - pos.z > JumpHeight) {
-		startArea =TheNavMesh->GetNearestNavArea(pos, 10000.0f, false, false, team);
+		startArea =TheNavMesh->GetNearestNavArea(pos, 200.0f, false, false, team);
 	}
 	return startArea;
 }
@@ -138,10 +140,10 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	path.Clear();
 	const Player* self = blackboard.getSelf();
 	CNavArea* startArea = blackboard.getStartArea();
+	blackboard.setStartArea(nullptr);
 	if (startArea == nullptr) {
 		startArea = getCurrentArea(self->getCurrentPosition());
 	}
-	blackboard.setStartArea(nullptr);
 	CNavArea* goalArea = getCurrentArea(targetLoc, self->getTeam());
 	if (goalArea == nullptr) {
 		Warning("Unable to find area for location.\n");
@@ -170,6 +172,11 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 		return false;
 	}
 	if (goalArea == nullptr) {
+		float dist = closest->GetCenter().DistTo(targetLoc);
+		if (dist > 200.0f) {
+			Warning("Unable to find area for location. Closest is %f\n", dist);
+			return false;
+		}
 		goalArea = closest;
 	}
 	for (CNavArea* area = goalArea; area != nullptr;
@@ -184,6 +191,7 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 		}
 		return false;
 	}
+	blackboard.setStartArea(goalArea);
 	return true;
 }
 
@@ -266,8 +274,8 @@ bool Navigator::findLadder(const CNavArea* from, const CNavArea* to) {
 					end.z += 3.0f * HumanHeight;
 				}
 				float delta = end.z - blackboard.getSelf()->getCurrentPosition().z;
-				if ((delta < 0.0f && delta >= -StepHeight)
-						|| delta <= HumanHeight + MoveStateContext::TARGET_OFFSET) {
+				if (delta == 0.0f || (delta < 0.0f && delta >= -StepHeight)
+						|| (delta > 0.0f && delta <= HumanHeight + MoveStateContext::TARGET_OFFSET)) {
 					// bot already got off the ladder
 					return false;
 				}
