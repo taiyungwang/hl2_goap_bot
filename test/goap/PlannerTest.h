@@ -16,8 +16,12 @@ public:
 
 	void testNoPlan();
 
+	void testNoGoalFound();
+
 	void testOneAction();
 
 	void testMultipleActions();
+
+	void testDeadEndReached();
 };
 

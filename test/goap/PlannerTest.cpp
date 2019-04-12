@@ -32,6 +32,7 @@ class LoadWeapon: public TestAction {
 public:
 	LoadWeapon() {
 		effects = {WorldProp::WEAPON_LOADED, true};
+		precond.Insert(WorldProp::OUT_OF_AMMO, false);
 	}
 };
 
@@ -56,7 +57,7 @@ public:
 		effects = {WorldProp::ENEMY_SIGHTED, false};
 	}
 
-	float getCost() const {
+	float getCost() {
 		return 4.0f;
 	}
 };
@@ -100,6 +101,7 @@ PlannerTest::~PlannerTest() {
 void PlannerTest::setUp() {
 	SetDefLessFunc(worldState);
 	worldState.Insert(WorldProp::USING_BEST_WEAP, false);
+	worldState.Insert(WorldProp::OUT_OF_AMMO, false);
 	worldState.Insert(WorldProp::WEAPON_LOADED, false);
 	worldState.Insert(WorldProp::MULTIPLE_ENEMY_SIGHTED, false);
 	worldState.Insert(WorldProp::ENEMY_SIGHTED, true);
@@ -116,6 +118,12 @@ void PlannerTest::testNoPlan() {
 	TS_ASSERT_EQUALS(0, plan.Count());
 }
 
+void PlannerTest::testNoGoalFound() {
+	worldState[worldState.Find(WorldProp::ENEMY_SIGHTED)] = false;
+	test(WorldProp::ENEMY_SIGHTED, true);
+	TS_ASSERT_EQUALS(0, plan.Count());
+}
+
 void PlannerTest::testOneAction() {
 	test(WorldProp::USING_BEST_WEAP, true);
 	TS_ASSERT_EQUALS(1, plan.Count());
@@ -127,4 +135,11 @@ void PlannerTest::testMultipleActions() {
 	TS_ASSERT_EQUALS(2, plan.Count());
 	TS_ASSERT_EQUALS(0, plan.RemoveAtHead());
 	TS_ASSERT_EQUALS(1, plan.RemoveAtHead());
+}
+
+void PlannerTest::testDeadEndReached() {
+	worldState[worldState.Find(WorldProp::OUT_OF_AMMO)] = true;
+	test(WorldProp::ENEMY_SIGHTED, false);
+	TS_ASSERT_EQUALS(1, plan.Count());
+	TS_ASSERT_EQUALS(3, plan.RemoveAtHead());
 }

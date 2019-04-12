@@ -82,9 +82,9 @@ bool AStar::searchStep() {
 	current.isClosed = true;
 	current.isOpen = false;
 	if (!foundGoal) { // no goals need to be satisfied
-		if (current.parent != -1
-				&& (start == nullptr || current.gScore < start->gScore)) {
+		if (current.parent >= 0) {
 			start = &current;
+			return true;
 		}
 		return openSet.Count() == 0;
 	}
@@ -120,8 +120,6 @@ bool AStar::searchStep() {
 				} else if (precond[j] != goalState[k]) {
 					throw SimpleException(CUtlString("Goal state conflict for prop, ")
 							+ static_cast<int>(prop));
-					goalStateConflict = true;
-					break;
 				}
 			}
 		}
