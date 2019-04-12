@@ -9,7 +9,7 @@
 #include <util/EntityUtils.h>
 #include <edict.h>
 
-float MoveStateContext::SELF_RADIUS = 16.0f,
+float MoveStateContext::SELF_RADIUS = 14.0f,
 	MoveStateContext::TARGET_OFFSET = 5.0f;
 
 MoveStateContext::~MoveStateContext() {
@@ -63,7 +63,7 @@ bool MoveStateContext::reachedGoal(float targetOffset) {
 	const Vector& pos = blackboard.getSelf()->getCurrentPosition();
 	if (((goal.z > pos.z && goal.z - pos.z < 20.0f) || pos.z - goal.z < HumanHeight)
 			&& goal.AsVector2D().DistTo(pos.AsVector2D())
-			<= targetOffset + SELF_RADIUS + TARGET_OFFSET) {
+			<= targetOffset + TARGET_OFFSET) {
 		stuck = false;
 		return true;
 	}
@@ -83,8 +83,8 @@ const trace_t& MoveStateContext::trace(Vector goal, edict_t* ignore) {
 	UTIL_TraceHull(pos, goal, mins,
 			Vector(HALF_WIDTH, HALF_WIDTH, self->getEyesPos().z - pos.z + FOREHEAD),
 			MASK_SOLID_BRUSHONLY, filter, &traceResult, mybot_debug.GetBool());
-	if (traceResult.DidHit() && !traceResult.allsolid &&
-			FClassnameIs(reinterpret_cast<IServerEntity*>(traceResult.m_pEnt)->GetNetworkable()->GetEdict()
+	if (traceResult.DidHit()
+			&& FClassnameIs(reinterpret_cast<IServerEntity*>(traceResult.m_pEnt)->GetNetworkable()->GetEdict()
 					, "worldspawn")) {
 		// check to see if worldspawn hit is below StepHeight (18.0f);
 		pos.z += StepHeight;
