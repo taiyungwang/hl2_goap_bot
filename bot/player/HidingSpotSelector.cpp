@@ -45,7 +45,7 @@ float beta_sample(float a, float b) {
 	return w / (b + w);
 }
 
-int HidingSpotSelector::select(Vector& pos, int team) {
+int HidingSpotSelector::select(Vector& pos, int team) const {
 	float max = 0.0f;
 	int selected = -1;
 	int scoreIdx = team > 1 ? team - 2 : 0;
@@ -61,10 +61,13 @@ int HidingSpotSelector::select(Vector& pos, int team) {
 			pos = spots[i].pos;
 		}
 	}
-	if (selected >= 0 && team > 1) {
-		spots[selected].score[scoreIdx].inUse = true;
-	}
 	return selected;
+}
+
+void HidingSpotSelector::setInUse(int spot, int team, bool inUse) {
+	if (team > 1) {
+		spots[spot].score[team > 1 ? team - 2 : 0].inUse = inUse;
+	}
 }
 
 void HidingSpotSelector::update(int spot, int team, bool success) {

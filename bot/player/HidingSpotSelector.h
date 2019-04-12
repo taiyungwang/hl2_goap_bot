@@ -15,11 +15,9 @@ public:
 	/**
 	 * @return -1 if no positions are available.
 	 */
-	int select(Vector& pos, int team);
+	int select(Vector& pos, int team) const;
 
-	void resetInUse(int spot, int team) {
-		spots[spot].score[team > 1 ? team - 2 : 0].inUse = false;
-	}
+	void setInUse(int spot, int team, bool inUse);
 
 	void update(int spot, int team, bool success);
 
