@@ -2,6 +2,6 @@
 
 #include <util/BaseEntity.h>
 
-bool GetItemAction::isAvailable(edict_t* ent) const {
+bool GetItemAction::isAvailable(edict_t* ent) {
 	return !BaseEntity(ent).isDestroyedOrUsed();
 }

@@ -44,7 +44,7 @@ bool DODDefuseBombAction::execute() {
 	return false;
 }
 
-bool DODDefuseBombAction::isAvailable(edict_t* ent) const {
+bool DODDefuseBombAction::isAvailable(edict_t* ent) {
 	if (!CapturePointAction::isAvailable(ent)) {
 		return false;
 	}
@@ -66,7 +66,7 @@ bool DODDefuseBombAction::isTeamMateActingOnBomb(DodPlayer& teammate) const {
 	return teammate.isDefusing();
 }
 
-bool DODDefuseBombAction::isAvailable(int idx) const {
+bool DODDefuseBombAction::isAvailable(int idx) {
 	return isDetonationMap
 			&& blackboard.getSelf()->getTeam()
 					== objectiveResource->getOwner()[idx]

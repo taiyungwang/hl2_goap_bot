@@ -4,11 +4,8 @@
 #include <event/EventHandler.h>
 #include <event/EventInfo.h>
 #include <goap/Planner.h>
-#include <goap/action/GoToAction.h>
 #include <goap/action/DestroyObjectAction.h>
-#include <mods/dod/goap/action/CapturePointAction.h>
 #include <mods/dod/goap/action/DODBombTargetAction.h>
-#include <mods/dod/goap/action/DODDefuseBombAction.h>
 #include <mods/dod/goap/action/DODUseFragGrenadeAction.h>
 #include <mods/dod/weapon/DODSMGBuilder.h>
 #include <mods/dod/weapon/DODAssaultRifleBuilder.h>
@@ -104,7 +101,8 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 	planner.addAction<DODUseRifleGrenadeAction>(0.92f);
 	planner.addAction<DODUseSmokeGrenadeAction>(0.91f);
 	planner.addAction<DODDestroyObjectAction>(0.7f);
-	planner.addAction<DODDefuseBombAction>(0.63f);
+	planner.addAction<DODDefuseBombAction>(0.64f);
+	planner.addAction<DODDefendPointAction>(0.63f);
 	planner.addAction<DODBombTargetAction>(0.62f);
 	planner.addAction<CapturePointAction>(0.61f);
 	planner.addAction<DODGetBombAction>(0.0f);

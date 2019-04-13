@@ -91,7 +91,7 @@ void CapturePointAction::endRound() {
 	}
 }
 
-bool CapturePointAction::isAvailable(edict_t* ent) const {
+bool CapturePointAction::isAvailable(edict_t* ent) {
 	auto key = ctrlPoints.Find(ent);
 	return ctrlPoints.IsValidIndex(key) && isAvailable(ctrlPoints[key]);
 }
@@ -108,14 +108,13 @@ bool CapturePointAction::findTargetLoc() {
 	return true;
 }
 
-bool CapturePointAction::isAvailable(int idx) const {
+bool CapturePointAction::isAvailable(int idx) {
 		return !isDetonationMap
 				&& blackboard.getSelf()->getTeam() != objectiveResource->getOwner()[idx];
 }
 
 void CapturePointAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
 	if (active.Count() == 0) {
-		item = nullptr;
 		return;
 	}
 	if (active.Count() == 1) {

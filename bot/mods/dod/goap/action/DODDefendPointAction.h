@@ -9,15 +9,19 @@ public:
 		effects = {WorldProp::POINTS_DEFENDED, true};
 	}
 
-	virtual bool execute() {
-		return GoToAction::execute() && GoToAction::postCondCheck() && duration++ < 1000;
-	}
+	virtual bool precondCheck();
+
+	virtual bool execute();
 
 protected:
 	int duration = 0;
 
-	virtual bool isAvailable(int idx) const;
+	virtual bool isAvailable(int idx);
+
+	virtual void selectFromActive(CUtlLinkedList<edict_t*>& active);
 
 	bool isBombInState(int idx, int state) const;
 
+private:
+	unsigned enemyControlled = 0;
 };

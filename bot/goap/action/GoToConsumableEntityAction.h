@@ -24,12 +24,12 @@ protected:
 	/**
 	 * Checks to see if this entity is available.
 	 */
-	virtual bool isAvailable(edict_t* ent) const = 0;
+	virtual bool isAvailable(edict_t* ent) = 0;
 
 	/**
 	 * Check to see if current entity is depleted
 	 */
-	virtual bool isDepleted() const;
+	virtual bool isDepleted();
 
 	virtual void selectItem();
 };

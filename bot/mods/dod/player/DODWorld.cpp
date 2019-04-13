@@ -9,7 +9,7 @@
 
 void DODWorld::addStates() {
 	states.Insert(WorldProp::ALL_POINTS_CAPTURED, false);
-	states.Insert(WorldProp::POINTS_DEFENDED, true);
+	states.Insert(WorldProp::POINTS_DEFENDED, false);
 	states.Insert(WorldProp::HAS_BOMB, false);
 	states.Insert(WorldProp::BOMB_DEFUSED, false);
 }
@@ -56,8 +56,6 @@ bool DODWorld::update(Blackboard& blackboard) {
 		}
 	}
 	updateState(WorldProp::HAS_BOMB, hasBomb);
-	updateState(WorldProp::POINTS_DEFENDED, bombPlantTeam == 1
-			|| bombPlantTeam == blackboard.getSelf()->getTeam());
 	if (reset) {
 		reset = false;
 		return true;

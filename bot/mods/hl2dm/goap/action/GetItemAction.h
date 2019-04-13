@@ -12,5 +12,5 @@ protected:
 	}
 
 private:
-	bool isAvailable(edict_t *) const;
+	bool isAvailable(edict_t *);
 };

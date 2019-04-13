@@ -25,15 +25,14 @@ protected:
 
 	static CUtlVector<CCopyableUtlVector<edict_t*>> capTarget;
 
-	virtual bool isAvailable(int idx) const;
+	virtual bool isAvailable(int idx);
 
-	virtual bool isAvailable(edict_t* ent) const;
+	virtual bool isAvailable(edict_t* ent);
 
 	virtual bool findTargetLoc();
 
+	virtual void selectFromActive(CUtlLinkedList<edict_t*>& active);
+
 private:
 	static void addCapTarget(const Vector& pos, const CUtlLinkedList<edict_t*>& targets);
-
-	void selectFromActive(CUtlLinkedList<edict_t*>& active);
-
 };

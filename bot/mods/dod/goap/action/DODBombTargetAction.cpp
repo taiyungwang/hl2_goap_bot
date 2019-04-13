@@ -19,7 +19,7 @@ bool DODBombTargetAction::execute() {
 	return planted && (!GoToAction::postCondCheck() || duration++ >= 1000);
 }
 
-bool DODBombTargetAction::isAvailable(int idx) const {
+bool DODBombTargetAction::isAvailable(int idx) {
 	return isDetonationMap
 			&& blackboard.getSelf()->getTeam()
 					!= objectiveResource->getOwner()[idx]

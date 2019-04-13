@@ -33,9 +33,10 @@ void GoToConsumableEntityAction::selectItem() {
 			depleted.Remove(j);
 		}
 	}
+	item = nullptr;
 	selectFromActive(active);
 }
 
-bool GoToConsumableEntityAction::isDepleted() const {
+bool GoToConsumableEntityAction::isDepleted() {
 	return !isAvailable(item);
 }

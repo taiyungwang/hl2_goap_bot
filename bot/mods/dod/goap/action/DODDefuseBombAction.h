@@ -8,6 +8,13 @@ class DODDefuseBombAction : public DODDefendPointAction {
 public:
 	DODDefuseBombAction(Blackboard& blackboard);
 
+	/**
+	 * TODO: Hacky, consider refactoring.
+	 */
+	virtual bool precondCheck() {
+		return GoToAction::precondCheck();
+	}
+
 	virtual bool execute();
 
 	virtual bool isInterruptable() const {
@@ -23,10 +30,17 @@ protected:
 
 	virtual bool isTeamMateActingOnBomb(DodPlayer& teammate) const;
 
-	virtual bool isAvailable(int idx) const;
+	virtual bool isAvailable(int idx);
 
 private:
+	/**
+	 * TODO: hacky, consider refactoring.
+	 */
+	void selectFromActive(CUtlLinkedList<edict_t*>& active) {
+		CapturePointAction::selectFromActive(active);
+	}
+
 	bool findTargetLoc();
 
-	bool isAvailable(edict_t* ent) const;
+	bool isAvailable(edict_t* ent);
 };

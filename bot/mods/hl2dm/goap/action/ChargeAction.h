@@ -30,7 +30,7 @@ protected:
 	virtual bool isFinished() const = 0;
 
 private:
-	bool isAvailable(edict_t *ent) const;
+	bool isAvailable(edict_t *ent);
 
-	bool isDepleted() const;
+	bool isDepleted();
 };

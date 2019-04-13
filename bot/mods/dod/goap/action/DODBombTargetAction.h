@@ -9,7 +9,7 @@ public:
 	bool execute();
 
 private:
-	bool isAvailable(int idx) const;
+	bool isAvailable(int idx);
 
 	bool isTeamMateActingOnBomb(DodPlayer& teammate) const;
 };

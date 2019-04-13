@@ -36,10 +36,10 @@ bool ChargeAction::execute() {
 	return false;
 }
 
-bool ChargeAction::isAvailable(edict_t* ent) const {
+bool ChargeAction::isAvailable(edict_t* ent) {
 	return availability.get<float>(ent) < 1.0f;
 }
 
-bool ChargeAction::isDepleted() const {
+bool ChargeAction::isDepleted() {
 	return availability.get<float>(item) == 1.0f;
 }
