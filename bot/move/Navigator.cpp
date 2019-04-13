@@ -154,9 +154,6 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 		}
 		return false;
 	}
-	if (goalArea->IsBlocked(self->getTeam())) {
-		goalArea = nullptr;
-	}
 	CNavArea* closest = nullptr;
 	if (!NavAreaBuildPath(startArea, goalArea, &targetLoc,
 			ShortestPathCost(self->getTeam()), &closest) && closest == nullptr) {
@@ -171,9 +168,10 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 		}
 		return false;
 	}
+	static const float MAX_DIST = 200.0f;
 	if (goalArea == nullptr) {
 		float dist = closest->GetCenter().DistTo(targetLoc);
-		if (dist > 200.0f) {
+		if (dist > MAX_DIST) {
 			Warning("Unable to find area for location. Closest is %f\n", dist);
 			return false;
 		}
@@ -183,7 +181,8 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 			area = area->GetParent()) {
 		path.Push(area);
 	}
-	if (path.Top() != startArea) {
+	if (path.Top() != startArea
+			&& path.Top()->GetCenter().DistTo(startArea->GetCenter()) > 200.0f) {
 		path.Clear();
 		Warning("Unable to get to area %d.\n", goalArea->GetID());
 		if (mybot_debug.GetBool()) {
