@@ -162,17 +162,17 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 					targetLoc, 255, 0, 0, true,
 					NDEBUG_PERSIST_TILL_NEXT_SERVER);
 		}
-		Warning("Unable to get to area %d.\n", goalArea->GetID());
+		Warning("Unable to get to goal area %d.\n", goalArea->GetID());
 		if (mybot_debug.GetBool()) {
 			goalArea->Draw();
 		}
 		return false;
 	}
-	static const float MAX_DIST = 200.0f;
+	static const float MAX_DIST = 300.0f;
 	if (goalArea == nullptr) {
 		float dist = closest->GetCenter().DistTo(targetLoc);
 		if (dist > MAX_DIST) {
-			Warning("Unable to find area for location. Closest is %f\n", dist);
+			Warning("Unable to find goal area for location. Closest is %f\n", dist);
 			return false;
 		}
 		goalArea = closest;
@@ -181,14 +181,18 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 			area = area->GetParent()) {
 		path.Push(area);
 	}
-	if (path.Top() != startArea
-			&& path.Top()->GetCenter().DistTo(startArea->GetCenter()) > 200.0f) {
-		path.Clear();
-		Warning("Unable to get to area %d.\n", goalArea->GetID());
-		if (mybot_debug.GetBool()) {
-			goalArea->Draw();
+	if (path.Top() != startArea) {
+		Vector loc = blackboard.getSelf()->getCurrentPosition(), goal;
+		path.Top()->GetClosestPointOnArea(loc, &goal);
+		if (this->moveCtx->trace(goal).DidHit()) {
+			path.Clear();
+			Warning("Start area %d is too far, closest is %f.\n", goalArea->GetID(),
+					loc.DistTo(goal));
+			if (mybot_debug.GetBool()) {
+				goalArea->Draw();
+			}
+			return false;
 		}
-		return false;
 	}
 	blackboard.setStartArea(goalArea);
 	return true;
