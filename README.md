@@ -1,4 +1,4 @@
-# A Half-Life 2 Bot driven by GOAP #
+# A Half-Life 2 Bot Driven by GOAP #
 
 GOAP stands for Goal Oriented Action Planning--please visit [Jeff Orkin's page](http://alumni.media.mit.edu/~jorkin/goap.html) for more information on the GOAP architecture.  The bot uses a [refactored version](taiyungwang/valve_source_plugin_navmesh) of [Valve's Navigation Mesh](https://developer.valvesoftware.com/wiki/Navigation_Meshes).  A bot traverses the mesh using an algorithm similar to [Valve's reactive path following technique](https://steamcdn-a.akamaihd.net/apps/valve/2009/ai_systems_of_l4d_mike_booth.pdf).  It also uses [Thompson sampling](https://en.wikipedia.org/wiki/Thompson_sampling) to determine which hide spots from the navigation mesh to use. The bot currently supports Valve's [Day of Defeat Source](https://en.wikipedia.org/wiki/Day_of_Defeat:_Source) and [Half-Life 2 Deathmatch](https://en.wikipedia.org/wiki/Half-Life_2:_Deathmatch).  This bot is still in the Alpha stage--lease see the TODO section for future work needed.
 
