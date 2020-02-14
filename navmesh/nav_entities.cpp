@@ -132,12 +132,7 @@ bool CFuncNavCost::HasTag( const char *groupname ) const
 // Return true if this cost applies to the given actor
 bool CFuncNavCost::IsApplicableTo( edict_t *who ) const
 {
-	if ( !who )
-	{
-		return false;
-	}
-
-	if ( m_team > 0 && playerinfomanager->GetPlayerInfo(who)->GetTeamIndex() != m_team ) {
+	if ( !who || ( m_team > 0 && playerinfomanager->GetPlayerInfo(who)->GetTeamIndex() != m_team )) {
 		return false;
 	}
 
