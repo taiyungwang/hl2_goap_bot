@@ -1,11 +1,10 @@
 #pragma once
 
-#include <util/EntityInstance.h>
+#include <util/BasePlayer.h>
 
-class DodPlayer: public EntityInstance {
+class DodPlayer: public BasePlayer {
 public:
-	DodPlayer(edict_t *ent) :
-			EntityInstance(ent, "CDODPlayer") {
+	DodPlayer(edict_t *ent): BasePlayer("CDODPlayer", ent) {
 	}
 
 	int getPlayerClass() {

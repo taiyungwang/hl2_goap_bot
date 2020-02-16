@@ -11,7 +11,7 @@ class HL2DMBotBuilder: public BotBuilder {
 
 	void updatePlanner(Planner& planner, Blackboard& blackboard) const;
 
-	EntityInstance* buildEntity(edict_t* ent) const;
+	BasePlayer* buildEntity(edict_t* ent) const;
 
 	World* buildWorld() const;
 };

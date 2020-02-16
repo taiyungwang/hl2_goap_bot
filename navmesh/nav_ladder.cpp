@@ -10,11 +10,11 @@
 
 #include "nav_area.h"
 
-#include "nav_colors.h"
-#include "nav_mesh.h"
-#include <util/BaseEntity.h>
+#include <util/BasePlayer.h>
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
+#include "nav_colors.h"
+#include "nav_mesh.h"
 #include <gametrace.h>
 #include <eiface.h>
 #include <convar.h>
@@ -577,7 +577,7 @@ public:
 	bool operator() ( edict_t *ent )
 	{
 		if (ent == m_ignore || ent == nullptr
-				|| !BaseEntity(ent).isOnLadder())
+				|| !BasePlayer(ent).isOnLadder())
 			return true;
 		IPlayerInfo* player = playerinfomanager->GetPlayerInfo(ent);
 		if (player == nullptr) {

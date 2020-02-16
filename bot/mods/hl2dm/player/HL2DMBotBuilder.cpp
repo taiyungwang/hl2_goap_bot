@@ -72,7 +72,7 @@ void HL2DMBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {
 	weaponFac.addInstance("weapon_physcannon", new UtilityToolBuilder(768.0f));
 }
 
-EntityInstance* HL2DMBotBuilder::buildEntity(edict_t* ent) const {
+BasePlayer* HL2DMBotBuilder::buildEntity(edict_t* ent) const {
 	return new HL2MPPlayer(ent);
 }
 

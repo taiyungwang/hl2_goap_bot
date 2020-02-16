@@ -5,7 +5,7 @@
 #include <eiface.h>
 #include <iplayerinfo.h>
 
-class EntityInstance;
+class BasePlayer;
 class Player;
 class Bot;
 class CNavArea;
@@ -18,7 +18,7 @@ public:
 	static float clamp180(float angle);
 
 	Blackboard(const CUtlMap<int, Player*>& players, Bot* player,
-			EntityInstance* entInstance);
+			BasePlayer* entInstance);
 
 	void reset();
 
@@ -125,7 +125,7 @@ private:
 
 	Buttons buttons;
 
-	EntityInstance* entInstance;
+	BasePlayer* entInstance;
 
 	// Used to track start areas for chained GoToActions.
 	CNavArea* startArea = nullptr;

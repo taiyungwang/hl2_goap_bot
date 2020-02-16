@@ -1,11 +1,10 @@
 #pragma once
 
-#include <util/EntityInstance.h>
+#include <util/BasePlayer.h>
 
-class HL2MPPlayer: public EntityInstance {
+class HL2MPPlayer: public BasePlayer {
 public:
-	HL2MPPlayer(edict_t *ent) :
-			EntityInstance(ent, "CHL2MP_Player") {
+	HL2MPPlayer(edict_t *ent): BasePlayer("CHL2MP_Player", ent) {
 	}
 
 	bool isOnLadder() {

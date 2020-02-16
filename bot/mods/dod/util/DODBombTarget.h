@@ -1,11 +1,10 @@
 #pragma once
 
-#include <util/EntityInstance.h>
+#include <util/BaseEntity.h>
 
-class DODBombTarget: public EntityInstance {
+class DODBombTarget: public BaseEntity {
 public:
-	DODBombTarget(edict_t *ent) :
-			EntityInstance(ent, "CDODBombTarget") {
+	DODBombTarget(edict_t *ent): BaseEntity("CDODBombTarget", ent) {
 	}
 
 	int getState() {

@@ -14,7 +14,7 @@
 #include <goap/action/SwitchToBestLoadedWeaponAction.h>
 #include <goap/action/SwitchWeaponAction.h>
 #include <goap/Planner.h>
-#include <util/BaseEntity.h>
+#include <util/BasePlayer.h>
 
 BotBuilder::~BotBuilder() {
 	delete command;
@@ -83,6 +83,6 @@ Bot* BotBuilder::build(const CUtlMap<int, Player*>& players,
 	return bot;
 }
 
-EntityInstance* BotBuilder::buildEntity(edict_t* ent) const {
-	return new BaseEntity(ent);
+BasePlayer* BotBuilder::buildEntity(edict_t* ent) const {
+	return new BasePlayer(ent);
 }

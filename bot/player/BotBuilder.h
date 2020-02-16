@@ -5,7 +5,7 @@
 
 class Blackboard;
 class Bot;
-class EntityInstance;
+class BasePlayer;
 class Player;
 class Planner;
 class WeaponBuilderFactory;
@@ -47,7 +47,7 @@ protected:
 	virtual void updatePlanner(Planner& planner,
 			Blackboard& blackboard) const = 0;
 
-	virtual EntityInstance* buildEntity(edict_t* ent) const;
+	virtual BasePlayer* buildEntity(edict_t* ent) const;
 
 	virtual World* buildWorld() const = 0;
 

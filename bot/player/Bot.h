@@ -9,7 +9,7 @@
 class Blackboard;
 class Planner;
 class Action;
-class EntityInstance;
+class BasePlayer;
 class Goal;
 class Armory;
 class World;
@@ -67,7 +67,7 @@ private:
 
 	static PlayerClasses CLASSES;
 
-	EntityInstance* playerClassVar = nullptr;
+	BasePlayer* playerClassVar = nullptr;
 
 	Blackboard* blackboard = nullptr;
 

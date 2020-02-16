@@ -1,11 +1,10 @@
 #pragma once
 
-#include "EntityInstance.h"
+#include "BaseEntity.h"
 
-class BaseCombatWeapon: public EntityInstance {
+class BaseCombatWeapon: public BaseEntity {
 public:
-	BaseCombatWeapon(edict_t *ent) :
-			EntityInstance(ent, "CBaseCombatWeapon") {
+	BaseCombatWeapon(edict_t *ent): BaseEntity("CBaseCombatWeapon", ent) {
 	}
 
 	int getWeaponState() {

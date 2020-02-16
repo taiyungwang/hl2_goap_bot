@@ -1,8 +1,8 @@
 #pragma once
 
-#include <util/EntityInstance.h>
+#include <util/BaseEntity.h>
 
-class DODObjectiveResource: public EntityInstance {
+class DODObjectiveResource: public BaseEntity {
 public:
 	DODObjectiveResource();
 

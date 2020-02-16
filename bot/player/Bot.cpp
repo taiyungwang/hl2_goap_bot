@@ -11,7 +11,7 @@
 #include <weapon/Weapon.h>
 #include <navmesh/nav_mesh.h>
 #include <util/Exception.h>
-#include <util/EntityInstance.h>
+#include <util/BasePlayer.h>
 #include <in_buttons.h>
 
 PlayerClasses Bot::CLASSES = nullptr;
