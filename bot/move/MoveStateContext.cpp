@@ -79,19 +79,12 @@ const trace_t& MoveStateContext::trace(Vector goal, edict_t* ignore) {
 	FilterList filter;
 	filter.add(self->getEdict()).add(BasePlayer(self->getEdict()).getGroundEntity())
 					.add(blackboard.getTarget()).add(ignore);
-	Vector mins(-HALF_WIDTH, -HALF_WIDTH, 0);
-	UTIL_TraceHull(pos, goal, mins,
-			Vector(HALF_WIDTH, HALF_WIDTH, self->getEyesPos().z - pos.z + FOREHEAD),
+	edict_t* edict = self->getEdict();
+	Vector mins = edict->GetCollideable()->OBBMins(),
+			maxs = edict->GetCollideable()->OBBMaxs();
+	mins.z += StepHeight;
+	maxs.x = 0;
+	UTIL_TraceHull(pos, goal, mins, maxs,
 			MASK_SOLID_BRUSHONLY, filter, &traceResult, mybot_debug.GetBool());
-	if (traceResult.DidHit()
-			&& FClassnameIs(reinterpret_cast<IServerEntity*>(traceResult.m_pEnt)->GetNetworkable()->GetEdict()
-					, "worldspawn")) {
-		// check to see if worldspawn hit is below StepHeight (18.0f);
-		pos.z += StepHeight;
-		goal.z += StepHeight;
-		UTIL_TraceHull(pos, goal, mins,
-				Vector(HALF_WIDTH, HALF_WIDTH, self->getEyesPos().z - pos.z + FOREHEAD),
-				MASK_SOLID_BRUSHONLY, filter, &traceResult, mybot_debug.GetBool());
-	}
 	return traceResult;
 }
