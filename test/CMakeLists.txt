@@ -20,4 +20,5 @@ macro(add_cxxtest test_name suites libs)
 endmacro(add_cxxtest)
 
 add_subdirectory(goap)
+add_subdirectory(move)
 add_cxxtest(sdk_test "ValveSDKTest" "${tier1};tier0")

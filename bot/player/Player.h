@@ -51,7 +51,10 @@ public:
 
 	int getMaxHealth() const;
 
-	QAngle getAngle() const;
+	/**
+	 * @Return Angle given by the player's last issued command.
+	 */
+	QAngle getNormalizedAngle() const;
 
 	Vector getFacing() const;
 

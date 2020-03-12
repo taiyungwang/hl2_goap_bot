@@ -50,12 +50,12 @@ int Player::getMaxHealth() const {
 	return info->GetMaxHealth();
 }
 
-QAngle Player::getAngle() const {
+QAngle Player::getNormalizedAngle() const {
 	return info->GetLastUserCommand().viewangles;
 }
 
 Vector Player::getFacing() const {
 	Vector facing;
-	AngleVectors(getAngle(), &facing);
+	AngleVectors(info->GetAbsAngles(), &facing);
 	return facing;
 }

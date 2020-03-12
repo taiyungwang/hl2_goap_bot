@@ -8,15 +8,6 @@
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
 
-float Blackboard::clamp180(float angle) {
-	if (angle > 180.0f) {
-		angle -= 360.0f;
-	} else if (angle < -180.0f) {
-		angle += 360.0f;
-	}
-	return angle;
-}
-
 Blackboard::Blackboard(const CUtlMap<int, Player*>& players,
 		Bot* self, BasePlayer* entInstance) : players(players),
 		self(self), entInstance(entInstance) {

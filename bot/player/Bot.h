@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Player.h"
+#include "move/RotationManager.h"
 #include <event/EventHandler.h>
-#include <move/RotationManager.h>
 #include <utlvector.h>
 #include <utlqueue.h>
 
@@ -77,7 +77,7 @@ private:
 
 	World* world = nullptr;
 
-	RotationManager rotX, rotY;
+	RotationManager rotation;
 
 	bool inGame = false, hookEnabled = false, resetPlanner = false;
 };

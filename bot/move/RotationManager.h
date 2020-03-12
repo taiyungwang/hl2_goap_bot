@@ -1,15 +1,44 @@
 #pragma once
 
+class QAngle;
+
 /**
- * Manages a bot's rotation along an Euler axis.
+ * Manages the rotation of the bot.  Uses acceleration and momentum to smooth
+ * out the rotation.  The acceleration is constant in both directions, therefore We can then
+ * determine whether we need to brake by treating the amount of distance covered as
+ * the area of a right triangle and the two sides along the right angle as the current
+ * speed and speed / acceleration, respectively.
  */
 class RotationManager {
 public:
 	static float clamp180(float angle);
 
-	float getUpdatedPosition(float target, float current, float accel);
+	RotationManager();
+
+	~RotationManager();
+
+	/**
+	 * @param desiredPos The position the bots want to turned to.
+	 */
+	void getUpdatedPosition(QAngle& desiredPos, QAngle currentPos,
+			float accelMagintude);
 
 private:
-	float lastPos = 0.0f;
-};
+	static void normalize(QAngle& angle);
 
+	static bool isSameSign(float f1, float f2) {
+		return f1 >= 0 == f2 >= 0;
+	}
+
+	/**
+	 * Tracks the current rotational momentum of the bot.
+	 */
+	QAngle* momentum;
+
+	float accelMagnitude = 1.0f;
+
+	/**
+	 * Updates momentum and calculate the new position.
+	 */
+	float getUpdatedPos(float& speed, float desired, float currentPos);
+};

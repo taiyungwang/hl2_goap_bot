@@ -1,0 +1,1 @@
+add_cxxtest(move_test "RotationManagerTest" "bot_move;tier0")

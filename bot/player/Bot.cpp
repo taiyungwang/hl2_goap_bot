@@ -7,6 +7,7 @@
 #include <goap/Planner.h>
 #include <goap/action/GoToAction.h>
 #include <move/Navigator.h>
+#include <move/RotationManager.h>
 #include <weapon/Armory.h>
 #include <weapon/Weapon.h>
 #include <navmesh/nav_mesh.h>
@@ -16,7 +17,8 @@
 
 PlayerClasses Bot::CLASSES = nullptr;
 
-ConVar mybot_rot_speed("mybot_rot_speed", "8", 0, "determines rotational acceleration rate in degrees");
+ConVar mybot_rot_speed("mybot_rot_speed", "0.5", 0,
+		"determines rotational acceleration rate in degrees");
 
 Bot::Bot(edict_t* ent) :
 		Player(ent) {
@@ -69,18 +71,9 @@ void Bot::think() {
 				world->updateState(WorldProp::USING_BEST_WEAP, false);
 			}
 			planner->execute();
-			VectorAngles((blackboard->getViewTarget() - getEyesPos()).Normalized(), cmd.viewangles);
-			QAngle currentAngle = getAngle();
-			float accel = mybot_rot_speed.GetFloat();
-			cmd.viewangles.y = rotY.getUpdatedPosition(cmd.viewangles.y, currentAngle.y,
-					accel);
-			cmd.viewangles.x = rotX.getUpdatedPosition(cmd.viewangles.x, currentAngle.x,
-					accel);
-			if (cmd.viewangles.x > 89.0f) {
-				cmd.viewangles.x = 181.0f - cmd.viewangles.x;
-			} else if (cmd.viewangles.x < -89.0f) {
-				cmd.viewangles.x = -181.0f - cmd.viewangles.x;
-			}
+			VectorAngles(blackboard->getViewTarget() - getEyesPos(), cmd.viewangles);
+			rotation.getUpdatedPosition(cmd.viewangles, getNormalizedAngle(),
+					mybot_rot_speed.GetFloat());
 			if (cmd.weaponselect != 0) {
 				world->updateState(WorldProp::USING_BEST_WEAP, true);
 			}

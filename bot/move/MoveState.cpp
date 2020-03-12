@@ -1,6 +1,7 @@
 #include "MoveState.h"
 
 #include "MoveStateContext.h"
+#include "RotationManager.h"
 #include "player/Blackboard.h"
 #include <player/Buttons.h>
 #include <player/Bot.h>
@@ -31,27 +32,26 @@ bool MoveState::checkStuck(const Vector& currentPos, const Vector& goal) {
 }
 
 void MoveState::moveStraight(const Vector& destination) const {
-	Vector pos = ctx.getBlackboard().getSelf()->getCurrentPosition();
-	Vector path = destination - pos;
 	// get distance from current position to destination.
 	int mvType = ctx.getType();
 	Blackboard& blackboard = ctx.getBlackboard();
+	Vector pos = blackboard.getSelf()->getCurrentPosition();
+	Vector path = destination - pos;
 	Buttons& buttons = blackboard.getButtons();
 	float speed = 450.0f; // jog speed
 	if (mvType & NAV_MESH_WALK) {
 		buttons.hold(IN_WALK); // walk speed
 	}
 	// get yaw (offset from cardinal Z) of bot.
-	QAngle qAngles;
-	VectorAngles(path.Normalized(), qAngles);
+	QAngle pathAngle, facing;
+	VectorAngles(blackboard.getSelf()->getFacing(), facing);
+	VectorAngles(path.Normalized(), pathAngle);
 	if (mvType & NAV_MESH_RUN) {
 		buttons.hold(IN_SPEED);
 	}
 	CBotCmd& cmd = blackboard.getCmd();
-	SinCos(
-			Blackboard::clamp180(
-					blackboard.getSelf()->getAngle().y
-							- Blackboard::clamp180(qAngles.y)) * M_PI / 180.0f,
+	SinCos(RotationManager::clamp180(facing.y
+			- RotationManager::clamp180(pathAngle.y)) * M_PI / 180.0f,
 			&cmd.sidemove, &cmd.forwardmove);
 	cmd.forwardmove *= speed;
 	cmd.sidemove *= speed;

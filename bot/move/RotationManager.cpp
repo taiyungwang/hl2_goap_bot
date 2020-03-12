@@ -1,10 +1,11 @@
 #include "RotationManager.h"
 
+#include <vector.h>
 #include <cmath>
 
 float RotationManager::clamp180(float angle) {
 	if (std::abs(angle) > 360.0f) {
-		angle -= 360.0f * (angle / 360);
+		angle -= 360.0f * static_cast<int>(angle / 360.0f);
 	}
 	if (angle > 180.0f) {
 		angle -= 360.0f;
@@ -14,25 +15,63 @@ float RotationManager::clamp180(float angle) {
 	return angle;
 }
 
-float RotationManager::getUpdatedPosition(float target, float current, float accel) {
-	target = clamp180(target);
-	float dist = clamp180(target - current);
-	float speed = lastPos - current;
-	lastPos = current;
-	if (std::abs(dist) < accel + std::abs(speed)) {
-		// if distance covered is less than acceleration + current speed, set to target, and reduce speed to 0
-		speed = 0.0f;
-		return target;
+RotationManager::RotationManager() :
+		momentum(new QAngle(0, 0, 0)) {
+}
+
+RotationManager::~RotationManager() {
+	delete momentum;
+}
+
+void RotationManager::normalize(QAngle &angle) {
+	angle.x = clamp180(angle.x);
+	angle.y = clamp180(angle.y);
+	if (angle.x > 90.0f) {
+		angle.x = 180.0f - angle.x;
+	} else if (angle.x < -90.0f) {
+		angle.x = -180.0f - angle.x;
 	}
-	if (dist < 0.0f) {
-		// we accelerating towards the negative side.
-		accel = -accel;
+	Clamp(angle.x, -89.0f, 89.0f);
+}
+
+void RotationManager::getUpdatedPosition(QAngle &desiredPos, QAngle currentPos,
+		float accelMagnitude) {
+	this->accelMagnitude = accelMagnitude;
+	desiredPos -= currentPos;
+	normalize(desiredPos);
+	normalize(currentPos);
+	desiredPos.x = getUpdatedPos(momentum->x, desiredPos.x, currentPos.x);
+	desiredPos.y = getUpdatedPos(momentum->y, desiredPos.y, currentPos.y);
+}
+
+float RotationManager::getUpdatedPos(float &speed, float desiredSpeed,
+		float currentPos) {
+	if (desiredSpeed == currentPos && speed == 0.0f) {
+		return currentPos;
 	}
-	// speed is opposite desired direction
-	if (accel < 0.0f != speed < 0.0f
-	// or we can still accelerate using Gaussian summation as estimation.
-			|| std::abs(speed * (speed + accel)) / 2.0f < std::abs(dist)) {
-		speed += accel;
+	float accel = desiredSpeed >= speed ? accelMagnitude : -accelMagnitude;
+	// do we need to brake
+	if (std::abs(speed) > 0 && isSameSign(speed, desiredSpeed)
+			&& speed * speed / accelMagnitude * 0.5f
+					>= std::abs(desiredSpeed)) {
+		// if we are not already braking
+		if (isSameSign(accel, speed)) {
+			accel = -accel;
+		}
+		// if we are close to stopping and current speed will cause us to overshoot target
+		if (std::abs(speed) <= accelMagnitude
+				&& accelMagnitude > std::abs(desiredSpeed)) {
+			speed = 0;
+			return currentPos + desiredSpeed;
+		}
 	}
-	return current + speed;
+	// if we are going to overshoot
+	if (isSameSign(accel, speed)
+			&& std::abs(accel + speed) > std::abs(desiredSpeed)) {
+		currentPos += speed > 0 ? speed : desiredSpeed;
+		speed = 0;
+		return currentPos;
+	}
+	speed += accel;
+	return currentPos + speed;
 }
