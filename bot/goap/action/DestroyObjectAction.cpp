@@ -96,7 +96,7 @@ bool DestroyObjectAction::execute() {
 		extern IVDebugOverlay *debugoverlay;
 		debugoverlay->AddLineOverlay(eyes, targetLoc, 255, 0, 255, true,
 		NDEBUG_PERSIST_TILL_NEXT_SERVER);
-		debugoverlay->AddLineOverlay(eyes, eyes + self->getFacing() * dist, 0, 255, 0, true,
+		debugoverlay->AddLineOverlay(eyes, eyes + blackboard.getFacing() * dist, 0, 255, 0, true,
 		NDEBUG_PERSIST_TILL_NEXT_SERVER);
 	}
 	if (fabs(blackboard.getAimAccuracy(targetLoc))

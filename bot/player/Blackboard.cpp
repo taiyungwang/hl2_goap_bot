@@ -29,7 +29,7 @@ Blackboard::~Blackboard() {
 }
 
 float Blackboard::getAimAccuracy(const Vector& pos) const {
-	return (pos - self->getEyesPos()).Normalized().Dot(self->getFacing());
+	return (pos - self->getEyesPos()).Normalized().Dot(getFacing());
 }
 
 bool Blackboard::isOnLadder() {
@@ -45,5 +45,11 @@ float Blackboard::getTargetEntDistance() const {
 
 void Blackboard::lookStraight() {
 	this->viewTarget.z = this->self->getEyesPos().z;
+}
+
+Vector Blackboard::getFacing() const {
+	Vector facing;
+	AngleVectors(self->getFacingAngle(), &facing);
+	return facing;
 }
 

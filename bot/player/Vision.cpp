@@ -56,7 +56,7 @@ bool UTIL_IsVisible(const Vector &vecAbsEnd,
 
 void Vision::updateVisiblity(Blackboard& blackboard) {
 	auto self = blackboard.getSelf();
-	Vector facing = self->getFacing();
+	Vector facing = blackboard.getFacing();
 	Vector selfEyes = self->getEyesPos();
 	byte pvs[MAX_MAP_CLUSTERS / 8];
 	extern IVEngineServer* engine;

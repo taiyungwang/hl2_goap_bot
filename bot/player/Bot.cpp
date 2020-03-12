@@ -72,7 +72,7 @@ void Bot::think() {
 			}
 			planner->execute();
 			VectorAngles(blackboard->getViewTarget() - getEyesPos(), cmd.viewangles);
-			rotation.getUpdatedPosition(cmd.viewangles, getNormalizedAngle(),
+			rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle(),
 					mybot_rot_speed.GetFloat());
 			if (cmd.weaponselect != 0) {
 				world->updateState(WorldProp::USING_BEST_WEAP, true);

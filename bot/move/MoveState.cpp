@@ -43,14 +43,13 @@ void MoveState::moveStraight(const Vector& destination) const {
 		buttons.hold(IN_WALK); // walk speed
 	}
 	// get yaw (offset from cardinal Z) of bot.
-	QAngle pathAngle, facing;
-	VectorAngles(blackboard.getSelf()->getFacing(), facing);
+	QAngle pathAngle;
 	VectorAngles(path.Normalized(), pathAngle);
 	if (mvType & NAV_MESH_RUN) {
 		buttons.hold(IN_SPEED);
 	}
 	CBotCmd& cmd = blackboard.getCmd();
-	SinCos(RotationManager::clamp180(facing.y
+	SinCos(RotationManager::clamp180(blackboard.getSelf()->getAbsoluteAngle().y
 			- RotationManager::clamp180(pathAngle.y)) * M_PI / 180.0f,
 			&cmd.sidemove, &cmd.forwardmove);
 	cmd.forwardmove *= speed;

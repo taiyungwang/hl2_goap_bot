@@ -103,6 +103,8 @@ public:
 	void setTarget(edict_t* target) {
 		this->target = target;
 	}
+
+	Vector getFacing() const;
 private:
 	const Bot* self;
 

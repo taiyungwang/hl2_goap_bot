@@ -54,13 +54,11 @@ public:
 	/**
 	 * @Return Angle given by the player's last issued command.
 	 */
-	QAngle getNormalizedAngle() const;
+	QAngle getFacingAngle() const;
 
-	Vector getFacing() const;
-
+	QAngle getAbsoluteAngle() const;
 
 private:
-
 	IPlayerInfo* info;
 
 	edict_t* ent;
