@@ -80,14 +80,12 @@ void PluginAdaptor::gameFrame(bool simulating) {
 				}
 			}
 		}
-		/*
-		 * TODO: figure out why setting spawn name causes nav_mark_walkable to fail.
 		if (Q_stristr(modPath, "dod")) {
 			TheNavMesh->SetPlayerSpawnName("info_player_axis");
 			TheNavMesh->AddWalkableSeeds();
 			TheNavMesh->SetPlayerSpawnName("info_player_allies");
 			// allied walkable seed will be added if nav is generated.
-		}**/
+		}
 		navMeshLoadAttempted = true;
 	}
 	if (TheNavMesh != nullptr) {

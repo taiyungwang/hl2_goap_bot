@@ -64,11 +64,11 @@ void findEntWithMatchingName(const char* name,
 			}, result);
 }
 
-void findEntWithSubStrInName(const char* name,
+void findEntWithPatternInName(const char* name,
 		CUtlLinkedList<edict_t*>& result) {
 	findEntWithName(name,
 			[name, &result] (const char* name, const char* className) -> bool {
-				return Q_stristr(className, name) != nullptr;
+				return CUtlString(className).MatchesPattern(name);
 			}, result);
 }
 

@@ -41,9 +41,9 @@ void CapturePointAction::startRound() {
 	objectiveResource = new DODObjectiveResource();
 	const Vector* position = objectiveResource->getCapturePositions();
 	CUtlLinkedList<edict_t*> points, bombsOnMap, capArea;
-	findEntWithSubStrInName("dod_control_point", points);
-	findEntWithSubStrInName("dod_bomb_target", bombsOnMap);
-	findEntWithSubStrInName("dod_capture_area", capArea);
+	findEntWithMatchingName("dod_control_point", points);
+	findEntWithMatchingName("dod_bomb_target", bombsOnMap);
+	findEntWithMatchingName("dod_capture_area", capArea);
 	for (int i = 0; i < objectiveResource->numCtrlPts(); i++) {
 		capTarget.AddToTail();
 		FOR_EACH_LL(points, j)

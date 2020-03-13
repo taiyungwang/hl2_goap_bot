@@ -118,7 +118,7 @@ bool CFuncNavCost::HasTag( const char *groupname ) const
 {
 	for( int i=0; i<m_tags.Count(); ++i )
 	{
-		if ( FStrEq( m_tags[i], groupname ) )
+		if ( strcmp( m_tags[i], groupname ) == 0)
 		{
 			return true;
 		}

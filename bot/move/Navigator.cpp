@@ -144,6 +144,10 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	if (startArea == nullptr) {
 		startArea = getCurrentArea(self->getCurrentPosition());
 	}
+	if (startArea == nullptr) {
+		Warning("Unable to get startArea.\n");
+		return false;
+	}
 	CNavArea* goalArea = getCurrentArea(targetLoc, self->getTeam());
 	if (goalArea == nullptr) {
 		Warning("Unable to find area for location.\n");
@@ -300,7 +304,8 @@ bool Navigator::getPortal(Vector& portal, const CNavArea* from, const CNavArea* 
 		FOR_EACH_VEC(*connections, j)
 		{
 			if (connections->Element(j).area == to) {
-				from->ComputePortal(to, dir, &portal);
+				float halfWidth;
+				from->ComputePortal(to, dir, &portal, &halfWidth);
 				return true;
 			}
 		}

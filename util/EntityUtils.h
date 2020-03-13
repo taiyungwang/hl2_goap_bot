@@ -41,9 +41,9 @@ edict_t * findEntWithSubStrInNetClassName(const char* name);
 void findEntWithMatchingName(const char* name, CUtlLinkedList<edict_t*>& result);
 
 /**
- * Find all entities with class name containing the given substring.
+ * Find all entities with class name with glob pattern
  */
-void findEntWithSubStrInName(const char* name, CUtlLinkedList<edict_t*>& result);
+void findEntWithPatternInName(const char* name, CUtlLinkedList<edict_t*>& result);
 
 /**
  * Return true if given entity can be ignored when moving
