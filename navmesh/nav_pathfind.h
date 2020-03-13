@@ -438,10 +438,7 @@ bool NavAreaBuildPath( CNavArea *startArea, CNavArea *goalArea, const Vector *go
 template< typename CostFunctor >
 float NavAreaTravelDistance( CNavArea *startArea, CNavArea *endArea, CostFunctor &costFunc, float maxPathLength = 0.0f )
 {
-	if (startArea == NULL)
-		return -1.0f;
-
-	if (endArea == NULL)
+	if (startArea == NULL || endArea == NULL)
 		return -1.0f;
 
 	if (startArea == endArea)
@@ -554,34 +551,24 @@ void SearchSurroundingAreas( CNavArea *startArea, const Vector &startPos, Functo
 				for( int i=0; i<count; ++i )
 				{
 					CNavArea *adjArea = area->GetAdjacentArea( (NavDirType)dir, i );
-					if ( options & EXCLUDE_OUTGOING_CONNECTIONS )
-					{
-						if ( !adjArea->IsConnected( area, NUM_DIRECTIONS ) )
-						{
-							continue;	// skip this outgoing connection
+					bool add = !(options & EXCLUDE_OUTGOING_CONNECTIONS)
+							&& adjArea->IsConnected( area, NUM_DIRECTIONS );
+					// include areas that connect TO this area via a one-way link
+					if (!add && (options & INCLUDE_INCOMING_CONNECTIONS)) {
+						const auto& adjAreaNeighbors
+						= *adjArea->GetAdjacentAreas(OppositeDirection(static_cast<NavDirType>(dir)));
+						FOR_EACH_VEC(adjAreaNeighbors, j) {
+							if (adjAreaNeighbors[j].area == area) {
+								add = true;
+								break;
+							}
 						}
 					}
-					
-					AddAreaToOpenList( adjArea, area, startPos, maxRange );
-				}
-			}
-			
-			// potentially include areas that connect TO this area via a one-way link
-			if (options & INCLUDE_INCOMING_CONNECTIONS)
-			{
-				for( int dir=0; dir<NUM_DIRECTIONS; ++dir )
-				{
-					const NavConnectVector *list = area->GetIncomingConnections( (NavDirType)dir );
-
-					FOR_EACH_VEC( (*list), it )
-					{
-						NavConnect connect = (*list)[ it ];				
-						
-						AddAreaToOpenList( connect.area, area, startPos, maxRange );
+					if (add) {
+						AddAreaToOpenList( adjArea, area, startPos, maxRange );
 					}
 				}
 			}
-
 
 			// explore adjacent areas connected by ladders
 
@@ -606,9 +593,8 @@ void SearchSurroundingAreas( CNavArea *startArea, const Vector &startPos, Functo
 			{
 				FOR_EACH_VEC( (*ladderList), it )
 				{
-					const CNavLadder *ladder = (*ladderList)[ it ].ladder;
-
-					AddAreaToOpenList( ladder->m_bottomArea, area, startPos, maxRange );
+					AddAreaToOpenList( (*ladderList)[ it ].ladder->m_bottomArea, area,
+							startPos, maxRange );
 				}
 			}
 
@@ -617,8 +603,7 @@ void SearchSurroundingAreas( CNavArea *startArea, const Vector &startPos, Functo
 				const NavConnectVector &elevatorList = area->GetElevatorAreas();
 				FOR_EACH_VEC( elevatorList, it )
 				{
-					CNavArea *elevatorArea = elevatorList[ it ].area;
-					AddAreaToOpenList( elevatorArea, area, startPos, maxRange );
+					AddAreaToOpenList( elevatorList[ it ].area, area, startPos, maxRange );
 				}
 			}
 		}
@@ -684,17 +669,10 @@ public:
 			area->SetParent( priorArea );
 
 			// compute approximate travel distance from start area of search
-			if ( priorArea )
-			{
-				float distAlong = priorArea->GetCostSoFar();
-				distAlong += ( area->GetCenter() - priorArea->GetCenter() ).Length();
-				area->SetCostSoFar( distAlong );
-			}
-			else
-			{
-				area->SetCostSoFar( 0.0f );
-			}
-
+			area->SetCostSoFar( priorArea ?
+					priorArea->GetCostSoFar()
+					+ ( area->GetCenter() - priorArea->GetCenter() ).Length()
+					: 0.0f );
 			// adding an area to the open list also marks it
 			area->AddToOpenList();
 		}
@@ -781,10 +759,8 @@ inline void CollectSurroundingAreas( CUtlVector< CNavArea * > *nearbyAreaVector,
 			{
 				float deltaZ = area->GetParent()->ComputeAdjacentConnectionHeightChange( area );
 
-				if ( deltaZ > maxStepUpLimit )
-					continue;
-
-				if ( deltaZ < -maxDropDownLimit )
+				if ( deltaZ > maxStepUpLimit
+						|| deltaZ < -maxDropDownLimit )
 					continue;
 			}
 
@@ -801,22 +777,17 @@ inline void CollectSurroundingAreas( CUtlVector< CNavArea * > *nearbyAreaVector,
 				{
 					CNavArea *adjArea = area->GetAdjacentArea( (NavDirType)dir, i );
 
-					if ( adjArea->IsBlocked( TEAM_ANY ) )
-					{
+					if ( adjArea->IsBlocked( TEAM_ANY )
+							|| adjArea->IsMarked() ) {
 						continue;
 					}
+					adjArea->SetTotalCost( 0.0f );
+					adjArea->SetParent( area );
 
-					if ( !adjArea->IsMarked() )
-					{
-						adjArea->SetTotalCost( 0.0f );
-						adjArea->SetParent( area );
-
-						// compute approximate travel distance from start area of search
-						float distAlong = area->GetCostSoFar();
-						distAlong += ( adjArea->GetCenter() - area->GetCenter() ).Length();
-						adjArea->SetCostSoFar( distAlong );
-						adjArea->AddToOpenList();
-					}
+					// compute approximate travel distance from start area of search
+					adjArea->SetCostSoFar( area->GetCostSoFar()
+							+ ( adjArea->GetCenter() - area->GetCenter() ).Length());
+					adjArea->AddToOpenList();
 				}
 			}
 		}
@@ -834,10 +805,9 @@ class FarAwayFunctor
 public:
 	float operator() ( CNavArea *area, CNavArea *fromArea, const CNavLadder *ladder )
 	{
-		if (area == fromArea)
-			return 9999999.9f;
-
-		return 1.0f/(fromArea->GetCenter() - area->GetCenter()).Length();
+		return area == fromArea ?
+				9999999.9f
+				: 1.0f/(fromArea->GetCenter() - area->GetCenter()).Length();
 	}
 };
 
