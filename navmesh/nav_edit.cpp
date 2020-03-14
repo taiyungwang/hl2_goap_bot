@@ -400,7 +400,7 @@ bool CNavMesh::FindActiveNavArea( void )
 			// Failing that, get the closest area to the endpoint
 			if ( !m_selectedArea && !m_selectedLadder )
 			{
-				m_selectedArea = TheNavMesh->GetNearestNavArea( result.endpos, false, 500.0f );
+				m_selectedArea = TheNavMesh->GetNearestNavArea( result.endpos, 500.0f );
 			}
 		}
 
@@ -2283,29 +2283,19 @@ void CNavMesh::CommandNavSelectStairs( void )
 void CNavMesh::CommandNavSelectOrphans( void )
 {
 	edict_t* player = UTIL_GetListenServerEnt();
-	if (player == NULL)
-		return;
-
-	if ( !IsEditMode( NORMAL ) && !IsEditMode( PLACE_PAINTING ) )
+	if (player == NULL || (!IsEditMode( NORMAL ) && !IsEditMode( PLACE_PAINTING )) )
 		return;
 
 	FindActiveNavArea();
 
-	CNavArea *start = m_selectedArea;
-	if ( !start )
-	{
-		start = m_markedArea;
-	}
-
+	CNavArea *start = m_selectedArea != nullptr ? m_selectedArea: m_markedArea;
 	if ( start )
 	{
 		EmitSound(player, "EDIT_DELETE" );
-
-		int connections = INCLUDE_BLOCKED_AREAS | INCLUDE_INCOMING_CONNECTIONS;
-
 		// collect all areas connected to this area
 		SelectCollector collector;
-		SearchSurroundingAreas( start, start->GetCenter(), collector, -1, connections );
+		SearchSurroundingAreas( start, start->GetCenter(), collector, -1,
+				INCLUDE_BLOCKED_AREAS | INCLUDE_INCOMING_CONNECTIONS );
 
 		// toggle the selected set to reveal the orphans
 		CommandNavToggleSelectedSet();

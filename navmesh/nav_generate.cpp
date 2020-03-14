@@ -2080,13 +2080,8 @@ void CNavMesh::ConnectGeneratedAreas( void )
 //--------------------------------------------------------------------------------------------------------------
 bool CNavArea::IsAbleToMergeWith( CNavArea *other ) const
 {
-	if ( !HasNodes() || ( GetAttributes() & NAV_MESH_NO_MERGE ) ) 
-		return false;
-
-	if ( !other->HasNodes() || ( other->GetAttributes() & NAV_MESH_NO_MERGE ) )
-		return false;
-
-	return true;
+	return HasNodes() && !( GetAttributes() & NAV_MESH_NO_MERGE )
+			&& other->HasNodes() && !( other->GetAttributes() & NAV_MESH_NO_MERGE );
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -2114,10 +2109,8 @@ void CNavMesh::MergeGeneratedAreas( void )
 			FOR_EACH_VEC( area->m_connect[ NORTH ], nit )
 			{
 				CNavArea *adjArea = area->m_connect[ NORTH ][ nit ].area;
-				if ( !area->IsAbleToMergeWith( adjArea ) ) // pre-existing areas in incremental generates won't have nodes
-					continue;
-
-				if ( area->GetSizeY() + adjArea->GetSizeY() > GenerationStepSize * nav_area_max_size.GetInt() )
+				if ( !area->IsAbleToMergeWith( adjArea )  // pre-existing areas in incremental generates won't have nodes
+						|| area->GetSizeY() + adjArea->GetSizeY() > GenerationStepSize * nav_area_max_size.GetInt() )
 					continue;
 
 				if (area->m_node[ NORTH_WEST ] == adjArea->m_node[ SOUTH_WEST ] &&
@@ -2146,10 +2139,8 @@ void CNavMesh::MergeGeneratedAreas( void )
 			FOR_EACH_VEC( area->m_connect[ SOUTH ], sit )
 			{
 				CNavArea *adjArea = area->m_connect[ SOUTH ][ sit ].area;
-				if ( !area->IsAbleToMergeWith( adjArea ) ) // pre-existing areas in incremental generates won't have nodes
-					continue;
-
-				if ( area->GetSizeY() + adjArea->GetSizeY() > GenerationStepSize * nav_area_max_size.GetInt() )
+				if ( !area->IsAbleToMergeWith( adjArea )  // pre-existing areas in incremental generates won't have nodes
+						|| area->GetSizeY() + adjArea->GetSizeY() > GenerationStepSize * nav_area_max_size.GetInt() )
 					continue;
 
 				if (adjArea->m_node[ NORTH_WEST ] == area->m_node[ SOUTH_WEST ] &&
@@ -2180,10 +2171,8 @@ void CNavMesh::MergeGeneratedAreas( void )
 			FOR_EACH_VEC( area->m_connect[ WEST ], wit )
 			{
 				CNavArea *adjArea = area->m_connect[ WEST ][ wit ].area;
-				if ( !area->IsAbleToMergeWith( adjArea ) ) // pre-existing areas in incremental generates won't have nodes
-					continue;
-
-				if ( area->GetSizeX() + adjArea->GetSizeX() > GenerationStepSize * nav_area_max_size.GetInt() )
+				if ( !area->IsAbleToMergeWith( adjArea ) // pre-existing areas in incremental generates won't have nodes
+						|| area->GetSizeX() + adjArea->GetSizeX() > GenerationStepSize * nav_area_max_size.GetInt() )
 					continue;
 
 				if (area->m_node[ NORTH_WEST ] == adjArea->m_node[ NORTH_EAST ] &&
@@ -2213,10 +2202,8 @@ void CNavMesh::MergeGeneratedAreas( void )
 			FOR_EACH_VEC( area->m_connect[ EAST ], eit )
 			{
 				CNavArea *adjArea = area->m_connect[ EAST ][ eit ].area;
-				if ( !area->IsAbleToMergeWith( adjArea ) ) // pre-existing areas in incremental generates won't have nodes
-					continue;
-
-				if ( area->GetSizeX() + adjArea->GetSizeX() > GenerationStepSize * nav_area_max_size.GetInt() )
+				if ( !area->IsAbleToMergeWith( adjArea )  // pre-existing areas in incremental generates won't have nodes
+					|| area->GetSizeX() + adjArea->GetSizeX() > GenerationStepSize * nav_area_max_size.GetInt() )
 					continue;
 
 				if (adjArea->m_node[ NORTH_WEST ] == area->m_node[ NORTH_EAST ] &&
@@ -2843,9 +2830,7 @@ public:
 			v = 1.0f;
 
 		float northZ = m_nw.z + u * (m_ne.z - m_nw.z);
-		float southZ = m_sw.z + u * (m_se.z - m_sw.z);
-
-		return northZ + v * (southZ - northZ);
+		return northZ + v * (m_sw.z + u * (m_se.z - m_sw.z) - northZ);
 	}
 
 	bool OverlapsExistingArea( void )
@@ -2869,12 +2854,10 @@ public:
 				start.z -= StepHeight;
 				end.z += HalfHumanHeight;
 
-				if ( TheNavMesh->FindNavAreaOrLadderAlongRay( start, end, &overlappingArea, &overlappingLadder, NULL ) )
+				if ( TheNavMesh->FindNavAreaOrLadderAlongRay( start, end, &overlappingArea, &overlappingLadder, NULL )
+						&& overlappingArea )
 				{
-					if ( overlappingArea )
-					{
-						return true;
-					}
+					return true;
 				}
 
 				start.y += GenerationStepSize;
@@ -3023,49 +3006,34 @@ bool CNavMesh::TestArea( CNavNode *node, int width, int height )
 			}
 
 			// all nodes must be crouch/non-crouch
-			if ( nodeCrouch != horizNodeCrouch )
-				return false;
-
-			// all nodes must have the same non-crouch attributes
-			int horizNodeAttributes = horizNode->GetAttributes() & ~NAV_MESH_CROUCH;
-			if (horizNodeAttributes != nodeAttributes)
-				return false;
-
-			if (horizNode->IsCovered())
-				return false;
-
-			if (!horizNode->IsClosedCell())
-				return false;
-
-			if ( !CheckObstacles( horizNode, width, height, x, y ) )
+			if ( nodeCrouch != horizNodeCrouch			
+					// all nodes must have the same non-crouch attributes
+					|| (horizNode->GetAttributes() & ~NAV_MESH_CROUCH) != nodeAttributes
+					|| horizNode->IsCovered()
+					|| !horizNode->IsClosedCell()
+					|| !CheckObstacles( horizNode, width, height, x, y ) )
 				return false;
 
 			horizNode = horizNode->GetConnectedNode( EAST );
-			if (horizNode == NULL)
-				return false;
-
+			if (horizNode == NULL
 			// nodes must lie on/near the plane
-			if (width > 1 || height > 1)
+					|| ((width > 1 || height > 1)
+					&& fabs( DotProduct( *horizNode->GetPosition(), normal ) + d )
+					> offPlaneTolerance))
 			{
-				float dist = (float)fabs( DotProduct( *horizNode->GetPosition(), normal ) + d );
-				if (dist > offPlaneTolerance)
-					return false;
+				return false;
 			}
 		}
-
 		// Check the final (x=width) node, the above only checks thru x=width-1
 		if ( !CheckObstacles( horizNode, width, height, x, y ) )
 			return false;
 
 		vertNode = vertNode->GetConnectedNode( SOUTH );
-		if (vertNode == NULL)
-			return false;
-
+		if (vertNode == NULL
 		// nodes must lie on/near the plane
-		if (width > 1 || height > 1)
-		{
-			float dist = (float)fabs( DotProduct( *vertNode->GetPosition(), normal ) + d );
-			if (dist > offPlaneTolerance)
+				|| ((width > 1 || height > 1)
+						&& fabs( DotProduct( *vertNode->GetPosition(), normal ) + d )
+						> offPlaneTolerance)) {
 				return false;
 		}
 	}
@@ -3081,12 +3049,9 @@ bool CNavMesh::TestArea( CNavNode *node, int width, int height )
 				return false;
 
 			horizNode = horizNode->GetConnectedNode( EAST );
-			if (horizNode == NULL)
-				return false;
-
+			if (horizNode == NULL
 			// nodes must lie on/near the plane
-			float dist = (float)fabs( DotProduct( *horizNode->GetPosition(), normal ) + d );
-			if (dist > offPlaneTolerance)
+					|| (float)fabs( DotProduct( *horizNode->GetPosition(), normal ) + d ) > offPlaneTolerance)
 				return false;
 		}
 
@@ -3103,14 +3068,9 @@ bool CNavMesh::TestArea( CNavNode *node, int width, int height )
 		for( int x=0; x<width; ++x )
 		{
 			// look for odd jump areas (3 points on the ground, 1 point floating much higher or lower)
-			if ( !TestForValidJumpArea( horizNode ) )
-			{
-				return false;
-			}
-
-			// Now that we've done the quick checks, test for a valid crouch area.
+			if ( !TestForValidJumpArea( horizNode )			// Now that we've done the quick checks, test for a valid crouch area.
 			// This finds pillars etc in the middle of 4 nodes, that weren't found initially.
-			if ( nodeCrouch && !TestForValidCrouchArea( horizNode ) )
+					|| (nodeCrouch && !TestForValidCrouchArea( horizNode )) )
 			{
 				return false;
 			}
@@ -3163,24 +3123,13 @@ bool CNavMesh::TestArea( CNavNode *node, int width, int height )
 */
 bool CNavMesh::CheckObstacles( CNavNode *node, int width, int height, int x, int y )
 {
-	// any area bigger than 1x1 can't have obstacles in any connection between nodes
-	if ( width > 1 || height > 1 )
-	{
-		if ( ( x > 0 ) && ( node->m_obstacleHeight[WEST] > MaxTraversableHeight ) )
-			return false;
-
-		if ( ( y > 0 ) && ( node->m_obstacleHeight[NORTH] > MaxTraversableHeight ) )
-			return false;
-
-		if ( ( x < width-1 ) && ( node->m_obstacleHeight[EAST] > MaxTraversableHeight ) )
-			return false;
-
-		if ( ( y < height-1 ) && ( node->m_obstacleHeight[SOUTH] > MaxTraversableHeight ) )
-			return false;
-	}
-
+	return (width <= 1 && height <= 1)
+			// any area bigger than 1x1 can't have obstacles in any connection between nodes
+			|| ((x <= 0 || node->m_obstacleHeight[WEST] <= MaxTraversableHeight )
+				&& ( y <= 0 || node->m_obstacleHeight[NORTH] <= MaxTraversableHeight )
+				&& ( x >= width-1 || node->m_obstacleHeight[EAST] <= MaxTraversableHeight )
+				&& ( y >= height-1 || node->m_obstacleHeight[SOUTH] <= MaxTraversableHeight ) );
 	// 1x1 area can have obstacles, that area will get fixed up later
-	return true;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -3373,8 +3322,7 @@ void CNavMesh::CreateNavAreasFromNodes( void )
 	{
 		for ( int i=0; i<m_ladders.Count(); ++i )
 		{
-			CNavLadder *ladder = m_ladders[i];
-			ladder->ConnectGeneratedLadder( 0.0f );
+			m_ladders[i]->ConnectGeneratedLadder( 0.0f );
 		}
 	}
 }
@@ -3390,9 +3338,7 @@ edict_t* findEntityByClassNameNearest(const char* className,
 	edict_t* ent = findEntityByClassName(className);
 	float mindist = INFINITY;
 	for (; ent != nullptr; ent = findEntityByClassName(className, ent)) {
-		float dist =
-				(pos
-						- ent->GetIServerEntity()->GetCollideable()->GetCollisionOrigin()).LengthSqr();
+		float dist = (pos- ent->GetIServerEntity()->GetCollideable()->GetCollisionOrigin()).LengthSqr();
 		if (dist < rad2 && dist < mindist) {
 			mindist = dist;
 		}
@@ -3931,10 +3877,7 @@ bool CNavMesh::UpdateGeneration( float maxTime )
 
 					continue;
 				}
-				else
-				{
-					++sit;
-				}
+				++sit;
 			}
 
 			if ( s_unlitAreas.Count() )
@@ -4112,11 +4055,9 @@ void CNavMesh::SetPlayerSpawnName( const char *name )
  */
 const char *CNavMesh::GetPlayerSpawnName( void ) const
 {
-	if (m_spawnName)
-		return m_spawnName;
-
+	return m_spawnName ? m_spawnName :
 	// default value
-	return "info_player_start";
+			"info_player_start";
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -4278,18 +4219,8 @@ bool StayOnFloor( trace_t *trace, float zLimit /* = DeathDrop */ )
 			CTraceFilterWalkableEntities( NULL, COLLISION_GROUP_NONE,
 					WALK_THRU_EVERYTHING), trace);
 	DrawTrace( trace );
-
-	if ( trace->startsolid || trace->fraction >= 1.0f )
-	{
-		return false;
-	}
-
-	if ( trace->plane.normal.z < nav_slope_limit.GetFloat() )
-	{
-		return false;
-	}
-
-	return true;
+	return !trace->startsolid && trace->fraction < 1.0f
+			&& trace->plane.normal.z >= nav_slope_limit.GetFloat();
 }
 
 
@@ -4313,13 +4244,9 @@ bool TraceAdjacentNode( int depth, const Vector& start, const Vector& end, trace
 	}
 
 	// If we didn't make enough progress, bail
-	if ( depth && start.AsVector2D().DistToSqr( trace->endpos.AsVector2D() ) < MinDistance * MinDistance )
-	{
-		return false;
-	}
-
+	if ( (depth && start.AsVector2D().DistToSqr( trace->endpos.AsVector2D() ) < MinDistance * MinDistance)
 	// We made it more than MinDistance.  If the slope is too steep, we can't go on.
-	if ( !StayOnFloor( trace, zLimit ) )
+			|| !StayOnFloor( trace, zLimit ) )
 	{
 		return false;
 	}
@@ -4355,12 +4282,8 @@ static bool IsNodeOverlapped( const Vector& pos, const Vector& offset )
 		trace_t trace;
 		CTraceFilterWalkableEntities filter( NULL, COLLISION_GROUP_NONE, WALK_THRU_EVERYTHING );
 		UTIL_TraceHull( start, end, mins, maxs, TheNavMesh->GetGenerationTraceMask(), filter, &trace );
-		if ( trace.startsolid || trace.allsolid )
-		{
-			return true;
-		}
-
-		if ( trace.fraction < 0.1f )
+		if ( trace.startsolid || trace.allsolid
+				|| trace.fraction < 0.1f )
 		{
 			return true;
 		}
@@ -4368,17 +4291,9 @@ static bool IsNodeOverlapped( const Vector& pos, const Vector& offset )
 		start = trace.endpos;
 		end.z -= HalfHumanHeight * 2;
 		UTIL_TraceHull( start, end, mins, maxs, TheNavMesh->GetGenerationTraceMask(), filter, &trace );
-		if ( trace.startsolid || trace.allsolid )
-		{
-			return true;
-		}
-		
-		if ( trace.fraction == 1.0f )
-		{
-			return true;
-		}
-
-		if ( trace.plane.normal.z < 0.7f )
+		if ( trace.startsolid || trace.allsolid
+				|| trace.fraction == 1.0f
+				|| trace.plane.normal.z < 0.7f )
 		{
 			return true;
 		}
@@ -4420,11 +4335,9 @@ bool CNavMesh::SampleStep( void )
 					CNavLadder *ladder = m_ladders[i];
 
 					// check ladder bottom
-					if ((m_currentNode = LadderEndSearch( &ladder->m_bottom, ladder->GetDir() )) != 0)
-						break;
-
-					// check ladder top
-					if ((m_currentNode = LadderEndSearch( &ladder->m_top, ladder->GetDir() )) != 0)
+					if ((m_currentNode = LadderEndSearch( &ladder->m_bottom, ladder->GetDir() )) != 0
+							// check ladder top
+							|| (m_currentNode = LadderEndSearch( &ladder->m_top, ladder->GetDir() )) != 0)
 						break;
 				}
 
@@ -4490,12 +4403,10 @@ bool CNavMesh::SampleStep( void )
 					}
 				}
 
-				if ( m_generationMode == GENERATE_SIMPLIFY )
+				if ( m_generationMode == GENERATE_SIMPLIFY
+						&& !m_simplifyGenerationExtent.Contains( pos ) )
 				{
-					if ( !m_simplifyGenerationExtent.Contains( pos ) )
-					{
-						return true;
-					}
+					return true;
 				}
 
 				// test if we can move to new position
@@ -4638,13 +4549,11 @@ bool CNavMesh::SampleStep( void )
 						end = start;
 						start = result.endpos;
 						UTIL_TraceHull( start, end, NavTraceMins, NavTraceMaxs, GetGenerationTraceMask(), filter, &result );
-						if ( result.fraction < 1 )
-						{
+						if ( result.fraction < 1
 							// if we made it down to within StepHeight, maybe we're on a static prop
-							if ( result.endpos.z > to.z + StepHeight )
-							{
-								return true;
-							}
+							&& result.endpos.z > to.z + StepHeight )
+						{
+							return true;
 						}
 					}
 				}
@@ -4704,10 +4613,7 @@ CNavNode *CNavMesh::GetNextWalkableSeedNode( void )
 
 	// check if a node exists at this location
 	CNavNode *node = CNavNode::GetNode( spot.pos );
-	if ( node )
-		return NULL;
-
-	return new CNavNode( spot.pos, spot.normal, NULL, false );
+	return node ? nullptr : new CNavNode( spot.pos, spot.normal, NULL, false );
 }
 
 
@@ -4748,10 +4654,7 @@ bool IsWalkableTraceLineClear( const Vector &from, const Vector &to, unsigned in
 		}
 	}
 
-	if (result.fraction == 1.0f)
-		return true;
-
-	return false;
+	return result.fraction == 1.0f;
 }
 
 
@@ -4838,14 +4741,7 @@ public:
  */
 void CNavMesh::CommandNavSubdivide( const CCommand &args )
 {
-	int depth = 1;
-	
-	if (args.ArgC() == 2)
-	{
-		depth = atoi( args[1] );
-	}
-
-	Subdivider chop( depth );
+	Subdivider chop( args.ArgC() == 2 ? atoi( args[1] ) : 1 );
 	TheNavMesh->ForAllSelectedAreas( chop );
 }
 
