@@ -2789,7 +2789,6 @@ NavAttributeLookup TheNavAttributeTable[] =
 	{ "STAIRS", NAV_MESH_STAIRS },
 	{ "NO_MERGE", NAV_MESH_NO_MERGE },
 	{ "OBSTACLE_TOP", NAV_MESH_OBSTACLE_TOP },
-	{ "CLIFF", NAV_MESH_CLIFF },
 #ifdef TERROR
 	{ "PLAYERCLIP", (NavAttributeType)CNavArea::NAV_PLAYERCLIP },
 	{ "BREAKABLEWALL", (NavAttributeType)CNavArea::NAV_BREAKABLEWALL },

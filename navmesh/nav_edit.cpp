@@ -944,7 +944,6 @@ void CNavMesh::DrawEditMode( void )
 					if ( attributes & NAV_MESH_NO_HOSTAGES )Q_strncat( attrib, "NO HOSTAGES ", sizeof( attrib ), -1 );
 					if ( attributes & NAV_MESH_STAIRS )		Q_strncat( attrib, "STAIRS ", sizeof( attrib ), -1 );
 					if ( attributes & NAV_MESH_OBSTACLE_TOP ) Q_strncat( attrib, "OBSTACLE ", sizeof( attrib ), -1 );
-					if ( attributes & NAV_MESH_CLIFF )		Q_strncat( attrib, "CLIFF ", sizeof( attrib ), -1 );
 #ifdef TERROR
 					if ( attributes & TerrorNavArea::NAV_PLAYERCLIP )		Q_strncat( attrib, "PLAYERCLIP ", sizeof( attrib ), -1 );
 					if ( attributes & TerrorNavArea::NAV_BREAKABLEWALL )	Q_strncat( attrib, "BREAKABLEWALL ", sizeof( attrib ), -1 );

@@ -49,8 +49,8 @@ template<typename Func>
 void findEntWithName(const char* name, const Func& match,
 		CUtlLinkedList<edict_t*>& result) {
 	forAllEntities([match, name, &result](edict_t* ent) -> void {
-		const char* className = ent->GetClassName();
-		if (name == className || match(name, className)) {
+		if (!ent->IsFree() && ent->GetNetworkable() != nullptr
+				&& (name == ent->GetClassName() || match(name, ent->GetClassName()))) {
 			result.AddToTail(ent);
 		}
 	});
