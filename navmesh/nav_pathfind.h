@@ -544,28 +544,34 @@ void SearchSurroundingAreas( CNavArea *startArea, const Vector &startPos, Functo
 		// invoke functor on area
 		if (func( area ))
 		{
-			// explore adjacent floor areas
-			for( int dir=0; dir<NUM_DIRECTIONS; ++dir )
-			{
-				int count = area->GetAdjacentCount( (NavDirType)dir );
-				for( int i=0; i<count; ++i )
+			if (!(options & EXCLUDE_OUTGOING_CONNECTIONS)) {
+				// explore adjacent floor areas
+				for( int dir=0; dir<NUM_DIRECTIONS; ++dir )
 				{
-					CNavArea *adjArea = area->GetAdjacentArea( (NavDirType)dir, i );
-					bool add = !(options & EXCLUDE_OUTGOING_CONNECTIONS)
-							&& adjArea->IsConnected( area, NUM_DIRECTIONS );
-					// include areas that connect TO this area via a one-way link
-					if (!add && (options & INCLUDE_INCOMING_CONNECTIONS)) {
-						const auto& adjAreaNeighbors
-						= *adjArea->GetAdjacentAreas(OppositeDirection(static_cast<NavDirType>(dir)));
-						FOR_EACH_VEC(adjAreaNeighbors, j) {
-							if (adjAreaNeighbors[j].area == area) {
-								add = true;
-								break;
-							}
+					int count = area->GetAdjacentCount( (NavDirType)dir );
+					for( int i=0; i<count; ++i )
+					{
+						CNavArea *adjArea = area->GetAdjacentArea( (NavDirType)dir, i );
+						if ( adjArea->IsConnected( area, NUM_DIRECTIONS ) )
+						{
+							AddAreaToOpenList( adjArea, area, startPos, maxRange );
 						}
 					}
-					if (add) {
-						AddAreaToOpenList( adjArea, area, startPos, maxRange );
+				}
+			}
+			// potentially include areas that connect TO this area via a one-way link
+			if (options & INCLUDE_INCOMING_CONNECTIONS)
+			{
+				for( int dir=0; dir<NUM_DIRECTIONS; ++dir )
+				{
+					const NavConnectVector *list = area->GetIncomingConnections( (NavDirType)dir );
+					FOR_EACH_VEC( (*list), it )
+					{
+						NavConnect connect = (*list)[ it ];
+						if (connect.area->IsConnected(area,
+								OppositeDirection(static_cast<NavDirType>(dir)))) {
+							AddAreaToOpenList( connect.area, area, startPos, maxRange );
+						}
 					}
 				}
 			}
