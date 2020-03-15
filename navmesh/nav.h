@@ -42,7 +42,7 @@ const float DeathDrop = 400.0f;					// (300) distance at which we will die if we
 #if defined(CSTRIKE_DLL)
 const float ClimbUpHeight = JumpCrouchHeight;	// CSBots assume all jump up links are reachable
 #else
-const float ClimbUpHeight = 200.0f;				// height to check for climbing up
+const float ClimbUpHeight = JumpCrouchHeight; //200.0f;				// height to check for climbing up
 #endif
 
 // TERROR: Converted these values to use the same numbers as the player bounding boxes etc

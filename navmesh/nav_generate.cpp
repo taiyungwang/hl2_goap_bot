@@ -4223,8 +4223,7 @@ bool CNavMesh::SampleStep( void )
 					bool inRange = false;
 					for ( int i=0; i<m_walkableSeeds.Count(); ++i )
 					{
-						const Vector &seedPos = m_walkableSeeds[i].pos;
-						if ( (seedPos - pos).IsLengthLessThan( incrementalRange ) )
+						if ( (m_walkableSeeds[i].pos - pos).IsLengthLessThan( incrementalRange ) )
 						{
 							inRange = true;
 							break;
@@ -4258,7 +4257,7 @@ bool CNavMesh::SampleStep( void )
 				{
 					// test going up ClimbUpHeight
 					bool success = false;
-					for ( float height = StepHeight; height <= StepHeight; height += 1.0f )
+					for ( float height = StepHeight; height <= ClimbUpHeight; height += 1.0f )
 					{						
 						trace_t tr;
 						Vector start( from );
@@ -4392,8 +4391,8 @@ bool CNavMesh::SampleStep( void )
 				// If there's an obstacle in the way and it's traversable, or the obstacle is not higher than the destination node itself minus a small epsilon
 				// (meaning the obstacle was just the height change to get to the destination node, no extra obstacle between the two), clear obstacle height
 				// and distances
-				if ( ( obstacleHeight < MaxTraversableHeight )
-						|| ( to.z - m_currentNode->GetPosition()->z > ( obstacleHeight - 2.0f ) ) )
+				if ( obstacleHeight < MaxTraversableHeight
+						|| to.z - m_currentNode->GetPosition()->z > obstacleHeight - 2.0f )
 				{
 					obstacleHeight = 0;
 					obstacleStartDist = 0;
