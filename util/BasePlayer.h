@@ -8,6 +8,9 @@ public:
 	BasePlayer(edict_t *ent): BasePlayer("CBasePlayer", ent) {
 	}
 
+	virtual ~BasePlayer() {
+	}
+
 	virtual int getPlayerClass() {
 		return -1;
 	}

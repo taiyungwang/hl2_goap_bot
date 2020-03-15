@@ -20,15 +20,8 @@ extern IVDebugOverlay* debugoverlay;
 extern IEngineTrace *enginetrace;
 extern ConVar r_visualizetraces;
 
-inline edict_t *EntityFromEntityHandle(IHandleEntity *pHandleEntity) {
-	return reinterpret_cast<IServerUnknown*>(pHandleEntity)->GetNetworkable()->GetEdict();
-}
-
-bool CTraceFilterWalkableEntities::ShouldHitEntity(IHandleEntity *pServerEntity,
-		int contentsMask) {
-	return (CTraceFilterNoNPCsOrPlayer::ShouldHitEntity(pServerEntity,
-			contentsMask))
-			&& !IsEntityWalkable(EntityFromEntityHandle(pServerEntity), m_flags);
+inline edict_t *EntityFromEntityHandle(const IHandleEntity *pHandleEntity) {
+	return reinterpret_cast<IServerUnknown*>(const_cast<IHandleEntity*>(pHandleEntity))->GetNetworkable()->GetEdict();
 }
 
 CTraceFilterSimple::CTraceFilterSimple(const IHandleEntity *passedict,
@@ -46,22 +39,17 @@ bool StandardFilterRules(IHandleEntity *pHandleEntity, int fContentsMask) {
 	SolidType_t solid = pCollide->GetCollideable()->GetSolid();
 	extern IVModelInfo *modelinfo;
 	BaseEntity baseEntity(pCollide);
-	if ((((modelinfo->GetModelType(
-			modelinfo->GetModel(baseEntity.getModelIndex())) != mod_brush)
-			|| (solid != SOLID_BSP && solid != SOLID_VPHYSICS))
-			&& (fContentsMask & CONTENTS_MONSTER) == 0)
+	return modelinfo->GetModelType(modelinfo->GetModel(baseEntity.getModelIndex())) == mod_brush
+			&& (solid == SOLID_BSP || solid == SOLID_VPHYSICS)
+			&& (fContentsMask & CONTENTS_MONSTER) == 0
 	// This code is used to cull out tests against see-thru entities
-			|| (!(fContentsMask & CONTENTS_WINDOW)
-					&& baseEntity.getRenderMode() == kRenderNormal)
+			&& ((fContentsMask & CONTENTS_WINDOW) || baseEntity.getRenderMode() != kRenderNormal)
 			// FIXME: this is to skip BSP models that are entities that can be
 			// potentially moved/deleted, similar to a monster but doors don't seem to
 			// be flagged as monsters
 			// FIXME: the FL_WORLDBRUSH looked promising, but it needs to be set on
 			// everything that's actually a worldbrush and it currently isn't
-			|| (!(fContentsMask & CONTENTS_MOVEABLE)
-					&& (baseEntity.getMoveType() == MOVETYPE_PUSH)))// !(touch->flags & FL_WORLDBRUSH) )
-		return false;
-	return true;
+			&& ((fContentsMask & CONTENTS_MOVEABLE) || baseEntity.getMoveType() != MOVETYPE_PUSH);// !(touch->flags & FL_WORLDBRUSH) )
 }
 
 bool CGameRulesShouldCollide(int collisionGroup0, int collisionGroup1) {
@@ -87,8 +75,8 @@ bool CGameRulesShouldCollide(int collisionGroup0, int collisionGroup1) {
 	// --------------------------------------------------------------------------
 
 	// Don't bother if either is in a vehicle...
-	if ((collisionGroup0 == COLLISION_GROUP_IN_VEHICLE)
-			|| (collisionGroup1 == COLLISION_GROUP_IN_VEHICLE)
+	if (collisionGroup0 == COLLISION_GROUP_IN_VEHICLE
+			|| collisionGroup1 == COLLISION_GROUP_IN_VEHICLE
 			|| (collisionGroup1 == COLLISION_GROUP_DOOR_BLOCKER
 					&& collisionGroup0 != COLLISION_GROUP_NPC)
 			|| (collisionGroup0 == COLLISION_GROUP_PLAYER
@@ -102,8 +90,7 @@ bool CGameRulesShouldCollide(int collisionGroup0, int collisionGroup1) {
 					&& collisionGroup0 != COLLISION_GROUP_NONE)
 			// doesn't collide with other members of this group
 			// or debris, but that's handled above
-			|| (collisionGroup0 == COLLISION_GROUP_INTERACTIVE_DEBRIS
-					&& collisionGroup1 == COLLISION_GROUP_INTERACTIVE_DEBRIS)) {
+			|| (collisionGroup0 == COLLISION_GROUP_INTERACTIVE_DEBRIS && collisionGroup1 == COLLISION_GROUP_INTERACTIVE_DEBRIS)) {
 		return false;
 	}
 #ifndef HL2MP
@@ -135,37 +122,48 @@ bool CGameRulesShouldCollide(int collisionGroup0, int collisionGroup1) {
 		return false;
 	}
 	// collision with vehicle clip entity??
-	if (collisionGroup0 == COLLISION_GROUP_VEHICLE_CLIP
-			|| collisionGroup1 == COLLISION_GROUP_VEHICLE_CLIP) {
+	return (collisionGroup0 != COLLISION_GROUP_VEHICLE_CLIP
+			&& collisionGroup1 != COLLISION_GROUP_VEHICLE_CLIP)
 		// yes then if it's a vehicle, collide, otherwise no collision
 		// vehicle sorts lower than vehicle clip, so must be in 0
-		if (collisionGroup0 == COLLISION_GROUP_VEHICLE)
-			return true;
+			|| collisionGroup0 == COLLISION_GROUP_VEHICLE;
 		// vehicle clip against non-vehicle, no collision
+}
+
+bool PassServerEntityFilter( const IHandleEntity *pTouch, const IHandleEntity *pPass )
+{
+	if ( !pPass )
+		return true;
+	if ( pTouch == pPass )
 		return false;
-	}
-	return true;
+	edict_t *pEntTouch = EntityFromEntityHandle( pTouch );
+	edict_t *pEntPass = EntityFromEntityHandle( pPass );
+	return !pEntTouch || !pEntPass || pEntTouch != pEntPass;
 }
 
 bool CTraceFilterSimple::ShouldHitEntity(IHandleEntity *pHandleEntity,
 		int contentsMask) {
-	if (!StandardFilterRules(pHandleEntity, contentsMask)
-			|| (m_pPassEnt && pHandleEntity == m_pPassEnt) || !pHandleEntity) {
+	if ( !StandardFilterRules( pHandleEntity, contentsMask )
+			|| (m_pPassEnt && !PassServerEntityFilter( pHandleEntity, m_pPassEnt ) ))
+	{
 		return false;
 	}
 	// Don't test if the game code tells us we should ignore this collision...
-	edict_t *pEntity = EntityFromEntityHandle(pHandleEntity);
-	if (pEntity == nullptr
-			|| pEntity->GetCollideable()->GetCollisionGroup()
-					!= COLLISION_GROUP_DEBRIS
-			|| !(contentsMask & CONTENTS_DEBRIS)
-			|| !CGameRulesShouldCollide(m_collisionGroup,
-					pEntity->GetCollideable()->GetCollisionGroup()))
+	edict_t *pEntity = EntityFromEntityHandle( pHandleEntity );
+	if (pEntity == nullptr) {
 		return false;
-	if (m_pExtraShouldHitCheckFunction
-			&& (!(m_pExtraShouldHitCheckFunction(pHandleEntity, contentsMask))))
-		return false;
-	return true;
+	}
+	int collisionGroup = pEntity->GetCollideable()->GetCollisionGroup();
+	return (collisionGroup != COLLISION_GROUP_DEBRIS || (contentsMask & CONTENTS_DEBRIS))
+			&& CGameRulesShouldCollide( m_collisionGroup, collisionGroup)
+			&& (m_pExtraShouldHitCheckFunction == nullptr
+					|| m_pExtraShouldHitCheckFunction( pHandleEntity, contentsMask )) ;
+}
+
+bool CTraceFilterWalkableEntities::ShouldHitEntity(IHandleEntity *pServerEntity,
+		int contentsMask) {
+	return CTraceFilterNoNPCsOrPlayer::ShouldHitEntity(pServerEntity, contentsMask)
+		&& !IsEntityWalkable(EntityFromEntityHandle( pServerEntity ), m_flags );
 }
 
 bool CTraceFilterNoNPCsOrPlayer::ShouldHitEntity(IHandleEntity *pHandleEntity,
@@ -173,7 +171,7 @@ bool CTraceFilterNoNPCsOrPlayer::ShouldHitEntity(IHandleEntity *pHandleEntity,
 	if (CTraceFilterSimple::ShouldHitEntity(pHandleEntity, contentsMask)) {
 		edict_t *pEntity = EntityFromEntityHandle(pHandleEntity);
 		if (!pEntity)
-			return nullptr;
+			return false;
 		/*
 		 * TODO
 		 #ifndef CLIENT_DLL
