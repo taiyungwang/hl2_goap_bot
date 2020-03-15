@@ -66,10 +66,24 @@ Color s_selectedSetColor( 255, 255, 200, 96 );
 Color s_selectedSetBorderColor( 100, 100, 0, 255 );
 Color s_dragSelectionSetBorderColor( 50, 50, 50, 255 );
 
+bool UTIL_IsCommandIssuedByServerAdmin() {
+	if (engine->IsDedicatedServer()) {
+		return false;
+	}
+	for (int i = 2; i < gpGlobals->maxClients; i++) {
+		edict_t* player = engine->PEntityOfEntIndex(i);
+		if (player != nullptr && !player->IsFree() && player->GetNetworkable() != nullptr
+				&& !playerinfomanager->GetPlayerInfo(player)->IsFakeClient()) {
+			return false;
+		}
+	}
+	return true;
+}
+
 template<typename Functor>
 bool ForEachActor(Functor &func) {
 	// iterate all non-bot players
-	for (int i = 1; i <= playerinfomanager->GetGlobalVars()->maxClients; ++i) {
+	for (int i = 1; i <= gpGlobals->maxClients; ++i) {
 		edict_t *ent = engine->PEntityOfEntIndex(i);
 		if (ent == nullptr) {
 			continue;

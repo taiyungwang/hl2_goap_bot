@@ -56,12 +56,7 @@ inline bool FStrEq(const char *sz1, const char *sz2)
 template < typename Functor >
 bool ForEachActor( Functor &func );
 
-/**
- * TODO:
- */
-static bool UTIL_IsCommandIssuedByServerAdmin() {
-	return true;
-}
+bool UTIL_IsCommandIssuedByServerAdmin();
 
 const char *UTIL_VarArgs( const char *format, ... );
 
