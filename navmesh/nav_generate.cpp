@@ -135,17 +135,6 @@ inline CNavArea *findFirstAreaInDirection(const Vector *start, NavDirType dir,
 	return area;
 }
 
-
-edict_t* findEntityByClassName(const char* className, edict_t* startEnt = nullptr) {
-	for (int i = engine->IndexOfEdict(startEnt); i < gpGlobals->maxEntities; i++) {
-		edict_t* ent = engine->PEntityOfEntIndex(i);
-		if (ent !=nullptr && strcmp(className, ent->GetClassName()) == 0) {
-			return ent;
-		}
-	}
-	return nullptr;
-}
-
 //--------------------------------------------------------------------------------------------------------------
 /**
  * For each ladder in the map, create a navigation representation of it.
@@ -3226,34 +3215,17 @@ void CNavMesh::CreateNavAreasFromNodes( void )
 }
 
 
-edict_t* findEntityByClassNameNearest(const char* className,
-		const Vector& pos, float maxRadius) {
-	float rad2 = pow(maxRadius, 2);
-	if (rad2 == 0)
-	{
-		rad2 = MAX_TRACE_LENGTH * MAX_TRACE_LENGTH;
-	}
-	edict_t* ent = findEntityByClassName(className);
-	float mindist = INFINITY;
-	for (; ent != nullptr; ent = findEntityByClassName(className, ent)) {
-		float dist = (pos- ent->GetIServerEntity()->GetCollideable()->GetCollisionOrigin()).LengthSqr();
-		if (dist < rad2 && dist < mindist) {
-			mindist = dist;
-		}
-	}
-	return ent;
-}
-
 //--------------------------------------------------------------------------------------------------------------
 // adds walkable positions for any/all positions a mod specifies
 void CNavMesh::AddWalkableSeeds( void )
 {
-	edict_t *ent = findEntityByClassName(GetPlayerSpawnName());
-
-	if (ent )
+	CUtlLinkedList<edict_t*> spawns;
+	findEntWithMatchingName(GetPlayerSpawnName(), spawns);
+	// TODO: For some reason adding multiple seeds causes the generation to ignore the last seed added
+	if(spawns.Count() > 0)
 	{
 		// snap it to the sampling grid
-		Vector pos = ent->GetCollideable()->GetCollisionOrigin();
+		Vector pos = spawns[0]->GetCollideable()->GetCollisionOrigin();
 		pos.x = TheNavMesh->SnapToGrid( pos.x );
 		pos.y = TheNavMesh->SnapToGrid( pos.y );
 
@@ -3553,8 +3525,7 @@ bool CNavMesh::UpdateGeneration( float maxTime )
 				ClearSelectedSet();
 				FOR_EACH_VEC( TheNavAreas, nit )
 				{
-					CNavArea *area = TheNavAreas[nit];
-					AddToSelectedSet( area );
+					AddToSelectedSet( TheNavAreas[nit] );
 				}
 			}
 
@@ -3595,10 +3566,7 @@ bool CNavMesh::UpdateGeneration( float maxTime )
 		{
 			while( m_generationIndex < TheNavAreas.Count() )
 			{
-				CNavArea *area = TheNavAreas[ m_generationIndex ];
-				++m_generationIndex;
-
-				area->ComputeHidingSpots();
+				TheNavAreas[ m_generationIndex++ ]->ComputeHidingSpots();
 
 				// don't go over our time allotment
 				if( Plat_FloatTime() - startTime > maxTime )
@@ -3620,10 +3588,7 @@ bool CNavMesh::UpdateGeneration( float maxTime )
 		{
 			while( m_generationIndex < TheNavAreas.Count() )
 			{
-				CNavArea *area = TheNavAreas[ m_generationIndex ];
-				++m_generationIndex;
-
-				area->ComputeSpotEncounters();
+				TheNavAreas[ m_generationIndex++ ]->ComputeSpotEncounters();
 
 				// don't go over our time allotment
 				if( Plat_FloatTime() - startTime > maxTime )
@@ -3645,10 +3610,7 @@ bool CNavMesh::UpdateGeneration( float maxTime )
 		{
 			while( m_generationIndex < TheNavAreas.Count() )
 			{
-				CNavArea *area = TheNavAreas[ m_generationIndex ];
-				++m_generationIndex;
-
-				area->ComputeSniperSpots();
+				TheNavAreas[ m_generationIndex++ ]->ComputeSniperSpots();
 
 				// don't go over our time allotment
 				if( Plat_FloatTime() - startTime > maxTime )
@@ -3673,10 +3635,7 @@ bool CNavMesh::UpdateGeneration( float maxTime )
 		{
 			while( m_generationIndex < TheNavAreas.Count() )
 			{
-				CNavArea *area = TheNavAreas[ m_generationIndex ];
-				++m_generationIndex;
-
-				area->ComputeVisibilityToMesh();
+				TheNavAreas[ m_generationIndex++ ]->ComputeVisibilityToMesh();
 
 				// don't go over our time allotment
 				if ( Plat_FloatTime() - startTime > maxTime )
@@ -3702,10 +3661,7 @@ bool CNavMesh::UpdateGeneration( float maxTime )
 		{
 			while( m_generationIndex < TheNavAreas.Count() )
 			{
-				CNavArea *area = TheNavAreas[ m_generationIndex ];
-				++m_generationIndex;
-
-				area->ComputeEarliestOccupyTimes();
+				TheNavAreas[ m_generationIndex++ ]->ComputeEarliestOccupyTimes();
 
 				// don't go over our time allotment
 				if( Plat_FloatTime() - startTime > maxTime )
@@ -3839,10 +3795,7 @@ bool CNavMesh::UpdateGeneration( float maxTime )
 			}
 			while( m_generationIndex < TheNavAreas.Count() )
 			{
-				CNavArea *area = TheNavAreas[ m_generationIndex ];
-				++m_generationIndex;
-
-				area->CustomAnalysis( m_generationMode == GENERATE_INCREMENTAL );
+				TheNavAreas[ m_generationIndex++ ]->CustomAnalysis( m_generationMode == GENERATE_INCREMENTAL );
 
 				// don't go over our time allotment
 				if( Plat_FloatTime() - startTime > maxTime )
