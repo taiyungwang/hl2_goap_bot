@@ -837,6 +837,7 @@ void CNavMesh::RaiseAreasWithInternalObstacles()
 				corner[SOUTH_EAST].x = corner[SOUTH_WEST].x + obstacleEndDist;				
 				corner[NORTH_WEST].x += obstacleStartDist;
 				corner[SOUTH_WEST].x += obstacleStartDist;
+				break;
 			case WEST:
 				corner[NORTH_WEST].x = corner[NORTH_EAST].x - obstacleEndDist;
 				corner[SOUTH_WEST].x = corner[SOUTH_EAST].x - obstacleEndDist;				
@@ -3930,14 +3931,13 @@ CNavNode *CNavMesh::AddNode( const Vector &destPos, const Vector &normal, NavDir
 		OnNodeAdded( node );
 		useNew = true;
 	}
-
-	// connect source node to new node
-	source->ConnectTo( node, dir, obstacleHeight, obstacleStartDist, obstacleEndDist );
-
-	// optimization: if deltaZ changes very little, assume connection is commutative
-	const float zTolerance = 50.0f;
 	float deltaZ = source->GetPosition()->z - destPos.z;
-	if (fabs( deltaZ ) < zTolerance)
+	// connect source node to new node
+	if (deltaZ < 50.0f) {
+		source->ConnectTo( node, dir, obstacleHeight, obstacleStartDist, obstacleEndDist );
+	}
+	// optimization: if deltaZ changes very little, assume connection is commutative
+	if (fabs( deltaZ ) < 50.0f)
 	{
 		if ( obstacleHeight > 0 )
 		{
@@ -4402,7 +4402,9 @@ bool CNavMesh::SampleStep( void )
 
 				// we can move here
 				// create a new navigation node, and update current node pointer
-				AddNode( to, toNormal, m_generationDir, m_currentNode, isOnDisplacement, obstacleHeight, obstacleStartDist, obstacleEndDist );
+				AddNode(to, toNormal, m_generationDir, m_currentNode,
+						isOnDisplacement, obstacleHeight, obstacleStartDist,
+						obstacleEndDist);
 
 				return true;
 			}
