@@ -4258,7 +4258,7 @@ bool CNavMesh::SampleStep( void )
 				{
 					// test going up ClimbUpHeight
 					bool success = false;
-					for ( float height = StepHeight; height <= ClimbUpHeight; height += 1.0f )
+					for ( float height = StepHeight; height <= StepHeight; height += 1.0f )
 					{						
 						trace_t tr;
 						Vector start( from );
