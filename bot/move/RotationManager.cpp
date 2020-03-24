@@ -31,7 +31,7 @@ void RotationManager::normalize(QAngle &angle) {
 	} else if (angle.x < -90.0f) {
 		angle.x = -180.0f - angle.x;
 	}
-	Clamp(angle.x, -89.0f, 89.0f);
+	angle.x = Clamp(angle.x, -89.0f, 89.0f);
 }
 
 void RotationManager::getUpdatedPosition(QAngle &desiredPos, QAngle currentPos,
