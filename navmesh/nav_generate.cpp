@@ -144,7 +144,7 @@ void CNavMesh::BuildLadders(void) {
 	DestroyLadders();
 	ladders.RemoveAll();
 	CUtlLinkedList<edict_t*> ladder;
-	findEntWithPatternInName("*ladder", ladder);
+	findEntWithPatternInName("*ladder*", ladder);
 	FOR_EACH_VEC(ladder, i)
 	{
 		ICollideable* coll = ladder[i]->GetCollideable();
@@ -662,9 +662,8 @@ void AdjustObstacleDistances( float *pObstacleStartDist, float *pObstacleEndDist
 	// is the obstacle width too narrow?
 	if ( obstacleWidth < MinObstacleAreaWidth )
 	{		
-		float halfDelta = ( MinObstacleAreaWidth - obstacleWidth ) /2;
 		// move start so it's half of min width from center, but no less than zero
-		*pObstacleStartDist = MAX( *pObstacleStartDist - halfDelta, 0 );
+		*pObstacleStartDist = MAX( *pObstacleStartDist - ( MinObstacleAreaWidth - obstacleWidth ) /2, 0 );
 		// move end so it's min width from start
 		*pObstacleEndDist = *pObstacleStartDist + MinObstacleAreaWidth;
 
@@ -905,11 +904,9 @@ void CNavMesh::CreateObstacleTopAreas()
 			{
 				CNavArea *areaOther = area->GetAdjacentArea( dir, j );
 				// if this is a jump node (which will ultimately get removed) or is an obstacle top, ignore it
-				if ( areaOther->GetAttributes() & ( NAV_MESH_JUMP | NAV_MESH_OBSTACLE_TOP ) )
-					continue;
-
+				if (!( areaOther->GetAttributes() & ( NAV_MESH_JUMP | NAV_MESH_OBSTACLE_TOP ) )
 				// create an obstacle top if there is a one-node separation between the areas and there is an intra-node obstacle within that separation
-				if ( !CreateObstacleTopAreaIfNecessary( area, areaOther, dir, false ) )
+						&& !CreateObstacleTopAreaIfNecessary( area, areaOther, dir, false ) )
 				{
 					// if not, create an obstacle top if there is a two-node separation between the areas and the intermediate node is significantly
 					// higher than the two areas, which means there's some geometry there that causes the middle node to be higher
@@ -1177,8 +1174,8 @@ void CNavMesh::RemoveOverlappingObstacleTopAreas()
 				else
 				{
 					// if they overlap without one being a superset of the other, just remove the smaller area
-					CNavArea *areaToRemove = ( area->GetSizeX() * area->GetSizeY() > areaOther->GetSizeX() * areaOther->GetSizeY() ? areaOther : area );
-					vecAreasToRemove.AddToTail( areaToRemove );					
+					vecAreasToRemove.AddToTail( ( area->GetSizeX() * area->GetSizeY() > areaOther->GetSizeX()
+							* areaOther->GetSizeY() ? areaOther : area ) );
 				}
 			}
 		}
