@@ -87,9 +87,9 @@ bool VSPlugin::Load(CreateInterfaceFn interfaceFactory,
 			|| !load(modelinfo, interfaceFactory, VMODELINFO_SERVER_INTERFACE_VERSION)
 			|| (!engine->IsDedicatedServer() && !load(debugoverlay, interfaceFactory,
 					VDEBUG_OVERLAY_INTERFACE_VERSION))
-			|| !loadUndefined(playerinfomanager, gameServerFactory, "PlayerInfoManager", 3, 1)
-			|| !loadUndefined(gameclients, gameServerFactory, "ServerGameClients", 5, 1)
-			|| !loadUndefined(servergamedll, gameServerFactory, "ServerGameDLL", 12, 1)
+			|| !loadUndefined(playerinfomanager, gameServerFactory, "PlayerInfoManager", 3, 2)
+			|| !loadUndefined(gameclients, gameServerFactory, "ServerGameClients", 5, 4)
+			|| !loadUndefined(servergamedll, gameServerFactory, "ServerGameDLL", 12, 10)
 			|| !loadUndefined(botmanager, gameServerFactory, "BotManager", 3, 1)
 			|| !loadUndefined(servergameents, gameServerFactory,
 					"ServerGameEnts", 10, 1)) {

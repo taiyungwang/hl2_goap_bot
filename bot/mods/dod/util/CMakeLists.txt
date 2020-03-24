@@ -1,1 +1,0 @@
-add_library(dod_util DODObjectiveResource.cpp) 

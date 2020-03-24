@@ -16,10 +16,10 @@ public:
 	}
 
 	int *getClipIndex(int i) {
-		return getPtr<int>(CLIP_NAMES[i]);
+		return getPtr<int>(CLIP_TYPES[i]);
 	}
 
 private:
-	static const char* CLIP_NAMES[2];
+	static const char* CLIP_TYPES[2];
 	static const char* AMMO_TYPES[2];
 };

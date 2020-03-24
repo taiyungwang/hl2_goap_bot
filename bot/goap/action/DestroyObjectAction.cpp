@@ -100,7 +100,7 @@ bool DestroyObjectAction::execute() {
 		NDEBUG_PERSIST_TILL_NEXT_SERVER);
 	}
 	if (fabs(blackboard.getAimAccuracy(targetLoc))
-			> 1.0f - (weapFunc->isMelee() ? 30.0f : 10.0f) / max(dist, 0.1f)) {
+			> 1.0f - (weapFunc->isMelee() ? 30.0f : 10.0f) / MAX(dist, 0.1f)) {
 		if (!UTIL_IsVisible(targetLoc, blackboard, targetEnt)
 				|| (weapFunc->isMelee() && eyes.z - targetLoc.z > 20.0f)) {
 			if (!crouch) {

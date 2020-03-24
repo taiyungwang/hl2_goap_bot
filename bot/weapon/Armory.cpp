@@ -75,7 +75,6 @@ void Armory::update(Blackboard& blackboard) {
 	CBaseHandle* weapList =
 			classManager->getClass("CBaseCombatCharacter")->getEntityVar(
 					"m_hMyWeapons").getPtr<CBaseHandle>(self);
-	auto current = weapons.InvalidIndex();
 	for (int i = 0; i < MAX_WEAPONS; i++) {
 		int entIdx = weapList[i].GetEntryIndex();
 		edict_t* weaponEnt = engine->PEntityOfEntIndex(entIdx);
@@ -98,7 +97,6 @@ void Armory::update(Blackboard& blackboard) {
 			j = weapons.Insert(entIdx, builder->build(weaponEnt));
 		}
 		if (weapState == WEAPON_IS_ACTIVE) {
-			current = j;
 			currWeapIdx = weapons.Key(j);
 		}
 	}

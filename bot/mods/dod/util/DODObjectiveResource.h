@@ -4,7 +4,8 @@
 
 class DODObjectiveResource: public BaseEntity {
 public:
-	DODObjectiveResource();
+	DODObjectiveResource(edict_t* ent) : BaseEntity("CDODObjectiveResource", ent) {
+	}
 
 	int* getOwner() {
 		return getPtr<int>("m_iOwner");

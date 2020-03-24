@@ -38,12 +38,14 @@ bool CapturePointAction::execute() {
 void CapturePointAction::startRound() {
 	endRound();
 	SetDefLessFunc(ctrlPoints);
-	objectiveResource = new DODObjectiveResource();
-	const Vector* position = objectiveResource->getCapturePositions();
-	CUtlLinkedList<edict_t*> points, bombsOnMap, capArea;
+
+	CUtlLinkedList<edict_t*> points, bombsOnMap, capArea, objRsrc;
+	findEntWithMatchingName("dod_objective_resource", objRsrc);
 	findEntWithMatchingName("dod_control_point", points);
 	findEntWithMatchingName("dod_bomb_target", bombsOnMap);
 	findEntWithMatchingName("dod_capture_area", capArea);
+	objectiveResource = new DODObjectiveResource(objRsrc[0]);
+	const Vector* position = objectiveResource->getCapturePositions();
 	for (int i = 0; i < objectiveResource->numCtrlPts(); i++) {
 		capTarget.AddToTail();
 		FOR_EACH_LL(points, j)
@@ -75,8 +77,8 @@ void CapturePointAction::addCapTarget(const Vector& pos,
 				targetPos = (maxs + mins) / 2.0f;
 			}
 			if (pos.DistTo(targetPos) < 400.0f) {
-			capTarget.Tail().AddToTail(targets[k]);
-				}
+				capTarget.Tail().AddToTail(targets[k]);
+			}
 		}
 	}
 }

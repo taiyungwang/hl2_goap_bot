@@ -19,12 +19,8 @@ bool DODWorld::handle(EventInfo* event) {
 	bool bombPlanted = name == "dod_bomb_planted";
 	if (name == "dod_point_captured" || bombPlanted
 			|| name == "dod_bomb_exploded" || name == "dod_bomb_defused") {
-		if (bombPlanted) {
-			extern PlayerManager *playerManager;
-			bombPlantTeam = playerManager->getPlayer(event->getInt("userid"))->getTeam();
-		} else {
-			bombPlantTeam = 1;
-		}
+		extern PlayerManager *playerManager;
+		bombPlantTeam = bombPlanted ? playerManager->getPlayer(event->getInt("userid"))->getTeam() : 1;
 		reset = true;
 		return false;
 	}

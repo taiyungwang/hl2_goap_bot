@@ -31,21 +31,6 @@ void forAllEntities(const Func& func,
 	}
 }
 
-edict_t * findEntWithSubStrInNetClassName(const char* name) {
-	CUtlLinkedList<edict_t*> result;
-	forAllEntities([name, &result](edict_t* ent) -> void {
-		IServerNetworkable *network = ent->GetNetworkable();
-		if (network == nullptr) {
-			return;
-		}
-		const char* className = network->GetServerClass()->GetName();
-		if (name == className || Q_stristr(className, name) != nullptr) {
-			result.AddToTail(ent);
-		}
-	});
-	return result[0];
-}
-
 template<typename Func>
 void findEntWithName(const char* name, const Func& match,
 		CUtlLinkedList<edict_t*>& result) {

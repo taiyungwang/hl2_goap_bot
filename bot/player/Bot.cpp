@@ -11,7 +11,7 @@
 #include <weapon/Armory.h>
 #include <weapon/Weapon.h>
 #include <navmesh/nav_mesh.h>
-#include <util/Exception.h>
+#include <util/SimpleException.h>
 #include <util/BasePlayer.h>
 #include <in_buttons.h>
 
@@ -35,58 +35,57 @@ Bot::~Bot() {
 }
 
 void Bot::think() {
-	CBotCmd& cmd = blackboard->getCmd();
-	if (isDead()) {
-		Vector pos = getCurrentPosition();
-		extern CNavMesh* TheNavMesh;
-		CNavArea* area = Navigator::getCurrentArea(pos);
-		if (area != nullptr) {
-			area->IncreaseDanger(getTeam(), 1.0f);
-		}
-		inGame = false;
-		planner->resetPlanning(true);
-		blackboard->getButtons().tap(IN_ATTACK);
-	} else if (getPlayerClass() != desiredClassId) {
-		extern IServerPluginHelpers* helpers;
-		helpers->ClientCommand(getEdict(), (*CLASSES)[getTeam() - 2][desiredClassId]);
-	} else {
-		if ((resetPlanner || world->think(*blackboard))
-				&& !blackboard->isOnLadder()) {
-			planner->resetPlanning(false);
-			resetPlanner = false;
-		}
-		Vision::updateVisiblity(*blackboard);
-		if (inGame) {
-			cmd.Reset();
-			Armory& amory = blackboard->getArmory();
-			try {
-				amory.update(*blackboard);
-			} catch (const Exception& ex) {
-				Warning("Exception caught while updating weapons: %s\n",
-						ex.what());
+	try {
+		CBotCmd& cmd = blackboard->getCmd();
+		if (isDead()) {
+			Vector pos = getCurrentPosition();
+			extern CNavMesh* TheNavMesh;
+			CNavArea* area = Navigator::getCurrentArea(pos);
+			if (area != nullptr) {
+				area->IncreaseDanger(getTeam(), 1.0f);
 			}
-			int currentWeapon = amory.getCurrWeaponIdx();
-			if (currentWeapon > 0
-					&& amory.getWeapon(currentWeapon)->isOutOfAmmo(getEdict())) {
-				world->updateState(WorldProp::USING_BEST_WEAP, false);
-			}
-			planner->execute();
-			VectorAngles(blackboard->getViewTarget() - getEyesPos(), cmd.viewangles);
-			rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle(),
-					mybot_rot_speed.GetFloat());
-			if (cmd.weaponselect != 0) {
-				world->updateState(WorldProp::USING_BEST_WEAP, true);
-			}
-		} else {
+			inGame = false;
+			planner->resetPlanning(true);
 			blackboard->getButtons().tap(IN_ATTACK);
+		} else if (getPlayerClass() != desiredClassId) {
+			extern IServerPluginHelpers* helpers;
+			helpers->ClientCommand(getEdict(), (*CLASSES)[getTeam() - 2][desiredClassId]);
+		} else {
+			if ((resetPlanner || world->think(*blackboard))
+					&& !blackboard->isOnLadder()) {
+				planner->resetPlanning(false);
+				resetPlanner = false;
+			}
+			Vision::updateVisiblity(*blackboard);
+			if (inGame) {
+				cmd.Reset();
+				Armory& amory = blackboard->getArmory();
+				amory.update(*blackboard);
+				int currentWeapon = amory.getCurrWeaponIdx();
+				if (currentWeapon > 0
+						&& amory.getWeapon(currentWeapon)->isOutOfAmmo(getEdict())) {
+					world->updateState(WorldProp::USING_BEST_WEAP, false);
+				}
+				planner->execute();
+				VectorAngles(blackboard->getViewTarget() - getEyesPos(), cmd.viewangles);
+				rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle(),
+						mybot_rot_speed.GetFloat());
+				if (cmd.weaponselect != 0) {
+					world->updateState(WorldProp::USING_BEST_WEAP, true);
+				}
+			} else {
+				blackboard->getButtons().tap(IN_ATTACK);
+			}
 		}
-	}
-	cmd.buttons = blackboard->getButtons().getPressed();
-	extern CGlobalVars *gpGlobals;
-	cmd.tick_count = gpGlobals->tickcount;
-	extern IBotManager *botmanager;
-	if (!hookEnabled) {
-		botmanager->GetBotController(getEdict())->RunPlayerMove(&cmd);
+		cmd.buttons = blackboard->getButtons().getPressed();
+		extern CGlobalVars *gpGlobals;
+		cmd.tick_count = gpGlobals->tickcount;
+		extern IBotManager *botmanager;
+		if (!hookEnabled) {
+			botmanager->GetBotController(getEdict())->RunPlayerMove(&cmd);
+		}
+	} catch (const Exception& e) {
+		throw new SimpleException(CUtlString(getName()) + ": " + e.what());
 	}
 }
 
