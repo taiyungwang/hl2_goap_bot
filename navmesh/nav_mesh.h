@@ -19,11 +19,14 @@
 #ifndef _NAV_MESH_H_
 #define _NAV_MESH_H_
 
-#include "nav_area.h"
-#include <generichash.h>
+#include "nav.h"
+#include "CountDownTimer.h"
+#include <shareddefs.h>
+#include <convar.h>
 #include <GameEventListener.h>
 
-class CBreakable;
+class HidingSpot;
+class CUtlBuffer;
 
 HidingSpot *GetHidingSpotByID( unsigned int id );
 //--------------------------------------------------------------------------------------------------------
@@ -76,12 +79,7 @@ public:
 		m_attribute = attribute;
 	}
 
-	bool operator() ( CNavArea *area )
-	{
-		area->SetAttributes( area->GetAttributes() & (~m_attribute) );
-
-		return true;
-	}
+	bool operator() ( CNavArea *area );
 
 	NavAttributeType m_attribute;
 };
@@ -96,12 +94,7 @@ public:
 		m_attribute = attribute;
 	}
 
-	bool operator() ( CNavArea *area )
-	{
-		area->SetAttributes( area->GetAttributes() | m_attribute );
-
-		return true;
-	}
+	bool operator() ( CNavArea *area );
 
 	NavAttributeType m_attribute;
 };
@@ -185,12 +178,7 @@ public:
 		return ( lhs.pAreas[0] == rhs.pAreas[0] && lhs.pAreas[1] == rhs.pAreas[1] );
 	}
 
-	unsigned int operator()( const NavVisPair_t &item ) const
-	{
-		COMPILE_TIME_ASSERT( sizeof(CNavArea *) == 4 );
-		int key[2] = { (int)item.pAreas[0] + item.pAreas[1]->GetID(), (int)item.pAreas[1] + item.pAreas[0]->GetID() };
-		return Hash8( key );	
-	}
+	unsigned int operator()( const NavVisPair_t &item ) const;
 };
 
 
@@ -286,8 +274,8 @@ public:
 	virtual void OnServerActivate( void );								// (EXTEND) invoked when server loads a new map
 	virtual void OnRoundRestart( void );								// invoked when a game round restarts
 	virtual void OnRoundRestartPreEntity( void );						// invoked when a game round restarts, but before entities are deleted and recreated
-	virtual void OnBreakableCreated( CBaseEntity *breakable ) { }		// invoked when a breakable is created
-	virtual void OnBreakableBroken( CBaseEntity *broken ) { }			// invoked when a breakable is broken
+	virtual void OnBreakableCreated( edict_t *breakable ) { }		// invoked when a breakable is created
+	virtual void OnBreakableBroken( edict_t *broken ) { }			// invoked when a breakable is broken
 	virtual void OnAreaBlocked( CNavArea *area );						// invoked when the area becomes blocked
 	virtual void OnAreaUnblocked( CNavArea *area );						// invoked when the area becomes un-blocked
 	virtual void OnAvoidanceObstacleEnteredArea( CNavArea *area );					// invoked when the area becomes obstructed
@@ -544,189 +532,17 @@ public:
 	 * If functor returns false, stop processing and return false.
 	 */
 	template < typename Functor >
-	bool ForAllAreasOverlappingExtent( Functor &func, const Extent &extent )
-	{
-		if ( !m_grid.Count() )
-		{
-#if _DEBUG
-			extern NavAreaVector TheNavAreas;
-			Warning("Query before nav mesh is loaded! %d\n", TheNavAreas.Count() );
-#endif
-			return true;
-		}
-		static unsigned int searchMarker = RandomInt(0, 1024*1024 );
-		if ( ++searchMarker == 0 )
-		{
-			++searchMarker;
-		}
-
-		Extent areaExtent;
-
-		// get list in cell that contains position
-		int startX = WorldToGridX( extent.lo.x );
-		int endX = WorldToGridX( extent.hi.x );
-		int startY = WorldToGridY( extent.lo.y );
-		int endY = WorldToGridY( extent.hi.y );
-
-		for( int x = startX; x <= endX; ++x )
-		{
-			for( int y = startY; y <= endY; ++y )
-			{
-				int iGrid = x + y*m_gridSizeX;
-				if ( iGrid >= m_grid.Count() )
-				{
-					ExecuteNTimes( 10, Warning( "** Walked off of the CNavMesh::m_grid in ForAllAreasOverlappingExtent()\n" ) );
-					return true;
-				}
-
-				NavAreaVector *areaVector = &m_grid[ iGrid ];
-
-				// find closest area in this cell
-				FOR_EACH_VEC( (*areaVector), it )
-				{
-					CNavArea *area = (*areaVector)[ it ];
-
-					// skip if we've already visited this area
-					if ( area->m_nearNavSearchMarker == searchMarker )
-						continue;
-
-					// mark as visited
-					area->m_nearNavSearchMarker = searchMarker;
-					area->GetExtent( &areaExtent );
-
-					if ( extent.IsOverlapping( areaExtent ) )
-					{
-						if ( func( area ) == false )
-							return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
+	bool ForAllAreasOverlappingExtent( Functor &func, const Extent &extent );
 
 	//-------------------------------------------------------------------------------------
 	/**
 	 * Populate the given vector with all navigation areas that overlap the given extent.
 	 */
 	template< typename NavAreaType >
-	void CollectAreasOverlappingExtent( const Extent &extent, CUtlVector< NavAreaType * > *outVector )
-	{
-		if ( !m_grid.Count() )
-		{
-			return;
-		}
-
-		static unsigned int searchMarker = RandomInt( 0, 1024*1024 );
-		if ( ++searchMarker == 0 )
-		{
-			++searchMarker;
-		}
-
-		Extent areaExtent;
-
-		// get list in cell that contains position
-		int startX = WorldToGridX( extent.lo.x );
-		int endX = WorldToGridX( extent.hi.x );
-		int startY = WorldToGridY( extent.lo.y );
-		int endY = WorldToGridY( extent.hi.y );
-
-		for( int x = startX; x <= endX; ++x )
-		{
-			for( int y = startY; y <= endY; ++y )
-			{
-				int iGrid = x + y*m_gridSizeX;
-				if ( iGrid >= m_grid.Count() )
-				{
-					ExecuteNTimes( 10, Warning( "** Walked off of the CNavMesh::m_grid in CollectAreasOverlappingExtent()\n" ) );
-					return;
-				}
-
-				NavAreaVector *areaVector = &m_grid[ iGrid ];
-
-				// find closest area in this cell
-				for( int v=0; v<areaVector->Count(); ++v )
-				{
-					CNavArea *area = areaVector->Element( v );
-
-					// skip if we've already visited this area
-					if ( area->m_nearNavSearchMarker == searchMarker )
-						continue;
-
-					// mark as visited
-					area->m_nearNavSearchMarker = searchMarker;
-					area->GetExtent( &areaExtent );
-
-					if ( extent.IsOverlapping( areaExtent ) )
-					{
-						outVector->AddToTail( (NavAreaType *)area );
-					}
-				}
-			}
-		}
-	}
-
+	void CollectAreasOverlappingExtent( const Extent &extent, CUtlVector< NavAreaType * > *outVector );
 
 	template < typename Functor >
-	bool ForAllAreasInRadius( Functor &func, const Vector &pos, float radius )
-	{
-		// use a unique marker for this method, so it can be used within a SearchSurroundingArea() call
-		static unsigned int searchMarker = RandomInt(0, 1024*1024 );
-
-		++searchMarker;
-
-		if ( searchMarker == 0 )
-		{
-			++searchMarker;
-		}
-
-
-		// get list in cell that contains position
-		int originX = WorldToGridX( pos.x );
-		int originY = WorldToGridY( pos.y );
-		int shiftLimit = ceil( radius / m_gridCellSize );
-		float radiusSq = radius * radius;
-		if ( radius == 0.0f )
-		{
-			shiftLimit = MAX( m_gridSizeX, m_gridSizeY );	// range 0 means all areas
-		}
-
-		for( int x = originX - shiftLimit; x <= originX + shiftLimit; ++x )
-		{
-			if ( x < 0 || x >= m_gridSizeX )
-				continue;
-
-			for( int y = originY - shiftLimit; y <= originY + shiftLimit; ++y )
-			{
-				if ( y < 0 || y >= m_gridSizeY )
-					continue;
-
-				NavAreaVector *areaVector = &m_grid[ x + y*m_gridSizeX ];
-
-				// find closest area in this cell
-				FOR_EACH_VEC( (*areaVector), it )
-				{
-					CNavArea *area = (*areaVector)[ it ];
-
-					// skip if we've already visited this area
-					if ( area->m_nearNavSearchMarker == searchMarker )
-						continue;
-
-					// mark as visited
-					area->m_nearNavSearchMarker = searchMarker;
-
-					float distSq = ( area->GetCenter() - pos ).LengthSqr();
-
-					if ( ( distSq <= radiusSq ) || ( radiusSq == 0 ) )
-					{
-						if ( func( area ) == false )
-							return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
+	bool ForAllAreasInRadius( Functor &func, const Vector &pos, float radius );
 
 	//---------------------------------------------------------------------------------------------------------------
 	/*
@@ -734,220 +550,7 @@ public:
 	 * Return true if enumeration reached endArea, false if doesn't reach it (no mesh between, bad connection, etc)
 	 */
 	template < typename Functor >
-	bool ForAllAreasAlongLine( Functor &func, CNavArea *startArea, CNavArea *endArea )
-	{
-		if ( !startArea || !endArea )
-			return false;
-
-		if ( startArea == endArea )
-		{
-			func( startArea );
-			return true;
-		}
-
-		Vector start = startArea->GetCenter();
-		Vector end = endArea->GetCenter();
-
-		Vector to = end - start;
-		float range = to.NormalizeInPlace();
-
-		const float epsilon = 0.00001f;
-
-		if ( range < epsilon )
-		{
-			func( startArea );
-			return true;
-		}
-
-		if ( fabs( to.x ) < epsilon )
-		{
-			NavDirType dir = ( to.y < 0.0f ) ? NORTH : SOUTH;
-
-			CNavArea *area = startArea;
-			while( area )
-			{
-				func( area );
-
-				if ( area == endArea )
-					return true;
-
-				const NavConnectVector *adjVector = area->GetAdjacentAreas( dir );
-
-				area = NULL;
-
-				for( int i=0; i<adjVector->Count(); ++i )
-				{
-					CNavArea *adjArea = adjVector->Element(i).area;
-
-					const Vector &adjOrigin = adjArea->GetCorner( NORTH_WEST );
-
-					if ( adjOrigin.x <= start.x && adjOrigin.x + adjArea->GetSizeX() >= start.x )
-					{
-						area = adjArea;
-						break;
-					}
-				}
-			}
-
-			return false;
-		}
-		else if ( fabs( to.y ) < epsilon )
-		{
-			NavDirType dir = ( to.x < 0.0f ) ? WEST : EAST;
-
-			CNavArea *area = startArea;
-			while( area )
-			{
-				func( area );
-
-				if ( area == endArea )
-					return true;
-
-				const NavConnectVector *adjVector = area->GetAdjacentAreas( dir );
-
-				area = NULL;
-
-				for( int i=0; i<adjVector->Count(); ++i )
-				{
-					CNavArea *adjArea = adjVector->Element(i).area;
-
-					const Vector &adjOrigin = adjArea->GetCorner( NORTH_WEST );
-
-					if ( adjOrigin.y <= start.y && adjOrigin.y + adjArea->GetSizeY() >= start.y )
-					{
-						area = adjArea;
-						break;
-					}
-				}
-			}
-
-			return false;
-		}
-
-
-		CNavArea *area = startArea;
-
-		while( area )
-		{
-			func( area );
-
-			if ( area == endArea )
-				return true;
-
-			const Vector &origin = area->GetCorner( NORTH_WEST );
-			float xMin = origin.x;
-			float xMax = xMin + area->GetSizeX();
-			float yMin = origin.y;
-			float yMax = yMin + area->GetSizeY();
-
-			// clip ray to area
-			Vector exit;
-			NavDirType edge = NUM_DIRECTIONS;
-
-			if ( to.x < 0.0f )
-			{
-				// find Y at west edge intersection
-				float t = ( xMin - start.x ) / ( end.x - start.x );
-				if ( t > 0.0f && t < 1.0f )
-				{
-					float y = start.y + t * ( end.y - start.y );
-					if ( y >= yMin && y <= yMax )
-					{
-						// intersects this edge
-						exit.x = xMin;
-						exit.y = y;
-						edge = WEST;
-					}
-				}
-			}
-			else
-			{
-				// find Y at east edge intersection
-				float t = ( xMax - start.x ) / ( end.x - start.x );
-				if ( t > 0.0f && t < 1.0f )
-				{
-					float y = start.y + t * ( end.y - start.y );
-					if ( y >= yMin && y <= yMax )
-					{
-						// intersects this edge
-						exit.x = xMax;
-						exit.y = y;
-						edge = EAST;
-					}
-				}
-			}
-
-			if ( edge == NUM_DIRECTIONS )
-			{
-				if ( to.y < 0.0f )
-				{
-					// find X at north edge intersection
-					float t = ( yMin - start.y ) / ( end.y - start.y );
-					if ( t > 0.0f && t < 1.0f )
-					{
-						float x = start.x + t * ( end.x - start.x );
-						if ( x >= xMin && x <= xMax )
-						{
-							// intersects this edge
-							exit.x = x;
-							exit.y = yMin;
-							edge = NORTH;
-						}
-					}
-				}
-				else
-				{
-					// find X at south edge intersection
-					float t = ( yMax - start.y ) / ( end.y - start.y );
-					if ( t > 0.0f && t < 1.0f )
-					{
-						float x = start.x + t * ( end.x - start.x );
-						if ( x >= xMin && x <= xMax )
-						{
-							// intersects this edge
-							exit.x = x;
-							exit.y = yMax;
-							edge = SOUTH;
-						}
-					}
-				}
-			}
-
-			if ( edge == NUM_DIRECTIONS )
-				break;
-
-			const NavConnectVector *adjVector = area->GetAdjacentAreas( edge );
-
-			area = NULL;
-
-			for( int i=0; i<adjVector->Count(); ++i )
-			{
-				CNavArea *adjArea = adjVector->Element(i).area;
-
-				const Vector &adjOrigin = adjArea->GetCorner( NORTH_WEST );
-
-				if ( edge == NORTH || edge == SOUTH )
-				{
-					if ( adjOrigin.x <= exit.x && adjOrigin.x + adjArea->GetSizeX() >= exit.x )
-					{
-						area = adjArea;
-						break;
-					}
-				}
-				else
-				{
-					if ( adjOrigin.y <= exit.y && adjOrigin.y + adjArea->GetSizeY() >= exit.y )
-					{
-						area = adjArea;
-						break;
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
+	bool ForAllAreasAlongLine( Functor &func, CNavArea *startArea, CNavArea *endArea );
 
 	//-------------------------------------------------------------------------------------
 	/**
@@ -1275,19 +878,6 @@ inline unsigned int CNavMesh::GetSubVersionNumber( void ) const
 	return 0;
 }
 
-
-//--------------------------------------------------------------------------------------------------------------
-inline CNavArea *CNavMesh::CreateArea( void ) const
-{
-	return new CNavArea(GetNavPlace());
-}
-
-//--------------------------------------------------------------------------------------------------------------
-inline void CNavMesh::DestroyArea( CNavArea *pArea ) const
-{
-	delete pArea;
-}
-
 //--------------------------------------------------------------------------------------------------------------
 inline int CNavMesh::ComputeHashKey( unsigned int id ) const
 {
@@ -1319,14 +909,6 @@ inline int CNavMesh::WorldToGridY( float wy ) const
 	
 	return y;
 }
-
-
-//--------------------------------------------------------------------------------------------------------------
-inline unsigned int CNavMesh::GetGenerationTraceMask( void ) const
-{
-	return MASK_NPCSOLID_BRUSHONLY;
-}
-
 
 //--------------------------------------------------------------------------------------------------------------
 //

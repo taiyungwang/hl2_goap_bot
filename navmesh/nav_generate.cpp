@@ -12,11 +12,13 @@
 #include "nav_mesh.h"
 #include "nav_node.h"
 #include "nav_pathfind.h"
+#include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
 #include <viewport_panel_names.h>
 #include <eiface.h>
 #include <irecipientfilter.h>
 #include <worldsize.h>
+#include <KeyValues.h>
 
 //#include "terror/TerrorShared.h"
 #include "fmtstr.h"
@@ -55,7 +57,6 @@ const float MinObstacleAreaWidth = 10.0f;			// min width of a nav area we will g
 static CUtlVector<edict_t*> ladders;
 
 extern IVEngineServer* engine;
-extern IGameEventManager2 *gameeventmanager;
 extern CGlobalVars *gpGlobals;
 extern CNavMesh* TheNavMesh;
 extern NavAreaVector TheNavAreas;
@@ -3242,10 +3243,14 @@ void CNavMesh::AddWalkableSeeds( void )
  */
 void CNavMesh::BeginGeneration( bool incremental )
 {
+	extern IGameEventManager2 *gameeventmanager;
 	IGameEvent *event = gameeventmanager->CreateEvent( "nav_generate" );
 	if ( event )
 	{
 		gameeventmanager->FireEvent( event );
+	} else {
+		extern IGameEventManager *gameeventmanager1;
+		gameeventmanager1->FireEvent(new KeyValues("nav_generate"));
 	}
 
 #ifdef TERROR

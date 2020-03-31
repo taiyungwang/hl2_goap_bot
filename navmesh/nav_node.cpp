@@ -14,6 +14,7 @@
 #include "nav_colors.h"
 #include "nav_mesh.h"
 #include "nav.h"
+#include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
 #include "tier1/utlhash.h"
 #include "tier1/generichash.h"

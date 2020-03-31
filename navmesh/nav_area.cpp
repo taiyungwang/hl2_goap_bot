@@ -3640,6 +3640,68 @@ void CNavArea::RemoveFromOpenList( void )
 }
 
 //--------------------------------------------------------------------------------------------------------------
+inline void CNavArea::SetClearedTimestamp( int teamID )
+{
+	m_clearedTimestamp[ teamID % MAX_NAV_TEAMS ] = playerinfomanager->GetGlobalVars()->curtime;
+}
+
+
+//--------------------------------------------------------------------------------------------------------------
+inline bool CNavArea::IsDamaging( void ) const
+{
+	return ( playerinfomanager->GetGlobalVars()->tickcount <= m_damagingTickCount );
+}
+
+
+//--------------------------------------------------------------------------------------------------------------
+inline void CNavArea::MarkAsDamaging( float duration )
+{
+	CGlobalVars *gpGlobals = playerinfomanager->GetGlobalVars();
+	m_damagingTickCount = gpGlobals->tickcount
+			+ TIME_TO_TICKS(duration);
+}
+
+
+
+//--------------------------------------------------------------------------------------------------------------
+inline bool CNavArea::IsVisible( const Vector &eye, Vector *visSpot ) const
+{
+	Vector corner;
+	trace_t result;
+	CTraceFilterNoNPCsOrPlayer traceFilter( NULL, COLLISION_GROUP_NONE );
+	const float offset = 0.75f * HumanHeight;
+
+	// check center first
+	UTIL_TraceLine( eye, GetCenter() + Vector( 0, 0, offset ), MASK_BLOCKLOS_AND_NPCS|CONTENTS_IGNORE_NODRAW_OPAQUE, &traceFilter, &result );
+	if (result.fraction == 1.0f)
+	{
+		// we can see this area
+		if (visSpot)
+		{
+			*visSpot = GetCenter();
+		}
+		return true;
+	}
+
+	for( int c=0; c<NUM_CORNERS; ++c )
+	{
+		corner = GetCorner( (NavCornerType)c );
+		UTIL_TraceLine( eye, corner + Vector( 0, 0, offset ), MASK_BLOCKLOS_AND_NPCS|CONTENTS_IGNORE_NODRAW_OPAQUE, &traceFilter, &result );
+		if (result.fraction == 1.0f)
+		{
+			// we can see this area
+			if (visSpot)
+			{
+				*visSpot = corner;
+			}
+			return true;
+		}
+	}
+
+	return false;
+}
+
+//--------------------------------------------------------------------------------------------------------------
 /**
  * Clears the open and closed lists for a new search
  */

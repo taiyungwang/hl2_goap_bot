@@ -11,6 +11,7 @@
 
 #include "nav_entities.h"
 
+#include "nav_area.h"
 #include <util/UtilTrace.h>
 #include <eiface.h>
 #include <iplayerinfo.h>

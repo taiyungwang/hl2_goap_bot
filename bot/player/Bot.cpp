@@ -11,6 +11,7 @@
 #include <weapon/Armory.h>
 #include <weapon/Weapon.h>
 #include <navmesh/nav_mesh.h>
+#include <navmesh/nav_area.h>
 #include <util/SimpleException.h>
 #include <util/BasePlayer.h>
 #include <in_buttons.h>
