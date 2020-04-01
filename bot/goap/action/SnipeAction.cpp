@@ -6,7 +6,7 @@
 #include <player/HidingSpotSelector.h>
 #include <weapon/Weapon.h>
 #include <weapon/Deployer.h>
-#include <navmesh/nav_mesh.h>
+#include <nav_mesh/nav_mesh.h>
 #include <util/UtilTrace.h>
 #include <vstdlib/random.h>
 #include <in_buttons.h>

@@ -5,8 +5,8 @@
 #include <player/Buttons.h>
 #include <player/Bot.h>
 #include <weapon/Weapon.h>
-#include <navmesh/nav_mesh.h>
-#include <navmesh/nav_pathfind.h>
+#include <nav_mesh/nav_mesh.h>
+#include <nav_mesh/nav_pathfind.h>
 #include <util/UtilTrace.h>
 #include <util/BasePlayer.h>
 #include <eiface.h>

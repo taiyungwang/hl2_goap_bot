@@ -1,6 +1,6 @@
 #include "HidingSpotSelector.h"
 
-#include <navmesh/nav_area.h>
+#include <nav_mesh/nav_area.h>
 
 HidingSpotSelector::HidingSpotSelector() {
 	extern NavAreaVector TheNavAreas;

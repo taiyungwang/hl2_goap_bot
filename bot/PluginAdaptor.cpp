@@ -4,11 +4,10 @@
 #include "mods/hl2dm/player/HL2DMBotBuilder.h"
 #include "mods/dod/player/DODBotBuilder.h"
 #include "player/PlayerManager.h"
-#include "util/EntityClassManager.h"
-#include "util/EntityUtils.h"
-#include "util/BaseEntity.h"
-#include "navmesh/nav_entities.h"
-
+#include <nav_mesh/nav_entities.h>
+#include <util/EntityClassManager.h>
+#include <util/EntityUtils.h>
+#include <util/BaseEntity.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
 

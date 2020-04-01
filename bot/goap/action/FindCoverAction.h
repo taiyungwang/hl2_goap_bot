@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GoToAction.h"
-#include <navmesh/nav_pathfind.h>
+#include <nav_mesh/nav_pathfind.h>
 
 class FindCoverAction: public GoToAction, public ISearchSurroundingAreasFunctor {
 public:

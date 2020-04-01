@@ -4,7 +4,7 @@
 #include <mods/dod/util/DodPlayer.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <navmesh/nav.h>
+#include <nav_mesh/nav.h>
 #include <util/UtilTrace.h>
 #include <in_buttons.h>
 

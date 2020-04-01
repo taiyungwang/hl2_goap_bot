@@ -6,7 +6,7 @@
 #include <player/Bot.h>
 #include <weapon/Weapon.h>
 #include <weapon/DeployableWeaponBuilder.h>
-#include <navmesh/nav.h>
+#include <nav_mesh/nav.h>
 #include <util/UtilTrace.h>
 #include <util/BasePlayer.h>
 #include <in_buttons.h>

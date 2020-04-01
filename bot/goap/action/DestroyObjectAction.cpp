@@ -8,10 +8,10 @@
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
 #include <weapon/Deployer.h>
+#include <nav_mesh/nav_area.h>
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
 #include <util/BaseEntity.h>
-#include <navmesh/nav_area.h>
 #include <convar.h>
 #include <ivdebugoverlay.h>
 #include <in_buttons.h>
@@ -101,13 +101,12 @@ bool DestroyObjectAction::execute() {
 	}
 	if (fabs(blackboard.getAimAccuracy(targetLoc))
 			> 1.0f - (weapFunc->isMelee() ? 30.0f : 10.0f) / MAX(dist, 0.1f)) {
-		if (!UTIL_IsVisible(targetLoc, blackboard, targetEnt)
-				|| (weapFunc->isMelee() && eyes.z - targetLoc.z > 20.0f)) {
-			if (!crouch) {
-				// try crouching
-				crouch = true;
-				return false;
-			}
+		if ((!UTIL_IsVisible(targetLoc, blackboard, targetEnt)
+				|| (weapFunc->isMelee() && eyes.z - targetLoc.z > 20.0f))
+				&& !crouch) {
+			// try crouching
+			crouch = true;
+			return false;
 		}
 		weapFunc->attack(buttons, dist);
 	}

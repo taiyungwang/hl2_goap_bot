@@ -1,6 +1,6 @@
 #pragma once
 
-#include <navmesh/nav_ladder.h>
+#include <nav_mesh/nav_ladder.h>
 #include <gametrace.h>
 
 class MoveState;

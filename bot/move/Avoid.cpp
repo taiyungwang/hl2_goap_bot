@@ -8,7 +8,7 @@
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
-#include <navmesh/nav_entities.h>
+#include <nav_mesh/nav_entities.h>
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
 #include <eiface.h>

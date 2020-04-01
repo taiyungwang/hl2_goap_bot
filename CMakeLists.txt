@@ -9,6 +9,9 @@ set (SRC_HOME $ENV{HOMEPATH})
 set( steam_root "c:/Program Files (x86)/steam" )
 set(HL2SDK_DIR "${PROJECT_SOURCE_DIR}/../hl2sdk")
 set (HL2SDK_LIBS ${HL2SDK_DIR}/lib/public)
+set (VSP_NAVMESH ${PROJECT_SOURCE_DIR}/../plugin_navmesh)
+find_library(VSP_NAVMESH_LIB valve_navmesh ~/workspace/plugin_navmesh/nav_mesh/)
+find_library(VSP_UTIL_LIB plugin_util ~/workspace/plugin_navmesh/util)
 set (CXX_TEST_GEN cxxtestgen)
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     add_definitions(-D_DEBUG)
@@ -62,7 +65,7 @@ endif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQ
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${ARCH_FLAGS}" )
 SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${ARCH_FLAGS}" )
 
-include_directories(${PROJECT_SOURCE_DIR} ${HL2SDK_DIR}/common utils/common ${HL2SDK_DIR}/public ${HL2SDK_DIR}/public/mathlib ${HL2SDK_DIR}/public/tier0 ${HL2SDK_DIR}/public/tier1 ${HL2SDK_DIR}/public/game/server ${HL2SDK_DIR}/public/engine ${HL2SDK_DIR}/game/shared ${HL2SDK_DIR}/game/server)
+include_directories(${PROJECT_SOURCE_DIR} ${VSP_NAVMESH} ${HL2SDK_DIR}/common utils/common ${HL2SDK_DIR}/public ${HL2SDK_DIR}/public/mathlib ${HL2SDK_DIR}/public/tier0 ${HL2SDK_DIR}/public/tier1 ${HL2SDK_DIR}/public/game/server ${HL2SDK_DIR}/public/engine ${HL2SDK_DIR}/game/shared ${HL2SDK_DIR}/game/server)
 
 #find installed mods on system.
 set (mods "tf;dod;hl2mp")
@@ -87,15 +90,13 @@ set(PLUGIN_NAME my_bot)
 add_library(public STATIC ${HL2SDK_DIR}/public/collisionutils.cpp)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bot)
-add_subdirectory(${PROJECT_SOURCE_DIR}/util)
-add_subdirectory(${PROJECT_SOURCE_DIR}/navmesh)
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 add_library(${PLUGIN_NAME} SHARED  VSPlugin.cpp)
 target_link_libraries(${PLUGIN_NAME}  
-	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player goap goap_actions weapon_sys 
-	 event bot_move valve_navmesh plugin_util 
+	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player goap goap_actions
+	 weapon_sys event bot_move ${VSP_NAVMESH_LIB} ${VSP_UTIL_LIB}
 	 ${tier1} ${mathlib} vstdlib public tier0 ${tier2} ${LEGACY_STDIO})
 
 foreach(mod_dir ${mod_dirs})
