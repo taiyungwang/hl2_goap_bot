@@ -80,41 +80,6 @@ bool UTIL_IsCommandIssuedByServerAdmin() {
 	return true;
 }
 
-template<typename Functor>
-bool ForEachActor(Functor &func) {
-	// iterate all non-bot players
-	for (int i = 1; i <= gpGlobals->maxClients; ++i) {
-		edict_t *ent = engine->PEntityOfEntIndex(i);
-		if (ent == nullptr) {
-			continue;
-		}
-		IPlayerInfo* player = playerinfomanager->GetPlayerInfo(ent);
-		if (player == NULL || !player->IsPlayer() || !player->IsConnected())
-			continue;
-#ifdef NEXT_BOT
-		// skip bots - ForEachCombatCharacter will catch them
-		INextBot *bot = player->MyNextBotPointer();
-		if ( bot )
-		{
-			continue;
-		}
-#endif // NEXT_BOT
-		if (!func(ent)) {
-			return false;
-		}
-	}
-
-#ifdef NEXT_BOT
-	// iterate all NextBots
-	return TheNextBots().ForEachCombatCharacter( func );
-#else
-	return true;
-#endif // NEXT_BOT
-}
-
-template
-bool ForEachActor(EditDestroyNotification &func);
-
 static void SelectedSetColorChaged(IConVar *var, const char *pOldValue,
 		float flOldValue) {
 	ConVarRef colorVar(var->GetName());
@@ -518,24 +483,6 @@ void CNavArea::GetNodes( NavDirType dir, CUtlVector< CNavNode * > *nodes ) const
 		nodes->AddToTail( node );
 	}
 }
-
-//--------------------------------------------------------------------------------------------------------------
-class ForgetArea
-{
-public:
-	ForgetArea( CNavArea *area )
-	{
-		m_area = area;
-	}
-
-	bool operator() ( edict_t *player )
-	{
-		// TODO: IMPELMENT
-		return true;
-	}
-
-	CNavArea *m_area;
-};
 
 //--------------------------------------------------------------------------------------------------------------
 class AreaDestroyNotification
@@ -1957,48 +1904,6 @@ bool CNavArea::IsOverlappingY( const CNavArea *area ) const
 
 	return false;
 }
-
-
-//--------------------------------------------------------------------------------------------------------------
-class COverlapCheck
-{
-public:
-	COverlapCheck( const CNavArea *me, const Vector &pos ) : m_pos( pos )
-	{
-		m_me = me;
-		m_myZ = me->GetZ( pos );
-	}
-
-	bool operator() ( CNavArea *area )
-	{
-		// skip self
-		if ( area == m_me )
-			return true;
-
-		// check 2D overlap
-		if ( !area->IsOverlapping( m_pos ) )
-			return true;
-
-		float theirZ = area->GetZ( m_pos );
-		if ( theirZ > m_pos.z )
-		{
-			// they are above the point
-			return true;
-		}
-
-		if ( theirZ > m_myZ )
-		{
-			// we are below an area that is beneath the given position
-			return false;
-		}
-
-		return true;
-	}
-
-	const CNavArea *m_me;
-	float m_myZ;
-	const Vector &m_pos;
-};
 
 //--------------------------------------------------------------------------------------------------------------
 /**

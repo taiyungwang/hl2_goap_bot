@@ -504,9 +504,7 @@ CNavNode *CNavNode::GetNode( const Vector &pos )
 		{
 			for( pNode = g_pNavNodeHash->Element( hNode ); pNode; pNode = pNode->m_nextAtXY )
 			{
-				float dz = fabs( pNode->m_pos.z - pos.z );
-
-				if (dz < tolerance)
+				if (fabs( pNode->m_pos.z - pos.z ) < tolerance)
 				{
 					break;
 				}
@@ -541,12 +539,7 @@ CNavNode *CNavNode::GetNode( const Vector &pos )
  */
 BOOL CNavNode::IsBiLinked( NavDirType dir ) const
 {
-	if (m_to[ dir ] && m_to[ dir ]->m_to[ Opposite[dir] ] == this)
-	{
-		return true;
-	}
-
-	return false;
+	return m_to[ dir ] && m_to[ dir ]->m_to[ Opposite[dir] ] == this;
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -556,15 +549,10 @@ BOOL CNavNode::IsBiLinked( NavDirType dir ) const
  */
 BOOL CNavNode::IsClosedCell( void ) const
 {
-	if (IsBiLinked( SOUTH ) &&
+	return IsBiLinked( SOUTH ) &&
 		IsBiLinked( EAST ) &&
 		m_to[ EAST ]->IsBiLinked( SOUTH ) &&
 		m_to[ SOUTH ]->IsBiLinked( EAST ) &&
-		m_to[ EAST ]->m_to[ SOUTH ] == m_to[ SOUTH ]->m_to[ EAST ])
-	{
-		return true;
-	}
-
-	return false;
+		m_to[ EAST ]->m_to[ SOUTH ] == m_to[ SOUTH ]->m_to[ EAST ];
 }
 

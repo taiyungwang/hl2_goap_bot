@@ -65,6 +65,7 @@ private:
 	static int m_nBytesCurrent;
 };
 
+
 //-------------------------------------------------------------------------------------------------------------------
 /**
  * Functor interface for iteration
@@ -99,7 +100,7 @@ struct NavConnect
 
 	bool operator==( const NavConnect &other ) const
 	{
-		return (area == other.area) ? true : false;
+		return area == other.area;
 	}
 };
 
@@ -114,7 +115,7 @@ union NavLadderConnect
 
 	bool operator==( const NavLadderConnect &other ) const
 	{
-		return (ladder == other.ladder) ? true : false;
+		return ladder == other.ladder;
 	}
 };
 
@@ -558,7 +559,7 @@ public:
 			if ( m_potentiallyVisibleAreas[i].attributes == NOT_VISIBLE )
 				continue;
 			
-			if ( func( area ) == false )
+			if ( !func( area ) )
 				return false;
 		}
 
@@ -570,11 +571,9 @@ public:
 
 		for ( i=0; i<inherited.Count(); ++i )
 		{
-			if ( !inherited[i].area )
-				continue;
-
+			if ( !inherited[i].area
 			// We may have visited this from m_potentiallyVisibleAreas
-			if ( inherited[i].area->m_nVisTestCounter == s_nCurrVisTestCounter )
+					|| inherited[i].area->m_nVisTestCounter == s_nCurrVisTestCounter )
 				continue;
 
 			// Theoretically, this shouldn't matter. But, just in case!
@@ -583,7 +582,7 @@ public:
 			if ( inherited[i].attributes == NOT_VISIBLE )
 				continue;
 
-			if ( func( inherited[i].area ) == false )
+			if ( !func( inherited[i].area ) )
 				return false;
 		}
 
@@ -615,7 +614,7 @@ public:
 			if ( ( m_potentiallyVisibleAreas[i].attributes & COMPLETELY_VISIBLE ) == 0 )
 				continue;
 
-			if ( func( area ) == false )
+			if ( !func( area ) )
 				return false;
 		}
 
@@ -627,11 +626,9 @@ public:
 
 		for ( i=0; i<inherited.Count(); ++i )
 		{
-			if ( !inherited[i].area )
-				continue;
-			
-			// We may have visited this from m_potentiallyVisibleAreas
-			if ( inherited[i].area->m_nVisTestCounter == s_nCurrVisTestCounter )
+			if ( !inherited[i].area
+					// We may have visited this from m_potentiallyVisibleAreas
+					|| inherited[i].area->m_nVisTestCounter == s_nCurrVisTestCounter )
 				continue;
 
 			// Theoretically, this shouldn't matter. But, just in case!
@@ -640,7 +637,7 @@ public:
 			if ( ( inherited[i].attributes & COMPLETELY_VISIBLE ) == 0 )
 				continue;
 
-			if ( func( inherited[i].area ) == false )
+			if ( !func( inherited[i].area ) )
 				return false;
 		}
 
@@ -771,6 +768,52 @@ typedef CUtlVector< CNavArea * > NavAreaVector;
 
 
 //--------------------------------------------------------------------------------------------------------------
+class COverlapCheck
+{
+public:
+	COverlapCheck(const CNavArea *me, const Vector &pos) :
+			m_pos(pos), m_me(me), m_myZ(me->GetZ(pos)) {
+	}
+
+	bool operator() ( CNavArea *area )
+	{
+		// skip self
+		if ( area == m_me
+				// check 2D overlap
+			|| !area->IsOverlapping( m_pos ) )
+			return true;
+
+		float theirZ = area->GetZ( m_pos );
+		return theirZ > m_pos.z
+			// they are above the point
+				|| theirZ <= m_myZ;
+			// we are below an area that is beneath the given position
+	}
+
+	const CNavArea *m_me;
+	float m_myZ;
+	const Vector &m_pos;
+};
+
+//--------------------------------------------------------------------------------------------------------------
+class ForgetArea
+{
+public:
+	ForgetArea( CNavArea *area )
+	{
+		m_area = area;
+	}
+
+	bool operator() ( edict_t *player )
+	{
+		// TODO: IMPELMENT
+		return true;
+	}
+
+	CNavArea *m_area;
+};
+
+//--------------------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------
 //
 // Inlines
@@ -867,10 +910,7 @@ inline CNavArea *CNavArea::PopOpenList( void )
 //--------------------------------------------------------------------------------------------------------------
 inline bool CNavArea::IsClosed( void ) const
 {
-	if (IsMarked() && !IsOpen())
-		return true;
-
-	return false;
+	return IsMarked() && !IsOpen();
 }
 
 //--------------------------------------------------------------------------------------------------------------

@@ -463,7 +463,6 @@ void CFuncNavBlocker::BlockNav( void )
 	TheNavMesh->ForAllAreasOverlappingExtent<CFuncNavBlocker>( *this, extent );
 }
 
-
 //--------------------------------------------------------------------------------------------------------
 void CFuncNavBlocker::UnblockNav( void )
 {

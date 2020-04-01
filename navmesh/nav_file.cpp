@@ -543,10 +543,9 @@ NavErrorType CNavArea::Load( CUtlBuffer &fileBuffer, unsigned int version, unsig
 		
 			for( int s=0; s<spotCount; ++s )
 			{
-				fileBuffer.GetFloat();
-				fileBuffer.GetFloat();
-				fileBuffer.GetFloat();
-				fileBuffer.GetFloat();
+				for (int i = 0; i < 4; i++) {
+					fileBuffer.GetFloat();
+				}
 			}
 		}
 		return NAV_OK;
@@ -986,7 +985,7 @@ void CNavMesh::ComputeBattlefrontAreas( void )
 /**
  * Return the filename for this map's "nav map" file
  */
-const char *CNavMesh::GetFilename( void ) const
+const char *CNavMesh::GetFilename( void )
 {
 	// filename is local to game dir for Steam, so we need to prepend game dir for regular file save
 	char gamePath[256];
@@ -1156,24 +1155,34 @@ bool CNavMesh::Save( void ) const
 	//
 	// Store navigation areas
 	//
-	// store number of areas
-	fileBuffer.PutUnsignedInt( TheNavAreas.Count() );
-
-	// store each area
-	FOR_EACH_VEC( TheNavAreas, it )
 	{
-		TheNavAreas[ it ]->Save( fileBuffer, NavCurrentVersion );
+		// store number of areas
+		unsigned int count = TheNavAreas.Count();
+		fileBuffer.PutUnsignedInt( count );
+
+		// store each area
+		FOR_EACH_VEC( TheNavAreas, it )
+		{
+			CNavArea *area = TheNavAreas[ it ];
+
+			area->Save( fileBuffer, NavCurrentVersion );
+		}
 	}
+
 	//
 	// Store ladders
 	//
-	// store number of ladders
-	fileBuffer.PutUnsignedInt( m_ladders.Count() );
-
-	// store each ladder
-	for ( int i=0; i<m_ladders.Count(); ++i )
 	{
-		m_ladders[i]->Save( fileBuffer, NavCurrentVersion );
+		// store number of ladders
+		unsigned int count = m_ladders.Count();
+		fileBuffer.PutUnsignedInt( count );
+
+		// store each ladder
+		for ( int i=0; i<m_ladders.Count(); ++i )
+		{
+			CNavLadder *ladder = m_ladders[i];
+			ladder->Save( fileBuffer, NavCurrentVersion );
+		}
 	}
 	
 	//
@@ -1244,7 +1253,9 @@ static NavErrorType CheckNavFile( const char *bspFilename )
 	filesystem->Read( &saveBspSize, sizeof(unsigned int), file );
 
 	// verify size
-	if (filesystem->Size( bspPathname ) != saveBspSize && !navIsInBsp)
+	unsigned int bspSize = filesystem->Size( bspPathname );
+
+	if (bspSize != saveBspSize && !navIsInBsp)
 	{
 		return NAV_FILE_OUT_OF_DATE;
 	}
@@ -1301,15 +1312,17 @@ const CUtlVector< Place > *CNavMesh::GetPlacesFromNavFile( bool *hasUnnamedPlace
 	Q_snprintf( filename, sizeof( filename ), FORMAT_NAVFILE, STRING( gpGlobals->mapname ) );
 
 	CUtlBuffer fileBuffer( 4096, 1024*1024, CUtlBuffer::READ_ONLY );
-	if ( !filesystem->ReadFile( filename, "GAME", fileBuffer ) 	// this ignores .nav files embedded in the .bsp ...
-			&& !filesystem->ReadFile( filename, "BSP", fileBuffer ) )	// ... and this looks for one if it's the only one around.
+	if ( !filesystem->ReadFile( filename, "GAME", fileBuffer ) )	// this ignores .nav files embedded in the .bsp ...
 	{
-		return NULL;
+		if ( !filesystem->ReadFile( filename, "BSP", fileBuffer ) )	// ... and this looks for one if it's the only one around.
+		{
+			return NULL;
+		}
 	}
 	
 	if ( IsX360()
 		// 360 has compressed NAVs
-			&& CLZMA::IsCompressed( (unsigned char *)fileBuffer.Base() ) )
+		&& CLZMA::IsCompressed( (unsigned char *)fileBuffer.Base() ) )
 	{
 		int originalSize = CLZMA::GetActualSize( (unsigned char *)fileBuffer.Base() );
 		unsigned char *pOriginalData = new unsigned char[originalSize];
@@ -1318,8 +1331,7 @@ const CUtlVector< Place > *CNavMesh::GetPlacesFromNavFile( bool *hasUnnamedPlace
 	}
 
 	// check magic number
-	unsigned int magic = fileBuffer.GetUnsignedInt();
-	if ( !fileBuffer.IsValid() || magic != NAV_MAGIC_NUMBER )
+	if ( fileBuffer.GetUnsignedInt() != NAV_MAGIC_NUMBER || !fileBuffer.IsValid() )
 	{
 		return NULL;	// Corrupt nav file?
 	}
@@ -1328,10 +1340,9 @@ const CUtlVector< Place > *CNavMesh::GetPlacesFromNavFile( bool *hasUnnamedPlace
 	unsigned int version = fileBuffer.GetUnsignedInt();
 	if ( !fileBuffer.IsValid() || version > NavCurrentVersion
 			// Unknown nav file version
-		|| version < 5 )
-		// Too old to have place names
+			|| version < 5 )
 	{
-		return NULL;
+		return NULL;	// Too old to have place names
 	}
 
 	unsigned int subVersion = 0;
@@ -1398,7 +1409,7 @@ NavErrorType CNavMesh::Load( void )
 
 	if ( IsX360()
 		// 360 has compressed NAVs
-			&& CLZMA::IsCompressed( (unsigned char *)fileBuffer.Base() ) )
+		&&  CLZMA::IsCompressed( (unsigned char *)fileBuffer.Base() ) )
 	{
 		int originalSize = CLZMA::GetActualSize( (unsigned char *)fileBuffer.Base() );
 		unsigned char *pOriginalData = new unsigned char[originalSize];
@@ -1407,7 +1418,8 @@ NavErrorType CNavMesh::Load( void )
 	}
 
 	// check magic number
-	if ( !fileBuffer.IsValid() || fileBuffer.GetUnsignedInt() != NAV_MAGIC_NUMBER )
+	unsigned int magic = fileBuffer.GetUnsignedInt();
+	if ( !fileBuffer.IsValid() || magic != NAV_MAGIC_NUMBER )
 	{
 		Msg( "Invalid navigation file '%s'.\n", filename );
 		return NAV_INVALID_FILE;
@@ -1415,7 +1427,7 @@ NavErrorType CNavMesh::Load( void )
 
 	// read file version number
 	unsigned int version = fileBuffer.GetUnsignedInt();
-	if ( !fileBuffer.IsValid() || fileBuffer.GetUnsignedInt() > NavCurrentVersion )
+	if ( !fileBuffer.IsValid() || version > NavCurrentVersion )
 	{
 		Msg( "Unknown navigation file version.\n" );
 		return NAV_BAD_FILE_VERSION;
@@ -1444,9 +1456,7 @@ NavErrorType CNavMesh::Load( void )
 			return NAV_INVALID_FILE;
 		}
 
-		unsigned int bspSize = filesystem->Size( bspFilename );
-
-		if ( bspSize != saveBspSize && !navIsInBsp )
+		if ( filesystem->Size( bspFilename ) != saveBspSize && !navIsInBsp )
 		{
 			if ( engine->IsDedicatedServer() )
 			{
@@ -1565,7 +1575,7 @@ struct OneWayLink_t
 	static int Compare(const OneWayLink_t *lhs, const OneWayLink_t *rhs )
 	{
 		int result = ( lhs->destArea - rhs->destArea );
-		return result != 0 ? result : (lhs->backD - rhs->backD );
+		return result != 0 ?  result : ( lhs->backD - rhs->backD );
 	}
 };
 
@@ -1578,14 +1588,16 @@ NavErrorType CNavMesh::PostLoad( unsigned int version )
 	// allow areas to connect to each other, etc
 	FOR_EACH_VEC( TheNavAreas, pit )
 	{
-		TheNavAreas[ pit ]->PostLoad();
+		CNavArea *area = TheNavAreas[ pit ];
+		area->PostLoad();
 	}
 
 	extern HidingSpotVector TheHidingSpots;
 	// allow hiding spots to compute information
 	FOR_EACH_VEC( TheHidingSpots, hit )
 	{
-		TheHidingSpots[ hit ]->PostLoad();
+		HidingSpot *spot = TheHidingSpots[ hit ];
+		spot->PostLoad();
 	}
 
 	if ( version < 8 )
@@ -1593,7 +1605,8 @@ NavErrorType CNavMesh::PostLoad( unsigned int version )
 		// Old nav meshes need to compute earliest occupy times
 		FOR_EACH_VEC( TheNavAreas, nit )
 		{
-			TheNavAreas[ nit ]->ComputeEarliestOccupyTimes();
+			CNavArea *area = TheNavAreas[ nit ];
+			area->ComputeEarliestOccupyTimes();
 		}
 	}
 
@@ -1618,7 +1631,8 @@ NavErrorType CNavMesh::PostLoad( unsigned int version )
 
 			FOR_EACH_VEC( (*connectList), it )
 			{
-				oneWayLink.destArea = (*connectList)[ it ].area;
+				NavConnect connect = (*connectList)[ it ];
+				oneWayLink.destArea = connect.area;
 			
 				// if the area we connect to has no connection back to us, allow that area to remember us as an incoming connection
 				oneWayLink.backD = OppositeDirection( (NavDirType)d );		
@@ -1626,7 +1640,8 @@ NavErrorType CNavMesh::PostLoad( unsigned int version )
 				bool isOneWay = true;
 				FOR_EACH_VEC( (*backConnectList), bit )
 				{
-					if ((*backConnectList)[ bit ].area->GetID() == oneWayLink.area->GetID())
+					NavConnect backConnect = (*backConnectList)[ bit ];
+					if (backConnect.area->GetID() == oneWayLink.area->GetID())
 					{
 						isOneWay = false;
 						break;

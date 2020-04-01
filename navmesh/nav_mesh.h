@@ -158,9 +158,8 @@ struct NavVisPair_t
 	void SetPair( CNavArea *pArea1, CNavArea *pArea2 )
 	{
 		int iArea1 = (int)( pArea1 > pArea2 );
-		int iArea2 = ( iArea1 + 1 ) % 2;
 		pAreas[iArea1] = pArea1;
-		pAreas[iArea2] = pArea2;
+		pAreas[( iArea1 + 1 ) % 2] = pArea2;
 	}
 
 	CNavArea *pAreas[2];
@@ -447,7 +446,7 @@ public:
 
 	const Vector &GetEditCursorPosition( void ) const	{ return m_editCursorPos; }	// return position of edit cursor
 	void StripNavigationAreas( void );
-	const char *GetFilename( void ) const;								// return the filename for this map's "nav" file
+	static const char *GetFilename( void );								// return the filename for this map's "nav" file
 
 	/// @todo Remove old select code and make all commands use this selected set
 	void AddToSelectedSet( CNavArea *area );							// add area to the currently selected set
@@ -470,23 +469,13 @@ public:
 		{
 			CNavArea *area = GetSelectedArea();
 			
-			if (area)
-			{
-				if (func( area ) == false)
-					return false;
+			if (area && !func( area )) {
+				return false;
 			}
 		}
-		else
-		{
-			FOR_EACH_VEC( m_selectedSet, it )
-			{
-				CNavArea *area = m_selectedSet[ it ];
-
-				if (func( area ) == false)
-					return false;
-			}
+		else if (!forAll(func, m_selectedSet)) {
+			return false;
 		}
-		
 		return true;
 	}
 
@@ -496,34 +485,10 @@ public:
 	 * If functor returns false, stop processing and return false.
 	 */
 	template < typename Functor >
-	bool ForAllAreas( Functor &func )
+	static bool ForAllAreas( Functor &func )
 	{
 		extern NavAreaVector TheNavAreas;
-		FOR_EACH_VEC( TheNavAreas, it )
-		{
-			CNavArea *area = TheNavAreas[ it ];
-
-			if (func( area ) == false)
-				return false;
-		}
-
-		return true;
-	}
-
-	// const version of the above
-	template < typename Functor >
-	bool ForAllAreas( Functor &func ) const
-	{
-		extern NavAreaVector TheNavAreas;
-		FOR_EACH_VEC( TheNavAreas, it )
-		{
-			const CNavArea *area = TheNavAreas[ it ];
-
-			if (func( area ) == false)
-				return false;
-		}
-
-		return true;
+		return forAll(func, TheNavAreas);
 	}
 
 	//-------------------------------------------------------------------------------------
@@ -560,15 +525,7 @@ public:
 	template < typename Functor >
 	bool ForAllLadders( Functor &func )
 	{
-		for ( int i=0; i<m_ladders.Count(); ++i )
-		{
-			CNavLadder *ladder = m_ladders[i];
-
-			if (func( ladder ) == false)
-				return false;
-		}
-
-		return true;
+		return forAll(func, m_ladders);
 	}
 
 	//-------------------------------------------------------------------------------------
@@ -579,11 +536,14 @@ public:
 	template < typename Functor >
 	bool ForAllLadders( Functor &func ) const
 	{
-		for ( int i=0; i<m_ladders.Count(); ++i )
-		{
-			const CNavLadder *ladder = m_ladders[i];
+		return forAll(func, m_ladders);
+	}
 
-			if (func( ladder ) == false)
+	template <typename Functor, typename T>
+	static bool forAll(Functor& func, CUtlVector<T>& vec) {
+		for ( int i=0; i<vec.Count(); ++i )
+		{
+			if (!func( vec[i] ))
 				return false;
 		}
 

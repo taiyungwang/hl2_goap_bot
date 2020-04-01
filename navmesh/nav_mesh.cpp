@@ -84,6 +84,43 @@ unsigned int CVisPairHashFuncs::operator()( const NavVisPair_t &item ) const
 	return Hash8( key );
 }
 
+
+template<typename Functor>
+bool ForEachActor(Functor &func) {
+	extern CGlobalVars *gpGlobals;
+	// iterate all non-bot players
+	for (int i = 1; i <= gpGlobals->maxClients; ++i) {
+		edict_t *ent = engine->PEntityOfEntIndex(i);
+		if (ent == nullptr) {
+			continue;
+		}
+		IPlayerInfo* player = playerinfomanager->GetPlayerInfo(ent);
+		if (player == NULL || !player->IsPlayer() || !player->IsConnected())
+			continue;
+#ifdef NEXT_BOT
+		// skip bots - ForEachCombatCharacter will catch them
+		INextBot *bot = player->MyNextBotPointer();
+		if ( bot )
+		{
+			continue;
+		}
+#endif // NEXT_BOT
+		if (!func(ent)) {
+			return false;
+		}
+	}
+
+#ifdef NEXT_BOT
+	// iterate all NextBots
+	return TheNextBots().ForEachCombatCharacter( func );
+#else
+	return true;
+#endif // NEXT_BOT
+}
+
+template bool ForEachActor(EditDestroyNotification&);
+template bool ForEachActor(ForgetArea&);
+
 //--------------------------------------------------------------------------------------------------------------
 CNavMesh::CNavMesh( void )
 {

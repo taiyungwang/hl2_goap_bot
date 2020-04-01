@@ -10,6 +10,7 @@
 // Author: Michael Booth, 2003-2004
 
 #include "nav_mesh.h"
+#include "nav_entities.h"
 #include "nav_pathfind.h"
 #include "nav_node.h"
 #include "nav_colors.h"
@@ -3647,16 +3648,20 @@ bool CNavMesh::ForAllAreasOverlappingExtent( Functor &func, const Extent &extent
 				area->m_nearNavSearchMarker = searchMarker;
 				area->GetExtent( &areaExtent );
 
-				if ( extent.IsOverlapping( areaExtent ) )
-				{
-					if ( func( area ) == false )
-						return false;
+				if ( extent.IsOverlapping( areaExtent )
+						&& !func( area ) ) {
+					return false;
 				}
 			}
 		}
 	}
 	return true;
 }
+
+template bool CNavMesh::ForAllAreasOverlappingExtent(CFuncNavBlocker&, const Extent&);
+template bool CNavMesh::ForAllAreasOverlappingExtent(NavAreaCollector&, const Extent&);
+template bool CNavMesh::ForAllAreasOverlappingExtent(CFuncNavObstruction&, const Extent&);
+template bool CNavMesh::ForAllAreasOverlappingExtent(COverlapCheck&, const Extent&);
 
 template< typename NavAreaType >
 void CNavMesh::CollectAreasOverlappingExtent( const Extent &extent, CUtlVector< NavAreaType * > *outVector )
@@ -3715,6 +3720,9 @@ void CNavMesh::CollectAreasOverlappingExtent( const Extent &extent, CUtlVector< 
 	}
 }
 
+template void CNavMesh::CollectAreasOverlappingExtent(const Extent&,
+		CUtlVector<CNavArea*>*);
+
 template < typename Functor >
 bool CNavMesh::ForAllAreasInRadius( Functor &func, const Vector &pos, float radius )
 {
@@ -3763,18 +3771,17 @@ bool CNavMesh::ForAllAreasInRadius( Functor &func, const Vector &pos, float radi
 				// mark as visited
 				area->m_nearNavSearchMarker = searchMarker;
 
-				float distSq = ( area->GetCenter() - pos ).LengthSqr();
-
-				if ( ( distSq <= radiusSq ) || ( radiusSq == 0 ) )
-				{
-					if ( func( area ) == false )
-						return false;
+				if ( (( area->GetCenter() - pos ).LengthSqr() <= radiusSq || radiusSq == 0 )
+						&& !func( area ) ) {
+					return false;
 				}
 			}
 		}
 	}
 	return true;
 }
+
+template bool CNavMesh::ForAllAreasInRadius(NavAreaCollector&, const Vector&, float);
 
 template < typename Functor >
 bool CNavMesh::ForAllAreasAlongLine( Functor &func, CNavArea *startArea, CNavArea *endArea )
@@ -3792,11 +3799,10 @@ bool CNavMesh::ForAllAreasAlongLine( Functor &func, CNavArea *startArea, CNavAre
 	Vector end = endArea->GetCenter();
 
 	Vector to = end - start;
-	float range = to.NormalizeInPlace();
 
 	const float epsilon = 0.00001f;
 
-	if ( range < epsilon )
+	if ( to.NormalizeInPlace() < epsilon )
 	{
 		func( startArea );
 		return true;
@@ -3977,13 +3983,10 @@ bool CNavMesh::ForAllAreasAlongLine( Functor &func, CNavArea *startArea, CNavAre
 					break;
 				}
 			}
-			else
+			else if ( adjOrigin.y <= exit.y && adjOrigin.y + adjArea->GetSizeY() >= exit.y )
 			{
-				if ( adjOrigin.y <= exit.y && adjOrigin.y + adjArea->GetSizeY() >= exit.y )
-				{
-					area = adjArea;
-					break;
-				}
+				area = adjArea;
+				break;
 			}
 		}
 	}
