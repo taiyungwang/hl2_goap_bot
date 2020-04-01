@@ -2,8 +2,6 @@
 
 class Button {
 public:
-	Button();
-
 	/**
 	 * Checks to see if a button is pressed and updates the state.
 	 * Assumed this is called once per frame.
@@ -14,9 +12,8 @@ public:
 
 private:
 
-	bool pressed;
+	bool pressed = false;
 
-	unsigned int coolDown;
-
-	unsigned int duration;
+	unsigned int coolDown = 0,
+			duration = 0;
 };

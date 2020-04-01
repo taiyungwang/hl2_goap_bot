@@ -1,8 +1,8 @@
 #pragma once
 
-#include <utlmap.h>
-
-class Button;
+#include "Button.h"
+#include <strtools.h>
+#include <utlhashtable.h>
 
 /**
  * Manages the state of CBotCmd.button.
@@ -27,5 +27,5 @@ public:
 	int getPressed();
 
 private:
-	CUtlMap<int, Button> buttons;
+	CUtlHashtable<int, Button> buttons;
 };

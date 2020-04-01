@@ -1,10 +1,5 @@
 #include <player/Button.h>
 
-Button::Button() {
-	pressed = false;
-	duration = coolDown = 0;
-}
-
 bool Button::press(unsigned int duration, unsigned int coolDown) {
 	if (pressed || this->coolDown > 0) {
 		return false;
