@@ -51,11 +51,6 @@ MoveState* Avoid::move(const Vector& pos) {
 			if (Q_stristr(blockerName, "physics") != nullptr
 					|| Q_stristr(blockerName, "breakable") != nullptr) {
 				blackboard.setBlocker(blocker);
-			} else if (Q_stristr(blockerName, "func_team") != nullptr) {
-				extern CUtlVector<NavEntity*> blockers;
-				CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
-				navBlocker->setBlockedTeam(blackboard.getSelf()->getTeam());
-				blockers.AddToTail(navBlocker);
 			} else {
 				int idx = engine->IndexOfEdict(blocker);
 				if (idx <= gpGlobals->maxClients) {
@@ -68,6 +63,12 @@ MoveState* Avoid::move(const Vector& pos) {
 				}
 			}
 			if (blackboard.getBlocker() != nullptr) {
+				if (Q_stristr(blockerName, "func_team") != nullptr) {
+					extern CUtlVector<NavEntity*> blockers;
+					CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
+					navBlocker->setBlockedTeam(blackboard.getSelf()->getTeam());
+					blockers.AddToTail(navBlocker);
+				}
 				ctx.setStuck(true);
 				return new Stopped(ctx);
 			}

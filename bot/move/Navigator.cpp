@@ -160,7 +160,7 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	}
 	CNavArea* closest = nullptr;
 	if (!NavAreaBuildPath(startArea, goalArea, &targetLoc,
-			ShortestPathCost(self->getTeam()), &closest) && closest == nullptr) {
+			ShortestPathCost(self->getTeam()), &closest, 0.0f, self->getTeam()) && closest == nullptr) {
 		if (mybot_debug.GetBool()) {
 			debugoverlay->AddLineOverlay(startArea->GetCenter(),
 					targetLoc, 255, 0, 0, true,
@@ -189,12 +189,12 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 		Vector loc = blackboard.getSelf()->getCurrentPosition(), goal;
 		path.Top()->GetClosestPointOnArea(loc, &goal);
 		if (this->moveCtx->trace(goal).DidHit()) {
-			path.Clear();
-			Warning("Start area %d is too far, closest is %f.\n", goalArea->GetID(),
+			Warning("Start area %d is too far, closest is %f.\n", path.Top()->GetID(),
 					loc.DistTo(goal));
 			if (mybot_debug.GetBool()) {
-				goalArea->Draw();
+				path.Top()->Draw();
 			}
+			path.Clear();
 			return false;
 		}
 	}
