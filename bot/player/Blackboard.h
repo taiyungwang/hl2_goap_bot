@@ -8,7 +8,6 @@
 class BasePlayer;
 class Player;
 class Bot;
-class CNavArea;
 class Navigator;
 struct edict_t;
 
@@ -88,14 +87,6 @@ public:
 
 	void lookStraight();
 
-	void setStartArea(CNavArea* startArea) {
-		this->startArea = startArea;
-	}
-
-	CNavArea* getStartArea() const {
-		return startArea;
-	}
-
 	edict_t* getTarget() const {
 		return target;
 	}
@@ -128,7 +119,4 @@ private:
 	Buttons buttons;
 
 	BasePlayer* entInstance;
-
-	// Used to track start areas for chained GoToActions.
-	CNavArea* startArea = nullptr;
 };

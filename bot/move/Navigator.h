@@ -53,7 +53,7 @@ private:
 
 	CUtlStack<CNavArea*>* path = nullptr;
 
-	CNavArea* lastArea = nullptr;
+	CNavArea *buildPathStartArea = nullptr, *lastArea = nullptr;
 
 	MoveStateContext* moveCtx;
 

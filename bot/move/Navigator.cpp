@@ -88,7 +88,7 @@ bool Navigator::step() {
 
 void Navigator::start(CUtlStack<CNavArea*>* path, const Vector& goal, float targetRadius) {
 	finalGoal = goal;
-	blackboard.setStartArea(nullptr);
+	buildPathStartArea = nullptr;
 	this->targetRadius = targetRadius;
 	this->path = path;
 	lastArea = nullptr;
@@ -139,12 +139,10 @@ CNavArea* Navigator::getCurrentArea(const Vector& pos, int team) {
 bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	path.Clear();
 	const Player* self = blackboard.getSelf();
-	CNavArea* startArea = blackboard.getStartArea();
-	blackboard.setStartArea(nullptr);
-	if (startArea == nullptr) {
-		startArea = getCurrentArea(self->getCurrentPosition());
+	if (buildPathStartArea == nullptr) {
+		buildPathStartArea = getCurrentArea(self->getCurrentPosition());
 	}
-	if (startArea == nullptr) {
+	if (buildPathStartArea == nullptr) {
 		Warning("Unable to get startArea.\n");
 		return false;
 	}
@@ -159,10 +157,10 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 		return false;
 	}
 	CNavArea* closest = nullptr;
-	if (!NavAreaBuildPath(startArea, goalArea, &targetLoc,
+	if (!NavAreaBuildPath(buildPathStartArea, goalArea, &targetLoc,
 			ShortestPathCost(self->getTeam()), &closest, 0.0f, self->getTeam()) && closest == nullptr) {
 		if (mybot_debug.GetBool()) {
-			debugoverlay->AddLineOverlay(startArea->GetCenter(),
+			debugoverlay->AddLineOverlay(buildPathStartArea->GetCenter(),
 					targetLoc, 255, 0, 0, true,
 					NDEBUG_PERSIST_TILL_NEXT_SERVER);
 		}
@@ -185,7 +183,7 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 			area = area->GetParent()) {
 		path.Push(area);
 	}
-	if (path.Top() != startArea) {
+	if (path.Top() != buildPathStartArea) {
 		Vector loc = blackboard.getSelf()->getCurrentPosition(), goal;
 		path.Top()->GetClosestPointOnArea(loc, &goal);
 		if (this->moveCtx->trace(goal).DidHit()) {
@@ -198,7 +196,7 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 			return false;
 		}
 	}
-	blackboard.setStartArea(goalArea);
+	buildPathStartArea = goalArea;
 	return true;
 }
 
