@@ -12,7 +12,7 @@ StepBack::StepBack(MoveStateContext& ctx) :
 }
 
 MoveState* StepBack::move(const Vector& currPos) {
-	if (checkStuck(currPos, startPos)) {
+	if (ctx.checkStuck()) {
 		return startPos.DistTo(currPos) < ctx.getTargetOffset() ?
 			buildFailedState(currPos) : buildAvoidState(currPos);
 	}

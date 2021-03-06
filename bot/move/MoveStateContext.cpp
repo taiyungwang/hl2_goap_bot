@@ -12,18 +12,23 @@
 float MoveStateContext::SELF_RADIUS = 14.0f,
 	MoveStateContext::TARGET_OFFSET = 5.0f;
 
+static ConVar mybot_stuck_threshold("mybot_stuck_threshold", "0.002f");
+static ConVar my_bot_stuck_dur_threshold("mybot_stuck_dur_threshold", "5");
+
+
 MoveStateContext::~MoveStateContext() {
 	delete state;
 }
 
 void MoveStateContext::stop() {
 	type = NAV_MESH_INVALID;
-	ladderDir = CNavLadder::NUM_LADDER_DIRECTIONS;
 	stuck = false;
+	ladderDir = CNavLadder::NUM_LADDER_DIRECTIONS;
 	targetOffset = 0.0f;
 	if (state != nullptr) {
 		delete state;
 	}
+	previousPos = blackboard.getSelf()->getCurrentPosition();
 	state = new Stopped(*this);
 }
 
@@ -53,6 +58,19 @@ void MoveStateContext::move(int type) {
 			|| blackboard.isOnLadder()) {
 		blackboard.setViewTarget(look);
 	}
+}
+
+bool MoveStateContext::checkStuck() {
+	Vector currentPos = blackboard.getSelf()->getCurrentPosition();
+	float movedDist = previousPos.DistTo(currentPos);
+	previousPos = currentPos;
+	bool stuck = movedDist < mybot_stuck_threshold.GetFloat();
+	if (!stuck) {
+		stuckDur = 0;
+	} else if (stuckDur++ > my_bot_stuck_dur_threshold.GetInt()) {
+		return true;
+	}
+	return false;
 }
 
 const bool MoveStateContext::hasGoal() const {

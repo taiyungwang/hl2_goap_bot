@@ -88,13 +88,15 @@ public:
 		return blackboard;
 	}
 
+	void setStuck(bool stuck) {
+		this->stuck = stuck;
+	}
+
 	bool isStuck() const {
 		return stuck;
 	}
 
-	void setStuck(bool stuck) {
-		this->stuck = stuck;
-	}
+	bool checkStuck();
 
 	void setTargetOffset(float offset) {
 		targetOffset = offset;
@@ -120,10 +122,11 @@ public:
 
 private:
 	float targetOffset;
-	bool stuck;
 	Blackboard& blackboard;
+	bool stuck;
 	int type;
-	Vector goal, ladderEnd;
+	unsigned int stuckDur = 0;
+	Vector goal, ladderEnd, previousPos;
 	CNavLadder::LadderDirectionType ladderDir;
 	MoveState* state = nullptr;
 	edict_t* blocker = nullptr;

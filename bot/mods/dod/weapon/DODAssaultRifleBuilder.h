@@ -6,7 +6,7 @@
 class DODAssaultRifleBuilder: public DeployableWeaponBuilder<Reloader> {
 public:
 	DODAssaultRifleBuilder() :
-			DeployableWeaponBuilder(0.8f, 100.0f, 1600.0f,
+			DeployableWeaponBuilder<Reloader>(0.8f, 100.0f, 1600.0f,
 					"CDODFireSelectWeapon", "m_bSemiAuto", 1000.0f) {
 	}
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MoveState.h"
+#include <vector.h>
 
 class Avoid;
 

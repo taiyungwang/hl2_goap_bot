@@ -44,7 +44,7 @@ MoveState* Avoid::move(const Vector& pos) {
 					|| Q_stristr(currBlockerName, "func_team") != nullptr)) {
 		blocker = currBlocker;
 	}
-	if (checkStuck(pos, ctx.getGoal())) {
+	if (ctx.checkStuck()) {
 		if (blocker != nullptr && !blocker->IsFree()
 				&& blocker->GetCollideable() != nullptr) {
 			const char* blockerName = blocker->GetClassName();

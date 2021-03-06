@@ -62,14 +62,6 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 			GoToEntityAction(blackboard, "dod_bomb_dispenser") {
 			effects = {WorldProp::HAS_BOMB, true};
 		}
-
-		bool precondCheck() {
-			if (GoToEntityAction::precondCheck()) {
-				blackboard.setStartArea(path[0]);
-				return true;
-			}
-			return false;
-		}
 	};
 	class DODNavigator: public Navigator {
 	public:
@@ -147,12 +139,12 @@ void DODBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {
 	class AntiTankBuilder: public DeployableWeaponBuilder<Reloader> {
 	public:
 		AntiTankBuilder() :
-				DeployableWeaponBuilder(0.9f, 500.0f, 2000.0f, "CDODBaseRocketWeapon",
+				DeployableWeaponBuilder<Reloader>(0.9f, 500.0f, 2000.0f, "CDODBaseRocketWeapon",
 						"m_bDeployed") {
 		}
 
 		Weapon* build(edict_t* weap) {
-			Weapon* weapon = DeployableWeaponBuilder::build(weap);
+			Weapon* weapon = DeployableWeaponBuilder<Reloader>::build(weap);
 			weapon->getPrimary()->setExplosive(true);
 			return weapon;
 		}

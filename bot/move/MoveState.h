@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector.h>
 class MoveStateContext;
+class Vector;
 
 /**
  * FSM State definition for bot movement.
@@ -9,24 +9,18 @@ class MoveStateContext;
 class MoveState {
 public:
 
-	MoveState(MoveStateContext& ctx);
+	MoveState(MoveStateContext &ctx) :
+			ctx(ctx) {
+	}
 
 	virtual ~MoveState() {
 	}
 
-	virtual MoveState* move(const Vector& currPos) = 0;
+	virtual MoveState* move(const Vector &currPos) = 0;
 
 protected:
+	MoveStateContext &ctx;
 
-	MoveStateContext& ctx;
-
-	bool checkStuck(const Vector& currentPos, const Vector& goal);
-
-	void moveStraight(const Vector& destination) const;
-
-private:
-
-	Vector prevPos;
-	unsigned int moveDur = 0, durLimit;
+	void moveStraight(const Vector &destination) const;
 };
 
