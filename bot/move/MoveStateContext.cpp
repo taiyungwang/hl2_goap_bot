@@ -12,7 +12,7 @@
 float MoveStateContext::SELF_RADIUS = 14.0f,
 	MoveStateContext::TARGET_OFFSET = 5.0f;
 
-static ConVar mybot_stuck_threshold("mybot_stuck_threshold", "0.002f");
+static ConVar mybot_stuck_threshold("mybot_stuck_threshold", "0.2f");
 static ConVar my_bot_stuck_dur_threshold("mybot_stuck_dur_threshold", "5");
 
 
@@ -68,6 +68,7 @@ bool MoveStateContext::checkStuck() {
 	if (!stuck) {
 		stuckDur = 0;
 	} else if (stuckDur++ > my_bot_stuck_dur_threshold.GetInt()) {
+		stuckDur = 0;
 		return true;
 	}
 	return false;
