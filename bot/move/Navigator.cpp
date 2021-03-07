@@ -141,10 +141,10 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	const Player* self = blackboard.getSelf();
 	if (buildPathStartArea == nullptr) {
 		buildPathStartArea = getCurrentArea(self->getCurrentPosition());
-	}
-	if (buildPathStartArea == nullptr) {
-		Warning("Unable to get startArea.\n");
-		return false;
+		if (buildPathStartArea == nullptr) {
+			Warning("Unable to get startArea.\n");
+			return false;
+		}
 	}
 	CNavArea* goalArea = getCurrentArea(targetLoc, self->getTeam());
 	if (goalArea == nullptr) {
@@ -174,6 +174,7 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	if (goalArea == nullptr) {
 		float dist = closest->GetCenter().DistTo(targetLoc);
 		if (dist > MAX_DIST) {
+			buildPathStartArea = nullptr;
 			Warning("Unable to find goal area for location. Closest is %f\n", dist);
 			return false;
 		}
@@ -192,7 +193,7 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 			if (mybot_debug.GetBool()) {
 				path.Top()->Draw();
 			}
-			path.Clear();
+			buildPathStartArea = nullptr;
 			return false;
 		}
 	}
