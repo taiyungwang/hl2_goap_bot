@@ -87,12 +87,11 @@ void Armory::update(Blackboard& blackboard) {
 		}
 		auto j = weapons.Find(entIdx);
 		if (!weapons.IsValidIndex(j)) {
-			WeaponBuilder* builder = factory.getInstance(
-					weaponEnt->GetClassName());
+			const char* weapName = weaponEnt->GetClassName();
+			WeaponBuilder* builder = factory.getInstance(weapName);
 			if (builder == nullptr) {
-				throw SimpleException(
-						CUtlString("Weapon is not registered: ")
-								+ weaponEnt->GetClassName());
+				Warning("Weapon is not registered: %s.\n", weapName);
+				continue;
 			}
 			j = weapons.Insert(entIdx, builder->build(weaponEnt));
 		}
