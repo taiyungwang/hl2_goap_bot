@@ -128,12 +128,8 @@ CNavArea* Navigator::getArea(edict_t* ent) {
 	return area == nullptr ? TheNavMesh->GetNearestNavArea(ent) : area;
 }
 
-CNavArea* Navigator::getCurrentArea(const Vector& pos, int team) {
-	CNavArea* startArea = TheNavMesh->GetNavArea(pos);
-	if (startArea == nullptr || startArea->GetCenter().z - pos.z > JumpHeight) {
-		startArea =TheNavMesh->GetNearestNavArea(pos, 200.0f, false, false, team);
-	}
-	return startArea;
+CNavArea* Navigator::getCurrentArea(const Vector& pos) const {
+	return TheNavMesh->GetNearestNavArea(pos, 10000.0f, false, true, blackboard.getSelf()->getTeam());
 }
 
 bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
@@ -146,7 +142,7 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 			return false;
 		}
 	}
-	CNavArea* goalArea = getCurrentArea(targetLoc, self->getTeam());
+	CNavArea* goalArea = getCurrentArea(targetLoc);
 	if (goalArea == nullptr) {
 		Warning("Unable to find area for location.\n");
 		if (mybot_debug.GetBool()) {
@@ -188,7 +184,7 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 		Vector loc = blackboard.getSelf()->getCurrentPosition(), goal;
 		path.Top()->GetClosestPointOnArea(loc, &goal);
 		if (this->moveCtx->trace(goal).DidHit()) {
-			Warning("Start area %d is too far, closest is %f.\n", path.Top()->GetID(),
+			Warning("Can't get to start area %d, distance is %f.\n", path.Top()->GetID(),
 					loc.DistTo(goal));
 			if (mybot_debug.GetBool()) {
 				path.Top()->Draw();

@@ -16,11 +16,6 @@ class Navigator {
 public:
 
 	/**
-	 * Gets the encompassing or closest area given the position.
-	 */
-	static CNavArea* getCurrentArea(const Vector& pos, int team = TEAM_ANY);
-
-	/**
 	 * Get the current area the entity is in.
 	 */
 	static CNavArea* getArea(edict_t* ent);
@@ -36,6 +31,10 @@ public:
 	void start(CUtlStack<CNavArea*>* path, const Vector& goal, float targetRadius);
 
 	bool buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path);
+
+	CNavArea* getLastArea() const {
+		return lastArea;
+	}
 
 protected:
 	Blackboard& blackboard;
@@ -64,6 +63,8 @@ private:
 	 * Gets the next target area.
 	 */
 	void getNextArea();
+
+	CNavArea* getCurrentArea(const Vector& pos) const;
 
 	/**
 	 * Checks to see if a ladder is required for traversing the two areas.

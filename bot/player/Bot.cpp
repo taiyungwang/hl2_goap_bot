@@ -10,7 +10,6 @@
 #include <move/RotationManager.h>
 #include <weapon/Armory.h>
 #include <weapon/Weapon.h>
-#include <nav_mesh/nav_mesh.h>
 #include <nav_mesh/nav_area.h>
 #include <util/SimpleException.h>
 #include <util/BasePlayer.h>
@@ -40,8 +39,7 @@ void Bot::think() {
 		CBotCmd& cmd = blackboard->getCmd();
 		if (isDead()) {
 			Vector pos = getCurrentPosition();
-			extern CNavMesh* TheNavMesh;
-			CNavArea* area = Navigator::getCurrentArea(pos);
+			CNavArea* area = blackboard->getNavigator()->getLastArea();
 			if (area != nullptr) {
 				area->IncreaseDanger(getTeam(), 1.0f);
 			}
@@ -86,7 +84,7 @@ void Bot::think() {
 			botmanager->GetBotController(getEdict())->RunPlayerMove(&cmd);
 		}
 	} catch (const Exception& e) {
-		throw new SimpleException(CUtlString(getName()) + ": " + e.what());
+		Error("%s: %s", getName(), e.what());
 	}
 }
 
