@@ -5,6 +5,7 @@
 #include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <util/EntityUtils.h>
+#include <nav_mesh/nav_entities.h>
 #include <vstdlib/random.h>
 #include <in_buttons.h>
 
@@ -61,6 +62,17 @@ void CapturePointAction::startRound() {
 				}
 				ctrlPoints.Insert(points[j], i);
 			}
+		}
+	}
+	extern CGlobalVars *gpGlobals;
+	extern IVEngineServer* engine;
+	extern CUtlMap<int, NavEntity*> blockers;
+	for (int i = gpGlobals->maxClients + 1; i < gpGlobals->maxEntities; i++) {
+		edict_t* ent = engine->PEntityOfEntIndex(i);
+		if (ent != nullptr && !ent->IsFree() && ent->GetIServerEntity() != nullptr
+				&& FClassnameIs(ent, "prop_dynamic") && blockers.Find(i) == blockers.InvalidIndex()) {
+			blockers.Insert(i, new CFuncNavBlocker(ent));
+			Msg("Enabling %s %d.\n", ent->GetClassName(), ent->m_EdictIndex);
 		}
 	}
 }

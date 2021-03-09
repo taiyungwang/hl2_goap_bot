@@ -63,12 +63,6 @@ MoveState* Avoid::move(const Vector& pos) {
 				}
 			}
 			if (blackboard.getBlocker() != nullptr) {
-				if (Q_stristr(blockerName, "func_team") != nullptr) {
-					extern CUtlVector<NavEntity*> blockers;
-					CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
-					navBlocker->setBlockedTeam(blackboard.getSelf()->getTeam());
-					blockers.AddToTail(navBlocker);
-				}
 				ctx.setStuck(true);
 				return new Stopped(ctx);
 			}
@@ -80,6 +74,12 @@ MoveState* Avoid::move(const Vector& pos) {
 			return new Jump(ctx);
 		}
 		if (dynamic_cast<Stopped*>(nextState) != nullptr) {
+			if (blocker != nullptr && Q_stristr(blocker->GetClassName(), "func_team") != nullptr) {
+				extern CUtlMap<int, NavEntity*> blockers;
+				CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
+				navBlocker->setBlockedTeam(blackboard.getSelf()->getTeam());
+				blockers.Insert(blocker->m_EdictIndex, navBlocker);
+			}
 			ctx.setStuck(true);
 		}
 		return nextState;

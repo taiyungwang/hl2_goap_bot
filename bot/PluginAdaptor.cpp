@@ -22,7 +22,7 @@ bool navMeshLoadAttempted;
 ConVar mybot_debug("my_bot_debug", "0");
 ConVar mybot_var("mybot_var", "0.5");
 
-CUtlVector<NavEntity*> blockers;
+CUtlMap<int, NavEntity*> blockers;
 
 extern IPlayerInfoManager *playerinfomanager;
 extern IVEngineServer* engine;
@@ -45,6 +45,7 @@ PluginAdaptor::PluginAdaptor() {
 		botBuilder = nullptr;
 		Msg("Mod not supported, %s.\n", modPath);
 	}
+	SetDefLessFunc(blockers);
 }
 
 PluginAdaptor::~PluginAdaptor() {
@@ -71,13 +72,6 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		if (TheNavMesh->Load() == NAV_OK) {
 			botBuilder->onNavMeshLoad();
 			Msg("Loaded Navigation mesh.\n");
-			for (int i = gpGlobals->maxClients + 1; i < gpGlobals->maxEntities; i++) {
-				edict_t* ent = engine->PEntityOfEntIndex(i);
-				if (ent != nullptr && !ent->IsFree() && ent->GetIServerEntity() != nullptr
-						&& FClassnameIs(ent, "prop_dynamic")) {
-					blockers.AddToTail(new CFuncNavBlocker(ent));
-				}
-			}
 		}
 		if (Q_stristr(modPath, "dod")) {
 			TheNavMesh->SetPlayerSpawnName("info_player_axis");
@@ -88,17 +82,21 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		navMeshLoadAttempted = true;
 	}
 	if (TheNavMesh != nullptr) {
-		static unsigned int poll = 0;
-		if (poll-- < 1) {
-			poll = 120;
-			FOR_EACH_VEC(blockers, i) {
-				if (!FClassnameIs(blockers[i]->getEntity(), "prop_dynamic")
-						|| !BaseEntity(blockers[i]->getEntity()).isDestroyedOrUsed()) {
-					blockers[i]->InputEnable();
-				} else {
-					blockers[i]->InputDisable();
-				}
+		CUtlLinkedList<unsigned short> toRemove;
+		FOR_EACH_MAP_FAST(blockers, i) {
+			edict_t* blocker = blockers[i]->getEntity();
+			if (blocker->IsFree()) {
+				toRemove.AddToTail(i);
+				Warning("Disabling %s %d.\n", blocker->GetClassName(),
+						blockers[i]->getEntity()->m_EdictIndex);
+				blockers[i]->InputDisable();
+				delete blockers[i];
+			} else {
+				blockers[i]->InputEnable();
 			}
+		}
+		FOR_EACH_LL(toRemove, i) {
+			blockers.RemoveAt(toRemove[i]);
 		}
 		TheNavMesh->Update();
 	}
@@ -126,7 +124,7 @@ void PluginAdaptor::levelShutdown() {
 		delete playerManager;
 		playerManager = nullptr;
 	}
-	blockers.Purge();
+	blockers.PurgeAndDeleteElements();
 }
 
 template
@@ -143,7 +141,7 @@ void PluginAdaptor::handEvent(T* event) {
 
 bool PluginAdaptor::handle(EventInfo* event) {
 	if (Q_strcmp("nav_generate", event->getName()) == 0) {
-		blockers.Purge();
+		blockers.PurgeAndDeleteElements();
 		return true;
 	}
 	return false;
