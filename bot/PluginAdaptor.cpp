@@ -87,8 +87,6 @@ void PluginAdaptor::gameFrame(bool simulating) {
 			edict_t* blocker = blockers[i]->getEntity();
 			if (blocker->IsFree()) {
 				toRemove.AddToTail(i);
-				Warning("Disabling %s %d.\n", blocker->GetClassName(),
-						blockers[i]->getEntity()->m_EdictIndex);
 				blockers[i]->InputDisable();
 				delete blockers[i];
 			} else {

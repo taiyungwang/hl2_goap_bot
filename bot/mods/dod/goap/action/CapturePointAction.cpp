@@ -72,7 +72,6 @@ void CapturePointAction::startRound() {
 		if (ent != nullptr && !ent->IsFree() && ent->GetIServerEntity() != nullptr
 				&& FClassnameIs(ent, "prop_dynamic") && blockers.Find(i) == blockers.InvalidIndex()) {
 			blockers.Insert(i, new CFuncNavBlocker(ent));
-			Msg("Enabling %s %d.\n", ent->GetClassName(), ent->m_EdictIndex);
 		}
 	}
 }

@@ -3,7 +3,7 @@
 #include "WeaponBuilder.h"
 
 WeaponBuilderFactory::~WeaponBuilderFactory() {
-	builders.Purge();
+	builders.PurgeAndDeleteElements();
 }
 
 WeaponBuilder* WeaponBuilderFactory::getInstance(const char* name) const {

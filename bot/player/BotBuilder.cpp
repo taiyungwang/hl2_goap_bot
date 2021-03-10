@@ -39,6 +39,7 @@ void BotBuilder::CommandCallback(const CCommand &command) {
 		botCount--;
 		return;
 	}
+	botCount %= 32;
 	if (command.ArgC() > 2) {
 		team = atoi(command.Arg(2)) % 2 + 2;
 	}

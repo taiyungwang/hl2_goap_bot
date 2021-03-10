@@ -58,7 +58,7 @@ int Armory::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) co
 
 void Armory::reset() {
 	currWeapIdx = bestWeapIdx = 0;
-	weapons.Purge();
+	weapons.PurgeAndDeleteElements();
 	FOR_EACH_MAP_FAST(weapons, i)
 	{
 		delete weapons[i];

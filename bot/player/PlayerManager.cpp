@@ -19,7 +19,7 @@ PlayerManager::PlayerManager(const BotBuilder* botBuilder) :
 }
 
 PlayerManager::~PlayerManager() {
-	players.Purge();
+	players.PurgeAndDeleteElements();
 	edictQ.RemoveAll();
 }
 

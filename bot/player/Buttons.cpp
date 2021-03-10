@@ -12,7 +12,7 @@ Buttons::Buttons() {
 
 bool Buttons::jump() {
 	if (buttons.GetPtr(IN_JUMP)->press(10, 20)) {
-		buttons.Element(IN_DUCK).press(10, 20);
+		buttons.Element(IN_DUCK).press(100, 20);
 		return true;
 	}
 	return false;
