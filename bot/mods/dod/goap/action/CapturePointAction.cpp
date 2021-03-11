@@ -137,16 +137,18 @@ void CapturePointAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
 	float totalDist = 0.0f;
 	CUtlLinkedList<float> prob;
 	FOR_EACH_LL(active, i) {
-		prob.AddToTail(active[i]->GetCollideable()->GetCollisionOrigin().DistTo(blackboard.getSelf()->getCurrentPosition()));
+		prob.AddToTail(1.0f / active[i]->GetCollideable()->GetCollisionOrigin().DistTo(blackboard.getSelf()->getCurrentPosition()));
 		totalDist += prob[prob.Tail()];
 	}
+	float totalProb = 0.0f;
 	FOR_EACH_LL(prob, i) {
-		prob[i] = (totalDist - prob[i]) / totalDist / 2.0f;
+		prob[i] /= totalDist;
 		if (i > 0) {
 			prob[i] += prob[i - 1];
 		}
 	}
 	float choice = RandomFloat(0, 1.0f);
+	item = active[active.Tail()];
 	FOR_EACH_LL(prob, i) {
 		if (choice < prob[i]) {
 			item = active[i];
