@@ -235,9 +235,12 @@ void Navigator::getNextArea() {
 	}
 	if (path->Count() > 1) {
 		CNavArea* nextArea = path->Element(path->Count() - 2);
+		float zDelta = loc.z - nextArea->GetCenter().z;
 		if ((nextArea->GetAttributes() & NAV_MESH_JUMP)
 				// don't skip to an area that is too far below.
-				|| loc.z - nextArea->GetCenter().z > 100.0f
+				|| zDelta > 100.0f
+				// don't skip area that is above step Height.
+				|| -zDelta > StepHeight
 				|| !getPortal(goal, path->Top(), nextArea)
 				|| !canMoveTo(goal)) {
 			return;

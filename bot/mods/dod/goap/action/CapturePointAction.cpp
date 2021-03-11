@@ -130,8 +130,8 @@ void CapturePointAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
 	if (active.Count() == 0) {
 		return;
 	}
+	item = active[active.Tail()];
 	if (active.Count() == 1) {
-		item = active[0];
 		return;
 	}
 	float totalDist = 0.0f;
@@ -148,7 +148,6 @@ void CapturePointAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
 		}
 	}
 	float choice = RandomFloat(0, 1.0f);
-	item = active[active.Tail()];
 	FOR_EACH_LL(prob, i) {
 		if (choice < prob[i]) {
 			item = active[i];
