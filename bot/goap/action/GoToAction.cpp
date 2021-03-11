@@ -9,6 +9,7 @@ float GoToAction::getCost() {
 }
 
 bool GoToAction::execute() {
+	canAbort = !blackboard.isOnLadder();
 	return blackboard.getNavigator()->step();
 }
 

@@ -22,7 +22,7 @@ public:
 	virtual bool postCondCheck();
 
 	virtual bool isInterruptable() const {
-		return true;
+		return canAbort;
 	}
 
 protected:
@@ -36,4 +36,7 @@ protected:
 	}
 
 	virtual bool findTargetLoc() = 0;
+
+private:
+	bool canAbort = true;
 };
