@@ -69,7 +69,7 @@ bool Navigator::step() {
 			// TODO: magic number.  Do we need some sort of logic to see if this is valid?
 			if (((attributes & NAV_MESH_JUMP) ||
 					((attributes & NAV_MESH_CROUCH) && !(area->GetAttributes() & NAV_MESH_CROUCH)))
-					&& lastAreaEnd.AsVector2D().DistTo(loc.AsVector2D()) > 40.0f) {
+					&& topAreaStart.AsVector2D().DistTo(loc.AsVector2D()) > 40.0f) {
 				attributes = NAV_MESH_INVALID;
 			}
 			moveCtx->setGoal(topAreaStart);
