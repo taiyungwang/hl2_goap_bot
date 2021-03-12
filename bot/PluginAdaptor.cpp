@@ -38,9 +38,12 @@ PluginAdaptor::PluginAdaptor() {
 	// TODO: make mod checking more stringent.
 	if (Q_stristr(modPath, "hl2mp")) {
 		botBuilder = new HL2DMBotBuilder();
+		TheNavMesh->addPlayerSpawnName("info_player_start");
 	} else if (Q_stristr(modPath, "dod")) {
 		botBuilder = new DODBotBuilder();
 		botBuilder->setEnableHook(true);
+		TheNavMesh->addPlayerSpawnName("info_player_axis");
+		TheNavMesh->addPlayerSpawnName("info_player_allies");
 	} else {
 		botBuilder = nullptr;
 		Msg("Mod not supported, %s.\n", modPath);
@@ -72,12 +75,6 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		if (TheNavMesh->Load() == NAV_OK) {
 			botBuilder->onNavMeshLoad();
 			Msg("Loaded Navigation mesh.\n");
-		}
-		if (Q_stristr(modPath, "dod")) {
-			TheNavMesh->SetPlayerSpawnName("info_player_axis");
-			TheNavMesh->AddWalkableSeeds();
-			TheNavMesh->SetPlayerSpawnName("info_player_allies");
-			// allied walkable seed will be added if nav is generated.
 		}
 		navMeshLoadAttempted = true;
 	}
