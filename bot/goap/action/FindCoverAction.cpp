@@ -14,7 +14,8 @@ FindCoverAction::FindCoverAction(Blackboard& blackboard) :
 bool FindCoverAction::ShouldSearch(CNavArea *adjArea, CNavArea *currentArea,
 		float travelDistanceSoFar) {
 	edict_t* target = getTarget();
-	return target != nullptr && Navigator::getArea(target) != currentArea;
+	return ISearchSurroundingAreasFunctor::ShouldSearch(adjArea, currentArea, travelDistanceSoFar)
+			&& target != nullptr && Navigator::getArea(target) != currentArea;
 }
 
 bool FindCoverAction::operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar ) {
