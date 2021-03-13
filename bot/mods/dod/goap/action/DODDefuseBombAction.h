@@ -28,8 +28,6 @@ public:
 protected:
 	bool interruptable = true;
 
-	virtual bool isTeamMateActingOnBomb(DodPlayer& teammate) const;
-
 	virtual bool isAvailable(int idx);
 
 private:

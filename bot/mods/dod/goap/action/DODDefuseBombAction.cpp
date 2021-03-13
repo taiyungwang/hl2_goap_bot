@@ -1,6 +1,6 @@
 #include "DODDefuseBombAction.h"
 
-#include <mods/dod/util/DODObjectiveResource.h>
+#include <mods/dod/player/DODObjectives.h>
 #include <mods/dod/util/DodPlayer.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
@@ -53,8 +53,7 @@ bool DODDefuseBombAction::isAvailable(edict_t* ent) {
 		if (players[i] != blackboard.getSelf()
 				&& players[i]->getTeam() == blackboard.getSelf()->getTeam()
 				&& players[i]->getCurrentPosition().DistTo(ent->GetCollideable()->GetCollisionOrigin()) < 100.0f) {
-			DodPlayer teammate(players[i]->getEdict());
-			if (isTeamMateActingOnBomb(teammate)) {
+			if (DodPlayer(players[i]->getEdict()).isDefusing()) {
 				return false;
 			}
 		}
@@ -62,14 +61,9 @@ bool DODDefuseBombAction::isAvailable(edict_t* ent) {
 	return true;
 }
 
-bool DODDefuseBombAction::isTeamMateActingOnBomb(DodPlayer& teammate) const {
-	return teammate.isDefusing();
-}
-
 bool DODDefuseBombAction::isAvailable(int idx) {
-	return isDetonationMap
-			&& blackboard.getSelf()->getTeam()
-					== objectiveResource->getOwner()[idx]
-			&& objectiveResource->getNumBombsRequired()[idx] != 0
-			&& isBombInState(idx, 2);
+	return objectives->isDetonation()
+			&& blackboard.getSelf()->getTeam() == objectives->getOwner(idx)
+			&& objectives->hasBombs(idx)
+			&& objectives->isBombInState(idx, 2);
 }

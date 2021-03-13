@@ -20,8 +20,6 @@ protected:
 
 	virtual void selectFromActive(CUtlLinkedList<edict_t*>& active);
 
-	bool isBombInState(int idx, int state) const;
-
 private:
 	unsigned enemyControlled = 0;
 };

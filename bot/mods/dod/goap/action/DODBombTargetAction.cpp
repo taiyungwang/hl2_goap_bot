@@ -1,6 +1,6 @@
 #include "DODBombTargetAction.h"
 
-#include <mods/dod/util/DODObjectiveResource.h>
+#include <mods/dod/player/DODObjectives.h>
 #include <mods/dod/util/DodPlayer.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
@@ -20,13 +20,8 @@ bool DODBombTargetAction::execute() {
 }
 
 bool DODBombTargetAction::isAvailable(int idx) {
-	return isDetonationMap
-			&& blackboard.getSelf()->getTeam()
-					!= objectiveResource->getOwner()[idx]
-			&& objectiveResource->getNumBombsRequired()[idx] > 0
-			&& isBombInState(idx, 1);
-}
-
-bool DODBombTargetAction::isTeamMateActingOnBomb(DodPlayer& teammate) const {
-	return teammate.isPlanting();
+	return objectives->isDetonation()
+			&& blackboard.getSelf()->getTeam() != objectives->getOwner(idx)
+			&& objectives->hasBombs(idx)
+			&& objectives->isBombInState(idx, 1);
 }

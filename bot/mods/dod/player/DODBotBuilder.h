@@ -2,6 +2,7 @@
 
 #include <player/BotBuilder.h>
 #include <event/EventHandler.h>
+#include "DODObjectives.h"
 
 class HL2MPPlayer;
 class HL2DMWorld;
@@ -10,12 +11,12 @@ class DODBotBuilder: public BotBuilder, public EventHandler {
 public:
 	DODBotBuilder();
 
-	~DODBotBuilder();
-
 	bool handle(EventInfo* event);
 
 private:
 	bool roundStarted = false;
+
+	DODObjectives objectives;
 
 	void initWeapons(WeaponBuilderFactory& factory) const;
 

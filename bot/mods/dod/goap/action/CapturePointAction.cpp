@@ -1,6 +1,6 @@
 #include "CapturePointAction.h"
 
-#include <mods/dod/util/DODObjectiveResource.h>
+#include <mods/dod/player/DODObjectives.h>
 #include <event/EventInfo.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
@@ -8,14 +8,6 @@
 #include <nav_mesh/nav_entities.h>
 #include <vstdlib/random.h>
 #include <in_buttons.h>
-
-bool CapturePointAction::isDetonationMap = false;
-
-DODObjectiveResource* CapturePointAction::objectiveResource = nullptr;
-
-CUtlMap<edict_t*, int> CapturePointAction::ctrlPoints;
-
-CUtlVector<CCopyableUtlVector<edict_t*>> CapturePointAction::capTarget;
 
 CapturePointAction::CapturePointAction(Blackboard& blackboard) :
 		GoToConsumableEntityAction(blackboard, "dod_control_point") {
@@ -36,94 +28,26 @@ bool CapturePointAction::execute() {
 	return false;
 }
 
-void CapturePointAction::startRound() {
-	endRound();
-	SetDefLessFunc(ctrlPoints);
-
-	CUtlLinkedList<edict_t*> points, bombsOnMap, capArea, objRsrc;
-	findEntWithMatchingName("dod_objective_resource", objRsrc);
-	findEntWithMatchingName("dod_control_point", points);
-	findEntWithMatchingName("dod_bomb_target", bombsOnMap);
-	findEntWithMatchingName("dod_capture_area", capArea);
-	objectiveResource = new DODObjectiveResource(objRsrc[0]);
-	const Vector* position = objectiveResource->getCapturePositions();
-	for (int i = 0; i < objectiveResource->numCtrlPts(); i++) {
-		capTarget.AddToTail();
-		FOR_EACH_LL(points, j)
-		{
-			ICollideable* collideable = points[j]->GetCollideable();
-			if (collideable != nullptr
-					&& position[i] == collideable->GetCollisionOrigin()) {
-				if (objectiveResource->getNumBombsRequired()[i] > 0) {
-					isDetonationMap = true;
-					addCapTarget(position[i], bombsOnMap);
-				} else {
-					addCapTarget(position[i], capArea);
-				}
-				ctrlPoints.Insert(points[j], i);
-			}
-		}
-	}
-	extern CGlobalVars *gpGlobals;
-	extern IVEngineServer* engine;
-	extern CUtlMap<int, NavEntity*> blockers;
-	for (int i = gpGlobals->maxClients + 1; i < gpGlobals->maxEntities; i++) {
-		edict_t* ent = engine->PEntityOfEntIndex(i);
-		if (ent != nullptr && !ent->IsFree() && ent->GetIServerEntity() != nullptr
-				&& FClassnameIs(ent, "prop_dynamic") && blockers.Find(i) == blockers.InvalidIndex()) {
-			blockers.Insert(i, new CFuncNavBlocker(ent));
-		}
-	}
-}
-
-void CapturePointAction::addCapTarget(const Vector& pos,
-		const CUtlLinkedList<edict_t*>& targets) {
-	FOR_EACH_LL(targets, k) {
-		ICollideable* collideable = targets[k]->GetCollideable();
-		if (collideable != nullptr) {
-			Vector targetPos = collideable->GetCollisionOrigin();
-			if (targetPos.LengthSqr() == 0.0f) {
-				Vector mins, maxs;
-				collideable->WorldSpaceTriggerBounds(&mins, &maxs);
-				targetPos = (maxs + mins) / 2.0f;
-			}
-			if (pos.DistTo(targetPos) < 400.0f) {
-				capTarget.Tail().AddToTail(targets[k]);
-			}
-		}
-	}
-}
-
-void CapturePointAction::endRound() {
-	isDetonationMap = false;
-	if (objectiveResource != nullptr) {
-		delete objectiveResource;
-		objectiveResource = nullptr;
-		ctrlPoints.RemoveAll();
-		capTarget.Purge();
-	}
-}
-
 bool CapturePointAction::isAvailable(edict_t* ent) {
-	auto key = ctrlPoints.Find(ent);
-	return ctrlPoints.IsValidIndex(key) && isAvailable(ctrlPoints[key]);
+	int idx = objectives->getIndex(ent);
+	return idx != -1 && isAvailable(idx);
 }
 
 bool CapturePointAction::findTargetLoc() {
-	if (objectiveResource == nullptr) {
+	if (!objectives->roundStarted()) {
 		return false;
 	}
 	selectItem();
 	if (item == nullptr) {
 		return false;
 	}
-	setTargetLocAndRadius(capTarget[ctrlPoints[ctrlPoints.Find(item)]][0]);
+	setTargetLocAndRadius(objectives->getCapTarget(objectives->getIndex(item))[0]);
 	return true;
 }
 
 bool CapturePointAction::isAvailable(int idx) {
-		return !isDetonationMap
-				&& blackboard.getSelf()->getTeam() != objectiveResource->getOwner()[idx];
+	return !objectives->isDetonation()
+			&& objectives->getOwner(idx) != blackboard.getSelf()->getTeam();
 }
 
 void CapturePointAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
