@@ -8,6 +8,11 @@ class Action;
 class AStar;
 class Blackboard;
 
+/**
+ * Manages a list of actions associated with their respective goals.  The goals are repeatedly executed
+ * order of priority.
+ */
+
 class Planner {
 public:
 	/**
@@ -23,17 +28,22 @@ public:
 	 * Adds a new action to the planner.
 	 * @param priority Priority value of the action.  Expected to
 	 * be between 0.0 and 1.0 inclusive. The planner chooses an action to execute
-	 * based on highest priority.  Priority goals are never considered.
+	 * based on highest priority.  0 Priority goals are never considered.
+	 * @param chanceToExec probability this action will be executed if conditions are met.
+	 * Exepected values are 0.0 and 1.0 inclusive.
 	 */
 	template<typename T>
-	void addAction(float priority) {
-		addAction(new T(blackboard));
+	T* addAction(float priority, float chanceToExec = 1.0f) {
+		T* action = new T(blackboard);
+		addAction(action);
 		if (priority <= 0.0f) {
-			return;
+			return action;
 		}
 		goals.AddToTail();
 		goals.Tail().action = actions.Count() - 1;
 		goals.Tail().priority = priority;
+		goals.Tail().chanceToExec = chanceToExec;
+		return action;
 	}
 
 	/**
@@ -61,7 +71,7 @@ private:
 	CUtlVector<Action*> actions;
 
 	struct Goal {
-		float priority;
+		float priority, chanceToExec;
 		int action;
 	};
 

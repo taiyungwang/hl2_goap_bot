@@ -8,7 +8,6 @@
 #include <weapon/Deployer.h>
 #include <nav_mesh/nav_mesh.h>
 #include <util/UtilTrace.h>
-#include <vstdlib/random.h>
 #include <in_buttons.h>
 
 HidingSpotSelector* SnipeAction::selector = nullptr;
@@ -22,9 +21,6 @@ bool SnipeAction::precondCheck() {
 	deployed = false;
 	const Bot* self = blackboard.getSelf();
 	int team = self->getTeam();
-	if (RandomInt(1, 2) == 1) {
-		return false;
-	}
 	if (!GoToAction::precondCheck()) {
 		selector->update(selectorId, team, false);
 		return false;

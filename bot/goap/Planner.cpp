@@ -4,6 +4,8 @@
 #include "action/Action.h"
 #include <player/Player.h>
 #include <eiface.h>
+#include <vstdlib/random.h>
+
 
 Planner::Planner(const WorldState& worldState, Blackboard& blackboard) :
 		worldState(worldState), blackboard(blackboard) {
@@ -91,7 +93,9 @@ void Planner::reset() {
 void Planner::getNextGoal() {
 	for (; currentGoal < goals.Count(); currentGoal++) {
 		auto& effects = actions[goals[currentGoal].action]->getEffects();
-		if (effects.m_value != worldState[worldState.Find(effects.m_key)]) {
+		if (effects.m_value != worldState[worldState.Find(effects.m_key)]
+			&& (goals[currentGoal].chanceToExec == 1.0f
+			|| goals[currentGoal].chanceToExec > RandomFloat(0, 1.0f))) {
 			break;
 		}
 	}
