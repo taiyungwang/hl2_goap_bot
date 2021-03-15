@@ -10,11 +10,11 @@ HidingSpotSelector::HidingSpotSelector() {
 			continue;
 		}
 		FOR_EACH_VEC(hideSpots, j) {
-			spots.AddToTail();
-			spots.Tail().pos = hideSpots[j]->GetPosition();
+			auto inserted = spots.Insert(hideSpots[j]->GetID());
+			spots[inserted].pos = hideSpots[j]->GetPosition();
 			for (int i = 0; i < 2; i++) {
 				if (TheNavAreas[i]->IsBlocked(i)) {
-					spots.Tail().score[i].inUse = true;
+					spots[inserted].score[i].inUse = true;
 				}
 			}
 		}
@@ -49,14 +49,14 @@ int HidingSpotSelector::select(Vector& pos, int team) const {
 	float max = 0.0f;
 	int selected = -1;
 	int scoreIdx = team > 1 ? team - 2 : 0;
-	FOR_EACH_VEC(spots, i) {
+	FOR_EACH_HASHTABLE(spots, i) {
 		const auto& score = spots[i].score[scoreIdx];
 		if (score.inUse && team > 1) {
 			continue;
 		}
 		float sample = beta_sample(score.success, score.fail);
 		if (sample > max) {
-			selected = i;
+			selected = spots.Key(i);
 			max = sample;
 			pos = spots[i].pos;
 		}
@@ -66,12 +66,12 @@ int HidingSpotSelector::select(Vector& pos, int team) const {
 
 void HidingSpotSelector::setInUse(int spot, int team, bool inUse) {
 	if (team > 1) {
-		spots[spot].score[team > 1 ? team - 2 : 0].inUse = inUse;
+		spots.GetPtr(spot)->score[team > 1 ? team - 2 : 0].inUse = inUse;
 	}
 }
 
 void HidingSpotSelector::update(int spot, int team, bool success) {
-	auto& score = spots[spot].score[team > 1 ? team - 2 : 0];
+	auto& score = spots.GetPtr(spot)->score[team > 1 ? team - 2 : 0];
 	success ? score.success += 1.0f : score.fail += 1.0f;
 }
 

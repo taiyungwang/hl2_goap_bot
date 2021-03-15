@@ -144,7 +144,7 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	}
 	CNavArea* goalArea = getCurrentArea(targetLoc);
 	if (goalArea == nullptr) {
-		Warning("Unable to find area for location.\n");
+		Warning("Unable to find area for goal.\n");
 		if (mybot_debug.GetBool()) {
 			debugoverlay->AddLineOverlay(self->getEyesPos(),
 					targetLoc, 255, 0, 0, true,

@@ -1,6 +1,7 @@
 #include "DODDefuseBombAction.h"
 
 #include <mods/dod/player/DODObjectives.h>
+#include <mods/dod/player/DODObjective.h>
 #include <mods/dod/util/DodPlayer.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
@@ -9,7 +10,7 @@
 #include <in_buttons.h>
 
 DODDefuseBombAction::DODDefuseBombAction(Blackboard& blackboard) :
-		DODDefendPointAction(blackboard) {
+	CapturePointAction(blackboard) {
 	effects = {WorldProp::BOMB_DEFUSED, true};
 }
 
@@ -61,9 +62,9 @@ bool DODDefuseBombAction::isAvailable(edict_t* ent) {
 	return true;
 }
 
-bool DODDefuseBombAction::isAvailable(int idx) {
+bool DODDefuseBombAction::isAvailable(const DODObjective& obj) {
 	return objectives->isDetonation()
-			&& blackboard.getSelf()->getTeam() == objectives->getOwner(idx)
-			&& objectives->hasBombs(idx)
-			&& objectives->isBombInState(idx, 2);
+			&& blackboard.getSelf()->getTeam() == obj.getOwner()
+			&& obj.hasBombs()
+			&& obj.hasBombTargetInState(DODObjective::BombState::ACTIVE);
 }

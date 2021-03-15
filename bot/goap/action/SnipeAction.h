@@ -14,24 +14,25 @@ public:
 
 	bool precondCheck();
 
-	void init();
-
 	bool execute();
 
 	bool postCondCheck();
 
 	void abort();
 
-private:
-
+protected:
 	static HidingSpotSelector* selector;
 
+	int duration = 0;
+
+	int selectorId = -1;
+
+	QAngle facing;
+
+	virtual void calculateFacing();
+
+	virtual bool findTargetLoc();
+
+private:
 	bool deployed = false;
-
-	float facing = 0;
-
-	int duration = 0,
-		selectorId = -1;
-
-	bool findTargetLoc();
 };

@@ -32,6 +32,7 @@ bool DODWorld::handle(EventInfo* event) {
 		bombPlantTeam = 1;
 	} else if (name == "dod_round_win" || name == "dod_game_over") {
 		roundStarted = false;
+		reset = true;
 	}
 	updateState(WorldProp::ROUND_STARTED, roundStarted);
 	return false;

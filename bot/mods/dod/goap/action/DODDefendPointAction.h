@@ -1,25 +1,33 @@
 #pragma once
 
-#include "CapturePointAction.h"
+#include <goap/action/SnipeAction.h>
 
-class DODDefendPointAction: public CapturePointAction {
+class DODObjectives;
+class DODObjective;
+
+class DODDefendPointAction: public SnipeAction {
 public:
 	DODDefendPointAction(Blackboard& blackboard) :
-		CapturePointAction(blackboard) {
+		SnipeAction(blackboard) {
 		effects = {WorldProp::POINTS_DEFENDED, true};
 	}
 
-	virtual bool precondCheck();
+	void setObjectives(const DODObjectives* objectives) {
+		this->objectives = objectives;
+	}
 
-	virtual bool execute();
-
-protected:
-	int duration = 0;
-
-	virtual bool isAvailable(int idx);
-
-	virtual void selectFromActive(CUtlLinkedList<edict_t*>& active);
+	bool execute();
 
 private:
-	unsigned enemyControlled = 0;
+	const DODObjectives* objectives = nullptr;
+
+	const DODObjective* target = nullptr;
+
+	Vector guardTarget;
+
+	bool findTargetLoc();
+
+	void calculateFacing();
+
+	bool isTargetValid() const;
 };

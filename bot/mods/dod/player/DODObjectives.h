@@ -5,6 +5,7 @@
 #include <utllinkedlist.h>
 
 class DODObjectiveResource;
+class DODObjective;
 struct edict_t;
 
 class DODObjectives {
@@ -46,28 +47,11 @@ public:
 		return detonation;
 	}
 
-	/**
-	 * Checks whether any bomb in a given area is in a given state
-	 * @param idx Index for the area from getIndex()
-	 * @param state Bomb state value, which is one of
-	 * 0 - unavailable,
-	 * 1 - available
-	 * 2 - active
-	 * @return True if any of the bombs in the area matches the given state
-	 */
-	bool isBombInState(int idx, int state) const;
+	const DODObjective* getObjective(edict_t*) const;
 
-	/**
-	 * @param idx Index for the area from getIndex()
-	 * @return Team id of owner of position.
-	 */
-	int getOwner(int idx) const;
-
-	const CapTarget& getCapTarget(int idx) const {
-		return capTargets[idx];
+	const CUtlLinkedList<edict_t*>& getCtrlPts() const {
+		return ctrlPts;
 	}
-
-	bool hasBombs(int idx) const;
 
 private:
 	bool detonation;
@@ -76,9 +60,10 @@ private:
 
 	CUtlMap<edict_t*, int> ctrlPoints;
 
-	CUtlVector<CapTarget> capTargets;
+	CUtlLinkedList<edict_t*> ctrlPts;
+
+	CUtlVector<DODObjective*> objectives;
 
 	void addCapTarget(const Vector &pos,
 			const CUtlLinkedList<edict_t*> &targets);
-
 };

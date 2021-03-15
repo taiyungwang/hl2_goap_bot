@@ -1,5 +1,6 @@
 #include "DODObjectives.h"
 
+#include "DODObjective.h"
 #include <util/EntityUtils.h>
 #include <mods/dod/util/DODObjectiveResource.h>
 #include <nav_mesh/nav_entities.h>
@@ -7,18 +8,18 @@
 
 void DODObjectives::startRound() {
 	SetDefLessFunc(ctrlPoints);
-	CUtlLinkedList<edict_t*> points, bombsOnMap, capArea, objRsrc;
+	CUtlLinkedList<edict_t*> bombsOnMap, capArea, objRsrc;
 	findEntWithMatchingName("dod_objective_resource", objRsrc);
-	findEntWithMatchingName("dod_control_point", points);
+	findEntWithMatchingName("dod_control_point", ctrlPts);
 	findEntWithMatchingName("dod_bomb_target", bombsOnMap);
 	findEntWithMatchingName("dod_capture_area", capArea);
 	objectiveResource = new DODObjectiveResource(objRsrc[0]);
 	const Vector *position = objectiveResource->getCapturePositions();
 	for (int i = 0; i < objectiveResource->numCtrlPts(); i++) {
-		capTargets.AddToTail();
-		FOR_EACH_LL(points, j)
+		objectives.AddToTail(new DODObjective(i, *objectiveResource));
+		FOR_EACH_LL(ctrlPts, j)
 		{
-			ICollideable *collideable = points[j]->GetCollideable();
+			ICollideable *collideable = ctrlPts[j]->GetCollideable();
 			if (collideable != nullptr
 					&& position[i] == collideable->GetCollisionOrigin()) {
 				if (objectiveResource->getNumBombsRequired()[i] > 0) {
@@ -27,10 +28,10 @@ void DODObjectives::startRound() {
 				} else {
 					addCapTarget(position[i], capArea);
 				}
-				addCapTarget(position[i], detonation ? bombsOnMap : capArea);
-				ctrlPoints.Insert(points[j], i);
+				ctrlPoints.Insert(ctrlPts[j], i);
 			}
 		}
+		SearchSurroundingAreas(TheNavMesh->GetNearestNavArea(ctrlPts[i]), *objectives.Tail(), 2000.0f);
 	}
 	extern CGlobalVars *gpGlobals;
 	extern IVEngineServer *engine;
@@ -52,37 +53,13 @@ void DODObjectives::endRound() {
 		delete objectiveResource;
 		objectiveResource = nullptr;
 		ctrlPoints.RemoveAll();
-		capTargets.Purge();
+		objectives.PurgeAndDeleteElements();
 	}
 }
 
-int DODObjectives::getIndex(edict_t* target) const {
+const DODObjective* DODObjectives::getObjective(edict_t* target) const {
 	auto key = ctrlPoints.Find(target);
-	return ctrlPoints.IsValidIndex(key) ? ctrlPoints[key] : 1;
-}
-
-class DODBombTarget: public BaseEntity {
-public:
-	DODBombTarget(edict_t *ent): BaseEntity("CDODBombTarget", ent) {
-	}
-
-	int getState() {
-		return get<int>("m_iState");
-	}
-};
-
-bool DODObjectives::isBombInState(int idx, int state) const {
-	auto& targets = capTargets[idx];
-	FOR_EACH_VEC(targets, i) {
-		if (DODBombTarget(targets[i]).getState() == state) {
-			return true;
-		}
-	}
-	return false;
-}
-
-bool DODObjectives::hasBombs(int idx) const {
-	return objectiveResource->getNumBombsRequired()[idx] > 0;
+	return ctrlPoints.IsValidIndex(key) ? objectives[ctrlPoints[key]] : nullptr;
 }
 
 void DODObjectives::addCapTarget(const Vector& pos,
@@ -97,12 +74,8 @@ void DODObjectives::addCapTarget(const Vector& pos,
 				targetPos = (maxs + mins) / 2.0f;
 			}
 			if (pos.DistTo(targetPos) < 400.0f) {
-				capTargets.Tail().AddToTail(targets[k]);
+				objectives.Tail()->addTarget(targets[k]);
 			}
 		}
 	}
-}
-
-int DODObjectives::getOwner(int idx) const {
-	return objectiveResource->getOwner()[idx];
 }

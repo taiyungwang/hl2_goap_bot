@@ -6,6 +6,7 @@
 #include <goap/Planner.h>
 #include <goap/action/DestroyObjectAction.h>
 #include <mods/dod/goap/action/DODBombTargetAction.h>
+#include <mods/dod/goap/action/DODDefendPointAction.h>
 #include <mods/dod/goap/action/DODUseFragGrenadeAction.h>
 #include <mods/dod/weapon/DODSMGBuilder.h>
 #include <mods/dod/weapon/DODAssaultRifleBuilder.h>

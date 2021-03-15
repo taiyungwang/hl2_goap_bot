@@ -6,10 +6,6 @@ class DODBombTargetAction: public DODDefuseBombAction {
 public:
 	DODBombTargetAction(Blackboard& blackboard);
 
-	bool execute();
-
 private:
-	bool isAvailable(int idx);
-
-	bool isTeamMateActingOnBomb(DodPlayer& teammate) const;
+	bool isAvailable(const DODObjective& obj);
 };

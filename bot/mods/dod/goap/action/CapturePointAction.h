@@ -4,6 +4,7 @@
 #include <utlvector.h>
 
 class DODObjectives;
+class DODObjective;
 
 class CapturePointAction: public GoToConsumableEntityAction {
 public:
@@ -16,13 +17,15 @@ public:
 	}
 
 protected:
-	virtual bool isAvailable(int idx);
+	virtual bool isAvailable(const DODObjective& obj);
 
 	virtual bool isAvailable(edict_t* ent);
 
 	virtual bool findTargetLoc();
 
-	virtual void selectFromActive(CUtlLinkedList<edict_t*>& active);
+	void selectFromActive(CUtlLinkedList<edict_t*>& active) {
+		item = randomChoice(active);
+	}
 
 	const DODObjectives* objectives = nullptr;
 };

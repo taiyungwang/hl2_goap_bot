@@ -2,8 +2,10 @@
 
 #include "Action.h"
 #include <utlstack.h>
+#include <utllinkedlist.h>
 
 class CNavArea;
+struct edict_t;
 
 /**
  * Defines the action for going to a location on the map.
@@ -36,6 +38,11 @@ protected:
 	}
 
 	virtual bool findTargetLoc() = 0;
+
+	/**
+	 * Randomly choose a target based on its relative distance.
+	 */
+	edict_t* randomChoice(CUtlLinkedList<edict_t*>& targets);
 
 private:
 	bool canAbort = true;

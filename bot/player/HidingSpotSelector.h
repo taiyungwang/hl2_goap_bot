@@ -1,6 +1,7 @@
 #pragma once
 
-#include <utlvector.h>
+#include <strtools.h>
+#include <utlhashtable.h>
 #include <vector.h>
 
 class CNavArea;
@@ -10,6 +11,7 @@ class CNavArea;
 **/
 class HidingSpotSelector {
 public:
+
 	HidingSpotSelector();
 
 	/**
@@ -21,6 +23,14 @@ public:
 
 	void update(int spot, int team, bool success);
 
+	const Vector& getSpotPos(int idx) const {
+		return spots.GetPtr(idx)->pos;
+	}
+
+	const bool isInUse(int idx, int team) const {
+		return spots.GetPtr(idx)->score[team - 2].inUse;
+	}
+
 private:
 	struct Spot {
 		Vector pos;
@@ -31,5 +41,5 @@ private:
 		} score[2];
 	};
 
-	CUtlVector<Spot> spots;
+	CUtlHashtable<unsigned int, Spot> spots;
 };

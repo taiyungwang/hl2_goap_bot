@@ -1,50 +1,61 @@
 #include "DODDefendPointAction.h"
 
 #include <mods/dod/player/DODObjectives.h>
+#include <mods/dod/player/DODObjective.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
+#include <player/HidingSpotSelector.h>
 #include <util/EntityUtils.h>
 #include <in_buttons.h>
 
- bool DODDefendPointAction::precondCheck() {
-	 if (!GoToAction::precondCheck()) {
-		 return false;
-	 }
-	 duration = 0;
-	 return blackboard.getSelf()->getCurrentPosition().DistTo(targetLoc)
-			 > targetRadius;
+bool DODDefendPointAction::execute() {
+	return objectives->roundStarted() && isTargetValid() && SnipeAction::execute();
 }
 
-bool DODDefendPointAction::execute() {
-	if (!GoToAction::execute()) {
+bool DODDefendPointAction::findTargetLoc() {
+	if (!objectives->roundStarted()) {
 		return false;
 	}
-	if (!GoToAction::postCondCheck()) {
-		return true;
+	const auto &points = objectives->getCtrlPts();
+	CUtlLinkedList<edict_t*> available;
+	FOR_EACH_LL(points, i)
+	{
+		target = objectives->getObjective(points[i]);
+		if (target != nullptr && isTargetValid()) {
+			available.AddToTail(points[i]);
+		}
 	}
-	blackboard.lookStraight();
-	blackboard.getButtons().hold(IN_DUCK);
-	return duration++ < 2000;
-}
-
-bool DODDefendPointAction::isAvailable(int idx) {
-	int owner = objectives->getOwner(idx);
-	bool ours = owner == blackboard.getSelf()->getTeam();
-	bool hasBombs = objectives->hasBombs(idx);
-	// bomb map and not our bomb or already bombed.
-	if ((objectives->isDetonation() && hasBombs && (!ours || objectives->isBombInState(idx, 0)))
-			// cap map and not our flag and enemy controlled
-			|| (!objectives->isDetonation() && !ours && owner > 0)) {
-		enemyControlled++;
+	while (available.Count() > 0) {
+		edict_t *choice = randomChoice(available);
+		target = objectives->getObjective(choice);
+		auto &spots = target->getHideSpots();
+		// TODO: should we randomize spot selection?
+		FOR_EACH_VEC(spots, i)
+		{
+			if (!selector->isInUse(spots[i], blackboard.getSelf()->getTeam())) {
+				guardTarget = choice->GetCollideable()->GetCollisionOrigin();
+				selectorId = spots[i];
+				targetLoc = selector->getSpotPos(selectorId);
+				if (target->hasBombTargetInState(DODObjective::BombState::ACTIVE)
+						&& targetLoc.DistTo(guardTarget) < 300.0f) {
+					selectorId = -1;
+					continue;
+				}
+				selector->setInUse(selectorId, blackboard.getSelf()->getTeam(), true);
+				return true;
+			}
+		}
+		available.FindAndRemove(choice);
 	}
-	return ours && (!objectives->isDetonation()
-			|| (hasBombs && (objectives->isBombInState(idx, 1) || objectives->isBombInState(idx, 2))));
+	return false;
 }
 
-void DODDefendPointAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
-	item = active.Count() == 1 && enemyControlled + 1 == items.Count()
-			&& findNearestEntity(items, blackboard.getSelf()->getCurrentPosition()) == active[0]?
-		active[0] : nullptr;
-	enemyControlled = 0;
+void DODDefendPointAction::calculateFacing() {
+	VectorAngles(guardTarget - targetLoc, facing);
 }
 
+bool DODDefendPointAction::isTargetValid() const {
+	bool ours = target->getOwner() == blackboard.getSelf()->getTeam();
+	return (ours && (!objectives->isDetonation() || (target->hasBombs() && target->hasBombTargetInState(DODObjective::BombState::AVAILABLE))))
+			|| (!ours && target->hasBombTargetInState(DODObjective::BombState::ACTIVE));
+}

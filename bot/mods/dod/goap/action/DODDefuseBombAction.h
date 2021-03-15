@@ -1,19 +1,12 @@
 #pragma once
 
-#include "DODDefendPointAction.h"
+#include "CapturePointAction.h"
 
 class DodPlayer;
 
-class DODDefuseBombAction : public DODDefendPointAction {
+class DODDefuseBombAction : public CapturePointAction {
 public:
 	DODDefuseBombAction(Blackboard& blackboard);
-
-	/**
-	 * TODO: Hacky, consider refactoring.
-	 */
-	virtual bool precondCheck() {
-		return GoToAction::precondCheck();
-	}
 
 	virtual bool execute();
 
@@ -28,15 +21,9 @@ public:
 protected:
 	bool interruptable = true;
 
-	virtual bool isAvailable(int idx);
+	virtual bool isAvailable(const DODObjective& obj);
 
 private:
-	/**
-	 * TODO: hacky, consider refactoring.
-	 */
-	void selectFromActive(CUtlLinkedList<edict_t*>& active) {
-		CapturePointAction::selectFromActive(active);
-	}
 
 	bool findTargetLoc();
 
