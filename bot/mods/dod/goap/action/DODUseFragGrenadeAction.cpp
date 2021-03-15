@@ -17,7 +17,7 @@ bool DODUseFragGrenadeAction::precondCheck() {
 // TODO: change to using player index in case of player logging off.
 bool DODUseFragGrenadeAction::execute() {
 	Weapon* weapon = armory.getWeapon(weapIdx);
-	if (target->getEdict()->IsFree() || target->isDead()
+	if (target == nullptr || target->getEdict()->IsFree() || target->isDead()
 			|| weapon == nullptr) {
 		return true;
 	}
