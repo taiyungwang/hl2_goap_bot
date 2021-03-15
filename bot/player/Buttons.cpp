@@ -11,8 +11,8 @@ Buttons::Buttons() {
 }
 
 bool Buttons::jump() {
-	if (buttons.GetPtr(IN_JUMP)->press(10, 20)) {
-		buttons.Element(IN_DUCK).press(100, 20);
+	if (buttons.GetPtr(IN_JUMP)->press(20, 10)) {
+		buttons.GetPtr(IN_DUCK)->press(20, 10);
 		return true;
 	}
 	return false;
