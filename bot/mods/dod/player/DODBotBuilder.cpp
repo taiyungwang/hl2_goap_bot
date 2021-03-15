@@ -91,7 +91,7 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 	planner.addAction<DODUseSmokeGrenadeAction>(0.91f);
 	planner.addAction<DODDestroyObjectAction>(0.7f);
 	planner.addAction<DODDefuseBombAction>(0.64f)->setObjectives(&objectives);
-	planner.addAction<DODDefendPointAction>(0.63f)->setObjectives(&objectives);
+	planner.addAction<DODDefendPointAction>(0.63f, 0.2f)->setObjectives(&objectives);
 	planner.addAction<DODBombTargetAction>(0.62f)->setObjectives(&objectives);
 	planner.addAction<CapturePointAction>(0.61f)->setObjectives(&objectives);
 	planner.addAction<DODGetBombAction>(0.0f);
