@@ -58,7 +58,7 @@ private:
 
 	DODObjectiveResource *objectiveResource = nullptr;
 
-	CUtlMap<edict_t*, int> ctrlPoints;
+	CUtlMap<edict_t*, int> ctrlPointsMap;
 
 	CUtlLinkedList<edict_t*> ctrlPts;
 

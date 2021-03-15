@@ -7,7 +7,7 @@
 #include <eiface.h>
 
 void DODObjectives::startRound() {
-	SetDefLessFunc(ctrlPoints);
+	SetDefLessFunc(ctrlPointsMap);
 	CUtlLinkedList<edict_t*> bombsOnMap, capArea, objRsrc;
 	findEntWithMatchingName("dod_objective_resource", objRsrc);
 	findEntWithMatchingName("dod_control_point", ctrlPts);
@@ -28,7 +28,7 @@ void DODObjectives::startRound() {
 				} else {
 					addCapTarget(position[i], capArea);
 				}
-				ctrlPoints.Insert(ctrlPts[j], i);
+				ctrlPointsMap.Insert(ctrlPts[j], i);
 			}
 		}
 		SearchSurroundingAreas(TheNavMesh->GetNearestNavArea(ctrlPts[i]), *objectives.Tail(), 2000.0f);
@@ -52,14 +52,15 @@ void DODObjectives::endRound() {
 	if (objectiveResource != nullptr) {
 		delete objectiveResource;
 		objectiveResource = nullptr;
-		ctrlPoints.RemoveAll();
+		ctrlPointsMap.RemoveAll();
+		ctrlPts.RemoveAll();
 		objectives.PurgeAndDeleteElements();
 	}
 }
 
 const DODObjective* DODObjectives::getObjective(edict_t* target) const {
-	auto key = ctrlPoints.Find(target);
-	return ctrlPoints.IsValidIndex(key) ? objectives[ctrlPoints[key]] : nullptr;
+	auto key = ctrlPointsMap.Find(target);
+	return ctrlPointsMap.IsValidIndex(key) ? objectives[ctrlPointsMap[key]] : nullptr;
 }
 
 void DODObjectives::addCapTarget(const Vector& pos,
