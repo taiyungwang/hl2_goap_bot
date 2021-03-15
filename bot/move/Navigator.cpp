@@ -129,7 +129,7 @@ CNavArea* Navigator::getArea(edict_t* ent) {
 }
 
 CNavArea* Navigator::getCurrentArea(const Vector& pos) const {
-	return TheNavMesh->GetNearestNavArea(pos, 10000.0f, false, true, blackboard.getSelf()->getTeam());
+	return TheNavMesh->GetNearestNavArea(pos, 10000.0f, false, false, blackboard.getSelf()->getTeam());
 }
 
 bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
