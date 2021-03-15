@@ -212,8 +212,8 @@ void Navigator::getNextArea() {
 				finalGoal, 255, 255, 255, true,
 				NDEBUG_PERSIST_TILL_NEXT_SERVER);
 	}
-	if (lastArea != nullptr && (path->Count() == 0 || blackboard.isOnLadder()
-			|| moveCtx->nextGoalIsLadderStart())) {
+	if (path->Count() == 0|| (lastArea != nullptr && (blackboard.isOnLadder()
+			|| moveCtx->nextGoalIsLadderStart()))) {
 		return;
 	}
 	const Vector& loc = self->getCurrentPosition();
