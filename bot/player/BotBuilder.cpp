@@ -53,6 +53,13 @@ void BotBuilder::onNavMeshLoad() {
 	SnipeAction::setSpotSelector(hidingSpotSelector);
 }
 
+class SwitchToBestInRangeWeaponAction: public SwitchToBestLoadedWeaponAction {
+public:
+	SwitchToBestInRangeWeaponAction(Blackboard &blackboard) :
+			SwitchToBestLoadedWeaponAction(blackboard) {
+		effects = { WorldProp::WEAPON_IN_RANGE, true };
+	}
+};
 
 Bot* BotBuilder::build(const CUtlMap<int, Player*>& players,
 		edict_t* ent) const {
@@ -76,6 +83,7 @@ Bot* BotBuilder::build(const CUtlMap<int, Player*>& players,
 	planner->addAction<SnipeAction>(0.4f, 0.4f);
 	planner->addAction<SwitchToDesiredWeaponAction>(0.0f);
 	planner->addAction<SwitchToBestLoadedWeaponAction>(0.0f);
+	planner->addAction<SwitchToBestInRangeWeaponAction>(0.0f);
 	updatePlanner(*planner, *blackboard);
 	bot->setPlanner(planner);
 	initWeapons(blackboard->getArmory().getWeaponFactory());
