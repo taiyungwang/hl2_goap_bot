@@ -27,6 +27,7 @@ bool DODDefendPointAction::findTargetLoc() {
 	}
 	while (available.Count() > 0) {
 		edict_t *choice = randomChoice(available);
+		available.FindAndRemove(choice);
 		target = objectives->getObjective(choice);
 		auto &spots = target->getHideSpots();
 		// TODO: should we randomize spot selection?
@@ -45,7 +46,6 @@ bool DODDefendPointAction::findTargetLoc() {
 				return true;
 			}
 		}
-		available.FindAndRemove(choice);
 	}
 	return false;
 }

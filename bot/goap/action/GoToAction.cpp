@@ -38,22 +38,24 @@ edict_t* GoToAction::randomChoice(CUtlLinkedList<edict_t*>& active) {
 		return item;
 	}
 	float totalDist = 0.0f;
-	CUtlLinkedList<float> prob;
+	CUtlVector<CUtlKeyValuePair<edict_t*, float>> choices;
 	FOR_EACH_LL(active, i) {
-		prob.AddToTail(1.0f / active[i]->GetCollideable()->GetCollisionOrigin().DistTo(blackboard.getSelf()->getCurrentPosition()));
-		totalDist += prob[prob.Tail()];
+		choices.AddToTail();
+		choices.Tail().m_key = active[i];
+		choices.Tail().m_value = 1.0f / active[i]->GetCollideable()->GetCollisionOrigin().DistTo(blackboard.getSelf()->getCurrentPosition());
+		totalDist += choices.Tail().m_value;
 	}
 	float totalProb = 0.0f;
-	FOR_EACH_LL(prob, i) {
-		prob[i] /= totalDist;
+	FOR_EACH_VEC(choices, i) {
+		choices[i].m_value /= totalDist;
 		if (i > 0) {
-			prob[i] += prob[i - 1];
+			choices[i].m_value += choices[i - 1].m_value;
 		}
 	}
 	float choice = RandomFloat(0, 1.0f);
-	FOR_EACH_LL(prob, i) {
-		if (choice < prob[i]) {
-			item = active[i];
+	FOR_EACH_VEC(choices, i) {
+		if (choice < choices[i].m_value) {
+			item = choices[i].m_key;
 			break;
 		}
 	}
