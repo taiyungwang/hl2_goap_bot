@@ -29,7 +29,7 @@ bool DODDefuseBombAction::execute() {
 	if (!GoToEntityAction::execute()) {
 		return false;
 	}
-	if (!GoToAction::postCondCheck()) {
+	if (!GoToAction::goalComplete()) {
 		interruptable = true;
 		return true;
 	}

@@ -140,7 +140,7 @@ void AStar::getPath(CUtlQueue<int>& path) const {
 		return;
 	}
 	for (int i = start->id; i != nodes.Count() - 1; i = nodes[i].parent) {
-		if (!actions[nodes[i].id]->precondCheck()) {
+		if (!actions[nodes[i].id]->onPlanningFinished()) {
 			path.RemoveAll();
 			return;
 		}
@@ -148,25 +148,28 @@ void AStar::getPath(CUtlQueue<int>& path) const {
 	}
 }
 
-void AStar::getNeighbors(CUtlVector<int>& neighbors,
-		const CCopyableUtlVector<int>& availableNeighbors) const {
-	FOR_EACH_VEC(availableNeighbors, i)
+void AStar::getNeighbors(CUtlVector<int>& dst,
+		const CCopyableUtlVector<int>& src) const {
+	FOR_EACH_VEC(src, i)
 	{
-		Action& availableAction = *(actions[availableNeighbors[i]]);
+		Action& availableAction = *(actions[src[i]]);
+		if (!availableAction.precondCheck()) {
+			continue;
+		}
 		bool addAction = true;
-		FOR_EACH_VEC(neighbors, j)
+		FOR_EACH_VEC(dst, j)
 		{
-			Action& neighbor = *(actions[neighbors[j]]);
+			Action& neighbor = *(actions[dst[j]]);
 			if (availableAction.getPrecond() == neighbor.getPrecond()) {
 				addAction = availableAction.getCost() < neighbor.getCost();
 				if (addAction) {
-					neighbors.Remove(j);
+					dst.Remove(j);
+					break;
 				}
-				break;
 			}
 		}
 		if (addAction) {
-			neighbors.AddToTail(availableNeighbors[i]);
+			dst.AddToTail(src[i]);
 		}
 	}
 }

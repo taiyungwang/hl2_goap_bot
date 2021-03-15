@@ -66,7 +66,7 @@ void Planner::execute() {
 		Action* action = actions[plan.Head()];
 		if (action->execute()) {
 			plan.RemoveAtHead();
-			if (!action->postCondCheck()) {
+			if (!action->goalComplete()) {
 				getNextGoal();
 			} else if (!plan.IsEmpty()) {
 				actions[plan.Head()]->init();

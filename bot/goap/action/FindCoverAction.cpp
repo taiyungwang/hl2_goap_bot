@@ -29,8 +29,8 @@ bool FindCoverAction::operator() ( CNavArea *area, CNavArea *priorArea, float tr
 	return isVisible;
 }
 
-bool FindCoverAction::precondCheck() {
-	if(!GoToAction::precondCheck()) {
+bool FindCoverAction::onPlanningFinished() {
+	if(!GoToAction::onPlanningFinished()) {
 		return false;
 	}
 	CNavArea* targetArea = Navigator::getArea(getTarget());

@@ -69,6 +69,8 @@ private:
 	/**
 	 * Gets the neighbors for the current node.  Selects the best edge
 	 * from any parallel edges.
+	 * @param actions output param of list of actions.
+	 * @param neighbors available actions to choose from.
 	 */
 	void getNeighbors(CUtlVector<int>& actions,
 			const CCopyableUtlVector<int>& neighbors) const;

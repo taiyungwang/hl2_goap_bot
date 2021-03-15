@@ -21,7 +21,7 @@ bool CapturePointAction::execute() {
 	if (!GoToConsumableEntityAction::execute()) {
 		return false;
 	}
-	if (!GoToAction::postCondCheck() || isDepleted()) {
+	if (!GoToAction::goalComplete() || isDepleted()) {
 		return true;
 	}
 	blackboard.lookStraight();

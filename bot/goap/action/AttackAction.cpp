@@ -14,7 +14,7 @@ bool AttackAction::precondCheck() {
 	return blackboard.getTargetedPlayer() != nullptr;
 }
 
-bool AttackAction::postCondCheck() {
+bool AttackAction::goalComplete() {
 	return blackboard.getTargetedPlayer() == nullptr
 			|| blackboard.getTargetedPlayer()->isDead();
 }

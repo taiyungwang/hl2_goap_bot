@@ -21,7 +21,7 @@ public:
 
 	bool execute();
 
-	virtual bool postCondCheck();
+	virtual bool goalComplete();
 
 protected:
 

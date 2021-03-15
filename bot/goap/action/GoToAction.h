@@ -17,11 +17,11 @@ public:
 
 	virtual void init();
 
-	virtual bool precondCheck();
+	virtual bool onPlanningFinished();
 
 	virtual float getCost();
 
-	virtual bool postCondCheck();
+	virtual bool goalComplete();
 
 	virtual bool isInterruptable() const {
 		return canAbort;

@@ -7,7 +7,7 @@ bool GoToConsumableEntityAction::execute() {
 	if (!GoToEntityAction::execute()) {
 		return false;
 	}
-	if (GoToAction::postCondCheck()
+	if (GoToAction::goalComplete()
 		&& isDepleted()
 		&& depleted.Find(item) == depleted.InvalidIndex()) {
 		depleted.AddToTail(item);

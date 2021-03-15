@@ -8,7 +8,7 @@ public:
 
 	bool precondCheck();
 
-	virtual bool postCondCheck();
+	virtual bool goalComplete();
 
 private:
 

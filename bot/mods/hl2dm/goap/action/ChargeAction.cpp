@@ -19,7 +19,7 @@ bool ChargeAction::execute() {
 	if (!GoToItemAction::execute()) {
 		return false;
 	}
-	if (!GoToAction::postCondCheck() || isFinished()) {
+	if (!GoToAction::goalComplete() || isFinished()) {
 		return true;
 	}
 	if (isDepleted()) {

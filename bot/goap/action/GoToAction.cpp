@@ -13,7 +13,7 @@ bool GoToAction::execute() {
 	return blackboard.getNavigator()->step();
 }
 
-bool GoToAction::precondCheck() {
+bool GoToAction::onPlanningFinished() {
 	return blackboard.getNavigator()->buildPath(targetLoc, path);
 }
 
@@ -21,7 +21,7 @@ void GoToAction::init() {
 	blackboard.getNavigator()->start(&path, targetLoc, targetRadius);
 }
 
-bool GoToAction::postCondCheck() {
+bool GoToAction::goalComplete() {
 	return blackboard.getNavigator()->reachedGoal();
 }
 

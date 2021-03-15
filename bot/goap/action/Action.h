@@ -28,16 +28,26 @@ public:
 	}
 
 	/**
-	 * @return True if preconditions for the action are satisfied.
+	 * Invoked during planning on precondition check.  A return of false will cause the planner
+	 * to ignore this action as a way to satisfy the given goal.
 	 */
 	virtual bool precondCheck() {
 		return true;
 	}
 
 	/**
+	 * Invoked when planning is complete.  The call to this callback is ordered based on
+	 * order of action.  Returning false will cause the plan to fail.
+	 */
+	virtual bool onPlanningFinished() {
+		return true;
+	}
+
+	
+	/**
 	 * @return True if post conditions for the action are satisfied.
 	 */
-	virtual bool postCondCheck() {
+	virtual bool goalComplete() {
 		return true;
 	}
 

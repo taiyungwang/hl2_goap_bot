@@ -11,7 +11,7 @@ public:
 		return false;
 	}
 
-	bool precondCheck();
+	bool onPlanningFinished();
 
 	bool operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar );
 

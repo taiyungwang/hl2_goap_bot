@@ -41,7 +41,7 @@ bool SnipeAction::findTargetLoc() {
 }
 
 bool SnipeAction::execute() {
-	if (!GoToAction::postCondCheck()) {
+	if (!GoToAction::goalComplete()) {
 		return GoToAction::execute();
 	}
 	Vector aim;
@@ -60,10 +60,10 @@ bool SnipeAction::execute() {
 	return deployed && --duration <= 0;
 }
 
-bool SnipeAction::postCondCheck() {
+bool SnipeAction::goalComplete() {
 	int team = blackboard.getSelf()->getTeam();
 	selector->setInUse(selectorId, team, false);
-	if (GoToAction::postCondCheck()) {
+	if (GoToAction::goalComplete()) {
 		// if we are at our location, and we didn't see an enemy, then count it as failure
 		selector->update(selectorId, team, 
 			blackboard.getTargetedPlayer() != nullptr);
@@ -77,7 +77,7 @@ void SnipeAction::abort() {
 	int team = self->getTeam();
 	selector->setInUse(selectorId, team, false);
 	if (blackboard.getTargetedPlayer() != nullptr
-		&& GoToAction::postCondCheck()) {
+		&& GoToAction::goalComplete()) {
 		// if we see an enemy at our spot, then it's successful.
 		selector->update(selectorId, team, true);
 	}

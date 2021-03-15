@@ -16,7 +16,7 @@ public:
 
 	bool execute();
 
-	bool postCondCheck();
+	bool goalComplete();
 
 	void abort();
 

@@ -48,7 +48,7 @@ bool DestroyObjectAction::execute() {
 		return true;
 	}
 	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
-	if (postCondCheck() || weapon->isClipEmpty()) {
+	if (goalComplete() || weapon->isClipEmpty()) {
 		return true;
 	}
 	const Player* self = blackboard.getSelf();
@@ -113,7 +113,7 @@ bool DestroyObjectAction::execute() {
 	return false;
 }
 
-bool DestroyObjectAction::postCondCheck() {
+bool DestroyObjectAction::goalComplete() {
 	bool isDestroyed = blackboard.getBlocker() == nullptr
 			|| BaseEntity(blackboard.getBlocker()).isDestroyedOrUsed()
 			|| blackboard.getBlocker()->GetCollideable()->GetCollisionOrigin().DistTo(
