@@ -12,7 +12,7 @@ public:
 
 	SnipeAction(Blackboard& blackboard);
 
-	bool precondCheck();
+	bool onPlanningFinished();
 
 	bool execute();
 

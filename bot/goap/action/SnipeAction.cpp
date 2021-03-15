@@ -18,10 +18,10 @@ SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 	facing.x = facing.z = facing.y = 0.0f;
 }
 
-bool SnipeAction::precondCheck() {
+bool SnipeAction::onPlanningFinished() {
 	deployed = false;
 	int team = blackboard.getSelf()->getTeam();
-	if (!GoToAction::precondCheck()) {
+	if (!GoToAction::onPlanningFinished()) {
 		selector->update(selectorId, team, false);
 		return false;
 	}
