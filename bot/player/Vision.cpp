@@ -9,16 +9,15 @@
 
 class FilterSelfAndEnemies: public CTraceFilter {
 public:
-	FilterSelfAndEnemies(const Blackboard& blackboard, edict_t* self,
-			edict_t* target) :
-			blackboard(blackboard), self(self), target(target) {
+	FilterSelfAndEnemies(edict_t* self,
+			edict_t* target) : self(self), target(target) {
 	}
 
 	virtual ~FilterSelfAndEnemies() {
 	}
 
 	bool ShouldHitEntity(IHandleEntity *pHandleEntity, int contentsMask) {
-		auto& players = blackboard.getPlayers();
+		auto& players = Player::getPlayers();
 		if (target != nullptr && pHandleEntity == target->GetIServerEntity()) {
 			return true;
 		}
@@ -36,7 +35,6 @@ public:
 	}
 
 private:
-	const Blackboard& blackboard;
 	edict_t* self, *target;
 };
 
@@ -65,7 +63,6 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 		return;
 	}
 	float closest = INFINITY;
-	const auto& players = blackboard.getPlayers();
 	auto& visibleEnemies = blackboard.getVisibleEnemies();
 	visibleEnemies.RemoveAll();
 	int team = self->getTeam();
@@ -74,6 +71,7 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 		float dist;
 	};
 	CUtlVector<Visible> visibles;
+	const auto& players = Player::getPlayers();
 	FOR_EACH_MAP_FAST(players, i) {
 		auto* target = players[i];
 		if (target == self || target->isDead()

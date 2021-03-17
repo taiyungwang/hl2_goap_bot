@@ -24,7 +24,5 @@ private:
 
 	World* buildWorld() const;
 
-	void modHandleCommand(const CCommand &command);
-
-	void update(Bot *bot) const;
+	void modHandleCommand(const CCommand &command, Bot* bot);
 };

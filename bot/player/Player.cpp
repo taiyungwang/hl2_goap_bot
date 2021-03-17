@@ -3,12 +3,29 @@
 #include <eiface.h>
 #include <iplayerinfo.h>
 
+CUtlMap<int, Player*> Player::players;
+
+extern IVEngineServer* engine;
+
+Player* Player::getPlayer(edict_t* ent) {
+	return getPlayer(engine->IndexOfEdict(ent));
+}
+
 Player::Player(edict_t* ent) :
 		ent(ent) {
 	extern IPlayerInfoManager *playerinfomanager;
 	info = playerinfomanager->GetPlayerInfo(ent);
-	extern IVEngineServer* engine;
-	userId = engine->GetPlayerUserId(ent);
+	players.Insert(engine->IndexOfEdict(ent), this);
+}
+
+Player::~Player() {
+	// Cant' rely on server index for server shutting down.
+	FOR_EACH_MAP_FAST(players, i) {
+		if (players[i] == this) {
+			players.RemoveAt(i);
+			return;
+		}
+	}
 }
 
 const char* Player::getName() const {
@@ -29,6 +46,11 @@ const char* Player::getWeaponName() const {
 
 bool Player::isDead() const {
 	return info->IsDead() || info->GetHealth() <= 0;
+}
+
+int Player::getUserId() const {
+	extern IVEngineServer* engine;
+	return engine->GetPlayerUserId(ent);
 }
 
 Vector Player::getEyesPos() const {

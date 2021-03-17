@@ -20,11 +20,6 @@ PlayerClasses Bot::CLASSES = nullptr;
 ConVar mybot_rot_speed("mybot_rot_speed", "0.5", 0,
 		"determines rotational acceleration rate in degrees");
 
-Bot::Bot(edict_t* ent) :
-		Player(ent) {
-	extern IPlayerInfoManager *playerinfomanager;
-}
-
 Bot::~Bot() {
 	delete blackboard;
 	delete world;
@@ -113,7 +108,7 @@ bool Bot::handle(EventInfo* event) {
 				return false;
 			}
 			world->updateState(WorldProp::HURT, true);
-			auto& players = blackboard->getPlayers();
+			auto& players = Player::getPlayers();
 			FOR_EACH_MAP_FAST(players, i) {
 				if (players[i]->getUserId() == attacker) {
 					blackboard->setViewTarget(players[i]->getEyesPos());

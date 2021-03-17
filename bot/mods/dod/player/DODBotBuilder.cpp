@@ -30,39 +30,40 @@
 #include <in_buttons.h>
 
 static const int CLASS_COUNT = 6;
-static const char* CLASSES[2][CLASS_COUNT] {
-	{ "cls_garand", "cls_tommy","cls_bar", "cls_spring", "cls_30cal", "cls_bazooka"},
-	{ "cls_mk98", "cls_mp40", "cls_mp44", "cls_k98s", "cls_mg42", "cls_pschreck"}
-};
+static const char *CLASSES[2][CLASS_COUNT] { { "cls_garand", "cls_tommy",
+		"cls_bar", "cls_spring", "cls_30cal", "cls_bazooka" }, { "cls_mk98",
+		"cls_mp40", "cls_mp44", "cls_k98s", "cls_mg42", "cls_pschreck" } };
 
 DODBotBuilder::DODBotBuilder() {
 	Bot::setClasses(&CLASSES);
 	extern EntityClassManager *classManager;
 }
 
-void DODBotBuilder::updatePlanner(Planner& planner,
-		Blackboard& blackboard) const {
+void DODBotBuilder::updatePlanner(Planner &planner,
+		Blackboard &blackboard) const {
 
 	class DODDestroyObjectAction: public DestroyObjectAction {
 	public:
-		DODDestroyObjectAction(Blackboard& blackboard): DestroyObjectAction(blackboard) {
+		DODDestroyObjectAction(Blackboard &blackboard) :
+				DestroyObjectAction(blackboard) {
 		}
 	private:
-		bool isBreakable(edict_t* object) const {
+		bool isBreakable(edict_t *object) const {
 			return Q_stristr(object->GetClassName(), "physics") != nullptr;
 		}
 
 	};
 	class DODGetBombAction: public GoToEntityAction {
 	public:
-		DODGetBombAction(Blackboard& blackboard) :
-			GoToEntityAction(blackboard, "dod_bomb_dispenser") {
-			effects = {WorldProp::HAS_BOMB, true};
+		DODGetBombAction(Blackboard &blackboard) :
+				GoToEntityAction(blackboard, "dod_bomb_dispenser") {
+			effects = { WorldProp::HAS_BOMB, true };
 		}
 	};
 	class DODNavigator: public Navigator {
 	public:
-		DODNavigator(Blackboard& blackboard) : Navigator(blackboard) {
+		DODNavigator(Blackboard &blackboard) :
+				Navigator(blackboard) {
 		}
 
 	private:
@@ -91,13 +92,14 @@ void DODBotBuilder::updatePlanner(Planner& planner,
 	planner.addAction<DODUseSmokeGrenadeAction>(0.91f);
 	planner.addAction<DODDestroyObjectAction>(0.7f);
 	planner.addAction<DODDefuseBombAction>(0.64f)->setObjectives(&objectives);
-	planner.addAction<DODDefendPointAction>(0.63f, 0.2f)->setObjectives(&objectives);
+	planner.addAction<DODDefendPointAction>(0.63f, 0.2f)->setObjectives(
+			&objectives);
 	planner.addAction<DODBombTargetAction>(0.62f)->setObjectives(&objectives);
 	planner.addAction<CapturePointAction>(0.61f)->setObjectives(&objectives);
 	planner.addAction<DODGetBombAction>(0.0f);
 }
 
-bool DODBotBuilder::handle(EventInfo* event) {
+bool DODBotBuilder::handle(EventInfo *event) {
 	CUtlString name(event->getName());
 	if (name == "dod_round_active") {
 		objectives.startRound();
@@ -112,16 +114,17 @@ bool DODBotBuilder::handle(EventInfo* event) {
 	return false;
 }
 
-void DODBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {
-	class GrenadeLauncherBuilder: public SimpleWeaponBuilder<GrenadeLauncherFunction> {
+void DODBotBuilder::initWeapons(WeaponBuilderFactory &weaponFac) const {
+	class GrenadeLauncherBuilder: public SimpleWeaponBuilder<
+			GrenadeLauncherFunction> {
 	public:
 		GrenadeLauncherBuilder(float zMultiplier) :
 				zMultiplier(zMultiplier) {
 		}
 
-		Weapon* build(edict_t* weap) {
-			Weapon* weapon = SimpleWeaponBuilder<GrenadeLauncherFunction>::build(
-					weap);
+		Weapon* build(edict_t *weap) {
+			Weapon *weapon =
+					SimpleWeaponBuilder<GrenadeLauncherFunction>::build(weap);
 			weapon->setGrenade(true);
 			dynamic_cast<GrenadeLauncherFunction*>(weapon->getPrimary())->setZMultiplier(
 					zMultiplier);
@@ -136,12 +139,12 @@ void DODBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {
 	class AntiTankBuilder: public DeployableWeaponBuilder<Reloader> {
 	public:
 		AntiTankBuilder() :
-				DeployableWeaponBuilder<Reloader>(0.9f, 500.0f, 2000.0f, "CDODBaseRocketWeapon",
-						"m_bDeployed") {
+				DeployableWeaponBuilder<Reloader>(0.9f, 500.0f, 2000.0f,
+						"CDODBaseRocketWeapon", "m_bDeployed") {
 		}
 
-		Weapon* build(edict_t* weap) {
-			Weapon* weapon = DeployableWeaponBuilder<Reloader>::build(weap);
+		Weapon* build(edict_t *weap) {
+			Weapon *weapon = DeployableWeaponBuilder<Reloader>::build(weap);
 			weapon->getPrimary()->setExplosive(true);
 			return weapon;
 		}
@@ -150,22 +153,24 @@ void DODBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {
 	class C96Builder: public PistolBuilder {
 	public:
 		C96Builder() :
-			PistolBuilder(0.2f) {
+				PistolBuilder(0.2f) {
 		}
 
-		Weapon* build(edict_t* weap) {
-			Weapon* weapon = PistolBuilder::build(weap);
+		Weapon* build(edict_t *weap) {
+			Weapon *weapon = PistolBuilder::build(weap);
 			weapon->getPrimary()->setFullAuto(true);
 			return weapon;
 		}
 	};
-	weaponFac.addInstance("weapon_riflegren_us", new GrenadeLauncherBuilder(2.0f));
-	weaponFac.addInstance("weapon_riflegren_ger", new GrenadeLauncherBuilder(2.0f));
+	weaponFac.addInstance("weapon_riflegren_us",
+			new GrenadeLauncherBuilder(2.0f));
+	weaponFac.addInstance("weapon_riflegren_ger",
+			new GrenadeLauncherBuilder(2.0f));
 	weaponFac.addInstance("weapon_amerknife", new MeleeWeaponBuilder());
 	weaponFac.addInstance("weapon_spade", new MeleeWeaponBuilder());
 	weaponFac.addInstance("weapon_garand",
-			new DeployableWeaponBuilder<Reloader>(0.8f, 100.0f, 1600.0f, "CWeaponGarand",
-					"m_bZoomed", 1000.0f));
+			new DeployableWeaponBuilder<Reloader>(0.8f, 100.0f, 1600.0f,
+					"CWeaponGarand", "m_bZoomed", 1000.0f));
 	weaponFac.addInstance("weapon_k98",
 			new DeployableWeaponBuilder<Reloader>(0.8f, 100.0f, 1600.0f,
 					"CWeaponK98", "m_bZoomed", 1000.0f));
@@ -173,10 +178,13 @@ void DODBotBuilder::initWeapons(WeaponBuilderFactory& weaponFac) const {
 	weaponFac.addInstance("weapon_mp40", new DODSMGBuilder());
 	weaponFac.addInstance("weapon_colt", new PistolBuilder(0.2f));
 	weaponFac.addInstance("weapon_p38", new PistolBuilder(0.2f));
-	weaponFac.addInstance("weapon_smoke_us", new GrenadeLauncherBuilder(400.0f));
-	weaponFac.addInstance("weapon_smoke_ger", new GrenadeLauncherBuilder(400.0f));
+	weaponFac.addInstance("weapon_smoke_us",
+			new GrenadeLauncherBuilder(400.0f));
+	weaponFac.addInstance("weapon_smoke_ger",
+			new GrenadeLauncherBuilder(400.0f));
 	weaponFac.addInstance("weapon_frag_us", new GrenadeLauncherBuilder(600.0f));
-	weaponFac.addInstance("weapon_frag_ger", new GrenadeLauncherBuilder(600.0f));
+	weaponFac.addInstance("weapon_frag_ger",
+			new GrenadeLauncherBuilder(600.0f));
 	weaponFac.addInstance("weapon_bar", new DODAssaultRifleBuilder());
 	weaponFac.addInstance("weapon_mp44", new DODAssaultRifleBuilder());
 	weaponFac.addInstance("weapon_spring",
@@ -199,13 +207,11 @@ World* DODBotBuilder::buildWorld() const {
 	return new DODWorld(roundStarted);
 }
 
-void DODBotBuilder::modHandleCommand(const CCommand &command) {
-	classType = RandomInt(0, CLASS_COUNT - 1);
-	if (command.ArgC() > 3) {
-		classType = atoi(command.Arg(3)) % CLASS_COUNT - 1;
-	}
-}
-
-void DODBotBuilder::update(Bot *bot) const {
+void DODBotBuilder::modHandleCommand(const CCommand &command, Bot* bot) {
+	bot->setDesiredClassId(
+			command.ArgC() > 3 ?
+					atoi(command.Arg(3)) % CLASS_COUNT - 1 :
+					RandomInt(0, CLASS_COUNT - 1));
 	bot->setPlayerClassVar<DodPlayer>();
+	bot->setHookEnabled(true);
 }

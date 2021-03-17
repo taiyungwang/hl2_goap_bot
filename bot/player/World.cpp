@@ -46,8 +46,8 @@ bool World::think(Blackboard& blackboard) {
 			inRange = true;
 		} else {
 			extern IVEngineServer* engine;
-			auto& players = blackboard.getPlayers();
 			int entIndx = engine->IndexOfEdict(blocker);
+			auto& players = Player::getPlayers();
 			auto i = players.Find(entIndx);
 			if (players.IsValidIndex(i) && players[i]->isDead()) {
 				blackboard.setBlocker(nullptr);

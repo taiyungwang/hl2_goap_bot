@@ -3,7 +3,6 @@
 #include <event/EventInfo.h>
 #include <weapon/Weapon.h>
 #include <player/Blackboard.h>
-#include <player/PlayerManager.h>
 #include <player/Bot.h>
 #include <utlstring.h>
 
@@ -19,8 +18,13 @@ bool DODWorld::handle(EventInfo* event) {
 	bool bombPlanted = name == "dod_bomb_planted";
 	if (name == "dod_point_captured" || bombPlanted
 			|| name == "dod_bomb_exploded" || name == "dod_bomb_defused") {
-		extern PlayerManager *playerManager;
-		bombPlantTeam = bombPlanted ? playerManager->getPlayer(event->getInt("userid"))->getTeam() : 1;
+		auto& players = Player::getPlayers();
+		FOR_EACH_MAP_FAST(players, i) {
+			if (players[i]->getUserId() == event->getInt("userid")) {
+				bombPlantTeam = bombPlanted ? players[i]->getTeam() : 1;
+				break;
+			}
+		}
 		reset = true;
 		return false;
 	}

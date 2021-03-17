@@ -49,7 +49,7 @@ bool DODDefuseBombAction::isAvailable(edict_t* ent) {
 	if (!CapturePointAction::isAvailable(ent)) {
 		return false;
 	}
-	auto& players = blackboard.getPlayers();
+	auto& players = Player::getPlayers();
 	FOR_EACH_MAP_FAST(players, i) {
 		if (players[i] != blackboard.getSelf()
 				&& players[i]->getTeam() == blackboard.getSelf()->getTeam()

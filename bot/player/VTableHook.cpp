@@ -1,7 +1,6 @@
 #include "VTableHook.h"
 
 #include "Bot.h"
-#include "PlayerManager.h"
 #include <util/SimpleException.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
@@ -72,10 +71,7 @@ void __fastcall nPlayerRunCommand(CBaseEntity *_this, void*, CUserCmd* pCmd, IMo
 #endif
 {
 	extern IServerGameEnts *servergameents;
-	edict_t *pEdict = servergameents->BaseEntityToEdict(_this);
-	extern PlayerManager *playerManager;
-	Bot* bot = dynamic_cast<Bot*>(playerManager->getPlayer(
-			servergameents->BaseEntityToEdict(_this)));
+	Bot* bot = dynamic_cast<Bot*>(Player::getPlayer(servergameents->BaseEntityToEdict(_this)));
 	if (bot != nullptr) {
 		auto cmd = bot->getCmd();
 		if (cmd != nullptr) {

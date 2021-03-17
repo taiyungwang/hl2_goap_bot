@@ -8,8 +8,7 @@
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
 
-Blackboard::Blackboard(const CUtlMap<int, Player*>& players,
-		Bot* self, BasePlayer* entInstance) : players(players),
+Blackboard::Blackboard(Bot *self, BasePlayer *entInstance) :
 		self(self), entInstance(entInstance) {
 	reset();
 }

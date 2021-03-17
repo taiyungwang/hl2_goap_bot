@@ -1,6 +1,5 @@
 #include "DODUseRifleGrenadeAction.h"
 
-#include <player/PlayerManager.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <player/Vision.h>
@@ -17,8 +16,7 @@ bool DODUseRifleGrenadeAction::precondCheck() {
 	float minDist = grenade->getPrimary()->getRange()[0];
 	FOR_EACH_VEC(enemies, i)
 	{
-		extern PlayerManager *playerManager;
-		const Player* enemy = playerManager->getPlayer(enemies[i]);
+		const Player* enemy = Player::getPlayer(enemies[i]);
 		if (enemy == nullptr) {
 			continue;
 		}
@@ -32,7 +30,7 @@ bool DODUseRifleGrenadeAction::precondCheck() {
 			if (enemies[i] == enemies[j]) {
 				continue;
 			}
-			const Player* enemyOther = playerManager->getPlayer(enemies[j]);
+			const Player* enemyOther = Player::getPlayer(enemies[j]);
 			if (enemyOther == nullptr) {
 				continue;
 			}

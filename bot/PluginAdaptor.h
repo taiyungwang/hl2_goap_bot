@@ -1,6 +1,8 @@
 #pragma once
 
 #include "event/EventHandler.h"
+#include <strtools.h>
+#include <utlqueue.h>
 
 class Thinker;
 class BotBuilder;
@@ -24,9 +26,12 @@ public:
 
 	void gameFrame(bool isSimulating);
 
-	void clientActive(edict_t *pEntity);
+	void clientActive(edict_t *pEntity) {
+	}
 
-	void clientPutInServer(edict_t *pEntity);
+	void clientPutInServer(edict_t *pEntity) {
+		activationQ.Insert(pEntity);
+	}
 
 	void clientDisconnect(edict_t *pEntity);
 
@@ -38,9 +43,11 @@ public:
 	bool handle(EventInfo* event);
 
 private:
+	bool enableHook = false;
+
 	BotBuilder* botBuilder;
 
-	CUtlLinkedList<Thinker*> thinkers;
+	CUtlQueue<edict_t*> activationQ;
 
 	char modPath[256];
 };

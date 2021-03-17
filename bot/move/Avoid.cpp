@@ -45,6 +45,8 @@ MoveState* Avoid::move(const Vector& pos) {
 						|| Q_stristr(currBlockerName, "func_team") != nullptr)) {
 			blocker = currBlocker;
 		}
+		auto& players = Player::getPlayers();
+		int team = blackboard.getSelf()->getTeam();
 		if (blocker != nullptr && !blocker->IsFree()
 				&& blocker->GetCollideable() != nullptr) {
 			const char* blockerName = blocker->GetClassName();
@@ -54,10 +56,9 @@ MoveState* Avoid::move(const Vector& pos) {
 			} else {
 				int idx = engine->IndexOfEdict(blocker);
 				if (idx <= gpGlobals->maxClients) {
-					auto i = blackboard.getPlayers().Find(idx);
-					if (blackboard.getSelf()->getTeam() < 2
-							|| (blackboard.getPlayers().IsValidIndex(i)
-							&& blackboard.getPlayers()[i]->getTeam() != blackboard.getSelf()->getTeam())) {
+					auto i = players.Find(idx);
+					if (team < 2 || (players.IsValidIndex(i)
+							&& players[i]->getTeam() != team)) {
 						blackboard.setBlocker(blocker);
 					}
 				}
@@ -80,15 +81,14 @@ MoveState* Avoid::move(const Vector& pos) {
 				} else if (Q_stristr(blocker->GetClassName(), "func_team") != nullptr) {
 					extern CUtlMap<int, NavEntity*> blockers;
 					CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
-					navBlocker->setBlockedTeam(blackboard.getSelf()->getTeam());
-					blockers.Insert(blocker->m_EdictIndex, navBlocker);
+					navBlocker->setBlockedTeam(team);
+					blockers.Insert(engine->IndexOfEdict(blocker), navBlocker);
 				} else {
 					int idx = engine->IndexOfEdict(blocker);
 					if (idx <= gpGlobals->maxClients) {
-						auto i = blackboard.getPlayers().Find(idx);
-						if (blackboard.getSelf()->getTeam() < 2
-								|| (blackboard.getPlayers().IsValidIndex(i)
-								&& blackboard.getPlayers()[i]->getTeam() != blackboard.getSelf()->getTeam())) {
+						auto i = players.Find(idx);
+						if (team < 2|| (players.IsValidIndex(i)
+								&& players[i]->getTeam() != blackboard.getSelf()->getTeam())) {
 							blackboard.setBlocker(blocker);
 						}
 					}

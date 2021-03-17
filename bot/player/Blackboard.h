@@ -16,7 +16,7 @@ public:
 
 	static float clamp180(float angle);
 
-	Blackboard(const CUtlMap<int, Player*>& players, Bot* player,
+	Blackboard(Bot* player,
 			BasePlayer* entInstance);
 
 	void reset();
@@ -61,10 +61,6 @@ public:
 		this->blocker = blocker;
 	}
 
-	const CUtlMap<int, Player*>& getPlayers() const {
-		return players;
-	}
-
 	CUtlVector<int>& getVisibleEnemies() {
 		return visibleEnemies;
 	}
@@ -98,8 +94,6 @@ public:
 	Vector getFacing() const;
 private:
 	const Bot* self;
-
-	const CUtlMap<int, Player*>& players;
 
 	Armory armory;
 

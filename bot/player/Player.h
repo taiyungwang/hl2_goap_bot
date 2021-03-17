@@ -7,20 +7,30 @@
 #ifndef UTILS_MYBOT_PLAYER_H_
 #define UTILS_MYBOT_PLAYER_H_
 
-#include <Thinker.h>
+#include <utlmap.h>
 
 class IPlayerInfo;
 class Vector;
 class QAngle;
 struct edict_t;
 
-class Player: public Thinker {
+class Player {
 public:
+	static CUtlMap<int, Player*>& getPlayers() {
+		return players;
+	}
+
+	static Player* build(edict_t* ent);
+
+	static Player* getPlayer(edict_t* ent);
+
+	static Player* getPlayer(int idx) {
+		return players[players.Find(idx)];
+	}
 
 	Player(edict_t* ent);
 
-	virtual ~Player() {
-	}
+	virtual ~Player();
 
 	virtual Vector getCurrentPosition() const;
 
@@ -37,9 +47,7 @@ public:
 	virtual void think() {
 	}
 
-	int getUserId() const {
-		return userId;
-	}
+	int getUserId() const;
 
 	bool isDead() const;
 
@@ -58,13 +66,13 @@ public:
 
 	QAngle getAbsoluteAngle() const;
 
+protected:
+	static CUtlMap<int, Player*> players;
+
 private:
 	IPlayerInfo* info;
 
 	edict_t* ent;
-
-	int userId;
-
 };
 
 #endif /* UTILS_MYBOT_PLAYER_H_ */

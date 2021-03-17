@@ -3,7 +3,8 @@
 #include "event/EventInfo.h"
 #include "mods/hl2dm/player/HL2DMBotBuilder.h"
 #include "mods/dod/player/DODBotBuilder.h"
-#include "player/PlayerManager.h"
+#include "player/Bot.h"
+#include "player/VTableHook.h"
 #include <nav_mesh/nav_entities.h>
 #include <util/EntityClassManager.h>
 #include <util/EntityUtils.h>
@@ -13,7 +14,6 @@
 
 CGlobalVars *gpGlobals = nullptr;
 ConVar r_visualizetraces("r_visualizetraces", "0", FCVAR_CHEAT);
-PlayerManager *playerManager = nullptr;
 
 EntityClassManager *classManager = nullptr;
 CNavMesh* TheNavMesh = nullptr;
@@ -33,7 +33,6 @@ PluginAdaptor::PluginAdaptor() {
 	classManager = new EntityClassManager(servergamedll);
 	gpGlobals = playerinfomanager->GetGlobalVars();
 	TheNavMesh = new CNavMesh;
-	playerManager = nullptr;
 	engine->GetGameDir(modPath, 256);
 	// TODO: make mod checking more stringent.
 	if (Q_stristr(modPath, "hl2mp")) {
@@ -41,13 +40,14 @@ PluginAdaptor::PluginAdaptor() {
 		TheNavMesh->addPlayerSpawnName("info_player_start");
 	} else if (Q_stristr(modPath, "dod")) {
 		botBuilder = new DODBotBuilder();
-		botBuilder->setEnableHook(true);
+		enableHook = true;
 		TheNavMesh->addPlayerSpawnName("info_player_axis");
 		TheNavMesh->addPlayerSpawnName("info_player_allies");
 	} else {
 		botBuilder = nullptr;
 		Msg("Mod not supported, %s.\n", modPath);
 	}
+	SetDefLessFunc(Player::getPlayers());
 	SetDefLessFunc(blockers);
 }
 
@@ -56,15 +56,14 @@ PluginAdaptor::~PluginAdaptor() {
 	TheNavMesh = nullptr;
 	delete classManager;
 	classManager = nullptr;
+	if (enableHook) {
+		unhookPlayerRunCommand();
+	}
 	delete botBuilder;
 }
 
 void PluginAdaptor::levelInit(const char* mapName) {
 	navMeshLoadAttempted = false;
-	if (botBuilder != nullptr) {
-		playerManager = new PlayerManager(botBuilder);
-		thinkers.AddToTail(playerManager);
-	}
 }
 
 void PluginAdaptor::gameFrame(bool simulating) {
@@ -77,6 +76,16 @@ void PluginAdaptor::gameFrame(bool simulating) {
 			Msg("Loaded Navigation mesh.\n");
 		}
 		navMeshLoadAttempted = true;
+	}
+	while (!activationQ.IsEmpty()) {
+		edict_t* ent = activationQ.RemoveAtHead();
+		auto& players = Player::getPlayers();
+		auto i = players.Find(engine->IndexOfEdict(ent));
+		if (i == players.InvalidIndex()) {
+			new Player(ent);
+		} else if (enableHook) {
+			hookPlayerRunCommand(ent);
+		}
 	}
 	if (TheNavMesh != nullptr) {
 		CUtlLinkedList<unsigned short> toRemove;
@@ -95,29 +104,20 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		}
 		TheNavMesh->Update();
 	}
-	FOR_EACH_LL(thinkers, i)
-	{
-		thinkers[i]->think();
+	auto& players = Player::getPlayers();
+	FOR_EACH_MAP_FAST(players, i) {
+		players[i]->think();
 	}
 }
 
-void PluginAdaptor::clientActive(edict_t *pEntity) {
-	playerManager->addPlayer(pEntity);
-}
-
-void PluginAdaptor::clientPutInServer(edict_t *pEntity) {
-
-}
-
 void PluginAdaptor::clientDisconnect(edict_t *pEntity) {
-	playerManager->removePlayer(pEntity);
+	delete Player::getPlayer(pEntity);
 }
 
 void PluginAdaptor::levelShutdown() {
-	thinkers.RemoveAll();
-	if (playerManager != nullptr) {
-		delete playerManager;
-		playerManager = nullptr;
+	auto& players = Player::getPlayers();
+	while(players.Count() > 0) {
+		delete players[players.FirstInorder()];
 	}
 	blockers.PurgeAndDeleteElements();
 }

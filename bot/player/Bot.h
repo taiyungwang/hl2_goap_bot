@@ -24,7 +24,8 @@ public:
 		CLASSES = options;
 	}
 
-	Bot(edict_t* ent);
+	Bot(edict_t* ent): Player(ent) {
+	}
 
 	~Bot();
 

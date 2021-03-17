@@ -23,12 +23,6 @@ public:
 
 	virtual ~BotBuilder();
 
-	Bot* build(const CUtlMap<int, Player*>& players, edict_t* ent) const;
-
-	void setEnableHook(bool enableHook = false) {
-		this->enableHook = enableHook;
-	}
-
 	void CommandCallback(const CCommand &command);
 
 	virtual void onNavMeshLoad();
@@ -38,10 +32,6 @@ public:
 	}
 
 protected:
-	bool enableHook = false;
-
-	int classType = -1;
-
 	virtual void initWeapons(WeaponBuilderFactory& factory) const = 0;
 
 	virtual void updatePlanner(Planner& planner,
@@ -51,14 +41,15 @@ protected:
 
 	virtual World* buildWorld() const = 0;
 
-	virtual void modHandleCommand(const CCommand &command) {
-	}
-
-	virtual void update(Bot *bot) const {
+	virtual void modHandleCommand(const CCommand &command, Bot* bot) {
 	}
 
 private:
 	ConCommand* command;
 
 	HidingSpotSelector* hidingSpotSelector = nullptr;
+
+	friend class Bot;
+
+	Bot* build(edict_t* ent) const;
 };

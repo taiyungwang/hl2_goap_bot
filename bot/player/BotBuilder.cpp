@@ -3,7 +3,6 @@
 #include "Blackboard.h"
 #include "Bot.h"
 #include "World.h"
-#include "VTableHook.h"
 #include "HidingSpotSelector.h"
 #include <move/Navigator.h>
 #include <goap/action/AttackAction.h>
@@ -18,9 +17,6 @@
 
 BotBuilder::~BotBuilder() {
 	delete command;
-	if (enableHook) {
-		unhookPlayerRunCommand();
-	}
 	if (hidingSpotSelector != nullptr) {
 		delete hidingSpotSelector;
 	}
@@ -30,6 +26,11 @@ void BotBuilder::CommandCallback(const CCommand &command) {
 	static int botCount = 0;
 	extern IBotManager *botmanager;
 	int team = rand() % 2 + 2;
+
+	botCount %= 32;
+	if (command.ArgC() > 2) {
+		team = atoi(command.Arg(2)) % 2 + 2;
+	}
 	edict_t *pEdict = botmanager->CreateBot(
 			command.ArgC() > 1 ?
 					command.Arg(1) :
@@ -39,13 +40,9 @@ void BotBuilder::CommandCallback(const CCommand &command) {
 		botCount--;
 		return;
 	}
-	botCount %= 32;
-	if (command.ArgC() > 2) {
-		team = atoi(command.Arg(2)) % 2 + 2;
-	}
 	extern IPlayerInfoManager *playerinfomanager;
 	playerinfomanager->GetPlayerInfo(pEdict)->ChangeTeam(team);
-	modHandleCommand(command);
+	modHandleCommand(command, build(pEdict));
 }
 
 void BotBuilder::onNavMeshLoad() {
@@ -61,20 +58,15 @@ public:
 	}
 };
 
-Bot* BotBuilder::build(const CUtlMap<int, Player*>& players,
-		edict_t* ent) const {
+Bot* BotBuilder::build(edict_t* ent) const {
 	Bot* bot = new Bot(ent);
-	if (enableHook) {
-		hookPlayerRunCommand(ent);
-	}
-	Blackboard *blackboard = new Blackboard(players, bot, buildEntity(ent));
+	Blackboard *blackboard = new Blackboard(bot, buildEntity(ent));
 	blackboard->setNavigator(new Navigator(*blackboard));
 	bot->setBlackboard(blackboard);
 	World* world = buildWorld();
 	world->reset();
 	bot->setInGame(world->getState(WorldProp::ROUND_STARTED));
 	bot->setWorld(world);
-	bot->setHookEnabled(enableHook);
 	Planner *planner = new Planner(world->getStates(), *blackboard);
 	planner->addAction<ReloadWeaponAction>(0.85f);
 	planner->addAction<AttackAction>(0.84f);
@@ -87,8 +79,6 @@ Bot* BotBuilder::build(const CUtlMap<int, Player*>& players,
 	updatePlanner(*planner, *blackboard);
 	bot->setPlanner(planner);
 	initWeapons(blackboard->getArmory().getWeaponFactory());
-	bot->setDesiredClassId(classType);
-	update(bot);
 	return bot;
 }
 
