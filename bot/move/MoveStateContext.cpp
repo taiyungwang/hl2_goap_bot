@@ -12,8 +12,8 @@
 float MoveStateContext::SELF_RADIUS = 14.0f,
 	MoveStateContext::TARGET_OFFSET = 5.0f;
 
-static ConVar mybot_stuck_threshold("mybot_stuck_threshold", "0.2f");
-static ConVar my_bot_stuck_dur_threshold("mybot_stuck_dur_threshold", "5");
+static ConVar mybot_stuck_threshold("mybot_stuck_threshold", "1.f");
+static ConVar my_bot_stuck_dur_threshold("mybot_stuck_dur_threshold", "2");
 
 
 MoveStateContext::~MoveStateContext() {
