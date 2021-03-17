@@ -36,7 +36,7 @@ static const char *CLASSES[2][CLASS_COUNT] { { "cls_garand", "cls_tommy",
 
 DODBotBuilder::DODBotBuilder() {
 	Bot::setClasses(&CLASSES);
-	extern EntityClassManager *classManager;
+	teamPlay = true;
 }
 
 void DODBotBuilder::updatePlanner(Planner &planner,
@@ -207,7 +207,7 @@ World* DODBotBuilder::buildWorld() const {
 	return new DODWorld(roundStarted);
 }
 
-void DODBotBuilder::modHandleCommand(const CCommand &command, Bot* bot) {
+void DODBotBuilder::modHandleCommand(const CCommand &command, Bot* bot) const {
 	bot->setDesiredClassId(
 			command.ArgC() > 3 ?
 					atoi(command.Arg(3)) % CLASS_COUNT - 1 :

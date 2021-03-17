@@ -1,7 +1,7 @@
 #pragma once
 
 #include <convar.h>
-#include <utlmap.h>
+#include <utlhashtable.h>
 
 class Blackboard;
 class Bot;
@@ -16,14 +16,13 @@ struct edict_t;
 class BotBuilder: public ICommandCallback {
 public:
 
-	BotBuilder() {
-		command = new ConCommand("mybot_add_bot", this,
-				"Add a bot to the server");
-	}
+	BotBuilder();
 
 	virtual ~BotBuilder();
 
-	void CommandCallback(const CCommand &command);
+	void CommandCallback(const CCommand &command) {
+		(this->**cmdCallbacks.GetPtr(command.Arg(0)))(command);
+	}
 
 	virtual void onNavMeshLoad();
 
@@ -32,6 +31,8 @@ public:
 	}
 
 protected:
+	bool teamPlay = false;
+
 	virtual void initWeapons(WeaponBuilderFactory& factory) const = 0;
 
 	virtual void updatePlanner(Planner& planner,
@@ -41,15 +42,23 @@ protected:
 
 	virtual World* buildWorld() const = 0;
 
-	virtual void modHandleCommand(const CCommand &command, Bot* bot) {
+	virtual void modHandleCommand(const CCommand &command, Bot* bot) const {
 	}
 
 private:
-	ConCommand* command;
+	typedef void (BotBuilder::*CmdFuncPtr)(const CCommand &command) const;
 
 	HidingSpotSelector* hidingSpotSelector = nullptr;
 
-	friend class Bot;
+	CUtlHashtable<const char*, CmdFuncPtr> cmdCallbacks;
+
+	CUtlLinkedList<ConCommand*> commands;
 
 	Bot* build(edict_t* ent) const;
+
+	void addAllBots(const CCommand &command) const;
+
+	void addBot(const CCommand &command) const;
+
+	void addCommand(const char* name, const char* description, CmdFuncPtr ptr);
 };

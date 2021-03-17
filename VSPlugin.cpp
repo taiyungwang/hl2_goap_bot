@@ -13,6 +13,7 @@
 #include <tier1.h>
 #include <tier2/tier2.h>
 #include <iplayerinfo.h>
+#include <icvar.h>
 #include <vphysics_interface.h>
 #include <datacache/imdlcache.h>
 
@@ -32,6 +33,7 @@ IPhysicsSurfaceProps *physprops = nullptr;
 IVModelInfo *modelinfo = nullptr;
 IPhysicsSurfaceProps *physprop = nullptr;
 IServerGameEnts *servergameents = nullptr;
+ICvar* cVars = nullptr;
 //
 // The plugin is a static singleton that is exported as an interface
 //
@@ -87,6 +89,7 @@ bool VSPlugin::Load(CreateInterfaceFn interfaceFactory,
 			|| !load(modelinfo, interfaceFactory, VMODELINFO_SERVER_INTERFACE_VERSION)
 			|| (!engine->IsDedicatedServer() && !load(debugoverlay, interfaceFactory,
 					VDEBUG_OVERLAY_INTERFACE_VERSION))
+			|| !load(cVars, interfaceFactory, CVAR_INTERFACE_VERSION)
 			|| !loadUndefined(playerinfomanager, gameServerFactory, "PlayerInfoManager", 3, 2)
 			|| !loadUndefined(gameclients, gameServerFactory, "ServerGameClients", 5, 4)
 			|| !loadUndefined(servergamedll, gameServerFactory, "ServerGameDLL", 12, 10)

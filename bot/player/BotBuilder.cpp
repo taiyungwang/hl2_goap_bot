@@ -15,14 +15,22 @@
 #include <goap/Planner.h>
 #include <util/BasePlayer.h>
 
+BotBuilder::BotBuilder() {
+	addCommand("mybot_add_bot",  "Add a bot to the server", &BotBuilder::addBot);
+	addCommand("mybot_add_all_bots",  "Fill server with bots", &BotBuilder::addAllBots);
+	extern ICvar* cVars;
+	teamPlay = cVars->FindVar("mp_teamplay")->GetBool();
+}
+
 BotBuilder::~BotBuilder() {
-	delete command;
+	cmdCallbacks.RemoveAll();
+	commands.Purge();
 	if (hidingSpotSelector != nullptr) {
 		delete hidingSpotSelector;
 	}
 }
 
-void BotBuilder::CommandCallback(const CCommand &command) {
+void BotBuilder::addBot(const CCommand &command) const {
 	static int botCount = 0;
 	extern IBotManager *botmanager;
 	int team = rand() % 2 + 2;
@@ -84,4 +92,22 @@ Bot* BotBuilder::build(edict_t* ent) const {
 
 BasePlayer* BotBuilder::buildEntity(edict_t* ent) const {
 	return new BasePlayer(ent);
+}
+
+void BotBuilder::addAllBots(const CCommand &command) const {
+	extern CGlobalVars *gpGlobals;
+	for (int i = 0; i < gpGlobals->maxClients - 2; i++) {
+		if (command.ArgC() > 2) {
+			const char* args[] = {"addbot",  "Bot", (i % 2 == 0 ? "2" : "3"), command.Arg(2) };
+			addBot(CCommand(4, args));
+		} else {
+			const char* args[] = {"addbot",  "Bot", (i % 2 == 0 ? "2" : "3") };
+			addBot(CCommand(3, args));
+		}
+	}
+}
+
+void BotBuilder::addCommand(const char* name, const char* description, CmdFuncPtr ptr) {
+	commands.AddToTail(new ConCommand(name, this, description));
+	cmdCallbacks.Insert(commands[commands.Tail()]->GetName(), ptr);
 }
