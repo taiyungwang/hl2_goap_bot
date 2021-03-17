@@ -120,7 +120,7 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 					255, 0, true,
 					NDEBUG_PERSIST_TILL_NEXT_SERVER);
 		}
-		visibleEnemies.AddToTail(target->getUserId());
+		visibleEnemies.AddToTail(engine->IndexOfEdict(target->getEdict()));
 	}
 }
 
