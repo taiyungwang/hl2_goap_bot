@@ -97,11 +97,12 @@ BasePlayer* BotBuilder::buildEntity(edict_t* ent) const {
 void BotBuilder::addAllBots(const CCommand &command) const {
 	extern CGlobalVars *gpGlobals;
 	for (int i = 0; i < gpGlobals->maxClients - 2; i++) {
-		if (command.ArgC() > 2) {
-			const char* args[] = {"addbot",  "Bot", (i % 2 == 0 ? "2" : "3"), command.Arg(2) };
+		const char* team = i % 2 == 0 ? "2" : "3";
+		if (command.ArgC() > 1) {
+			const char* args[] = {"addbot", "Bot", team, command.Arg(1) };
 			addBot(CCommand(4, args));
 		} else {
-			const char* args[] = {"addbot",  "Bot", (i % 2 == 0 ? "2" : "3") };
+			const char* args[] = {"addbot", "Bot", team };
 			addBot(CCommand(3, args));
 		}
 	}
