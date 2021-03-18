@@ -33,20 +33,7 @@ PluginAdaptor::PluginAdaptor() {
 	classManager = new EntityClassManager(servergamedll);
 	gpGlobals = playerinfomanager->GetGlobalVars();
 	TheNavMesh = new CNavMesh;
-	engine->GetGameDir(modPath, 256);
-	// TODO: make mod checking more stringent.
-	if (Q_stristr(modPath, "hl2mp")) {
-		botBuilder = new HL2DMBotBuilder();
-		TheNavMesh->addPlayerSpawnName("info_player_start");
-	} else if (Q_stristr(modPath, "dod")) {
-		botBuilder = new DODBotBuilder();
-		enableHook = true;
-		TheNavMesh->addPlayerSpawnName("info_player_axis");
-		TheNavMesh->addPlayerSpawnName("info_player_allies");
-	} else {
-		botBuilder = nullptr;
-		Msg("Mod not supported, %s.\n", modPath);
-	}
+	botBuilder = nullptr;
 	SetDefLessFunc(Player::getPlayers());
 	SetDefLessFunc(blockers);
 }
@@ -59,11 +46,23 @@ PluginAdaptor::~PluginAdaptor() {
 	if (enableHook) {
 		unhookPlayerRunCommand();
 	}
-	delete botBuilder;
 }
 
 void PluginAdaptor::levelInit(const char* mapName) {
 	navMeshLoadAttempted = false;
+	engine->GetGameDir(modPath, 256);
+	// TODO: make mod checking more stringent.
+	if (Q_stristr(modPath, "hl2mp")) {
+		botBuilder = new HL2DMBotBuilder();
+		TheNavMesh->addPlayerSpawnName("info_player_start");
+	} else if (Q_stristr(modPath, "dod")) {
+		botBuilder = new DODBotBuilder();
+		enableHook = true;
+		TheNavMesh->addPlayerSpawnName("info_player_axis");
+		TheNavMesh->addPlayerSpawnName("info_player_allies");
+	} else {
+		Msg("Mod not supported, %s.\n", modPath);
+	}
 }
 
 void PluginAdaptor::gameFrame(bool simulating) {
@@ -118,6 +117,10 @@ void PluginAdaptor::levelShutdown() {
 	auto& players = Player::getPlayers();
 	while(players.Count() > 0) {
 		delete players[players.FirstInorder()];
+	}
+	if (botBuilder != nullptr) {
+		delete botBuilder;
+		botBuilder = nullptr;
 	}
 	blockers.PurgeAndDeleteElements();
 }
