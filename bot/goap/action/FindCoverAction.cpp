@@ -15,13 +15,13 @@ bool FindCoverAction::ShouldSearch(CNavArea *adjArea, CNavArea *currentArea,
 		float travelDistanceSoFar) {
 	edict_t* target = getTarget();
 	return ISearchSurroundingAreasFunctor::ShouldSearch(adjArea, currentArea, travelDistanceSoFar)
-			&& target != nullptr && Navigator::getArea(target) != currentArea;
+			&& target != nullptr && Navigator::getArea(target, blackboard.getSelf()->getTeam()) != currentArea;
 }
 
 bool FindCoverAction::operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar ) {
 	edict_t* target = getTarget();
 	bool isVisible = currentArea == area
-			|| (area->IsPotentiallyVisible(Navigator::getArea(target))
+			|| (area->IsPotentiallyVisible(Navigator::getArea(target, blackboard.getSelf()->getTeam()))
 			&& UTIL_IsVisible(area->GetCenter(), blackboard, target));
 	if (!isVisible) {
 		this->hideArea = area;
@@ -33,7 +33,7 @@ bool FindCoverAction::onPlanningFinished() {
 	if(!GoToAction::onPlanningFinished()) {
 		return false;
 	}
-	CNavArea* targetArea = Navigator::getArea(getTarget());
+	CNavArea* targetArea = Navigator::getArea(getTarget(), blackboard.getSelf()->getTeam());
 	for (int i = 0; i < path.Count(); i++)  {
 		if (path[i] == targetArea) {
 			return false;
@@ -48,7 +48,7 @@ bool FindCoverAction::findTargetLoc() {
 		return false;
 	}
 	this->hideArea = nullptr;
-	currentArea = Navigator::getArea(blackboard.getSelf()->getEdict());
+	currentArea = Navigator::getArea(blackboard.getSelf()->getEdict(), blackboard.getSelf()->getTeam());
 	SearchSurroundingAreas(currentArea, *this);
 	return hideArea != nullptr;
 }

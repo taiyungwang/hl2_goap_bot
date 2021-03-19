@@ -18,7 +18,7 @@ public:
 	/**
 	 * Get the current area the entity is in.
 	 */
-	static CNavArea* getArea(edict_t* ent);
+	static CNavArea* getArea(edict_t* ent, int team);
 
 	Navigator(Blackboard& blackboard);
 

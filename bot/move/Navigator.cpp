@@ -123,13 +123,14 @@ NavDirType getConnectedDir(const CNavArea* from, const CNavArea* to) {
 	return NUM_DIRECTIONS;
 }
 
-CNavArea* Navigator::getArea(edict_t* ent) {
-	CNavArea* area = TheNavMesh->GetNavArea(ent->GetCollideable()->GetCollisionOrigin());
-	return area == nullptr ? TheNavMesh->GetNearestNavArea(ent) : area;
+CNavArea* Navigator::getArea(edict_t* ent, int team) {
+	return TheNavMesh->GetNearestNavArea(ent->GetCollideable()->GetCollisionOrigin(),
+			10000.0f, false, true, team);
+
 }
 
 CNavArea* Navigator::getCurrentArea(const Vector& pos) const {
-	return TheNavMesh->GetNearestNavArea(pos, 10000.0f, false, false, blackboard.getSelf()->getTeam());
+	return TheNavMesh->GetNearestNavArea(pos, 10000.0f, false, true, blackboard.getSelf()->getTeam());
 }
 
 bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
@@ -144,6 +145,7 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	}
 	CNavArea* goalArea = getCurrentArea(targetLoc);
 	if (goalArea == nullptr) {
+		buildPathStartArea = nullptr;
 		Warning("Unable to find area for goal.\n");
 		if (mybot_debug.GetBool()) {
 			debugoverlay->AddLineOverlay(self->getEyesPos(),
@@ -160,6 +162,7 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 					targetLoc, 255, 0, 0, true,
 					NDEBUG_PERSIST_TILL_NEXT_SERVER);
 		}
+		buildPathStartArea = nullptr;
 		Warning("Unable to get to goal area %d.\n", goalArea->GetID());
 		if (mybot_debug.GetBool()) {
 			goalArea->Draw();

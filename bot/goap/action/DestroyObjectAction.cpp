@@ -74,7 +74,7 @@ bool DestroyObjectAction::execute() {
 		moveCtx->setGoal(
 				(targetLoc - self->getCurrentPosition()).Normalized()
 						* (dist - 25.0f) + self->getCurrentPosition());
-		CNavArea* area = Navigator::getArea(selfEnt);
+		CNavArea* area = Navigator::getArea(selfEnt, self->getTeam());
 		moveCtx->traceMove();
 		moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
 		buttons.hold(IN_SPEED);
