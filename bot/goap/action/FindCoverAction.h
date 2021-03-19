@@ -11,6 +11,11 @@ public:
 		return false;
 	}
 
+	bool execute() {
+		return getTarget() == nullptr || GoToAction::execute();
+	}
+
+
 	float getCost() {
 		return path.Count();
 	}
