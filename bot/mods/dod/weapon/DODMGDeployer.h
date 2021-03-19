@@ -10,8 +10,9 @@ public:
 	bool execute(Blackboard& blackboard);
 
 private:
+	bool proneRequired = true;
 
-	void reset(Blackboard& blackboard);
+	int animationCounter = -1;
 
-	int position = 3, animationCounter = -1;
+	void start(Blackboard& blackboard);
 };

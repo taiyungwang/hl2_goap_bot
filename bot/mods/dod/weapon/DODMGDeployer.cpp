@@ -11,66 +11,45 @@
 #include <util/BasePlayer.h>
 #include <in_buttons.h>
 
-#define PRONE_ANIM 120
+#define PRONE_ANIM_TIME 120
 
 bool DODMGDeployer::execute(Blackboard& blackboard) {
-	if (animationCounter < 0) {
-		reset(blackboard);
-	}
 	if (weapon.isDeployed()) {
 		animationCounter = -1;
 		return true;
 	}
-	extern ConVar mybot_var;
-	if (blackboard.getAimAccuracy(blackboard.getViewTarget()) < mybot_var.GetFloat()) {
+	Buttons& buttons = blackboard.getButtons();
+	if (--animationCounter < 0) {
+		start(blackboard);
 		return false;
 	}
-	Buttons& buttons = blackboard.getButtons();
-	if (position == 2) {
-		if (!DodPlayer(blackboard.getSelf()->getEdict()).isProne()
-				&& animationCounter == PRONE_ANIM) {
-			if (blackboard.getTargetedPlayer() == nullptr
-					&& blackboard.getBlocker() == nullptr) {
-				blackboard.lookStraight();
-			}
-			buttons.tap(IN_ALT1);
+	if (proneRequired) {
+		extern ConVar mybot_var;
+		if (DodPlayer(blackboard.getSelf()->getEdict()).isProne()
+				&& blackboard.getAimAccuracy(blackboard.getViewTarget()) >= mybot_var.GetFloat()) {
+			buttons.tap(IN_ATTACK2);
 		}
-	} else if (position == 1) {
-		buttons.hold(IN_DUCK);
-	}
-	if (--animationCounter < 0) {
-		buttons.tap(IN_ATTACK2);
-		return true;
 	}
 	return false;
 }
 
-void DODMGDeployer::reset(Blackboard& blackboard) {
+void DODMGDeployer::start(Blackboard& blackboard) {
 	const Player* self = blackboard.getSelf();
-	Vector pos = self->getEyesPos();
-	static float DELTA_Z[] = {HumanCrouchEyeHeight - HumanEyeHeight, -20.0f};
-	for (position = 0; position < 2; position++) {
-		static float halfHull = 17.0f;
-		trace_t result;
-		extern ConVar mybot_debug;
-		edict_t * ground = BasePlayer(self->getEdict()).getGroundEntity();
-		UTIL_TraceHull(pos,
-				pos + (blackboard.getViewTarget() - pos).Normalized() * halfHull,
-				Vector(0.0f, -halfHull, DELTA_Z[position]),
-				Vector(0.0f, halfHull, 0.0f),
-								MASK_NPCSOLID_BRUSHONLY,
-								FilterSelf(self->getEdict()->GetIServerEntity()),
-										&result, mybot_debug.GetBool());
-		if (result.DidHit()) {
-			break;
-		}
+	if (blackboard.getTargetedPlayer() == nullptr
+			&& blackboard.getBlocker() == nullptr) {
+		blackboard.lookStraight();
 	}
-	if (position == 2) {
-		animationCounter = PRONE_ANIM;
-	} else if (position == 1) {
-		animationCounter = 10;
-	} else {
-		animationCounter = 0;
-	}
+	Vector pos(self->getCurrentPosition() + (blackboard.getViewTarget() - self->getCurrentPosition()).Normalized() * HalfHumanWidth);
+	pos.z += StepHeight;
+	trace_t result;
+	extern ConVar mybot_debug;
+	edict_t * ground = BasePlayer(self->getEdict()).getGroundEntity();
+	UTIL_TraceHull(pos, pos, Vector(0.0f, -HalfHumanWidth, 0.0f),
+					Vector(0.0f, HalfHumanWidth, 0.0f),
+									MASK_NPCSOLID_BRUSHONLY, FilterSelf(self->getEdict()->GetIServerEntity()),
+											&result, mybot_debug.GetBool());
+	proneRequired = !result.DidHit();
+	blackboard.getButtons().tap(proneRequired ? IN_ALT1 : IN_ATTACK2);
+	animationCounter = proneRequired ? PRONE_ANIM_TIME : 5.0f;
 }
 
