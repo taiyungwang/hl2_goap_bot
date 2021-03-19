@@ -103,8 +103,7 @@ MoveState* Avoid::move(const Vector& pos) {
 	if (!result.startsolid && result.DidHit()
 			&& currBlocker != nullptr
 			&& Q_stristr(currBlockerName, "func_team") == nullptr
-			&& goal.AsVector2D().DistTo(result.endpos.AsVector2D())
-			> MoveStateContext::SELF_RADIUS
+			&& goal.AsVector2D().DistTo(result.endpos.AsVector2D()) > HalfHumanWidth
 			&& (result.plane.normal.LengthSqr() == 0.0f
 			|| result.plane.normal.z > nav_slope_limit.GetFloat())) {
 		Vector avoid = currBlocker->GetCollideable()->GetCollisionOrigin();

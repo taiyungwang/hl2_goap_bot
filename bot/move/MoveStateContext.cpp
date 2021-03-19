@@ -9,12 +9,8 @@
 #include <util/EntityUtils.h>
 #include <edict.h>
 
-float MoveStateContext::SELF_RADIUS = 14.0f,
-	MoveStateContext::TARGET_OFFSET = 5.0f;
-
-static ConVar mybot_stuck_threshold("mybot_stuck_threshold", "1.f");
-static ConVar my_bot_stuck_dur_threshold("mybot_stuck_dur_threshold", "2");
-
+static ConVar mybot_stuck_threshold("mybot_stuck_threshold", "0.2f");
+static ConVar my_bot_stuck_dur_threshold("mybot_stuck_dur_threshold", "5");
 
 MoveStateContext::~MoveStateContext() {
 	delete state;
@@ -80,9 +76,11 @@ const bool MoveStateContext::hasGoal() const {
 
 bool MoveStateContext::reachedGoal(float targetOffset) {
 	const Vector& pos = blackboard.getSelf()->getCurrentPosition();
+	Vector goalGround(goal);
+	goalGround.z = pos.z;
 	if (((goal.z > pos.z && goal.z - pos.z < 20.0f) || pos.z - goal.z < HumanHeight)
-			&& goal.AsVector2D().DistTo(pos.AsVector2D())
-			<= targetOffset + TARGET_OFFSET) {
+			&& goalGround.DistTo(pos)
+			< targetOffset + HalfHumanWidth) {
 		stuck = false;
 		return true;
 	}

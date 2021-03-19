@@ -1,6 +1,7 @@
 #include "Navigator.h"
 
 #include <move/MoveStateContext.h>
+#include <move/MoveLadder.h>
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
@@ -283,7 +284,7 @@ bool Navigator::findLadder(const CNavArea* from, const CNavArea* to) {
 				}
 				float delta = end.z - blackboard.getSelf()->getCurrentPosition().z;
 				if (delta == 0.0f || (delta < 0.0f && delta >= -StepHeight)
-						|| (delta > 0.0f && delta <= HumanHeight + MoveStateContext::TARGET_OFFSET)) {
+						|| (delta > 0.0f && delta <= HumanHeight + MoveLadder::TARGET_OFFSET)) {
 					// bot already got off the ladder
 					return false;
 				}

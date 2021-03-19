@@ -13,14 +13,6 @@ class CBotCmd;
  */
 class MoveStateContext {
 public:
-	/**
-	 * Radius of bot
-	 */
-	static float SELF_RADIUS,
-	/**
-	 * Margin of error for to consider a position reached.
-	 */
-	TARGET_OFFSET;
 
 	/**
 	 * @param pos Current position

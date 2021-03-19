@@ -8,6 +8,8 @@
 #include <eiface.h>
 #include <in_buttons.h>
 
+float MoveLadder::TARGET_OFFSET = 5.0f;
+
 MoveLadder::MoveLadder(MoveStateContext& ctx) :
 		MoveState(ctx) {
 	remainingDist = -1.0f;
@@ -30,7 +32,7 @@ MoveState* MoveLadder::move(const Vector& currPos) {
 			}
 			ctx.setLadderDir(CNavLadder::NUM_LADDER_DIRECTIONS);
 			if (remainingDist > (dir == CNavLadder::LADDER_UP ? 3.0f * HumanHeight : StepHeight)
-					+ MoveStateContext::TARGET_OFFSET) {
+					+ TARGET_OFFSET) {
 				ctx.setStuck(true);
 			}
 			return new Stopped(ctx);
