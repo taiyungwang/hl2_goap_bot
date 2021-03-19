@@ -24,7 +24,7 @@ BotBuilder::BotBuilder() {
 
 BotBuilder::~BotBuilder() {
 	cmdCallbacks.RemoveAll();
-	commands.Purge();
+	commands.PurgeAndDeleteElements();
 	if (hidingSpotSelector != nullptr) {
 		delete hidingSpotSelector;
 	}
