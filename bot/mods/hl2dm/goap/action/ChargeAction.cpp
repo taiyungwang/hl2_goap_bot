@@ -43,3 +43,12 @@ bool ChargeAction::isAvailable(edict_t* ent) {
 bool ChargeAction::isDepleted() {
 	return availability.get<float>(item) == 1.0f;
 }
+
+bool ChargeAction::findTargetLoc() {
+	if (!GoToEntityAction::findTargetLoc()) {
+		return false;
+	}
+	// override the trigger distance
+	targetRadius = 13.0f;
+	return true;
+}

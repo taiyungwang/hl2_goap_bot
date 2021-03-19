@@ -32,5 +32,7 @@ protected:
 private:
 	bool isAvailable(edict_t *ent);
 
+	bool findTargetLoc();
+
 	bool isDepleted();
 };
