@@ -11,7 +11,11 @@ public:
 		return false;
 	}
 
-	bool onPlanningFinished();
+	float getCost() {
+		return path.Count();
+	}
+
+	bool precondCheck();
 
 	bool operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar );
 

@@ -18,22 +18,23 @@ bool FindCoverAction::ShouldSearch(CNavArea *adjArea, CNavArea *currentArea,
 			&& target != nullptr && Navigator::getArea(target, blackboard.getSelf()->getTeam()) != currentArea;
 }
 
-bool FindCoverAction::operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar ) {
+bool FindCoverAction::operator() (CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar) {
 	edict_t* target = getTarget();
-	bool isVisible = currentArea == area
+	bool isVisible = target != nullptr && (currentArea == area
 			|| (area->IsPotentiallyVisible(Navigator::getArea(target, blackboard.getSelf()->getTeam()))
-			&& UTIL_IsVisible(area->GetCenter(), blackboard, target));
+			&& UTIL_IsVisible(area->GetCenter(), blackboard, target)));
 	if (!isVisible) {
 		this->hideArea = area;
 	}
 	return isVisible;
 }
 
-bool FindCoverAction::onPlanningFinished() {
-	if(!GoToAction::onPlanningFinished()) {
+bool FindCoverAction::precondCheck() {
+	edict_t* target = getTarget();
+	if(target == nullptr || !GoToAction::onPlanningFinished()) {
 		return false;
 	}
-	CNavArea* targetArea = Navigator::getArea(getTarget(), blackboard.getSelf()->getTeam());
+	CNavArea* targetArea = Navigator::getArea(target, blackboard.getSelf()->getTeam());
 	for (int i = 0; i < path.Count(); i++)  {
 		if (path[i] == targetArea) {
 			return false;
