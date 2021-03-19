@@ -29,13 +29,20 @@ bool FindCoverAction::operator() (CNavArea *area, CNavArea *priorArea, float tra
 	return isVisible;
 }
 
-bool FindCoverAction::precondCheck() {
-	edict_t* target = getTarget();
-	if(target == nullptr || !GoToAction::onPlanningFinished()) {
+float FindCoverAction::getCost() {
+	return findTargetLoc()
+			&& blackboard.getNavigator()->buildPath(targetLoc, path) ?
+			path.Count() : INFINITY;
+}
+
+bool FindCoverAction::onPlanningFinished() {
+	edict_t *target = getTarget();
+	if (target == nullptr) {
 		return false;
 	}
-	CNavArea* targetArea = Navigator::getArea(target, blackboard.getSelf()->getTeam());
-	for (int i = 0; i < path.Count(); i++)  {
+	CNavArea *targetArea = Navigator::getArea(target,
+			blackboard.getSelf()->getTeam());
+	for (int i = 0; i < path.Count(); i++) {
 		if (path[i] == targetArea) {
 			return false;
 		}
@@ -44,7 +51,7 @@ bool FindCoverAction::precondCheck() {
 }
 
 bool FindCoverAction::findTargetLoc() {
-	edict_t* target = getTarget();
+	edict_t *target = getTarget();
 	if (target == nullptr) {
 		return false;
 	}
@@ -54,7 +61,7 @@ bool FindCoverAction::findTargetLoc() {
 	return hideArea != nullptr;
 }
 
-void FindCoverAction::PostSearch( void ) {
+void FindCoverAction::PostSearch(void) {
 	if (hideArea != nullptr) {
 		targetLoc = hideArea->GetCenter();
 	}
