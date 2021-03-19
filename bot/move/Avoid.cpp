@@ -103,13 +103,11 @@ MoveState* Avoid::move(const Vector& pos) {
 	if (!result.startsolid && result.DidHit()
 			&& currBlocker != nullptr
 			&& Q_stristr(currBlockerName, "func_team") == nullptr
-			&& goal.AsVector2D().DistTo(result.endpos.AsVector2D()) > HalfHumanWidth
 			&& (result.plane.normal.LengthSqr() == 0.0f
-			|| result.plane.normal.z > nav_slope_limit.GetFloat())) {
-		Vector avoid = currBlocker->GetCollideable()->GetCollisionOrigin();
-		avoid = avoid.x == 0.0f && avoid.y == 0.0f && avoid.z == 0.0f ?
-			result.plane.normal : (result.endpos - avoid).Normalized();
-		goal = result.endpos + avoid / Max(0.000001f, (result.endpos - pos).Length())
+					|| result.plane.normal.z > nav_slope_limit.GetFloat())) {
+		Vector avoid(result.endpos);
+		avoid.z = pos.z;
+		goal = goal + (avoid - pos).Normalized() / Max(0.000001f, (result.endpos - pos).Length())
 				* mybot_avoid_move_factor.GetFloat();
 	}
 	moveStraight(goal);
