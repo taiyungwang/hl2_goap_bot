@@ -9,14 +9,12 @@ class HL2DMWorld;
 
 class DODBotBuilder: public BotBuilder, public EventHandler {
 public:
-	DODBotBuilder();
+	DODBotBuilder(GameManager* objectives);
 
 	bool handle(EventInfo* event);
 
 private:
 	bool roundStarted = false;
-
-	DODObjectives objectives;
 
 	void initWeapons(WeaponBuilderFactory& factory) const;
 

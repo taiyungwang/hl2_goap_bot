@@ -5,6 +5,7 @@
 #include <utlqueue.h>
 
 class Thinker;
+class GameManager;
 class BotBuilder;
 struct edict_t;
 
@@ -44,6 +45,8 @@ public:
 
 private:
 	bool enableHook = false;
+
+	GameManager* gameManager = nullptr;
 
 	BotBuilder* botBuilder;
 

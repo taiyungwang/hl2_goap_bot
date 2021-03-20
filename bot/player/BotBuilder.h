@@ -3,6 +3,7 @@
 #include <convar.h>
 #include <utlhashtable.h>
 
+class GameManager;
 class Blackboard;
 class Bot;
 class BasePlayer;
@@ -16,7 +17,7 @@ struct edict_t;
 class BotBuilder: public ICommandCallback {
 public:
 
-	BotBuilder();
+	BotBuilder(GameManager* objectives);
 
 	virtual ~BotBuilder();
 
@@ -31,6 +32,8 @@ public:
 	}
 
 protected:
+	GameManager* objectives;
+
 	bool teamPlay = false;
 
 	virtual void initWeapons(WeaponBuilderFactory& factory) const = 0;

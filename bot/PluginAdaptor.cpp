@@ -4,6 +4,7 @@
 #include "mods/hl2dm/player/HL2DMBotBuilder.h"
 #include "mods/dod/player/DODBotBuilder.h"
 #include "player/Bot.h"
+#include "player/GameManager.h"
 #include "player/VTableHook.h"
 #include <nav_mesh/nav_entities.h>
 #include <util/EntityClassManager.h>
@@ -36,6 +37,20 @@ PluginAdaptor::PluginAdaptor() {
 	botBuilder = nullptr;
 	SetDefLessFunc(Player::getPlayers());
 	SetDefLessFunc(blockers);
+	engine->GetGameDir(modPath, 256);
+	// TODO: make mod checking more stringent.
+	if (Q_stristr(modPath, "hl2mp")) {
+		botBuilder = new HL2DMBotBuilder();
+		TheNavMesh->addPlayerSpawnName("info_player_start");
+	} else if (Q_stristr(modPath, "dod")) {
+		gameManager = new DODObjectives();
+		botBuilder = new DODBotBuilder(gameManager);
+		enableHook = true;
+		TheNavMesh->addPlayerSpawnName("info_player_axis");
+		TheNavMesh->addPlayerSpawnName("info_player_allies");
+	} else {
+		Msg("Mod not supported, %s.\n", modPath);
+	}
 }
 
 PluginAdaptor::~PluginAdaptor() {
@@ -46,23 +61,14 @@ PluginAdaptor::~PluginAdaptor() {
 	if (enableHook) {
 		unhookPlayerRunCommand();
 	}
+	if (botBuilder != nullptr) {
+		delete botBuilder;
+		botBuilder = nullptr;
+	}
 }
 
 void PluginAdaptor::levelInit(const char* mapName) {
 	navMeshLoadAttempted = false;
-	engine->GetGameDir(modPath, 256);
-	// TODO: make mod checking more stringent.
-	if (Q_stristr(modPath, "hl2mp")) {
-		botBuilder = new HL2DMBotBuilder();
-		TheNavMesh->addPlayerSpawnName("info_player_start");
-	} else if (Q_stristr(modPath, "dod")) {
-		botBuilder = new DODBotBuilder();
-		enableHook = true;
-		TheNavMesh->addPlayerSpawnName("info_player_axis");
-		TheNavMesh->addPlayerSpawnName("info_player_allies");
-	} else {
-		Msg("Mod not supported, %s.\n", modPath);
-	}
 }
 
 void PluginAdaptor::gameFrame(bool simulating) {
@@ -118,11 +124,10 @@ void PluginAdaptor::levelShutdown() {
 	while(players.Count() > 0) {
 		delete players[players.FirstInorder()];
 	}
-	if (botBuilder != nullptr) {
-		delete botBuilder;
-		botBuilder = nullptr;
-	}
 	blockers.PurgeAndDeleteElements();
+	if (gameManager != nullptr) {
+		gameManager->endRound();
+	}
 }
 
 template

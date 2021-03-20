@@ -6,6 +6,11 @@ class HL2MPPlayer;
 class HL2DMWorld;
 
 class HL2DMBotBuilder: public BotBuilder {
+public:
+	HL2DMBotBuilder(): BotBuilder(nullptr) {
+	}
+
+private:
 
 	void initWeapons(WeaponBuilderFactory& factory) const;
 

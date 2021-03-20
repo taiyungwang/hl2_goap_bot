@@ -15,7 +15,7 @@
 #include <goap/Planner.h>
 #include <util/BasePlayer.h>
 
-BotBuilder::BotBuilder() {
+BotBuilder::BotBuilder(GameManager* objectives): objectives(objectives) {
 	addCommand("mybot_add_bot",  "Add a bot to the server", &BotBuilder::addBot);
 	addCommand("mybot_add_all_bots",  "Fill server with bots", &BotBuilder::addAllBots);
 	extern ICvar* cVars;

@@ -34,7 +34,7 @@ static const char *CLASSES[2][CLASS_COUNT] { { "cls_garand", "cls_tommy",
 		"cls_bar", "cls_spring", "cls_30cal", "cls_bazooka" }, { "cls_mk98",
 		"cls_mp40", "cls_mp44", "cls_k98s", "cls_mg42", "cls_pschreck" } };
 
-DODBotBuilder::DODBotBuilder() {
+DODBotBuilder::DODBotBuilder(GameManager* objectives): BotBuilder(objectives) {
 	Bot::setClasses(&CLASSES);
 	teamPlay = true;
 }
@@ -91,24 +91,24 @@ void DODBotBuilder::updatePlanner(Planner &planner,
 	planner.addAction<DODUseRifleGrenadeAction>(0.92f);
 	planner.addAction<DODUseSmokeGrenadeAction>(0.91f);
 	planner.addAction<DODDestroyObjectAction>(0.7f);
-	planner.addAction<DODDefuseBombAction>(0.64f)->setObjectives(&objectives);
+	planner.addAction<DODDefuseBombAction>(0.64f)->setObjectives(dynamic_cast<DODObjectives*>(objectives));
 	planner.addAction<DODDefendPointAction>(0.63f, 0.2f)->setObjectives(
-			&objectives);
-	planner.addAction<DODBombTargetAction>(0.62f)->setObjectives(&objectives);
-	planner.addAction<CapturePointAction>(0.61f)->setObjectives(&objectives);
+			dynamic_cast<DODObjectives*>(objectives));
+	planner.addAction<DODBombTargetAction>(0.62f)->setObjectives(dynamic_cast<DODObjectives*>(objectives));
+	planner.addAction<CapturePointAction>(0.61f)->setObjectives(dynamic_cast<DODObjectives*>(objectives));
 	planner.addAction<DODGetBombAction>(0.0f);
 }
 
 bool DODBotBuilder::handle(EventInfo *event) {
 	CUtlString name(event->getName());
 	if (name == "dod_round_active") {
-		objectives.startRound();
+		objectives->startRound();
 		roundStarted = true;
 		return false;
 	}
 	if (name == "dod_game_over" || name == "dod_round_win") {
 		roundStarted = false;
-		objectives.endRound();
+		objectives->endRound();
 		return false;
 	}
 	return false;

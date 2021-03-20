@@ -1,5 +1,6 @@
 #pragma once
 
+#include <player/GameManager.h>
 #include <utlmap.h>
 #include <utlvector.h>
 #include <utllinkedlist.h>
@@ -8,7 +9,7 @@ class DODObjectiveResource;
 class DODObjective;
 struct edict_t;
 
-class DODObjectives {
+class DODObjectives: public GameManager {
 public:
 	typedef CCopyableUtlVector<edict_t*> CapTarget;
 
