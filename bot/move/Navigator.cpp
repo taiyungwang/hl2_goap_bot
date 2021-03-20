@@ -131,7 +131,15 @@ CNavArea* Navigator::getArea(edict_t* ent, int team) {
 }
 
 CNavArea* Navigator::getCurrentArea(const Vector& pos) const {
-	return TheNavMesh->GetNearestNavArea(pos, 10000.0f, false, true, blackboard.getSelf()->getTeam());
+	int team = blackboard.getSelf()->getTeam();
+	CNavArea* area = TheNavMesh->GetNearestNavArea(pos, 10000.0f, false, true, team);
+	if (area == nullptr) {
+		area = TheNavMesh->GetNearestNavArea(pos, 10000.0f, false, false, team);
+		if (area != nullptr && area->IsBlocked(team)) {
+			area = nullptr;
+		}
+	}
+	return area;
 }
 
 bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
