@@ -46,3 +46,17 @@ void MoveState::moveStraight(const Vector& destination) const {
 	}
 }
 
+Vector MoveState::perpLeft2D(const Vector& end, const Vector& start) {
+	Vector dir = end - start;
+	Vector perp = dir;
+	perp.x = -dir.y;
+	perp.y = dir.x;
+	return perp;
+}
+
+Vector MoveState::inverse2D(const Vector& dir) {
+	Vector inv(dir);
+	inv.Negate();
+	inv.z = -inv.z;
+	return inv;
+}

@@ -87,15 +87,13 @@ bool MoveStateContext::reachedGoal(float targetOffset) {
 	return false;
 }
 
-const trace_t& MoveStateContext::trace(Vector goal, edict_t* ignore) {
+const trace_t& MoveStateContext::trace(Vector goal) {
 	const Player* self = blackboard.getSelf();
 	Vector pos = self->getCurrentPosition();
-	static const float HALF_WIDTH = 16.0f;
-	static const float FOREHEAD = HumanHeight - HumanEyeHeight;
 	extern ConVar mybot_debug;
 	FilterList filter;
 	filter.add(self->getEdict()).add(BasePlayer(self->getEdict()).getGroundEntity())
-					.add(blackboard.getTarget()).add(ignore);
+					.add(blackboard.getTarget());
 	edict_t* edict = self->getEdict();
 	Vector mins = edict->GetCollideable()->OBBMins(),
 			maxs = edict->GetCollideable()->OBBMaxs();

@@ -106,7 +106,7 @@ public:
 		trace(goal);
 	}
 
-	const trace_t& trace(Vector goal, edict_t* ignore = nullptr);
+	const trace_t& trace(Vector goal);
 
 	const trace_t& getTraceResult() const {
 		return traceResult;

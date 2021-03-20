@@ -25,7 +25,7 @@ bool UseGravityGunAction::execute() {
 		blackboard.setBlocker(nullptr);
 		return true;
 	}
-	if (fabs(blackboard.getAimAccuracy(targetLoc))
+	if (blackboard.getAimAccuracy(targetLoc)
 			> 1.0f - 30.0f / (dist == 0.0f ? 0.0001f : dist)) {
 		armory.getCurrWeapon()->getPrimary()->attack(blackboard.getButtons(),
 				dist);

@@ -12,8 +12,6 @@ public:
 	}
 
 protected:
-	static Vector perpLeft2D(const Vector& end, const Vector& start);
-
 	virtual MoveState* buildFailedState(const Vector& currPos) const;
 
 	virtual Vector buildDir(const Vector& currPos) const;

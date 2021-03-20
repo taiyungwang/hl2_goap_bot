@@ -12,8 +12,6 @@ public:
 	}
 
 private:
-	static Vector inverse2D(const Vector& dir);
-
 	float distance;
 
 	MoveState* buildFailedState(const Vector& currPos) const;

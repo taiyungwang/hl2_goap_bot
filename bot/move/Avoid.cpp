@@ -11,6 +11,7 @@
 #include <nav_mesh/nav_entities.h>
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
+#include <util/BasePlayer.h>
 #include <eiface.h>
 #include <in_buttons.h>
 
@@ -100,14 +101,37 @@ MoveState* Avoid::move(const Vector& pos) {
 	}
 	Vector goal = ctx.getGoal();
 	extern ConVar nav_slope_limit;
+	Vector avoid(result.endpos);
 	if (!result.startsolid && result.DidHit()
 			&& currBlocker != nullptr
 			&& Q_stristr(currBlockerName, "func_team") == nullptr
 			&& (result.plane.normal.LengthSqr() == 0.0f
 					|| result.plane.normal.z > nav_slope_limit.GetFloat())) {
-		Vector avoid(result.endpos);
+		if ((goal - pos).Normalized().Dot((result.endpos - pos).Normalized()) > 0.9) {
+			Vector left(perpLeft2D(result.endpos, pos).Normalized() * HalfHumanWidth);
+			trace_t tr;
+			FilterList filter;
+			auto self = blackboard.getSelf();
+			filter.add(self->getEdict()).add(BasePlayer(self->getEdict()).getGroundEntity())
+							.add(blackboard.getTarget());
+			// we're heading straight for the blocker.
+			UTIL_TraceLine(pos, left + result.endpos,
+					MASK_SOLID_BRUSHONLY, &filter, &tr);
+			if (!tr.DidHit()) {
+				avoid = inverse2D(left) + result.endpos - pos;
+			} else {
+				UTIL_TraceLine(pos, inverse2D(left) + result.endpos,
+						MASK_SOLID_BRUSHONLY, &filter, &tr);
+				if (!tr.DidHit()) {
+					avoid = left + result.endpos - pos;
+				}
+			}
+
+		} else {
+			avoid -= pos;
+		}
 		avoid.z = pos.z;
-		goal = goal + (avoid - pos).Normalized() / Max(0.000001f, (result.endpos - pos).Length())
+		goal = goal + avoid.Normalized() / Max(0.000001f, (result.endpos - pos).Length())
 				* mybot_avoid_move_factor.GetFloat();
 	}
 	moveStraight(goal);

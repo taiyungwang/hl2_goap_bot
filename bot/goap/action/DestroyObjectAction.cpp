@@ -99,7 +99,7 @@ bool DestroyObjectAction::execute() {
 		debugoverlay->AddLineOverlay(eyes, eyes + blackboard.getFacing() * dist, 0, 255, 0, true,
 		NDEBUG_PERSIST_TILL_NEXT_SERVER);
 	}
-	if (weapFunc->isMelee() || fabs(blackboard.getAimAccuracy(targetLoc))
+	if (weapFunc->isMelee() || blackboard.getAimAccuracy(targetLoc)
 			> 1.0f - 10.0f / MAX(dist, 0.1f)) {
 		if ((!UTIL_IsVisible(targetLoc, blackboard, targetEnt)
 				|| (weapFunc->isMelee() && eyes.z - targetLoc.z > 20.0f))
