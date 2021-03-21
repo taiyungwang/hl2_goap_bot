@@ -33,14 +33,7 @@ void Bot::think() {
 	try {
 		CBotCmd& cmd = blackboard->getCmd();
 		if (isDead()) {
-			Vector pos = getCurrentPosition();
-			CNavArea* area = blackboard->getNavigator()->getLastArea();
-			if (area != nullptr) {
-				area->IncreaseDanger(getTeam(), 1.0f);
-			}
-			inGame = false;
-			planner->resetPlanning(true);
-			blackboard->getButtons().tap(IN_ATTACK);
+			despawn();
 		} else if (getPlayerClass() != desiredClassId) {
 			extern IServerPluginHelpers* helpers;
 			helpers->ClientCommand(getEdict(), (*CLASSES)[getTeam() - 2][desiredClassId]);
@@ -87,6 +80,10 @@ bool Bot::handle(EventInfo* event) {
 	CUtlString name(event->getName());
 	int eventUserId = event->getInt("userid");
 	if (name == "player_death" || name == "player_disconnect") {
+		if (name == "player_death" && eventUserId == getUserId()  && inGame) {
+			despawn();
+			return false;
+		}
 		auto targeted = blackboard->getTargetedPlayer();
 		extern IVEngineServer* engine;
 		if (targeted != nullptr && eventUserId == targeted->getUserId()) {
@@ -134,3 +131,13 @@ int Bot::getPlayerClass() const {
 	return playerClassVar == nullptr ? -1 : playerClassVar->getPlayerClass();
 }
 
+
+void Bot::despawn() {
+	CNavArea* area = blackboard->getNavigator()->getLastArea();
+	if (area != nullptr) {
+		area->IncreaseDanger(getTeam(), 1.0f);
+	}
+	inGame = false;
+	planner->resetPlanning(true);
+	blackboard->getButtons().tap(IN_ATTACK);
+}

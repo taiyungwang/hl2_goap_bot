@@ -65,7 +65,6 @@ public:
 	int getPlayerClass() const;
 
 private:
-
 	static PlayerClasses CLASSES;
 
 	BasePlayer* playerClassVar = nullptr;
@@ -81,4 +80,6 @@ private:
 	RotationManager rotation;
 
 	bool inGame = false, hookEnabled = false, resetPlanner = false;
+
+	void despawn();
 };
