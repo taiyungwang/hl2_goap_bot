@@ -2,6 +2,7 @@
 
 #include <player/Blackboard.h>
 #include <player/Player.h>
+#include <weapon/Weapon.h>
 
 AttackAction::AttackAction(Blackboard& blackboard) :
 		DestroyObjectAction(blackboard) {
@@ -14,7 +15,7 @@ bool AttackAction::precondCheck() {
 	return blackboard.getTargetedPlayer() != nullptr;
 }
 
-bool AttackAction::goalComplete() {
+bool AttackAction::targetDestroyed() const {
 	return blackboard.getTargetedPlayer() == nullptr
 			|| blackboard.getTargetedPlayer()->isDead();
 }

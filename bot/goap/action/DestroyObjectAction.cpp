@@ -48,7 +48,7 @@ bool DestroyObjectAction::execute() {
 		return true;
 	}
 	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
-	if (goalComplete() || weapon->isClipEmpty()) {
+	if (targetDestroyed() || weapon->isClipEmpty()) {
 		return true;
 	}
 	const Player* self = blackboard.getSelf();
@@ -114,14 +114,27 @@ bool DestroyObjectAction::execute() {
 }
 
 bool DestroyObjectAction::goalComplete() {
-	bool isDestroyed = blackboard.getBlocker() == nullptr
+	if (targetDestroyed()) {
+		blackboard.setBlocker(nullptr);
+		abort();
+		return true;
+	}
+	return false;
+}
+
+
+void DestroyObjectAction::abort() {
+	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
+	if (weapon != nullptr) {
+		weapon->undeploy(blackboard);
+	}
+}
+
+bool DestroyObjectAction::targetDestroyed() const {
+	return blackboard.getBlocker() == nullptr
 			|| BaseEntity(blackboard.getBlocker()).isDestroyedOrUsed()
 			|| blackboard.getBlocker()->GetCollideable()->GetCollisionOrigin().DistTo(
 					blackboard.getSelf()->getCurrentPosition()) > 130.0f;
-	if (isDestroyed) {
-		blackboard.setBlocker(nullptr);
-	}
-	return isDestroyed;
 }
 
 edict_t* DestroyObjectAction::getTargetedEdict() const {

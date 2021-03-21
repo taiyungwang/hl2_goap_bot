@@ -89,10 +89,9 @@ bool Navigator::step() {
 
 void Navigator::start(CUtlStack<CNavArea*>* path, const Vector& goal, float targetRadius) {
 	finalGoal = goal;
-	buildPathStartArea = nullptr;
+	lastArea = buildPathStartArea = nullptr;
 	this->targetRadius = targetRadius;
 	this->path = path;
-	lastArea = nullptr;
 	moveCtx->stop();
 	if (path->Count() == 0) {
 		Msg("No path available.\n");
@@ -102,7 +101,7 @@ void Navigator::start(CUtlStack<CNavArea*>* path, const Vector& goal, float targ
 bool Navigator::checkCanMove() {
 	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
 	if (weapon != nullptr && weapon->isDeployed()) {
-		blackboard.getButtons().tap(IN_ATTACK2);
+		weapon->undeploy(blackboard);
 		return false;
 	}
 	return true;

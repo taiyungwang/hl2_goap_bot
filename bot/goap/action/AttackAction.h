@@ -7,10 +7,8 @@ public:
 	AttackAction(Blackboard& blackboard);
 
 	bool precondCheck();
-
-	virtual bool goalComplete();
-
 private:
+	bool targetDestroyed() const;
 
 	edict_t* getTargetedEdict() const;
 

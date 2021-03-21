@@ -111,8 +111,8 @@ MoveState* Avoid::move(const Vector& pos) {
 			Vector left(perpLeft2D(result.endpos, pos).Normalized() * HalfHumanWidth);
 			trace_t tr;
 			FilterList filter;
-			auto self = blackboard.getSelf();
-			filter.add(self->getEdict()).add(BasePlayer(self->getEdict()).getGroundEntity())
+			edict_t* self = blackboard.getSelf()->getEdict();
+			filter.add(self).add(BasePlayer(self).getGroundEntity())
 							.add(blackboard.getTarget());
 			// we're heading straight for the blocker.
 			UTIL_TraceLine(pos, left + result.endpos,

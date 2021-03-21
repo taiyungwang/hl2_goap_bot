@@ -21,7 +21,9 @@ public:
 
 	bool execute();
 
-	virtual bool goalComplete();
+	bool goalComplete();
+
+	void abort();
 
 protected:
 
@@ -34,6 +36,8 @@ protected:
 	virtual bool isBreakable(edict_t* object) const {
 		return false;
 	}
+
+	virtual bool targetDestroyed() const;
 
 private:
 	CUtlLinkedList<CUtlString> objectNames;

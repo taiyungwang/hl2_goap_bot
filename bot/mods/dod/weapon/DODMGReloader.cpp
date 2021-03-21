@@ -3,9 +3,7 @@
 #include <weapon/Deployer.h>
 #include <weapon/Weapon.h>
 
-bool DODMGReloader::execute(Blackboard& blackboard) {
-	if (!weapon.getDeployer()->execute(blackboard)) {
-		return false;
-	}
-	return Reloader::execute(blackboard);
+bool DODMGReloader::execute(Blackboard &blackboard) {
+	return weapon.getDeployer()->execute(blackboard)
+			&& Reloader::execute(blackboard);
 }

@@ -9,6 +9,8 @@ public:
 
 	bool execute(Blackboard& blackboard);
 
+	void undeploy(Blackboard& blackboard);
+
 private:
 	bool proneRequired = true;
 

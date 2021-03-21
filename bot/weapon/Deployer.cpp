@@ -12,3 +12,9 @@ bool Deployer::execute(Blackboard& blackboard) {
 	}
 	return true;
 }
+
+void Deployer::undeploy(Blackboard& blackboard) {
+	if (weapon.isDeployed()) {
+		blackboard.getButtons().tap(IN_ATTACK2);
+	}
+}

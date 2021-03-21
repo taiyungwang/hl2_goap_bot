@@ -1,5 +1,6 @@
 #pragma once
 
+class Blackboard;
 class EntityVar;
 class WeaponFunction;
 class Deployer;
@@ -51,6 +52,8 @@ public:
 	}
 
 	bool isDeployed() const;
+
+	void undeploy(Blackboard& blackboard);
 
 	const edict_t* getEdict() const {
 		return weap;

@@ -33,6 +33,11 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 	return false;
 }
 
+void DODMGDeployer::undeploy(Blackboard& blackboard) {
+	Deployer::undeploy(blackboard);
+	animationCounter = -1;
+}
+
 void DODMGDeployer::start(Blackboard& blackboard) {
 	const Player* self = blackboard.getSelf();
 	if (blackboard.getTargetedPlayer() == nullptr

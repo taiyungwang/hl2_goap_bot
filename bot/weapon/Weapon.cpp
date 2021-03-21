@@ -44,6 +44,12 @@ bool Weapon::isDeployed() const {
 			&& deployedCheck->get<bool>(weap);
 }
 
+void Weapon::undeploy(Blackboard& blackboard) {
+	 if (deployer != nullptr) {
+		 deployer->undeploy(blackboard);
+	 }
+}
+
 bool Weapon::isOutOfAmmo(edict_t* player) const {
 	return checkAmmo([player](WeaponFunction* weapFunc) {
 		return weapFunc->getAmmo(player);
