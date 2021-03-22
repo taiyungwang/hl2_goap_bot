@@ -67,6 +67,8 @@ void DODBotBuilder::updatePlanner(Planner &planner,
 		}
 
 	private:
+		bool unproned = false;
+
 		bool checkCanMove() {
 			if (!Navigator::checkCanMove()) {
 				return false;
@@ -76,13 +78,11 @@ void DODBotBuilder::updatePlanner(Planner &planner,
 					blackboard.getButtons().tap(IN_ALT1);
 					unproned = true;
 				}
-				return false;
+				return true;
 			}
 			unproned = false;
 			return true;
 		}
-
-		bool unproned = false;
 	};
 	// TODO: hacky way of overriding the default navigator
 	delete blackboard.getNavigator();
