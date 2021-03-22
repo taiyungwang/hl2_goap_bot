@@ -33,6 +33,9 @@ bool DODDefuseBombAction::execute() {
 		interruptable = true;
 		return true;
 	}
+	if (!isAvailable(item)) {
+		return true;
+	}
 	interruptable = false;
 	blackboard.getButtons().hold(IN_USE);
 	Vector itemPos = UTIL_FindGround(
