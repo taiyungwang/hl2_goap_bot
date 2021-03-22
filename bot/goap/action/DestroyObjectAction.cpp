@@ -44,28 +44,23 @@ bool DestroyObjectAction::precondCheck() {
 }
 
 bool DestroyObjectAction::execute() {
-	if (dur-- < 1) {
-		return true;
-	}
-	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
-	if (targetDestroyed() || weapon->isClipEmpty()) {
-		return true;
-	}
 	const Player* self = blackboard.getSelf();
-	edict_t* selfEnt = self->getEdict();
-	edict_t* targetEnt = getTargetedEdict();
-	if (targetEnt == nullptr || targetEnt->IsFree()) {
+	Vector targetLoc = blackboard.getViewTarget();
+	float dist = targetLoc.DistTo(self->getCurrentPosition());
+	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
+	if (weapon == nullptr) {
 		return true;
 	}
-	Vector targetLoc = blackboard.getViewTarget();
-	Vector eyes = self->getEyesPos();
-	float dist = targetLoc.DistTo(self->getCurrentPosition());
-	Buttons& buttons = blackboard.getButtons();
-	if (weapon->getDeployer() != nullptr
-			&& weapon->getMinDeployRange() < dist
-			&& !weapon->getDeployer()->execute(blackboard)) {
-		return false;
+	if (!weapon->isDeployed()&& weapon->getMinDeployRange() < dist) {
+		return weapon->getDeployer()->execute(blackboard);
 	}
+	if (dur-- < 1 || targetDestroyed() || weapon->isClipEmpty()) {
+		return true;
+	}
+	edict_t* targetEnt = getTargetedEdict();
+	Vector eyes = self->getEyesPos();
+	Buttons& buttons = blackboard.getButtons();
+	edict_t* selfEnt = self->getEdict();
 	WeaponFunction* weapFunc = weapon->chooseWeaponFunc(selfEnt, dist);
 	if (weapFunc->isExplosive()) {
 		targetLoc = targetEnt->GetCollideable()->GetCollisionOrigin();
@@ -106,7 +101,9 @@ bool DestroyObjectAction::execute() {
 				&& !crouch) {
 			// try crouching
 			crouch = true;
-			return false;
+			if (!weapFunc->isMelee()) {
+				return false;
+			}
 		}
 		weapFunc->attack(buttons, dist);
 	}
@@ -128,6 +125,7 @@ void DestroyObjectAction::abort() {
 	if (weapon != nullptr) {
 		weapon->undeploy(blackboard);
 	}
+	moveCtx->stop();
 }
 
 bool DestroyObjectAction::targetDestroyed() const {

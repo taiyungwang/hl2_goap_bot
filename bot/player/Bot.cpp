@@ -13,6 +13,7 @@
 #include <nav_mesh/nav_area.h>
 #include <util/SimpleException.h>
 #include <util/BasePlayer.h>
+#include <ivdebugoverlay.h>
 #include <in_buttons.h>
 
 PlayerClasses Bot::CLASSES = nullptr;
@@ -54,6 +55,13 @@ void Bot::think() {
 					world->updateState(WorldProp::USING_BEST_WEAP, false);
 				}
 				planner->execute();
+				extern ConVar mybot_debug;
+				if (mybot_debug.GetBool()) {
+					extern IVDebugOverlay *debugoverlay;
+					debugoverlay->AddLineOverlay(getEyesPos(), blackboard->getViewTarget(), 0,
+							255, 0, true,
+							NDEBUG_PERSIST_TILL_NEXT_SERVER);
+				}
 				VectorAngles(blackboard->getViewTarget() - getEyesPos(), cmd.viewangles);
 				rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle(),
 						mybot_rot_speed.GetFloat());
@@ -80,10 +88,6 @@ bool Bot::handle(EventInfo* event) {
 	CUtlString name(event->getName());
 	int eventUserId = event->getInt("userid");
 	if (name == "player_death" || name == "player_disconnect") {
-		if (name == "player_death" && eventUserId == getUserId()  && inGame) {
-			despawn();
-			return false;
-		}
 		auto targeted = blackboard->getTargetedPlayer();
 		extern IVEngineServer* engine;
 		if (targeted != nullptr && eventUserId == targeted->getUserId()) {
@@ -98,6 +102,10 @@ bool Bot::handle(EventInfo* event) {
 			blackboard->reset();
 			world->reset();
 			return true;
+		}
+		if (name == "player_death" && inGame) {
+			despawn();
+			return false;
 		}
 		if (name == "player_hurt") {
 			int attacker = event->getInt("attacker");
