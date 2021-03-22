@@ -116,7 +116,7 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 		extern ConVar mybot_debug;
 		if (mybot_debug.GetBool()) {
 			extern IVDebugOverlay *debugoverlay;
-			debugoverlay->AddLineOverlay(selfEyes, targetPos, 0,
+			debugoverlay->AddLineOverlay(selfEyes, targetPos, 255,
 					255, 0, true,
 					NDEBUG_PERSIST_TILL_NEXT_SERVER);
 		}
