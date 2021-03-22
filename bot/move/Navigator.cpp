@@ -37,10 +37,10 @@ bool Navigator::step() {
 	if (!checkCanMove()) {
 		return false;
 	}
-	getNextArea();
 	const Player* self = blackboard.getSelf();
 	Vector loc = self->getCurrentPosition();
 	CNavArea* area = getCurrentArea(loc);
+	getNextArea(area);
 	int attributes = area == nullptr ? NAV_MESH_INVALID: area->GetAttributes();
 	if (path->Count() == 0) {
 		moveCtx->setTargetOffset(targetRadius);
@@ -216,7 +216,7 @@ bool Navigator::canMoveTo(Vector goal) const {
 	return !moveCtx->trace(goal).DidHit();
 }
 
-void Navigator::getNextArea() {
+void Navigator::getNextArea(CNavArea* currentArea) {
 	const Bot* self = blackboard.getSelf();
 	if (mybot_debug.GetBool()) {
 		debugoverlay->AddLineOverlay(self->getEyesPos(),
@@ -228,7 +228,8 @@ void Navigator::getNextArea() {
 		return;
 	}
 	const Vector& loc = self->getCurrentPosition();
-	if (lastArea == nullptr || (lastArea == getCurrentArea(loc)
+	// check to see if we have to get a new area no matter what.
+	if (lastArea == nullptr || (lastArea == currentArea
 			&& !(lastArea->GetAttributes() & NAV_MESH_PRECISE)
 			&& !(path->Top()->GetAttributes() & NAV_MESH_JUMP))
 			|| !moveCtx->hasGoal()) {
@@ -252,6 +253,7 @@ void Navigator::getNextArea() {
 				|| zDelta > 100.0f
 				// don't skip area that is above step Height.
 				|| -zDelta > StepHeight
+				|| !currentArea->IsPotentiallyVisible(nextArea)
 				|| !getPortal(goal, path->Top(), nextArea)
 				|| !canMoveTo(goal)) {
 			return;
