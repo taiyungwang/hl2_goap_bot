@@ -200,7 +200,6 @@ void DODBotBuilder::initWeapons(WeaponBuilderFactory &weaponFac) const {
 	weaponFac.addInstance("weapon_m1carbine", new PistolBuilder(0.4f));
 	weaponFac.addInstance("weapon_c96", new C96Builder());
 	weaponFac.addInstance("weapon_basebomb", new UtilityToolBuilder());
-
 }
 
 World* DODBotBuilder::buildWorld() const {

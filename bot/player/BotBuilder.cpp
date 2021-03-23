@@ -16,8 +16,9 @@
 #include <util/BasePlayer.h>
 
 BotBuilder::BotBuilder(GameManager* objectives): objectives(objectives) {
-	addCommand("mybot_add_bot",  "Add a bot to the server", &BotBuilder::addBot);
-	addCommand("mybot_add_all_bots",  "Fill server with bots", &BotBuilder::addAllBots);
+	addCommand("mybot_add_bot", "Add a bot to the server", &BotBuilder::addBot);
+	addCommand("mybot_add_all_bots", "Fill server with bots", &BotBuilder::addAllBots);
+	addCommand("mybot_kick_all_bots", "Kicks all bots", &BotBuilder::kickAllBots);
 	extern ICvar* cVars;
 	teamPlay = cVars->FindVar("mp_teamplay")->GetBool();
 }
@@ -34,7 +35,6 @@ void BotBuilder::addBot(const CCommand &command) const {
 	static int botCount = 0;
 	extern IBotManager *botmanager;
 	int team = rand() % 2 + 2;
-
 	botCount %= 32;
 	if (command.ArgC() > 2) {
 		team = atoi(command.Arg(2)) % 2 + 2;
@@ -52,6 +52,17 @@ void BotBuilder::addBot(const CCommand &command) const {
 	playerinfomanager->GetPlayerInfo(pEdict)->ChangeTeam(team);
 	modHandleCommand(command, build(pEdict));
 }
+
+void BotBuilder::kickAllBots(const CCommand &command) const {
+	auto& players = Player::getPlayers();
+	FOR_EACH_MAP_FAST(players, i) {
+		if (dynamic_cast<Bot*>(players[i]) != nullptr) {
+			extern IVEngineServer* engine;
+			engine->ServerCommand((CUtlString("kickid ") + players[i]->getUserId() + "\n").Get());
+		}
+	}
+}
+
 
 void BotBuilder::onNavMeshLoad() {
 	hidingSpotSelector = new HidingSpotSelector();

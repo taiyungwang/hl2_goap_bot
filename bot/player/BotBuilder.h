@@ -63,5 +63,7 @@ private:
 
 	void addBot(const CCommand &command) const;
 
+	void kickAllBots(const CCommand &command) const;
+
 	void addCommand(const char* name, const char* description, CmdFuncPtr ptr);
 };
