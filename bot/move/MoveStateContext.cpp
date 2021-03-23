@@ -1,6 +1,7 @@
 #include "MoveStateContext.h"
 
 #include "Stopped.h"
+#include "MoveTraceFilter.h"
 #include <player/Bot.h>
 #include <player/Blackboard.h>
 #include <player/Button.h>
@@ -90,15 +91,15 @@ bool MoveStateContext::reachedGoal(float targetOffset) {
 const trace_t& MoveStateContext::trace(Vector goal) {
 	const Player* self = blackboard.getSelf();
 	Vector pos = self->getCurrentPosition();
-	extern ConVar mybot_debug;
-	FilterList filter;
-	filter.add(self->getEdict()).add(BasePlayer(self->getEdict()).getGroundEntity())
-					.add(blackboard.getTarget());
+	pos.z += StepHeight;
+	goal.z += StepHeight;
+	MoveTraceFilter filter(*self, blackboard.getTarget());
 	edict_t* edict = self->getEdict();
 	Vector mins = edict->GetCollideable()->OBBMins(),
 			maxs = edict->GetCollideable()->OBBMaxs();
 	mins.z += StepHeight;
 	maxs.x = 0;
+	extern ConVar mybot_debug;
 	UTIL_TraceHull(pos, goal, mins, maxs,
 			MASK_SOLID_BRUSHONLY, filter, &traceResult, mybot_debug.GetBool());
 	return traceResult;

@@ -108,7 +108,7 @@ public:
 
 	const trace_t& trace(Vector goal);
 
-	const trace_t& getTraceResult() const {
+	trace_t& getTraceResult() {
 		return traceResult;
 	}
 
