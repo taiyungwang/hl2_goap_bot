@@ -38,8 +38,8 @@ private:
 	edict_t* self, *target;
 };
 
-bool UTIL_IsVisible(const Vector &vecAbsEnd,
-		Blackboard& blackboard, edict_t* target, trace_t& result) {
+bool UTIL_IsVisible(trace_t& result, const Vector &vecAbsEnd,
+		Blackboard& blackboard, edict_t* target) {
 	if (target == nullptr) {
 		return false;
 	}
@@ -54,7 +54,7 @@ bool UTIL_IsVisible(const Vector &vecAbsEnd,
 bool UTIL_IsVisible(const Vector &vecAbsEnd,
 		Blackboard& blackboard, edict_t* target) {
 	trace_t result;
-	return UTIL_IsVisible(vecAbsEnd, blackboard, target, result);
+	return UTIL_IsVisible(result, vecAbsEnd, blackboard, target);
 }
 
 void Vision::updateVisiblity(Blackboard& blackboard) {
@@ -111,7 +111,7 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 			targetPos = target->getCurrentPosition();
 			targetPos.z += 31.0f; // center mass
 			trace_t result;
-			if (!UTIL_IsVisible(targetPos, blackboard, target->getEdict(), result)) {
+			if (!UTIL_IsVisible(result, targetPos, blackboard, target->getEdict())) {
 				// see if the target is obscured by another enemy.
 				bool visible = false;
 				if (result.m_pEnt != nullptr) {

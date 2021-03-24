@@ -11,6 +11,7 @@
 #include <weapon/DeployableWeaponBuilder.h>
 #include <nav_mesh/nav.h>
 #include <nav_mesh/nav_area.h>
+#include <util/UtilTrace.h>
 #include <util/BasePlayer.h>
 #include <in_buttons.h>
 
@@ -40,7 +41,7 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 			if (target != nullptr && !target->isDead()) {
 				trace_t result;
 				auto self = blackboard.getSelf();
-				UTIL_IsVisible(self->getEyesPos(), blackboard, target, result);
+				UTIL_IsVisible(result, self->getEyesPos(), blackboard, target->getEdict());
 				extern ConVar nav_slope_limit;
 				if (result.DidHit()) {
 					if (result.endpos.DistTo(result.startpos) > HalfHumanWidth
