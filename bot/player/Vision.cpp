@@ -39,17 +39,22 @@ private:
 };
 
 bool UTIL_IsVisible(const Vector &vecAbsEnd,
-		Blackboard& blackboard, edict_t* target) {
+		Blackboard& blackboard, edict_t* target, trace_t& result) {
 	if (target == nullptr) {
 		return false;
 	}
-	trace_t result;
 	result.fraction = 0.0f;
 	auto self = blackboard.getSelf();
 	Vector start = self->getEyesPos();
 	FilterSelfAndTarget filter(blackboard.getSelf()->getEdict()->GetIServerEntity(), target->GetIServerEntity());
 	UTIL_TraceLine(start, vecAbsEnd, MASK_ALL, &filter, &result);
 	return !result.DidHit();
+}
+
+bool UTIL_IsVisible(const Vector &vecAbsEnd,
+		Blackboard& blackboard, edict_t* target) {
+	trace_t result;
+	return UTIL_IsVisible(vecAbsEnd, blackboard, target, result);
 }
 
 void Vision::updateVisiblity(Blackboard& blackboard) {
@@ -105,8 +110,26 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 		if (!UTIL_IsVisible(targetPos, blackboard, target->getEdict())) {
 			targetPos = target->getCurrentPosition();
 			targetPos.z += 31.0f; // center mass
-			if (!UTIL_IsVisible(targetPos, blackboard, target->getEdict())) {
-				continue;
+			trace_t result;
+			if (!UTIL_IsVisible(targetPos, blackboard, target->getEdict(), result)) {
+				// see if the target is obscured by another enemy.
+				bool visible = false;
+				if (result.m_pEnt != nullptr) {
+					extern IServerGameEnts *servergameents;
+					edict_t* target = servergameents->BaseEntityToEdict(result.m_pEnt);
+					extern CGlobalVars *gpGlobals;
+					if (engine->IndexOfEdict(target) < gpGlobals->maxClients) {
+						FOR_EACH_VEC(visibles, j) {
+							if (visibles[j].player->getEdict() == target) {
+								visible = true;
+								break;
+							}
+						}
+					}
+				}
+				if (!visible) {
+					continue;
+				}
 			}
 		}
 		if (blackboard.getTargetedPlayer() == nullptr) {

@@ -6,11 +6,11 @@
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
+#include <player/Vision.h>
 #include <weapon/Weapon.h>
 #include <weapon/DeployableWeaponBuilder.h>
 #include <nav_mesh/nav.h>
 #include <nav_mesh/nav_area.h>
-#include <util/UtilTrace.h>
 #include <util/BasePlayer.h>
 #include <in_buttons.h>
 
@@ -40,9 +40,7 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 			if (target != nullptr && !target->isDead()) {
 				trace_t result;
 				auto self = blackboard.getSelf();
-				FilterSelfAndTarget filter(selfEnt->GetIServerEntity(),
-						target->getEdict()->GetIServerEntity());
-				UTIL_TraceLine(self->getEyesPos(), target->getCurrentPosition(), MASK_ALL, &filter, &result);
+				UTIL_IsVisible(self->getEyesPos(), blackboard, target, result);
 				extern ConVar nav_slope_limit;
 				if (result.DidHit()) {
 					if (result.endpos.DistTo(result.startpos) > HalfHumanWidth
