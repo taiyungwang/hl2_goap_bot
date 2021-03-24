@@ -40,43 +40,68 @@ bool Navigator::step() {
 	const Player* self = blackboard.getSelf();
 	Vector loc = self->getCurrentPosition();
 	CNavArea* area = getCurrentArea(loc);
-	getNextArea(area);
-	int attributes = area == nullptr ? NAV_MESH_INVALID: area->GetAttributes();
-	if (path->Count() == 0) {
-		moveCtx->setTargetOffset(targetRadius);
-		moveCtx->setGoal(finalGoal);
-		moveCtx->traceMove();
-	} else if (lastArea != nullptr) {
-		attributes = path->Top()->GetAttributes();
-		if (mybot_debug.GetBool()) {
-			path->Top()->Draw();
+	// do we need to get the next area?
+	Vector goal(finalGoal);
+	bool canLookAhead = path->Count() > 0;
+	if (lastArea == nullptr || (canLookAhead && path->Top() == area) || !moveCtx->hasGoal()) {
+		if (canLookAhead) {
+			path->Pop(lastArea);
+			canLookAhead = path->Count() > 0;
+			centerHit = false;
+			if (canLookAhead) {
+				getPortal(goal, lastArea, path->Top());
+			} else {
+				lastArea->GetClosestPointOnArea(finalGoal, &goal);
+			}
+		} else {
+			moveCtx->setTargetOffset(targetRadius);
 		}
-		Vector lastAreaEnd;
-		if (moveCtx->nextGoalIsLadderStart()) {
-			if (blackboard.isOnLadder()) {
-				moveCtx->setGoal(path->Top()->GetCenter());
-			}
-		} else if (getPortal(lastAreaEnd, lastArea, path->Top())) {
-			Vector topAreaStart;
-			path->Top()->GetClosestPointOnArea(lastAreaEnd, &topAreaStart);
-			if (lastArea->GetAttributes() & NAV_MESH_PRECISE) {
-				attributes = lastArea->GetAttributes();
-			}
-			if ((area != lastArea && ((attributes & NAV_MESH_JUMP)
-					|| (attributes & NAV_MESH_PRECISE))) || !canMoveTo(topAreaStart)) {
-				topAreaStart = lastArea->GetCenter();
-				moveCtx->trace(topAreaStart);
-			}
-			// TODO: magic number.  Do we need some sort of logic to see if this is valid?
-			if (((attributes & NAV_MESH_JUMP) ||
-					((attributes & NAV_MESH_CROUCH) && !(area->GetAttributes() & NAV_MESH_CROUCH)))
-					&& topAreaStart.AsVector2D().DistTo(loc.AsVector2D()) > 40.0f) {
-				attributes = NAV_MESH_INVALID;
-			}
-			moveCtx->setGoal(topAreaStart);
-		} else if (!findLadder(lastArea, path->Top())) {
-			Warning("Unable to find next goal.\n");
+	} else if (canLookAhead) {
+		getPortal(goal, lastArea, path->Top());
+	}
+	int attributes = lastArea->GetAttributes();
+	if (area == lastArea) {
+		attributes &= ~NAV_MESH_JUMP;
+		// do we need to go to center of area?
+		if (!centerHit) {
+			centerHit = loc.DistTo(lastArea->GetCenter()) <= 32;
 		}
+		if (!centerHit && ((attributes & NAV_MESH_PRECISE)
+					|| (path->Count() > 0 && (findLadder(lastArea, path->Top())
+							|| (path->Top()->GetAttributes() & NAV_MESH_JUMP)))
+					|| !canMoveTo(goal))) {
+			canLookAhead = false;
+			goal = lastArea->GetCenter();
+		}
+		canLookAhead = canLookAhead && canMoveTo(goal);
+	} else if (!canMoveTo(goal)) {
+		canLookAhead = false;
+		goal = lastArea->GetCenter();
+		if (!canMoveTo(goal)) {
+			lastArea->GetClosestPointOnArea(loc, &goal);
+		}
+	}
+	if (canLookAhead && !(path->Top()->GetAttributes() & NAV_MESH_JUMP)
+			&& area->IsPotentiallyVisible(path->Top())) {
+		Vector test;
+		path->Top()->GetClosestPointOnArea(loc, &test);
+		float zDelta = loc.z - path->Top()->GetCenter().z;
+		// don't skip to an area that is too far below.
+		if (zDelta < -100.0f
+				// don't skip area that is above step Height.
+				&& zDelta <= StepHeight
+				&& canMoveTo(test)) {
+			path->Pop(lastArea);
+			centerHit = false;
+		}
+	}
+	lastArea->Draw();
+	moveCtx->setGoal(goal);
+	// TODO: magic number.  Do we need some sort of logic to see if this is valid?
+	if (((attributes & NAV_MESH_JUMP) ||
+			((attributes & NAV_MESH_CROUCH) && !(area->GetAttributes() & NAV_MESH_CROUCH)))
+			&& goal.AsVector2D().DistTo(loc.AsVector2D()) > 40.0f) {
+		attributes = NAV_MESH_INVALID;
 	}
 	moveCtx->move(attributes);
 	if (mybot_debug.GetBool()) {
@@ -214,54 +239,6 @@ bool Navigator::canMoveTo(Vector goal) const {
 		goal = (goal - loc).Normalized() * (goal.DistTo(loc) - targetRadius) + loc;
 	}
 	return !moveCtx->trace(goal).DidHit();
-}
-
-void Navigator::getNextArea(CNavArea* currentArea) {
-	const Bot* self = blackboard.getSelf();
-	if (mybot_debug.GetBool()) {
-		debugoverlay->AddLineOverlay(self->getEyesPos(),
-				finalGoal, 255, 255, 255, true,
-				NDEBUG_PERSIST_TILL_NEXT_SERVER);
-	}
-	if (path->Count() == 0|| (lastArea != nullptr && (blackboard.isOnLadder()
-			|| moveCtx->nextGoalIsLadderStart()))) {
-		return;
-	}
-	const Vector& loc = self->getCurrentPosition();
-	// check to see if we have to get a new area no matter what.
-	if (lastArea == nullptr || (lastArea == currentArea
-			&& !(lastArea->GetAttributes() & NAV_MESH_PRECISE)
-			&& !(path->Top()->GetAttributes() & NAV_MESH_JUMP))
-			|| !moveCtx->hasGoal()) {
-		path->Pop(lastArea);
-		return;
-	}
-	int nextAreaAttr = path->Top()->GetAttributes();
-	Vector goal;
-	if (!getPortal(goal, lastArea, path->Top())
-			|| (nextAreaAttr & NAV_MESH_JUMP)
-					|| (nextAreaAttr & NAV_MESH_CROUCH)
-					|| (nextAreaAttr & NAV_MESH_PRECISE)
-					|| !canMoveTo(goal)) {
-		return;
-	}
-	if (path->Count() > 1) {
-		CNavArea* nextArea = path->Element(path->Count() - 2);
-		float zDelta = loc.z - nextArea->GetCenter().z;
-		if ((nextArea->GetAttributes() & NAV_MESH_JUMP)
-				// don't skip to an area that is too far below.
-				|| zDelta > 100.0f
-				// don't skip area that is above step Height.
-				|| -zDelta > StepHeight
-				|| !currentArea->IsPotentiallyVisible(nextArea)
-				|| !getPortal(goal, path->Top(), nextArea)
-				|| !canMoveTo(goal)) {
-			return;
-		}
-	} else if (!canMoveTo(finalGoal)) {
-		return;
-	}
-	path->Pop(lastArea);
 }
 
 bool Navigator::reachedGoal() const {

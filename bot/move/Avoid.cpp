@@ -5,6 +5,7 @@
 #include "MoveStateContext.h"
 #include "StepLeft.h"
 #include "Jump.h"
+#include "MoveTraceFilter.h"
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
@@ -32,11 +33,16 @@ MoveState* Avoid::move(const Vector& pos) {
 		return new Stopped(ctx);
 	}
 	Blackboard& blackboard = ctx.getBlackboard();
-	const trace_t& result = ctx.getTraceResult();
+	trace_t& result = ctx.getTraceResult();
+	Vector goal = ctx.getGoal();
+	MoveTraceFilter filter(*blackboard.getSelf(), blackboard.getTarget());
+	if (result.startsolid) {
+		UTIL_TraceLine(pos, goal, MASK_SOLID_BRUSHONLY, &filter, &result);
+	}
+	extern IVEngineServer* engine;
 	edict_t* currBlocker = getEdict(result);
 	const char* currBlockerName = currBlocker == nullptr || currBlocker->IsFree() ? nullptr: currBlocker->GetClassName();
 	if (ctx.checkStuck()) {
-		extern IVEngineServer* engine;
 		extern CGlobalVars *gpGlobals;
 		int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
 		if (currBlocker != nullptr
@@ -99,43 +105,20 @@ MoveState* Avoid::move(const Vector& pos) {
 		}
 		return nextState;
 	}
-	Vector goal = ctx.getGoal();
 	extern ConVar nav_slope_limit;
-	Vector avoid(result.endpos);
-	if (!result.startsolid && result.DidHit()
+	// TODO: the plane / world spawn avoidance doesn't really work, since using the plane
+	// as a avoidance adjustment doesn't necessarily push the bot toward the right direction.
+	if (result.DidHit() && !result.startsolid
 			&& currBlocker != nullptr
 			&& Q_stristr(currBlockerName, "func_team") == nullptr
 			&& (result.plane.normal.LengthSqr() == 0.0f
 					|| result.plane.normal.z > nav_slope_limit.GetFloat())) {
-		if ((goal - pos).Normalized().Dot((result.endpos - pos).Normalized()) > 0.9) {
-			Vector left(perpLeft2D(result.endpos, pos).Normalized() * HalfHumanWidth);
-			trace_t tr;
-			FilterList filter;
-			edict_t* self = blackboard.getSelf()->getEdict();
-			filter.add(self).add(BasePlayer(self).getGroundEntity())
-							.add(blackboard.getTarget());
-			// we're heading straight for the blocker.
-			UTIL_TraceLine(pos, left + result.endpos,
-					MASK_SOLID_BRUSHONLY, &filter, &tr);
-			if (!tr.DidHit()) {
-				avoid = inverse2D(left) + result.endpos - pos;
-			} else {
-				UTIL_TraceLine(pos, inverse2D(left) + result.endpos,
-						MASK_SOLID_BRUSHONLY, &filter, &tr);
-				if (!tr.DidHit()) {
-					avoid = left + result.endpos - pos;
-				}
-			}
-
-		} else {
-			avoid -= pos;
-		}
-		avoid.z = pos.z;
-		goal = goal + avoid.Normalized() / Max(0.000001f, (result.endpos - pos).Length())
+		Vector avoid(currBlocker->GetCollideable()->GetCollisionOrigin());
+		avoid = avoid.x == 0.0f && avoid.y == 0.0f && avoid.z == 0.0f
+			? result.plane.normal: (result.endpos - avoid).Normalized();
+		goal += avoid / Max(0.000001f, result.endpos.DistTo(pos))
 				* mybot_avoid_move_factor.GetFloat();
 	}
 	moveStraight(goal);
 	return nullptr;
 }
-
-

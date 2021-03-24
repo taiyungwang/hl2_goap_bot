@@ -58,12 +58,9 @@ private:
 
 	float targetRadius = 25.0f;
 
-	bool canMoveTo(Vector to) const;
+	bool centerHit = false;
 
-	/**
-	 * Gets the next target area.
-	 */
-	void getNextArea(CNavArea* currentArea);
+	bool canMoveTo(Vector to) const;
 
 	CNavArea* getCurrentArea(const Vector& pos) const;
 
