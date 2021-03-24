@@ -81,13 +81,12 @@ bool Navigator::step() {
 			lastArea->GetClosestPointOnArea(loc, &goal);
 		}
 	}
-	if (canLookAhead && !(path->Top()->GetAttributes() & NAV_MESH_JUMP)
-			&& area->IsPotentiallyVisible(path->Top())) {
+	if (canLookAhead && !(path->Top()->GetAttributes() & NAV_MESH_JUMP)) {
 		Vector test;
 		path->Top()->GetClosestPointOnArea(loc, &test);
 		float zDelta = loc.z - path->Top()->GetCenter().z;
 		// don't skip to an area that is too far below.
-		if (zDelta < -100.0f
+		if (zDelta > -100.0f
 				// don't skip area that is above step Height.
 				&& zDelta <= StepHeight
 				&& canMoveTo(test)) {
