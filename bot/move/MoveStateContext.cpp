@@ -91,8 +91,6 @@ bool MoveStateContext::reachedGoal(float targetOffset) {
 const trace_t& MoveStateContext::trace(Vector goal) {
 	const Player* self = blackboard.getSelf();
 	Vector pos = self->getCurrentPosition();
-	pos.z += StepHeight;
-	goal.z += StepHeight;
 	MoveTraceFilter filter(*self, blackboard.getTarget());
 	edict_t* edict = self->getEdict();
 	Vector mins = edict->GetCollideable()->OBBMins(),

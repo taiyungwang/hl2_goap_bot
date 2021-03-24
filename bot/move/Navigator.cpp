@@ -58,12 +58,15 @@ bool Navigator::step() {
 		}
 	} else if (canLookAhead) {
 		getPortal(goal, lastArea, path->Top());
+	} else if (!canMoveTo(goal)) {
+		lastArea->GetClosestPointOnArea(goal, &goal);
 	}
 	int attributes = lastArea->GetAttributes();
 	if (area == lastArea) {
 		attributes &= ~NAV_MESH_JUMP;
 		// do we need to go to center of area?
 		if (!centerHit) {
+			// HumanHidth diagonal.
 			centerHit = loc.DistTo(lastArea->GetCenter()) <= 32;
 		}
 		if (!centerHit && ((attributes & NAV_MESH_PRECISE)
@@ -81,25 +84,12 @@ bool Navigator::step() {
 			lastArea->GetClosestPointOnArea(loc, &goal);
 		}
 	}
-	if (canLookAhead && !(path->Top()->GetAttributes() & NAV_MESH_JUMP)) {
-		Vector test;
-		path->Top()->GetClosestPointOnArea(loc, &test);
-		float zDelta = loc.z - path->Top()->GetCenter().z;
-		// don't skip to an area that is too far below.
-		if (zDelta > -100.0f
-				// don't skip area that is above step Height.
-				&& zDelta <= StepHeight
-				&& canMoveTo(test)) {
-			path->Pop(lastArea);
-			centerHit = false;
-		}
-	}
 	lastArea->Draw();
 	moveCtx->setGoal(goal);
-	// TODO: magic number.  Do we need some sort of logic to see if this is valid?
+	// magic number from https://developer.valvesoftware.com/wiki/Dimensions#Horizontal_.28To_Equal_Height.29
 	if (((attributes & NAV_MESH_JUMP) ||
 			((attributes & NAV_MESH_CROUCH) && !(area->GetAttributes() & NAV_MESH_CROUCH)))
-			&& goal.AsVector2D().DistTo(loc.AsVector2D()) > 40.0f) {
+			&& goal.AsVector2D().DistTo(loc.AsVector2D()) > 136.0f) {
 		attributes = NAV_MESH_INVALID;
 	}
 	moveCtx->move(attributes);
@@ -107,6 +97,19 @@ bool Navigator::step() {
 		debugoverlay->AddLineOverlay(loc,
 				moveCtx->getGoal(), 0, 255, 255, true,
 				NDEBUG_PERSIST_TILL_NEXT_SERVER);
+	}
+	// see if we can skip the next area.
+	if (canLookAhead && !(path->Top()->GetAttributes() & NAV_MESH_JUMP)) {
+		path->Top()->GetClosestPointOnArea(loc, &goal);
+		float zDelta = loc.z - path->Top()->GetCenter().z;
+		// don't skip to area that is too far below
+		if (zDelta <= 100.0f
+				// don't skip to area that is above step Height.
+				&& -zDelta <= StepHeight
+				&& canMoveTo(goal)) {
+			path->Pop(lastArea);
+			centerHit = false;
+		}
 	}
 	return false;
 }
@@ -150,7 +153,6 @@ NavDirType getConnectedDir(const CNavArea* from, const CNavArea* to) {
 CNavArea* Navigator::getArea(edict_t* ent, int team) {
 	return TheNavMesh->GetNearestNavArea(ent->GetCollideable()->GetCollisionOrigin(),
 			10000.0f, false, true, team);
-
 }
 
 CNavArea* Navigator::getCurrentArea(const Vector& pos) const {
