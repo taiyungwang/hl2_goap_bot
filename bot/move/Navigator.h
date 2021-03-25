@@ -24,6 +24,10 @@ public:
 
 	virtual ~Navigator();
 
+	/**
+	 * Takes a step on the nav mesh path.
+	 * @return True if the bot has reached its goal.
+	 */
 	bool step();
 
 	bool reachedGoal() const;
@@ -46,7 +50,7 @@ private:
 	 * Gets the portal of the to area if it is connected without using a ladder.
 	 * @Return True if it is connected without using a ladder.
 	 */
-	static bool getPortal(Vector& portal, const CNavArea* from, const CNavArea* to);
+	bool getPortalToNextArea(Vector& portal) const;
 
 	Vector finalGoal;
 
@@ -58,16 +62,17 @@ private:
 
 	float targetRadius = 25.0f;
 
-	bool centerHit = false;
+	bool touchedAreaCenter = false;
+
+	bool getNextArea(const Vector& loc, const CNavArea* area);
 
 	bool canMoveTo(Vector to) const;
 
 	CNavArea* getCurrentArea(const Vector& pos) const;
 
 	/**
-	 * Checks to see if a ladder is required for traversing the two areas.
-	 * If a ladder is required, moveCtx is updated accordingly.
-	 * @return True if a ladder is required.
+	 * Finds the start for a ladder to the next area.  Assumes that getPortalToNextArea()
+	 * was called to see if the two areas does not require traversing a ladder.
 	 */
-	bool findLadder(const CNavArea* from, const CNavArea* to);
+	void setLadderStart();
 };

@@ -40,52 +40,45 @@ bool Navigator::step() {
 	const Player* self = blackboard.getSelf();
 	Vector loc = self->getCurrentPosition();
 	CNavArea* area = getCurrentArea(loc);
-	// do we need to get the next area?
 	Vector goal(finalGoal);
-	bool canLookAhead = path->Count() > 0;
-	if (lastArea == nullptr || (canLookAhead && path->Top() == area) || !moveCtx->hasGoal()) {
-		if (canLookAhead) {
-			path->Pop(lastArea);
-			canLookAhead = path->Count() > 0;
-			centerHit = false;
-			if (canLookAhead) {
-				getPortal(goal, lastArea, path->Top());
-			} else {
-				lastArea->GetClosestPointOnArea(finalGoal, &goal);
-			}
-		} else {
-			moveCtx->setTargetOffset(targetRadius);
-		}
-	} else if (canLookAhead) {
-		getPortal(goal, lastArea, path->Top());
-	} else if (!canMoveTo(goal)) {
-		lastArea->GetClosestPointOnArea(goal, &goal);
+	if (getNextArea(loc, area)) {
+		touchedAreaCenter = false;
 	}
 	int attributes = lastArea->GetAttributes();
+	bool foundGoalToNextArea = getPortalToNextArea(goal);
 	if (area == lastArea) {
 		attributes &= ~NAV_MESH_JUMP;
-		// do we need to go to center of area?
-		if (!centerHit) {
-			// HumanHidth diagonal.
-			centerHit = loc.DistTo(lastArea->GetCenter()) <= 32;
+		if (!touchedAreaCenter) {
+			touchedAreaCenter = loc.DistTo(lastArea->GetCenter()) <= 32;
 		}
-		if (!centerHit && ((attributes & NAV_MESH_PRECISE)
-					|| (path->Count() > 0 && (findLadder(lastArea, path->Top())
-							|| (path->Top()->GetAttributes() & NAV_MESH_JUMP)))
-					|| !canMoveTo(goal))) {
-			canLookAhead = false;
+		if (touchedAreaCenter) {
+			if (path->Count() == 0) {
+				if (!canMoveTo(goal)) {
+					lastArea->GetClosestPointOnArea(finalGoal, &goal);
+				} else {
+					moveCtx->setTargetOffset(targetRadius);
+				}
+			} else if (!foundGoalToNextArea) {
+				setLadderStart();
+			}
+		} else if ((attributes & NAV_MESH_PRECISE)
+					|| (path->Count() == 0 && !canMoveTo(goal))
+					|| ((path->Count() > 0 && ((path->Top()->GetAttributes() & NAV_MESH_JUMP)
+							|| !foundGoalToNextArea)))) {
 			goal = lastArea->GetCenter();
 		}
-		canLookAhead = canLookAhead && canMoveTo(goal);
-	} else if (!canMoveTo(goal)) {
-		canLookAhead = false;
-		goal = lastArea->GetCenter();
+	} else {
+		if (!foundGoalToNextArea || !canMoveTo(goal)) {
+			goal = lastArea->GetCenter();
+		}
 		if (!canMoveTo(goal)) {
 			lastArea->GetClosestPointOnArea(loc, &goal);
 		}
 	}
 	lastArea->Draw();
-	moveCtx->setGoal(goal);
+	if (!blackboard.isOnLadder() && !moveCtx->nextGoalIsLadderStart()) {
+		moveCtx->setGoal(goal);
+	}
 	// magic number from https://developer.valvesoftware.com/wiki/Dimensions#Horizontal_.28To_Equal_Height.29
 	if (((attributes & NAV_MESH_JUMP) ||
 			((attributes & NAV_MESH_CROUCH) && !(area->GetAttributes() & NAV_MESH_CROUCH)))
@@ -97,19 +90,6 @@ bool Navigator::step() {
 		debugoverlay->AddLineOverlay(loc,
 				moveCtx->getGoal(), 0, 255, 255, true,
 				NDEBUG_PERSIST_TILL_NEXT_SERVER);
-	}
-	// see if we can skip the next area.
-	if (canLookAhead && !(path->Top()->GetAttributes() & NAV_MESH_JUMP)) {
-		path->Top()->GetClosestPointOnArea(loc, &goal);
-		float zDelta = loc.z - path->Top()->GetCenter().z;
-		// don't skip to area that is too far below
-		if (zDelta <= 100.0f
-				// don't skip to area that is above step Height.
-				&& -zDelta <= StepHeight
-				&& canMoveTo(goal)) {
-			path->Pop(lastArea);
-			centerHit = false;
-		}
 	}
 	return false;
 }
@@ -234,6 +214,36 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	return true;
 }
 
+bool Navigator::getNextArea(const Vector& loc, const CNavArea* area) {
+	if (path->Count() == 0) {
+		return false;
+	}
+	if (lastArea == nullptr || !moveCtx->hasGoal() || area == path->Top()) {
+		path->Pop(lastArea);
+		return true;
+	}
+	Vector goal;
+	if (!canMoveTo(moveCtx->getGoal())
+			|| moveCtx->nextGoalIsLadderStart() || blackboard.isOnLadder()
+			|| !getPortalToNextArea(goal)) {
+		return false;
+	}
+	path->Top()->GetClosestPointOnArea(loc, &goal);
+	int flags = NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE;
+	float zDelta = loc.z - path->Top()->GetCenter().z;
+	if ((lastArea->GetAttributes() & flags)
+			// don't skip to area that is too far below
+			|| zDelta > 100.0f
+			// don't skip to area that is above step Height.
+			|| -zDelta > StepHeight
+			// don't skip if we can't get to the closest point on the next.
+			|| !canMoveTo(goal)) {
+		return false;
+	}
+	path->Pop(lastArea);
+	return true;
+}
+
 bool Navigator::canMoveTo(Vector goal) const {
 	const Vector& loc = blackboard.getSelf()->getCurrentPosition();
 	if (path->Count() == 1) {
@@ -246,24 +256,24 @@ bool Navigator::reachedGoal() const {
 	return path->Count() == 0 && moveCtx->reachedGoal(targetRadius);
 }
 
-bool Navigator::findLadder(const CNavArea* from, const CNavArea* to) {
-	if (from == nullptr || to == nullptr) {
-		return false;
+void Navigator::setLadderStart() {
+	if (path->Count() == 0) {
+		return;
 	}
 	for (int i = 0; i < CNavLadder::NUM_LADDER_DIRECTIONS; i++) {
 		CNavLadder::LadderDirectionType dir = static_cast<CNavLadder::LadderDirectionType>(i);
-		const NavLadderConnectVector* laddersFrom = from->GetLadders(dir);
+		const NavLadderConnectVector* laddersFrom = lastArea->GetLadders(dir);
 		FOR_EACH_VEC(*laddersFrom, i)
 		{
 			const CNavLadder* ladder = laddersFrom->Element(i).ladder;
-			if (ladder->IsConnected(to, dir)) {
+			if (ladder->IsConnected(path->Top(), dir)) {
 				const Vector* start = &ladder->m_top;
 				Vector end = ladder->m_bottom;
 				if (dir == CNavLadder::LADDER_UP) {
 					// normalize ladder height when climbing up.
 					start = &ladder->m_bottom;
 					// assume that the z of the next area can be stepped on.
-					to->GetClosestPointOnArea(*start, &end);
+					path->Top()->GetClosestPointOnArea(*start, &end);
 					end.x = ladder->m_top.x;
 					end.y = ladder->m_top.y;
 					// the top the ladder is guaranteed to be above human height
@@ -273,28 +283,33 @@ bool Navigator::findLadder(const CNavArea* from, const CNavArea* to) {
 				if (delta == 0.0f || (delta < 0.0f && delta >= -StepHeight)
 						|| (delta > 0.0f && delta <= HumanHeight + MoveLadder::TARGET_OFFSET)) {
 					// bot already got off the ladder
-					return false;
+					Error("No ladder found from area %d to area %d.\n", lastArea->GetID(),
+							path->Top()->GetID());
+					return;
 				}
 				moveCtx->setGoal(*start);
 				moveCtx->setLadderEnd(end);
 				moveCtx->setLadderDir(dir);
-				return true;
+				return;
 			}
 		}
 	}
-	return false;
+	Error("No ladder found from area %d to area %d.\n", lastArea->GetID(),
+			path->Top()->GetID());
 }
 
-bool Navigator::getPortal(Vector& portal, const CNavArea* from, const CNavArea* to) {
-	Vector toCenter = to->GetCenter();
+bool Navigator::getPortalToNextArea(Vector& portal) const {
+	if (path->Count() == 0) {
+		return false;
+	}
 	for (int i = 0; i < NUM_DIRECTIONS; i++) {
 		NavDirType dir = static_cast<NavDirType>(i);
-		const NavConnectVector* connections = from->GetAdjacentAreas(dir);
+		const NavConnectVector* connections = lastArea->GetAdjacentAreas(dir);
 		FOR_EACH_VEC(*connections, j)
 		{
-			if (connections->Element(j).area == to) {
+			if (connections->Element(j).area == path->Top()) {
 				float halfWidth;
-				from->ComputePortal(to, dir, &portal, &halfWidth);
+				lastArea->ComputePortal(path->Top(), dir, &portal, &halfWidth);
 				return true;
 			}
 		}
