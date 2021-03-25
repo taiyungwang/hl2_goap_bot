@@ -20,9 +20,11 @@ bool FindCoverAction::ShouldSearch(CNavArea *adjArea, CNavArea *currentArea,
 
 bool FindCoverAction::operator() (CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar) {
 	edict_t* target = getTarget();
+	Vector eyes(area->GetCenter());
+	eyes.z += HumanEyeHeight;
 	bool isVisible = target != nullptr && (currentArea == area
 			|| (area->IsPotentiallyVisible(Navigator::getArea(target, blackboard.getSelf()->getTeam()))
-			&& UTIL_IsVisible(area->GetCenter(), blackboard, target)));
+			&& UTIL_IsVisible(eyes, blackboard, target)));
 	if (!isVisible) {
 		this->hideArea = area;
 	}
