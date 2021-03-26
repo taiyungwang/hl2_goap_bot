@@ -96,7 +96,6 @@ const trace_t& MoveStateContext::trace(Vector goal) {
 	Vector mins = edict->GetCollideable()->OBBMins(),
 			maxs = edict->GetCollideable()->OBBMaxs();
 	mins.z += StepHeight;
-	maxs.x = 0;
 	extern ConVar mybot_debug;
 	UTIL_TraceHull(pos, goal, mins, maxs,
 			MASK_SOLID_BRUSHONLY, filter, &traceResult, mybot_debug.GetBool());
