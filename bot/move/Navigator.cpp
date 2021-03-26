@@ -232,9 +232,8 @@ bool Navigator::getNextArea(const Vector& loc, const CNavArea* area) {
 	int flags = NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE;
 	float zDelta = loc.z - path->Top()->GetCenter().z;
 	if ((lastArea->GetAttributes() & flags)
-			// don't skip to area that is too far below
-			|| zDelta > 100.0f
-			// don't skip to area that is above step Height.
+			// don't skip areas above and below ground height
+			|| zDelta > -StepHeight
 			|| -zDelta > StepHeight
 			// don't skip if we can't get to the closest point on the next.
 			|| !canMoveTo(goal)) {
