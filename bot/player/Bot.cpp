@@ -20,6 +20,7 @@ PlayerClasses Bot::CLASSES = nullptr;
 
 ConVar mybot_rot_speed("mybot_rot_speed", "0.5", 0,
 		"determines rotational acceleration rate in degrees");
+ConVar mybot_mimic("mybot_mimic", "0");
 
 Bot::~Bot() {
 	delete blackboard;
@@ -75,6 +76,11 @@ void Bot::think() {
 		cmd.buttons = blackboard->getButtons().getPressed();
 		extern CGlobalVars *gpGlobals;
 		cmd.tick_count = gpGlobals->tickcount;
+		if (mybot_mimic.GetBool()) {
+			auto& players = Player::getPlayers();
+			cmd = players[players.Find(1)]->getInfo()->GetLastUserCommand();
+		}
+
 		extern IBotManager *botmanager;
 		if (!hookEnabled) {
 			botmanager->GetBotController(getEdict())->RunPlayerMove(&cmd);
