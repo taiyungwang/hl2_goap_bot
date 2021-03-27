@@ -66,6 +66,10 @@ public:
 
 	QAngle getAbsoluteAngle() const;
 
+	IPlayerInfo* getInfo() const {
+		return info;
+	}
+
 protected:
 	static CUtlMap<int, Player*> players;
 
