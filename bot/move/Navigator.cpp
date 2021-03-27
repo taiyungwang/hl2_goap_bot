@@ -75,7 +75,9 @@ bool Navigator::step() {
 			lastArea->GetClosestPointOnArea(loc, &goal);
 		}
 	}
-	lastArea->Draw();
+	if (mybot_debug.GetBool()) {
+		lastArea->Draw();
+	}
 	if (!blackboard.isOnLadder() && !moveCtx->nextGoalIsLadderStart()) {
 		moveCtx->setGoal(goal);
 	}
@@ -233,8 +235,7 @@ bool Navigator::getNextArea(const Vector& loc, const CNavArea* area) {
 	float zDelta = loc.z - path->Top()->GetCenter().z;
 	if ((lastArea->GetAttributes() & flags)
 			// don't skip areas above and below ground height
-			|| zDelta > -StepHeight
-			|| -zDelta > StepHeight
+			|| fabs(zDelta) > StepHeight
 			// don't skip if we can't get to the closest point on the next.
 			|| !canMoveTo(goal)) {
 		return false;
