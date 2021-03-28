@@ -88,8 +88,6 @@ public:
 		return stuck;
 	}
 
-	bool checkStuck();
-
 	void setTargetOffset(float offset) {
 		targetOffset = offset;
 	}
@@ -117,7 +115,6 @@ private:
 	Blackboard& blackboard;
 	bool stuck;
 	int type;
-	unsigned int stuckDur = 0;
 	Vector goal, ladderEnd, previousPos;
 	CNavLadder::LadderDirectionType ladderDir;
 	MoveState* state = nullptr;

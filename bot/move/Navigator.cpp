@@ -21,6 +21,10 @@ extern ConVar mybot_debug;
 
 extern IVDebugOverlay *debugoverlay;
 
+static ConVar maxAreaTime("my_bot_max_area_time", "50");
+
+static ConVar mybot_stuck_threshold("mybot_stuck_threshold", "2.0f");
+
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
 	moveCtx = new MoveStateContext(blackboard);
@@ -40,26 +44,32 @@ bool Navigator::step() {
 	const Player* self = blackboard.getSelf();
 	Vector loc = self->getCurrentPosition();
 	CNavArea* area = getCurrentArea(loc);
+	if (area == lastArea) {
+		areaTime++;
+	} else {
+		areaTime = 0;
+	}
+	lastArea = area;
 	Vector goal(finalGoal);
 	if (getNextArea(loc, area)) {
 		touchedAreaCenter = false;
 	}
-	int attributes = lastArea->GetAttributes();
+	int attributes = nextArea->GetAttributes();
 	bool crouching = attributes & NAV_MESH_CROUCH;
 	bool foundGoalToNextArea = getPortalToNextArea(goal);
 	Vector closest;
-	lastArea->GetClosestPointOnArea(loc, &closest);
-	if (area == lastArea
+	nextArea->GetClosestPointOnArea(loc, &closest);
+	if (area == nextArea
 			// or we are very close to the lastArea
 			|| (closest.DistTo(loc) <= 32.0)) {
 		attributes &= ~NAV_MESH_JUMP;
 		if (!touchedAreaCenter) {
-			touchedAreaCenter = loc.DistTo(lastArea->GetCenter()) <= 32.0f;
+			touchedAreaCenter = loc.DistTo(nextArea->GetCenter()) <= 32.0f;
 		}
 		if (touchedAreaCenter) {
 			if (path->Count() == 0) {
 				if (!canMoveTo(goal, crouching)) {
-					lastArea->GetClosestPointOnArea(finalGoal, &goal);
+					nextArea->GetClosestPointOnArea(finalGoal, &goal);
 					if (loc.DistTo(goal) <= 32.0f) {
 						goal = finalGoal;
 						moveCtx->setTargetOffset(targetRadius);
@@ -74,15 +84,15 @@ bool Navigator::step() {
 					|| (path->Count() == 0 && !canMoveTo(goal, crouching))
 					|| ((path->Count() > 0 && ((path->Top()->GetAttributes() & NAV_MESH_JUMP)
 							|| !foundGoalToNextArea)))) {
-			goal = lastArea->GetCenter();
+			goal = nextArea->GetCenter();
 		}
 	} else {
 		if (!foundGoalToNextArea || !canMoveTo(goal,crouching)) {
-			goal = lastArea->GetCenter();
+			goal = nextArea->GetCenter();
 		}
 		// target for area center if the next area is a drop
 		if (loc.z - goal.z <= StepHeight && !canMoveTo(goal, crouching)) {
-			lastArea->GetClosestPointOnArea(loc, &goal);
+			nextArea->GetClosestPointOnArea(loc, &goal);
 			if (path->Count() == 0 && (loc.DistTo(goal) < 32.0f || !canMoveTo(goal, crouching))) {
 				moveCtx->setTargetOffset(targetRadius);
 				goal = finalGoal;
@@ -90,7 +100,7 @@ bool Navigator::step() {
 		}
 	}
 	if (mybot_debug.GetBool()) {
-		lastArea->Draw();
+		nextArea->Draw();
 	}
 	if (!blackboard.isOnLadder() && !moveCtx->nextGoalIsLadderStart()) {
 		moveCtx->setGoal(goal);
@@ -100,6 +110,15 @@ bool Navigator::step() {
 			((attributes & NAV_MESH_CROUCH) && !(area->GetAttributes() & NAV_MESH_CROUCH)))
 			&& goal.AsVector2D().DistTo(loc.AsVector2D()) > 136.0f) {
 		attributes = NAV_MESH_INVALID;
+	}
+	int maxTime = maxAreaTime.GetInt();
+	if (attributes & NAV_MESH_CROUCH) {
+		maxTime *= 1.5f;
+	}
+	if (areaTime > maxTime
+			&& BasePlayer(self->getEdict()).getVelocity().Length() < mybot_stuck_threshold.GetFloat()) {
+		areaTime = 0;
+		moveCtx->setStuck(true);
 	}
 	moveCtx->move(attributes);
 	if (mybot_debug.GetBool()) {
@@ -112,7 +131,7 @@ bool Navigator::step() {
 
 void Navigator::start(CUtlStack<CNavArea*>* path, const Vector& goal, float targetRadius) {
 	finalGoal = goal;
-	lastArea = buildPathStartArea = nullptr;
+	lastArea = nextArea = buildPathStartArea = nullptr;
 	this->targetRadius = targetRadius;
 	this->path = path;
 	moveCtx->stop();
@@ -234,26 +253,26 @@ bool Navigator::getNextArea(const Vector& loc, const CNavArea* area) {
 	if (path->Count() == 0) {
 		return false;
 	}
-	if (lastArea == nullptr || !moveCtx->hasGoal() || area == path->Top()) {
-		path->Pop(lastArea);
+	if (nextArea == nullptr || !moveCtx->hasGoal() || area == path->Top()) {
+		path->Pop(nextArea);
 		return true;
 	}
 	Vector goal;
-	if (!canMoveTo(moveCtx->getGoal(), lastArea->GetAttributes() & NAV_MESH_CROUCH)
+	if (!canMoveTo(moveCtx->getGoal(), nextArea->GetAttributes() & NAV_MESH_CROUCH)
 			|| moveCtx->nextGoalIsLadderStart() || blackboard.isOnLadder()
 			|| !getPortalToNextArea(goal)) {
 		return false;
 	}
 	path->Top()->GetClosestPointOnArea(loc, &goal);
 	float zDelta = loc.z - path->Top()->GetCenter().z;
-	if ((lastArea->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE))
+	if ((nextArea->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE))
 			// don't skip areas above and below ground height
 			|| fabs(zDelta) > StepHeight
 			// don't skip if we can't get to the closest point on the next.
-			|| !canMoveTo(goal, lastArea->GetAttributes() & NAV_MESH_CROUCH)) {
+			|| !canMoveTo(goal, nextArea->GetAttributes() & NAV_MESH_CROUCH)) {
 		return false;
 	}
-	path->Pop(lastArea);
+	path->Pop(nextArea);
 	return true;
 }
 
@@ -276,7 +295,7 @@ void Navigator::setLadderStart() {
 	}
 	for (int i = 0; i < CNavLadder::NUM_LADDER_DIRECTIONS; i++) {
 		CNavLadder::LadderDirectionType dir = static_cast<CNavLadder::LadderDirectionType>(i);
-		const NavLadderConnectVector* laddersFrom = lastArea->GetLadders(dir);
+		const NavLadderConnectVector* laddersFrom = nextArea->GetLadders(dir);
 		FOR_EACH_VEC(*laddersFrom, i)
 		{
 			const CNavLadder* ladder = laddersFrom->Element(i).ladder;
@@ -297,7 +316,7 @@ void Navigator::setLadderStart() {
 				if (delta == 0.0f || (delta < 0.0f && delta >= -StepHeight)
 						|| (delta > 0.0f && delta <= HumanHeight + MoveLadder::TARGET_OFFSET)) {
 					// bot already got off the ladder
-					Error("No ladder found from area %d to area %d.\n", lastArea->GetID(),
+					Error("No ladder found from area %d to area %d.\n", nextArea->GetID(),
 							path->Top()->GetID());
 					return;
 				}
@@ -308,7 +327,7 @@ void Navigator::setLadderStart() {
 			}
 		}
 	}
-	Error("No ladder found from area %d to area %d.\n", lastArea->GetID(),
+	Error("No ladder found from area %d to area %d.\n", nextArea->GetID(),
 			path->Top()->GetID());
 }
 
@@ -318,12 +337,12 @@ bool Navigator::getPortalToNextArea(Vector& portal) const {
 	}
 	for (int i = 0; i < NUM_DIRECTIONS; i++) {
 		NavDirType dir = static_cast<NavDirType>(i);
-		const NavConnectVector* connections = lastArea->GetAdjacentAreas(dir);
+		const NavConnectVector* connections = nextArea->GetAdjacentAreas(dir);
 		FOR_EACH_VEC(*connections, j)
 		{
 			if (connections->Element(j).area == path->Top()) {
 				float halfWidth;
-				lastArea->ComputePortal(path->Top(), dir, &portal, &halfWidth);
+				nextArea->ComputePortal(path->Top(), dir, &portal, &halfWidth);
 				return true;
 			}
 		}

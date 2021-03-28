@@ -10,9 +10,6 @@
 #include <util/EntityUtils.h>
 #include <edict.h>
 
-static ConVar mybot_stuck_threshold("mybot_stuck_threshold", "0.5f");
-static ConVar my_bot_stuck_dur_threshold("mybot_stuck_dur_threshold", "5");
-
 MoveStateContext::~MoveStateContext() {
 	delete state;
 }
@@ -57,23 +54,6 @@ void MoveStateContext::move(int type) {
 	}
 }
 
-bool MoveStateContext::checkStuck() {
-	Vector currentPos = blackboard.getSelf()->getCurrentPosition();
-	float movedDist = previousPos.DistTo(currentPos);
-	if (type & NAV_MESH_CROUCH) {
-		movedDist *= 2.0f;
-	}
-	previousPos = currentPos;
-	bool stuck = movedDist < mybot_stuck_threshold.GetFloat();
-	if (!stuck) {
- 		stuckDur = 0;
-	} else if (stuckDur++ > my_bot_stuck_dur_threshold.GetInt()) {
-		stuckDur = 0;
-		return true;
-	}
-	return false;
-}
-
 const bool MoveStateContext::hasGoal() const {
 	return dynamic_cast<Stopped*>(state) == nullptr;
 }
@@ -100,7 +80,7 @@ const trace_t& MoveStateContext::trace(Vector goal, bool crouch) {
 	if (crouch) {
 		// magic number from https://developer.valvesoftware.com/wiki/Dimensions#Map_Grid_Units:_quick_reference
 		// for some reason the OBBMaxs returns 60
-		maxs -= 24.0f;
+		maxs.z -= 24.0f;
 	}
 	mins.z += StepHeight;
 	extern ConVar mybot_debug;

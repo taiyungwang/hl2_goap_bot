@@ -37,7 +37,7 @@ public:
 	bool buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path);
 
 	CNavArea* getLastArea() const {
-		return lastArea;
+		return nextArea;
 	}
 
 protected:
@@ -56,11 +56,12 @@ private:
 
 	CUtlStack<CNavArea*>* path = nullptr;
 
-	CNavArea *buildPathStartArea = nullptr, *lastArea = nullptr;
+	CNavArea *buildPathStartArea = nullptr, *nextArea = nullptr, *lastArea = nullptr;
 
 	MoveStateContext* moveCtx;
 
 	float targetRadius = 25.0f;
+	int areaTime = 0;
 
 	bool touchedAreaCenter = false;
 
