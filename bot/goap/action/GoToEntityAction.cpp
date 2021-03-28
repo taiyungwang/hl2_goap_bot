@@ -38,7 +38,7 @@ void GoToEntityAction::setTargetLocAndRadius(edict_t* target) {
 		// look for trigger zone
 		targetLoc = (min + max) / 2.0f;
 		targetLoc.z = min.z;
-		targetRadius = MIN(targetLoc.x - min.x, targetLoc.y - min.y) - 1.0f;
+		targetRadius = MIN(targetLoc.x - min.x, targetLoc.y - min.y);
 	}
 }
 

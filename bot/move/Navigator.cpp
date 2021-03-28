@@ -45,16 +45,25 @@ bool Navigator::step() {
 		touchedAreaCenter = false;
 	}
 	int attributes = lastArea->GetAttributes();
+	bool crouching = attributes & NAV_MESH_CROUCH;
 	bool foundGoalToNextArea = getPortalToNextArea(goal);
-	if (area == lastArea) {
+	Vector closest;
+	lastArea->GetClosestPointOnArea(loc, &closest);
+	if (area == lastArea
+			// or we are very close to the lastArea
+			|| (closest.DistTo(loc) <= 32.0)) {
 		attributes &= ~NAV_MESH_JUMP;
 		if (!touchedAreaCenter) {
-			touchedAreaCenter = loc.DistTo(lastArea->GetCenter()) <= 32;
+			touchedAreaCenter = loc.DistTo(lastArea->GetCenter()) <= 32.0f;
 		}
 		if (touchedAreaCenter) {
 			if (path->Count() == 0) {
-				if (!canMoveTo(goal)) {
+				if (!canMoveTo(goal, crouching)) {
 					lastArea->GetClosestPointOnArea(finalGoal, &goal);
+					if (loc.DistTo(goal) <= 32.0f) {
+						goal = finalGoal;
+						moveCtx->setTargetOffset(targetRadius);
+					}
 				} else {
 					moveCtx->setTargetOffset(targetRadius);
 				}
@@ -62,17 +71,22 @@ bool Navigator::step() {
 				setLadderStart();
 			}
 		} else if ((attributes & NAV_MESH_PRECISE)
-					|| (path->Count() == 0 && !canMoveTo(goal))
+					|| (path->Count() == 0 && !canMoveTo(goal, crouching))
 					|| ((path->Count() > 0 && ((path->Top()->GetAttributes() & NAV_MESH_JUMP)
 							|| !foundGoalToNextArea)))) {
 			goal = lastArea->GetCenter();
 		}
 	} else {
-		if (!foundGoalToNextArea || !canMoveTo(goal)) {
+		if (!foundGoalToNextArea || !canMoveTo(goal,crouching)) {
 			goal = lastArea->GetCenter();
 		}
-		if (!canMoveTo(goal)) {
+		// target for area center if the next area is a drop
+		if (loc.z - goal.z <= StepHeight && !canMoveTo(goal, crouching)) {
 			lastArea->GetClosestPointOnArea(loc, &goal);
+			if (path->Count() == 0 && (loc.DistTo(goal) < 32.0f || !canMoveTo(goal, crouching))) {
+				moveCtx->setTargetOffset(targetRadius);
+				goal = finalGoal;
+			}
 		}
 	}
 	if (mybot_debug.GetBool()) {
@@ -202,7 +216,7 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	if (path.Top() != buildPathStartArea) {
 		Vector loc = blackboard.getSelf()->getCurrentPosition(), goal;
 		path.Top()->GetClosestPointOnArea(loc, &goal);
-		if (this->moveCtx->trace(goal).DidHit()) {
+		if (this->moveCtx->trace(goal, path.Top()->GetAttributes() & NAV_MESH_CROUCH).DidHit()) {
 			Warning("Can't get to start area %d, distance is %f.\n", path.Top()->GetID(),
 					loc.DistTo(goal));
 			if (mybot_debug.GetBool()) {
@@ -225,35 +239,35 @@ bool Navigator::getNextArea(const Vector& loc, const CNavArea* area) {
 		return true;
 	}
 	Vector goal;
-	if (!canMoveTo(moveCtx->getGoal())
+	if (!canMoveTo(moveCtx->getGoal(), lastArea->GetAttributes() & NAV_MESH_CROUCH)
 			|| moveCtx->nextGoalIsLadderStart() || blackboard.isOnLadder()
 			|| !getPortalToNextArea(goal)) {
 		return false;
 	}
 	path->Top()->GetClosestPointOnArea(loc, &goal);
-	int flags = NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE;
 	float zDelta = loc.z - path->Top()->GetCenter().z;
-	if ((lastArea->GetAttributes() & flags)
+	if ((lastArea->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE))
 			// don't skip areas above and below ground height
 			|| fabs(zDelta) > StepHeight
 			// don't skip if we can't get to the closest point on the next.
-			|| !canMoveTo(goal)) {
+			|| !canMoveTo(goal, lastArea->GetAttributes() & NAV_MESH_CROUCH)) {
 		return false;
 	}
 	path->Pop(lastArea);
 	return true;
 }
 
-bool Navigator::canMoveTo(Vector goal) const {
+bool Navigator::canMoveTo(Vector goal, bool crouch) const {
 	const Vector& loc = blackboard.getSelf()->getCurrentPosition();
 	if (path->Count() == 1) {
 		goal = (goal - loc).Normalized() * (goal.DistTo(loc) - targetRadius) + loc;
 	}
-	return !moveCtx->trace(goal).DidHit();
+	return !moveCtx->trace(goal, crouch).DidHit();
 }
 
 bool Navigator::reachedGoal() const {
-	return path->Count() == 0 && moveCtx->reachedGoal(targetRadius);
+	return path->Count() == 0 && moveCtx->getGoal() == finalGoal
+			&& moveCtx->reachedGoal(targetRadius);
 }
 
 void Navigator::setLadderStart() {

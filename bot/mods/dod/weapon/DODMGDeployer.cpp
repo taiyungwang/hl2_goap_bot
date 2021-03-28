@@ -52,7 +52,7 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 						}
 						moveCtx->setGoal(result.endpos);
 						CNavArea* area = Navigator::getArea(selfEnt, self->getTeam());
-						moveCtx->traceMove();
+						moveCtx->traceMove(false);
 						moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
 						animationCounter++;
 					} else {

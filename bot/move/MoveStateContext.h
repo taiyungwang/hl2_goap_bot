@@ -102,11 +102,11 @@ public:
 	 * Traces from current position to final goal.  Assumes that final goal
 	 * and current position are latest.
 	 */
-	void traceMove() {
-		trace(goal);
+	void traceMove(bool crouch) {
+		trace(goal, crouch);
 	}
 
-	const trace_t& trace(Vector goal);
+	const trace_t& trace(Vector goal, bool crouch);
 
 	trace_t& getTraceResult() {
 		return traceResult;

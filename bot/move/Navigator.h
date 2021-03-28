@@ -66,7 +66,7 @@ private:
 
 	bool getNextArea(const Vector& loc, const CNavArea* area);
 
-	bool canMoveTo(Vector to) const;
+	bool canMoveTo(Vector to, bool crouch) const;
 
 	CNavArea* getCurrentArea(const Vector& pos) const;
 
