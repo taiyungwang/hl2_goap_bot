@@ -17,13 +17,13 @@
 
 extern CNavMesh* TheNavMesh;
 
-extern ConVar mybot_debug;
-
 extern IVDebugOverlay *debugoverlay;
 
-static ConVar maxAreaTime("my_bot_max_area_time", "50");
+extern ConVar mybot_debug;
 
-static ConVar mybot_stuck_threshold("mybot_stuck_threshold", "2.0f");
+static ConVar maxAreaTime("my_bot_max_area_time", "70");
+
+static ConVar mybotStuckThreshold("mybot_stuck_threshold", "80.0f");
 
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
@@ -112,11 +112,11 @@ bool Navigator::step() {
 		attributes = NAV_MESH_INVALID;
 	}
 	int maxTime = maxAreaTime.GetInt();
-	if (attributes & NAV_MESH_CROUCH) {
+	if ((attributes & NAV_MESH_CROUCH) || blackboard.isOnLadder()) {
 		maxTime *= 1.5f;
 	}
 	if (areaTime > maxTime
-			&& BasePlayer(self->getEdict()).getVelocity().Length() < mybot_stuck_threshold.GetFloat()) {
+			&& BasePlayer(self->getEdict()).getVelocity().Length() < mybotStuckThreshold.GetFloat()) {
 		areaTime = 0;
 		moveCtx->setStuck(true);
 	}
@@ -134,6 +134,7 @@ void Navigator::start(CUtlStack<CNavArea*>* path, const Vector& goal, float targ
 	lastArea = nextArea = buildPathStartArea = nullptr;
 	this->targetRadius = targetRadius;
 	this->path = path;
+	moveCtx->setGoal(blackboard.getSelf()->getCurrentPosition());
 	moveCtx->stop();
 	if (path->Count() == 0) {
 		Msg("No path available.\n");
