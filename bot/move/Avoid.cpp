@@ -77,7 +77,7 @@ MoveState* Avoid::move(const Vector& pos) {
 			if (ctx.nextGoalIsLadderStart()) {
 				return new MoveLadder(ctx);
 			}
-			return new Jump(ctx);
+			return nextState;
 		}
 		if (dynamic_cast<Stopped*>(nextState) != nullptr) {
 			// completely stuck.
