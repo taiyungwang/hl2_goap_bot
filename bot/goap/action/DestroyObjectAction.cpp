@@ -101,12 +101,9 @@ bool DestroyObjectAction::execute() {
 				&& !crouch) {
 			// try crouching
 			crouch = true;
-			if (!weapFunc->isMelee()) {
-				return false;
-			}
 		}
-		weapFunc->attack(buttons, dist);
 	}
+	weapFunc->attack(buttons, dist);
 	return false;
 }
 
