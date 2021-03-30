@@ -92,10 +92,11 @@ void Planner::reset() {
 
 void Planner::getNextGoal() {
 	for (; currentGoal < goals.Count(); currentGoal++) {
-		auto& effects = actions[goals[currentGoal].action]->getEffects();
-		if (effects.m_value != worldState[worldState.Find(effects.m_key)]
-			&& (goals[currentGoal].chanceToExec == 1.0f
-			|| goals[currentGoal].chanceToExec > RandomFloat(0, 1.0f))) {
+		auto& goal = goals[currentGoal];
+		auto& effect = actions[goal.action]->getEffects();
+		if (effect.m_value != worldState[worldState.Find(effect.m_key)]
+			&& (currentGoal == goals.Count() - 1
+			|| goal.chanceToExec == 1.0f || goal.chanceToExec > RandomFloat(0, 1.0f))) {
 			break;
 		}
 	}
