@@ -30,6 +30,8 @@ protected:
 	virtual bool isFinished() const = 0;
 
 private:
+	int chargeTime = 0;
+
 	bool isAvailable(edict_t *ent);
 
 	bool findTargetLoc();

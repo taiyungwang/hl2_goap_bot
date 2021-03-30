@@ -12,6 +12,7 @@ bool ChargeAction::precondCheck() {
 		return false;
 	}
 	targetRadius += 30.0f;
+	chargeTime = 0;
 	return true;
 }
 
@@ -19,7 +20,7 @@ bool ChargeAction::execute() {
 	if (!GoToItemAction::execute()) {
 		return false;
 	}
-	if (!GoToAction::goalComplete() || isFinished()) {
+	if (!GoToAction::goalComplete() || chargeTime++ > 900 || isFinished()) {
 		return true;
 	}
 	if (isDepleted()) {
