@@ -47,11 +47,10 @@ MoveState* Avoid::move(const Vector& pos) {
 		ctx.setStuck(false);
 		extern CGlobalVars *gpGlobals;
 		int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
-		if (currBlocker != nullptr
-				&& ((idx > 0 && idx <= gpGlobals->maxClients)
+		if ((idx > 0 && idx <= gpGlobals->maxClients)
 						|| Q_stristr(currBlockerName, "physics") != nullptr
 						|| Q_stristr(currBlockerName, "breakable") != nullptr
-						|| Q_stristr(currBlockerName, "func_team") != nullptr)) {
+						|| Q_stristr(currBlockerName, "func_team") != nullptr) {
 			blocker = currBlocker;
 		}
 		auto& players = Player::getPlayers();
