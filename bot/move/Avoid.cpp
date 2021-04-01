@@ -40,11 +40,10 @@ MoveState* Avoid::move(const Vector& pos) {
 	if (result.startsolid) {
 		UTIL_TraceLine(pos, goal, MASK_SOLID_BRUSHONLY, &filter, &result);
 	}
-	extern IVEngineServer* engine;
 	edict_t* currBlocker = getEdict(result);
 	const char* currBlockerName = currBlocker == nullptr || currBlocker->IsFree() ? nullptr: currBlocker->GetClassName();
 	if (ctx.isStuck()) {
-		ctx.setStuck(false);
+		extern IVEngineServer* engine;
 		extern CGlobalVars *gpGlobals;
 		int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
 		if ((idx > 0 && idx <= gpGlobals->maxClients)
@@ -61,11 +60,6 @@ MoveState* Avoid::move(const Vector& pos) {
 			if (Q_stristr(blockerName, "physics") != nullptr
 					|| Q_stristr(blockerName, "breakable") != nullptr) {
 				blackboard.setBlocker(blocker);
-			} else if (Q_stristr(blocker->GetClassName(), "func_team") != nullptr) {
-				extern CUtlMap<int, NavEntity*> blockers;
-				CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
-				navBlocker->setBlockedTeam(team);
-				blockers.Insert(engine->IndexOfEdict(blocker), navBlocker);
 			} else {
 				int idx = engine->IndexOfEdict(blocker);
 				if (idx <= gpGlobals->maxClients) {
@@ -77,6 +71,7 @@ MoveState* Avoid::move(const Vector& pos) {
 				}
 			}
 		}
+		ctx.setStuck(false);
 		if (blackboard.isOnLadder()) {
 			if (ctx.nextGoalIsLadderStart()) {
 				return new MoveLadder(ctx);
@@ -86,6 +81,12 @@ MoveState* Avoid::move(const Vector& pos) {
 		if (dynamic_cast<Stopped*>(nextState) != nullptr) {
 			// completely stuck.
 			ctx.setStuck(true);
+			if (blocker != nullptr && Q_stristr(blocker->GetClassName(), "func_team") != nullptr) {
+				extern CUtlMap<int, NavEntity*> blockers;
+				CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
+				navBlocker->setBlockedTeam(team);
+				blockers.Insert(engine->IndexOfEdict(blocker), navBlocker);
+			}
 		}
 		return nextState;
 	}
