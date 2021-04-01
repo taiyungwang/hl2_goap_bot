@@ -35,7 +35,7 @@ Navigator::~Navigator() {
 }
 
 bool Navigator::step() {
-	if (moveCtx->isStuck() || reachedGoal()) {
+	if (moveCtx->isStuck() || reachedGoal() || blackboard.getBlocker() != nullptr) {
 		return true;
 	}
 	if (!checkCanMove()) {
@@ -61,7 +61,7 @@ bool Navigator::step() {
 	nextArea->GetClosestPointOnArea(loc, &closest);
 	if (area == nextArea
 			// or we are very close to the lastArea
-			|| (closest.DistTo(loc) <= 32.0)) {
+			|| (closest.DistTo(loc) <= HalfHumanWidth)) {
 		attributes &= ~NAV_MESH_JUMP;
 		if (!touchedAreaCenter) {
 			touchedAreaCenter = loc.DistTo(nextArea->GetCenter()) <= 32.0f;
@@ -259,18 +259,19 @@ bool Navigator::getNextArea(const Vector& loc, const CNavArea* area) {
 		return true;
 	}
 	Vector goal;
+	bool crouching = nextArea->GetAttributes() & NAV_MESH_CROUCH;
 	if (!canMoveTo(moveCtx->getGoal(), nextArea->GetAttributes() & NAV_MESH_CROUCH)
 			|| moveCtx->nextGoalIsLadderStart() || blackboard.isOnLadder()
-			|| !getPortalToNextArea(goal)) {
+			|| !getPortalToNextArea(goal) || !canMoveTo(goal, crouching)) {
 		return false;
 	}
 	path->Top()->GetClosestPointOnArea(loc, &goal);
-	float zDelta = loc.z - path->Top()->GetCenter().z;
 	if ((nextArea->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE))
 			// don't skip areas above and below ground height
-			|| fabs(zDelta) > StepHeight
+			|| fabs(nextArea->GetCenter().z - path->Top()->GetCenter().z) > StepHeight
+			|| fabs(loc.z - nextArea->GetCenter().z) > StepHeight
 			// don't skip if we can't get to the closest point on the next.
-			|| !canMoveTo(goal, nextArea->GetAttributes() & NAV_MESH_CROUCH)) {
+			|| !canMoveTo(goal, crouching)) {
 		return false;
 	}
 	path->Pop(nextArea);
