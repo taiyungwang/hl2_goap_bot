@@ -5,7 +5,7 @@
 
 Weapon* MeleeWeaponBuilder::build(edict_t* weap) {
 	Weapon* weapon = new Weapon(weap);
-	WeaponFunction *primary = new WeaponFunction(0.6f);
+	WeaponFunction *primary = new WeaponFunction(0.1f);
 	weapon->setUnderWater(true);
 	primary->setMelee(true);
 	primary->setFullAuto(true);
