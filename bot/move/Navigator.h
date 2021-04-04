@@ -37,7 +37,7 @@ public:
 	bool buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path);
 
 	CNavArea* getLastArea() const {
-		return nextArea;
+		return lastArea;
 	}
 
 protected:

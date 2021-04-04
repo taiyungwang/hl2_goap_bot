@@ -70,7 +70,8 @@ bool Navigator::step() {
 			if (path->Count() == 0) {
 				if (!canMoveTo(goal, crouching)) {
 					nextArea->GetClosestPointOnArea(finalGoal, &goal);
-					if (loc.DistTo(goal) <= 32.0f) {
+					float dist = loc.DistTo(goal);
+					if (dist <= 32.0f || dist >= loc.DistTo(finalGoal)) {
 						goal = finalGoal;
 						moveCtx->setTargetOffset(targetRadius);
 					}
@@ -102,7 +103,7 @@ bool Navigator::step() {
 	if (mybot_debug.GetBool()) {
 		nextArea->Draw();
 	}
-	if (!blackboard.isOnLadder() && !moveCtx->nextGoalIsLadderStart()) {
+	if (!moveCtx->nextGoalIsLadderStart()) {
 		moveCtx->setGoal(goal);
 	}
 	// magic number from https://developer.valvesoftware.com/wiki/Dimensions#Horizontal_.28To_Equal_Height.29
@@ -112,7 +113,7 @@ bool Navigator::step() {
 		attributes = NAV_MESH_INVALID;
 	}
 	int maxTime = maxAreaTime.GetInt();
-	if ((attributes & NAV_MESH_CROUCH) || blackboard.isOnLadder()) {
+	if ((attributes & NAV_MESH_CROUCH) || moveCtx->nextGoalIsLadderStart()) {
 		maxTime *= 1.5f;
 	}
 	if (areaTime > maxTime
