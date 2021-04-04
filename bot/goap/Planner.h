@@ -53,7 +53,6 @@ public:
 	void execute();
 
 private:
-
 	void reset();
 
 	enum class State {

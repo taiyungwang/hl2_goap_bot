@@ -1,101 +1,89 @@
 #include "PlannerTest.h"
 
 #include <goap/AStar.h>
-#include <goap/action/Action.h>
 #include <goap/WorldCond.h>
-#include <utlvector.h>
+#include <goap/action/Action.h>
 #include <utlqueue.h>
 
 CUtlQueue<int> plan;
 CUtlMap<WorldProp, bool> worldState;
-CUtlVector<Action*> actions;
-AStar* planner;
+AStar planner(worldState);
 
 class Blackboard {
-};
+} bb;
 
 class TestAction: public Action {
 public:
-	TestAction() :
-			Action(bot) {
+	TestAction(const GoalState &effect) :
+			Action(bb) {
+		effects = effect;
+		planner.addAction(this);
 	}
 
 	bool execute() {
 		return true;
 	}
 
+	bool precondCheck() {
+		return procPrecond;
+	}
+
+	void setProcPrecond(bool procPrecond) {
+		this->procPrecond = procPrecond;
+	}
+
 private:
-	Blackboard bot;
+	bool procPrecond = true;
 };
 
-class LoadWeapon: public TestAction {
+//0
+class ReloadWeaponAction: public TestAction {
 public:
-	LoadWeapon() {
-		effects = {WorldProp::WEAPON_LOADED, true};
+	ReloadWeaponAction() :
+			TestAction( { WorldProp::WEAPON_LOADED, true }) {
 		precond.Insert(WorldProp::OUT_OF_AMMO, false);
+		precond.Insert(WorldProp::ENEMY_SIGHTED, false);
 	}
-};
 
-class ThrowGrenade: public TestAction {
-public:
-	ThrowGrenade() {
-		effects = {WorldProp::ENEMY_SIGHTED, false};
-		precond.Insert(WorldProp::MULTIPLE_ENEMY_SIGHTED, true);
-	}
-};
-class Shoot: public TestAction {
-public:
-	Shoot() {
-		effects = {WorldProp::ENEMY_SIGHTED, false};
-		precond.Insert(WorldProp::WEAPON_LOADED, true);
-	}
-};
+} reload;
 
-class FindCover: public TestAction {
+//1
+class FindCoverAction: public TestAction {
 public:
-	FindCover() {
-		effects = {WorldProp::ENEMY_SIGHTED, false};
+	FindCoverAction() :
+			TestAction( { WorldProp::ENEMY_SIGHTED, false }) {
+		precond.Insert(WorldProp::OUT_OF_AMMO, false);
 	}
 
 	float getCost() {
-		return 4.0f;
+		return 5.0f;
 	}
-};
+} findCover;
 
-class UseBestWeapon: public TestAction {
+//2
+class SwitchToBestLoadedWeaponAction: public TestAction {
 public:
-	UseBestWeapon() {
-		effects = {WorldProp::USING_BEST_WEAP, true};
+	SwitchToBestLoadedWeaponAction() :
+			TestAction( { WorldProp::WEAPON_LOADED, true }) {
 	}
-};
+} switchToLoadedWeap;
+
+//3
+class AttackAction: public TestAction {
+public:
+	AttackAction() :
+			TestAction( { WorldProp::ENEMY_SIGHTED, false }) {
+		precond.Insert(WorldProp::WEAPON_IN_RANGE, true);
+		precond.Insert(WorldProp::WEAPON_LOADED, true);
+	}
+} attack;
 
 void test(WorldProp prop, bool cond) {
 	GoalState goal = { prop, cond };
-	planner->startSearch(goal);
-	while (!planner->searchStep())
+	planner.startSearch(goal);
+	while (!planner.searchStep())
 		;
-	planner->getPath(plan);
-}
-
-PlannerTest::PlannerTest() {
-	actions.AddToTail(new LoadWeapon());
-	actions.AddToTail(new Shoot());
-	actions.AddToTail(new UseBestWeapon());
-	actions.AddToTail(new FindCover());
-	actions.AddToTail(new ThrowGrenade());
-	planner = new AStar(worldState);
-	FOR_EACH_VEC(actions, i) {
-		planner->addAction(actions[i]);
-	}
-}
-
-PlannerTest::~PlannerTest() {
-	delete planner;
-	FOR_EACH_VEC(actions, i)
-	{
-		delete actions[i];
-	}
-	actions.RemoveAll();
+	planner.getPath(plan);
 }
 
 void PlannerTest::setUp() {
@@ -103,6 +91,7 @@ void PlannerTest::setUp() {
 	worldState.Insert(WorldProp::USING_BEST_WEAP, false);
 	worldState.Insert(WorldProp::OUT_OF_AMMO, false);
 	worldState.Insert(WorldProp::WEAPON_LOADED, false);
+	worldState.Insert(WorldProp::WEAPON_IN_RANGE, true);
 	worldState.Insert(WorldProp::MULTIPLE_ENEMY_SIGHTED, false);
 	worldState.Insert(WorldProp::ENEMY_SIGHTED, true);
 }
@@ -112,34 +101,18 @@ void PlannerTest::tearDown() {
 	worldState.RemoveAll();
 }
 
-void PlannerTest::testNoPlan() {
-	worldState[worldState.Find(WorldProp::USING_BEST_WEAP)] = true;
-	test(WorldProp::USING_BEST_WEAP, true);
-	TS_ASSERT_EQUALS(0, plan.Count());
-}
-
-void PlannerTest::testNoGoalFound() {
-	worldState[worldState.Find(WorldProp::ENEMY_SIGHTED)] = false;
-	test(WorldProp::ENEMY_SIGHTED, true);
-	TS_ASSERT_EQUALS(0, plan.Count());
-}
-
-void PlannerTest::testOneAction() {
-	test(WorldProp::USING_BEST_WEAP, true);
-	TS_ASSERT_EQUALS(1, plan.Count());
-	TS_ASSERT_EQUALS(2, plan.RemoveAtHead());
-}
-
-void PlannerTest::testMultipleActions() {
+void PlannerTest::testSwitchToLoadedWeaponThenAttack() {
 	test(WorldProp::ENEMY_SIGHTED, false);
 	TS_ASSERT_EQUALS(2, plan.Count());
-	TS_ASSERT_EQUALS(0, plan.RemoveAtHead());
-	TS_ASSERT_EQUALS(1, plan.RemoveAtHead());
+	TS_ASSERT_EQUALS(2, plan.RemoveAtHead());
+	TS_ASSERT_EQUALS(3, plan.RemoveAtHead());
 }
 
-void PlannerTest::testDeadEndReached() {
-	worldState[worldState.Find(WorldProp::OUT_OF_AMMO)] = true;
-	test(WorldProp::ENEMY_SIGHTED, false);
-	TS_ASSERT_EQUALS(1, plan.Count());
-	TS_ASSERT_EQUALS(3, plan.RemoveAtHead());
+void PlannerTest::testFindFindCoverReload() {
+	switchToLoadedWeap.setProcPrecond(false);
+	test(WorldProp::WEAPON_LOADED, true);
+	TS_ASSERT_EQUALS(2, plan.Count());
+	TS_ASSERT_EQUALS(1, plan.RemoveAtHead());
+	TS_ASSERT_EQUALS(0, plan.RemoveAtHead());
+	switchToLoadedWeap.setProcPrecond(true);
 }

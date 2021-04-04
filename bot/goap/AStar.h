@@ -66,20 +66,7 @@ private:
 
 	const Node* start = nullptr;
 
-	/**
-	 * Gets the neighbors for the current node.  Selects the best edge
-	 * from any parallel edges.
-	 * @param actions output param of list of actions.
-	 * @param neighbors available actions to choose from.
-	 */
-	void getNeighbors(CUtlVector<int>& actions,
-			const CCopyableUtlVector<int>& neighbors) const;
-
 	void createNode();
 
-	bool addToOpenSet(Node* node);
-
 	float getHeuristicCost(const Node& node) const;
-
-	float getEdgeCost(Action * action) const;
 };

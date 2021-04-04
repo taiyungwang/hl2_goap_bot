@@ -41,10 +41,7 @@ void Planner::execute() {
 		extern IVEngineServer* engine;
 		// timebox to 1/60 second
 		float timeLimit = 0.0167f + engine->Time();
-		while (!finished) {
-			if (engine->Time() > timeLimit) {
-				break;
-			}
+		while (!finished && engine->Time() <= timeLimit) {
 			finished = planBuilder->searchStep();
 		}
 		if (finished) {
@@ -67,7 +64,7 @@ void Planner::execute() {
 		if (action->execute()) {
 			plan.RemoveAtHead();
 			if (!action->goalComplete()) {
-				getNextGoal();
+				reset();
 			} else if (!plan.IsEmpty()) {
 				actions[plan.Head()]->init();
 			}
@@ -95,8 +92,7 @@ void Planner::getNextGoal() {
 		auto& goal = goals[currentGoal];
 		auto& effect = actions[goal.action]->getEffects();
 		if (effect.m_value != worldState[worldState.Find(effect.m_key)]
-			&& (currentGoal == goals.Count() - 1
-			|| goal.chanceToExec == 1.0f || goal.chanceToExec > RandomFloat(0, 1.0f))) {
+			&& (goal.chanceToExec == 1.0f || goal.chanceToExec > RandomFloat(0, 1.0f))) {
 			break;
 		}
 	}

@@ -5,23 +5,12 @@
 
 class PlannerTest: public CxxTest::TestSuite {
 public:
-
-	PlannerTest();
-
-	~PlannerTest();
-
 	void setUp();
 
 	void tearDown();
 
-	void testNoPlan();
+	void testSwitchToLoadedWeaponThenAttack();
 
-	void testNoGoalFound();
-
-	void testOneAction();
-
-	void testMultipleActions();
-
-	void testDeadEndReached();
+	void testFindFindCoverReload();
 };
 
