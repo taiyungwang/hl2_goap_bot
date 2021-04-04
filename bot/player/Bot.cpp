@@ -104,6 +104,11 @@ bool Bot::handle(EventInfo* event) {
 	// bot owns this event.
 	if (eventUserId == getUserId()) {
 		if (name == "player_spawn") {
+			despawn();
+			CNavArea* area = blackboard->getNavigator()->getLastArea();
+			if (area != nullptr) {
+				area->IncreaseDanger(getTeam(), 1.0f);
+			}
 			resetPlanner = inGame = true;
 			blackboard->reset();
 			world->reset();
@@ -147,10 +152,6 @@ int Bot::getPlayerClass() const {
 
 
 void Bot::despawn() {
-	CNavArea* area = blackboard->getNavigator()->getLastArea();
-	if (area != nullptr) {
-		area->IncreaseDanger(getTeam(), 1.0f);
-	}
 	inGame = false;
 	planner->resetPlanning(true);
 	blackboard->getButtons().tap(IN_ATTACK);
