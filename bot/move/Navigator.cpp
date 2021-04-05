@@ -121,6 +121,11 @@ bool Navigator::step() {
 		areaTime = 0;
 		moveCtx->setStuck(true);
 	}
+	float goalDist = moveCtx->getGoal().DistTo(loc);
+	if (goalDist > 1000.0f) {
+		Warning("Goal is too far from current position: %f.\n", goalDist);
+		return true;
+	}
 	moveCtx->move(attributes);
 	if (mybot_debug.GetBool()) {
 		debugoverlay->AddLineOverlay(loc,
