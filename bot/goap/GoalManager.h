@@ -13,14 +13,14 @@ class Blackboard;
  * order of priority.
  */
 
-class Planner {
+class GoalManager {
 public:
 	/**
 	 * Builds a list of actions and a list of goals.
 	 */
-	Planner(const WorldState& worldState, Blackboard& blackboard);
+	GoalManager(const WorldState& worldState, Blackboard& blackboard);
 
-	~Planner();
+	~GoalManager();
 
 	void resetPlanning(bool force);
 

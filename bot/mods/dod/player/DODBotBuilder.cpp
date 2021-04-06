@@ -3,7 +3,6 @@
 #include "DODWorld.h"
 #include <event/EventHandler.h>
 #include <event/EventInfo.h>
-#include <goap/Planner.h>
 #include <goap/action/DestroyObjectAction.h>
 #include <mods/dod/goap/action/DODBombTargetAction.h>
 #include <mods/dod/goap/action/DODDefendPointAction.h>
@@ -26,6 +25,7 @@
 #include <util/EntityClass.h>
 #include <util/EntityVar.h>
 #include <eiface.h>
+#include <goap/GoalManager.h>
 #include <vstdlib/random.h>
 #include <in_buttons.h>
 
@@ -39,7 +39,7 @@ DODBotBuilder::DODBotBuilder(GameManager* objectives): BotBuilder(objectives) {
 	teamPlay = true;
 }
 
-void DODBotBuilder::updatePlanner(Planner &planner,
+void DODBotBuilder::updatePlanner(GoalManager &planner,
 		Blackboard &blackboard) const {
 
 	class DODDestroyObjectAction: public DestroyObjectAction {

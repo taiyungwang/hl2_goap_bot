@@ -3,9 +3,9 @@
 #include "HL2DMWorld.h"
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <goap/Planner.h>
 #include <goap/action/DestroyObjectAction.h>
 #include <goap/action/GoToAction.h>
+#include <goap/GoalManager.h>
 #include <mods/hl2dm/goap/action/ChargeArmorAction.h>
 #include <mods/hl2dm/goap/action/GetBatteryAction.h>
 #include <mods/hl2dm/goap/action/UseGravityGunAction.h>
@@ -24,7 +24,7 @@
 #include <weapon/UtilityToolBuilder.h>
 
 
-void HL2DMBotBuilder::updatePlanner(Planner& planner,
+void HL2DMBotBuilder::updatePlanner(GoalManager& planner,
 		Blackboard& blackboard) const {
 	/**
 	 * Defines the action for using a suit charger

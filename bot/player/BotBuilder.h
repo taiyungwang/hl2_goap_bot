@@ -8,7 +8,7 @@ class Blackboard;
 class Bot;
 class BasePlayer;
 class Player;
-class Planner;
+class GoalManager;
 class WeaponBuilderFactory;
 class World;
 class HidingSpotSelector;
@@ -38,7 +38,7 @@ protected:
 
 	virtual void initWeapons(WeaponBuilderFactory& factory) const = 0;
 
-	virtual void updatePlanner(Planner& planner,
+	virtual void updatePlanner(GoalManager& planner,
 			Blackboard& blackboard) const = 0;
 
 	virtual BasePlayer* buildEntity(edict_t* ent) const;

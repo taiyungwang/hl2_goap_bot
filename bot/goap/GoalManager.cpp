@@ -1,4 +1,4 @@
-#include "Planner.h"
+#include "GoalManager.h"
 
 #include "AStar.h"
 #include "action/Action.h"
@@ -7,12 +7,12 @@
 #include <vstdlib/random.h>
 
 
-Planner::Planner(const WorldState& worldState, Blackboard& blackboard) :
+GoalManager::GoalManager(const WorldState& worldState, Blackboard& blackboard) :
 		worldState(worldState), blackboard(blackboard) {
 	planBuilder = new AStar(worldState);
 }
 
-Planner::~Planner() {
+GoalManager::~GoalManager() {
 	if (planBuilder != nullptr) {
 		delete planBuilder;
 	}
@@ -24,7 +24,7 @@ Planner::~Planner() {
 	goals.RemoveAll();
 }
 
-void Planner::resetPlanning(bool force) {
+void GoalManager::resetPlanning(bool force) {
 	if (force || state != State::ACTION || plan.IsEmpty()
 			|| actions[plan.Head()]->isInterruptable()) {
 		if (state == State::ACTION && !plan.IsEmpty()) {
@@ -34,7 +34,7 @@ void Planner::resetPlanning(bool force) {
 	}
 }
 
-void Planner::execute() {
+void GoalManager::execute() {
 	switch (state) {
 	case State::PLANNING: {
 		bool finished = false;
@@ -82,12 +82,12 @@ void Planner::execute() {
 	}
 }
 
-void Planner::reset() {
+void GoalManager::reset() {
 	state = State::REPLAN;
 	currentGoal = 0;
 }
 
-void Planner::getNextGoal() {
+void GoalManager::getNextGoal() {
 	for (; currentGoal < goals.Count(); currentGoal++) {
 		auto& goal = goals[currentGoal];
 		auto& effect = actions[goal.action]->getEffects();
@@ -105,7 +105,7 @@ void Planner::getNextGoal() {
 	state = State::PLANNING;
 }
 
-void Planner::addAction(Action* action) {
+void GoalManager::addAction(Action* action) {
 	actions.AddToTail(action);
 	planBuilder->addAction(action);
 }

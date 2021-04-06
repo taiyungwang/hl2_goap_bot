@@ -12,7 +12,7 @@
 #include <goap/action/SwitchToDesiredWeaponAction.h>
 #include <goap/action/SwitchToBestLoadedWeaponAction.h>
 #include <goap/action/SwitchWeaponAction.h>
-#include <goap/Planner.h>
+#include <goap/GoalManager.h>
 #include <util/BasePlayer.h>
 
 BotBuilder::BotBuilder(GameManager* objectives): objectives(objectives) {
@@ -86,7 +86,7 @@ Bot* BotBuilder::build(edict_t* ent) const {
 	world->reset();
 	bot->setInGame(world->getState(WorldProp::ROUND_STARTED));
 	bot->setWorld(world);
-	Planner *planner = new Planner(world->getStates(), *blackboard);
+	GoalManager *planner = new GoalManager(world->getStates(), *blackboard);
 	planner->addAction<ReloadWeaponAction>(0.85f);
 	planner->addAction<AttackAction>(0.84f);
 	planner->addAction<SwitchWeaponAction>(0.82f);

@@ -7,7 +7,7 @@
 #include <utlqueue.h>
 
 class Blackboard;
-class Planner;
+class GoalManager;
 class Action;
 class BasePlayer;
 class Goal;
@@ -42,7 +42,7 @@ public:
 
 	void setWorld(World* world);
 
-	void setPlanner(Planner* planner) {
+	void setPlanner(GoalManager* planner) {
 		this->planner = planner;
 	}
 
@@ -73,7 +73,7 @@ private:
 
 	int desiredClassId = -1;
 
-	Planner* planner = nullptr;
+	GoalManager* planner = nullptr;
 
 	World* world = nullptr;
 

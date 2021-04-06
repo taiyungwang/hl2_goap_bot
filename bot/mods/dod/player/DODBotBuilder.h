@@ -18,7 +18,7 @@ private:
 
 	void initWeapons(WeaponBuilderFactory& factory) const;
 
-	void updatePlanner(Planner& planner, Blackboard& blackboard) const;
+	void updatePlanner(GoalManager& planner, Blackboard& blackboard) const;
 
 	World* buildWorld() const;
 

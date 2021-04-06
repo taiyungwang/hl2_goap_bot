@@ -4,8 +4,8 @@
 #include "Vision.h"
 #include "World.h"
 #include <event/EventInfo.h>
-#include <goap/Planner.h>
 #include <goap/action/GoToAction.h>
+#include <goap/GoalManager.h>
 #include <move/Navigator.h>
 #include <move/RotationManager.h>
 #include <weapon/Armory.h>
