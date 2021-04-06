@@ -17,15 +17,12 @@ bool UseGravityGunAction::execute() {
 	if (blocker == nullptr) {
 		return true;
 	}
-	Vector targetLoc =
-			blocker->GetCollideable()->GetCollisionOrigin();
-	float dist = targetLoc.DistTo(blackboard.getSelf()->getCurrentPosition());
-	blackboard.setViewTarget(targetLoc);
-	if (dist > 130.0f || !UTIL_IsVisible(targetLoc, blackboard, blocker)) {
+	float dist = blackboard.getViewTarget().DistTo(blackboard.getSelf()->getCurrentPosition());
+	if (dist > 130.0f || !UTIL_IsVisible(blackboard.getViewTarget(), blackboard, blocker)) {
 		blackboard.setBlocker(nullptr);
 		return true;
 	}
-	if (blackboard.getAimAccuracy(targetLoc)
+	if (blackboard.getAimAccuracy(blackboard.getViewTarget())
 			> 1.0f - 30.0f / (dist == 0.0f ? 0.0001f : dist)) {
 		armory.getCurrWeapon()->getPrimary()->attack(blackboard.getButtons(),
 				dist);

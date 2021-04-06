@@ -40,25 +40,27 @@ bool World::think(Blackboard& blackboard) {
 	} else if (weap != nullptr) {
 		inRange = weap->isInRange(pos.DistTo(enemy->getCurrentPosition()));
 	}
-	if (blocker != nullptr) {
-		if (BaseEntity(blocker).isDestroyedOrUsed()) {
-			blackboard.setBlocker(nullptr);
-			inRange = true;
-		} else {
-			extern IVEngineServer* engine;
-			int entIndx = engine->IndexOfEdict(blocker);
-			auto& players = Player::getPlayers();
-			auto i = players.Find(entIndx);
-			if (players.IsValidIndex(i) && players[i]->isDead()) {
+	if (blocker == nullptr || BaseEntity(blocker).isDestroyedOrUsed()) {
+		blackboard.setBlocker(nullptr);
+		inRange = true;
+	} else {
+		Vector blockerPos = blocker->GetCollideable()->GetCollisionOrigin();
+		extern IVEngineServer* engine;
+		auto& players = Player::getPlayers();
+		auto i = players.Find(engine->IndexOfEdict(blocker));
+		if (players.IsValidIndex(i)) {
+			if (players[i]->isDead()) {
 				blackboard.setBlocker(nullptr);
 				inRange = true;
+			} else {
+				blackboard.setViewTarget(players[i]->getEyesPos());
 			}
+		} else {
+			blackboard.setViewTarget(blockerPos);
 		}
 		if (!inRange && weap != nullptr) {
-			inRange = weap->isInRange(pos.DistTo(blocker->GetCollideable()->GetCollisionOrigin()));
+			inRange = weap->isInRange(pos.DistTo(blockerPos));
 		}
-	} else if (enemy == nullptr) {
-		inRange = true;
 	}
 	updateState(WorldProp::WEAPON_IN_RANGE, inRange);
 	auto& weapons = armory.getWeapons();
