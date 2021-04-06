@@ -1,5 +1,4 @@
-#include "AStar.h"
-
+#include <goap/Planner.h>
 #include "action/Action.h"
 #include <util/SimpleException.h>
 #include <utlstring.h>
@@ -22,7 +21,7 @@ bool operator==(const CUtlMap<T, U> &m1, const CUtlMap<T, U> &m2) {
 	return true;
 }
 
-AStar::AStar(const WorldState &worldState) :
+Planner::Planner(const WorldState &worldState) :
 		worldState(worldState) {
 	efxToActions.SetLessFunc(
 			[](const GoalState &g1, const GoalState &g2) {
@@ -35,7 +34,7 @@ AStar::AStar(const WorldState &worldState) :
 	createNode();
 }
 
-void AStar::addAction(Action *action) {
+void Planner::addAction(Action *action) {
 	int i = actions.Count();
 	actions.AddToTail(action);
 	const GoalState &currCond = actions[i]->getEffects();
@@ -47,7 +46,7 @@ void AStar::addAction(Action *action) {
 	createNode();
 }
 
-void AStar::startSearch(const GoalState &goal) {
+void Planner::startSearch(const GoalState &goal) {
 	openSet.RemoveAll();
 	start = nullptr;
 	FOR_EACH_VEC(nodes, i)
@@ -67,7 +66,7 @@ void AStar::startSearch(const GoalState &goal) {
 	node.fScore = getHeuristicCost(node);
 }
 
-bool AStar::searchStep() {
+bool Planner::searchStep() {
 	Node &current = *(openSet.ElementAtHead());
 	openSet.RemoveAtHead();
 	GoalState goal;
@@ -143,7 +142,7 @@ bool AStar::searchStep() {
 	return openSet.Count() == 0;
 }
 
-void AStar::getPath(CUtlQueue<int> &path) const {
+void Planner::getPath(CUtlQueue<int> &path) const {
 	path.RemoveAll();
 	if (start == nullptr) {
 		return;
@@ -157,7 +156,7 @@ void AStar::getPath(CUtlQueue<int> &path) const {
 	}
 }
 
-void AStar::copy(WorldState &left, const WorldState &right) {
+void Planner::copy(WorldState &left, const WorldState &right) {
 	if (&left == &right) {
 		return;
 	}
@@ -168,14 +167,14 @@ void AStar::copy(WorldState &left, const WorldState &right) {
 	}
 }
 
-void AStar::createNode() {
+void Planner::createNode() {
 	nodes.AddToTail();
 	SetDefLessFunc(nodes.Tail().goalState);
 	SetDefLessFunc(nodes.Tail().currState);
 	nodes.Tail().id = nodes.Count() - 1;
 }
 
-float AStar::getHeuristicCost(const Node &node) const {
+float Planner::getHeuristicCost(const Node &node) const {
 	float cost = 0.0f;
 	const auto &goals = node.goalState;
 	FOR_EACH_MAP_FAST(goals, i)

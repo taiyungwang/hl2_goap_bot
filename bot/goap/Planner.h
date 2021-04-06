@@ -10,9 +10,9 @@
 class Action;
 
 /**
- * Builds a list of actions for a plan with a given goal.
+ * Builds a list of actions for a plan with a given goal using A * search.
  */
-class AStar {
+class Planner {
 public:
 	/**
 	 * Builds a map of effects to available actions.
@@ -20,7 +20,7 @@ public:
 	 * @param actions List of available actions.
 	 * @param The current world state.
 	 */
-	AStar(const WorldState& worldState);
+	Planner(const WorldState& worldState);
 
 	void addAction(Action* action);
 

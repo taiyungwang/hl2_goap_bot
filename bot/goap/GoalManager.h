@@ -5,7 +5,7 @@
 #include <utlqueue.h>
 
 class Action;
-class AStar;
+class Planner;
 class Blackboard;
 
 /**
@@ -59,7 +59,7 @@ private:
 		ACTION, PLANNING, REPLAN
 	} state = State::REPLAN;
 
-	AStar* planBuilder;
+	Planner* planBuilder;
 
 	CUtlQueue<int> plan;
 

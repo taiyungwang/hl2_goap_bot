@@ -1,13 +1,13 @@
 #include "PlannerTest.h"
 
-#include <goap/AStar.h>
 #include <goap/WorldCond.h>
 #include <goap/action/Action.h>
+#include <goap/Planner.h>
 #include <utlqueue.h>
 
 CUtlQueue<int> plan;
 CUtlMap<WorldProp, bool> worldState;
-AStar planner(worldState);
+Planner planner(worldState);
 
 class Blackboard {
 } bb;

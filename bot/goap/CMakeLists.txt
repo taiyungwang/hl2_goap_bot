@@ -1,2 +1,2 @@
-add_library(goap AStar.cpp GoalManager.cpp)
+add_library(goap Planner.cpp GoalManager.cpp)
 add_subdirectory(action)

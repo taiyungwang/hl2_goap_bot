@@ -1,6 +1,6 @@
 #include "GoalManager.h"
 
-#include "AStar.h"
+#include "Planner.h"
 #include "action/Action.h"
 #include <player/Player.h>
 #include <eiface.h>
@@ -9,7 +9,7 @@
 
 GoalManager::GoalManager(const WorldState& worldState, Blackboard& blackboard) :
 		worldState(worldState), blackboard(blackboard) {
-	planBuilder = new AStar(worldState);
+	planBuilder = new Planner(worldState);
 }
 
 GoalManager::~GoalManager() {
