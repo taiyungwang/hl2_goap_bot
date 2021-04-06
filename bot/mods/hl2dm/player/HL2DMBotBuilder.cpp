@@ -3,7 +3,6 @@
 #include "HL2DMWorld.h"
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <goap/action/DestroyObjectAction.h>
 #include <goap/action/GoToAction.h>
 #include <goap/GoalManager.h>
 #include <mods/hl2dm/goap/action/ChargeArmorAction.h>
