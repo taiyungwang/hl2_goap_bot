@@ -1,4 +1,4 @@
-#include "DestroyObjectAction.h"
+#include "AttackAction.h"
 
 #include <move/Navigator.h>
 #include <move/MoveStateContext.h>
@@ -17,7 +17,7 @@
 #include <in_buttons.h>
 #include <edict.h>
 
-DestroyObjectAction::DestroyObjectAction(Blackboard& blackboard) :
+AttackAction::AttackAction(Blackboard& blackboard) :
 		Action(blackboard) {
 	moveCtx = new MoveStateContext(blackboard);
 	crouch = false;
@@ -26,11 +26,11 @@ DestroyObjectAction::DestroyObjectAction(Blackboard& blackboard) :
 	precond.Insert(WorldProp::WEAPON_LOADED, true);
 }
 
-DestroyObjectAction::~DestroyObjectAction() {
+AttackAction::~AttackAction() {
 	delete moveCtx;
 }
 
-bool DestroyObjectAction::precondCheck() {
+bool AttackAction::precondCheck() {
 	edict_t* blocker = blackboard.getBlocker();
 	if (blocker == nullptr) {
 		return false;
@@ -43,7 +43,7 @@ bool DestroyObjectAction::precondCheck() {
 			|| isBreakable(blocker);
 }
 
-bool DestroyObjectAction::execute() {
+bool AttackAction::execute() {
 	const Player* self = blackboard.getSelf();
 	Vector targetLoc = blackboard.getViewTarget();
 	float dist = targetLoc.DistTo(self->getCurrentPosition());
@@ -107,7 +107,7 @@ bool DestroyObjectAction::execute() {
 	return false;
 }
 
-bool DestroyObjectAction::goalComplete() {
+bool AttackAction::goalComplete() {
 	if (targetDestroyed()) {
 		blackboard.setBlocker(nullptr);
 		abort();
@@ -117,7 +117,7 @@ bool DestroyObjectAction::goalComplete() {
 }
 
 
-void DestroyObjectAction::abort() {
+void AttackAction::abort() {
 	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
 	if (weapon != nullptr) {
 		weapon->undeploy(blackboard);
@@ -125,13 +125,13 @@ void DestroyObjectAction::abort() {
 	moveCtx->stop();
 }
 
-bool DestroyObjectAction::targetDestroyed() const {
+bool AttackAction::targetDestroyed() const {
 	return blackboard.getBlocker() == nullptr
 			|| BaseEntity(blackboard.getBlocker()).isDestroyedOrUsed()
 			|| blackboard.getBlocker()->GetCollideable()->GetCollisionOrigin().DistTo(
 					blackboard.getSelf()->getCurrentPosition()) > 130.0f;
 }
 
-edict_t* DestroyObjectAction::getTargetedEdict() const {
+edict_t* AttackAction::getTargetedEdict() const {
 	return blackboard.getBlocker();
 }

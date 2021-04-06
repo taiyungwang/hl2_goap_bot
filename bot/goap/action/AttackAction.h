@@ -7,11 +7,11 @@ class MoveStateContext;
 class WeaponFunction;
 struct edict_t;
 
-class DestroyObjectAction: public Action {
+class AttackAction: public Action {
 public:
-	DestroyObjectAction(Blackboard& blackboard);
+	AttackAction(Blackboard& blackboard);
 
-	virtual ~DestroyObjectAction();
+	virtual ~AttackAction();
 
 	void init() {
 		crouch = false;

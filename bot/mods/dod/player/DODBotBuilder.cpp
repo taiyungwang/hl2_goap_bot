@@ -3,7 +3,7 @@
 #include "DODWorld.h"
 #include <event/EventHandler.h>
 #include <event/EventInfo.h>
-#include <goap/action/DestroyObjectAction.h>
+#include <goap/action/AttackAction.h>
 #include <mods/dod/goap/action/DODBombTargetAction.h>
 #include <mods/dod/goap/action/DODDefendPointAction.h>
 #include <mods/dod/goap/action/DODUseFragGrenadeAction.h>
@@ -42,10 +42,10 @@ DODBotBuilder::DODBotBuilder(GameManager* objectives): BotBuilder(objectives) {
 void DODBotBuilder::updatePlanner(GoalManager &planner,
 		Blackboard &blackboard) const {
 
-	class DODDestroyObjectAction: public DestroyObjectAction {
+	class DODDestroyObjectAction: public AttackAction {
 	public:
 		DODDestroyObjectAction(Blackboard &blackboard) :
-				DestroyObjectAction(blackboard) {
+				AttackAction(blackboard) {
 		}
 	private:
 		bool isBreakable(edict_t *object) const {

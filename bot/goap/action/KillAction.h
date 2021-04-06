@@ -1,8 +1,8 @@
 #pragma once
 
-#include "DestroyObjectAction.h"
+#include "AttackAction.h"
 
-class KillAction: public DestroyObjectAction {
+class KillAction: public AttackAction {
 public:
 	KillAction(Blackboard& blackboard);
 

@@ -69,14 +69,14 @@ public:
 } switchToLoadedWeap;
 
 //3
-class DestroyObjectAction: public TestAction {
+class KillAction: public TestAction {
 public:
-	DestroyObjectAction() :
+	KillAction() :
 			TestAction( { WorldProp::ENEMY_SIGHTED, false }) {
 		precond.Insert(WorldProp::WEAPON_IN_RANGE, true);
 		precond.Insert(WorldProp::WEAPON_LOADED, true);
 	}
-} attack;
+} killEnemy;
 
 void test(WorldProp prop, bool cond) {
 	GoalState goal = { prop, cond };

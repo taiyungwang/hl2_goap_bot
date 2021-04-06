@@ -5,7 +5,7 @@
 #include <weapon/Weapon.h>
 
 KillAction::KillAction(Blackboard &blackboard) :
-		DestroyObjectAction(blackboard) {
+		AttackAction(blackboard) {
 	effects = { WorldProp::ENEMY_SIGHTED, false };
 }
 
