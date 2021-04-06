@@ -5,7 +5,7 @@
 #include "World.h"
 #include "HidingSpotSelector.h"
 #include <move/Navigator.h>
-#include <goap/action/AttackAction.h>
+#include <goap/action/KillAction.h>
 #include <goap/action/FindCoverAction.h>
 #include <goap/action/ReloadWeaponAction.h>
 #include <goap/action/SnipeAction.h>
@@ -88,7 +88,7 @@ Bot* BotBuilder::build(edict_t* ent) const {
 	bot->setWorld(world);
 	GoalManager *planner = new GoalManager(world->getStates(), *blackboard);
 	planner->addAction<ReloadWeaponAction>(0.85f);
-	planner->addAction<AttackAction>(0.84f);
+	planner->addAction<KillAction>(0.84f);
 	planner->addAction<SwitchWeaponAction>(0.82f);
 	planner->addAction<FindCoverAction>(0.81f);
 	planner->addAction<SnipeAction>(0.7f, 0.5f);

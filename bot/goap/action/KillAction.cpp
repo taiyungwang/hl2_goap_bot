@@ -1,25 +1,25 @@
-#include "AttackAction.h"
+#include "KillAction.h"
 
 #include <player/Blackboard.h>
 #include <player/Player.h>
 #include <weapon/Weapon.h>
 
-AttackAction::AttackAction(Blackboard& blackboard) :
+KillAction::KillAction(Blackboard &blackboard) :
 		DestroyObjectAction(blackboard) {
-	effects = {WorldProp::ENEMY_SIGHTED, false};
+	effects = { WorldProp::ENEMY_SIGHTED, false };
 }
 
-bool AttackAction::precondCheck() {
+bool KillAction::precondCheck() {
 	adjustAim = true;
 	dur = 600;
 	return blackboard.getTargetedPlayer() != nullptr;
 }
 
-bool AttackAction::targetDestroyed() const {
+bool KillAction::targetDestroyed() const {
 	return blackboard.getTargetedPlayer() == nullptr
 			|| blackboard.getTargetedPlayer()->isDead();
 }
 
-edict_t* AttackAction::getTargetedEdict() const {
+edict_t* KillAction::getTargetedEdict() const {
 	return blackboard.getTargetedPlayer()->getEdict();
 }

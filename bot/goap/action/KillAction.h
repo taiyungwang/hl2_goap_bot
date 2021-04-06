@@ -2,9 +2,9 @@
 
 #include "DestroyObjectAction.h"
 
-class AttackAction: public DestroyObjectAction {
+class KillAction: public DestroyObjectAction {
 public:
-	AttackAction(Blackboard& blackboard);
+	KillAction(Blackboard& blackboard);
 
 	bool precondCheck();
 private:

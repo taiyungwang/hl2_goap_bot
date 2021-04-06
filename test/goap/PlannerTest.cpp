@@ -69,9 +69,9 @@ public:
 } switchToLoadedWeap;
 
 //3
-class AttackAction: public TestAction {
+class DestroyObjectAction: public TestAction {
 public:
-	AttackAction() :
+	DestroyObjectAction() :
 			TestAction( { WorldProp::ENEMY_SIGHTED, false }) {
 		precond.Insert(WorldProp::WEAPON_IN_RANGE, true);
 		precond.Insert(WorldProp::WEAPON_LOADED, true);
