@@ -11,6 +11,10 @@ public:
 
 	bool precondCheck();
 
+	float getCost() {
+		return 1.5f;
+	}
+
 	bool execute();
 
 private:
