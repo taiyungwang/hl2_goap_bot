@@ -54,6 +54,9 @@ bool AttackAction::execute() {
 	if (weapon->getMinDeployRange() < dist && !weapon->getDeployer()->execute(blackboard)) {
 		return false;
 	}
+	if (weapon->getDeployer() != nullptr && !weapon->isDeployed()) {
+		return true;
+	}
 	edict_t* targetEnt = getTargetedEdict();
 	Vector eyes = self->getEyesPos();
 	Buttons& buttons = blackboard.getButtons();
