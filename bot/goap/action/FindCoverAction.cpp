@@ -23,18 +23,18 @@ bool FindCoverAction::operator() (CNavArea *area, CNavArea *priorArea, float tra
 	edict_t* target = getTarget();
 	Vector eyes(area->GetCenter());
 	eyes.z += HumanEyeHeight;
-	bool isVisible = target != nullptr && (currentArea == area
-			|| (area->IsPotentiallyVisible(Navigator::getArea(target, blackboard.getSelf()->getTeam()))
-			&& UTIL_IsVisible(eyes, blackboard, target)));
-	if (!isVisible) {
+	if (currentArea != area
+			&& !area->IsPotentiallyVisible(Navigator::getArea(target, blackboard.getSelf()->getTeam()))
+			&& !UTIL_IsVisible(eyes, blackboard, target)) {
 		this->hideArea = area;
+		return true;
 	}
-	return isVisible;
+	return false;
 }
 
 float FindCoverAction::getCost() {
-	return findTargetLoc()
-			&& blackboard.getNavigator()->buildPath(targetLoc, path) ?
+	return getTarget() == nullptr || (findTargetLoc()
+			&& blackboard.getNavigator()->buildPath(targetLoc, path)) ?
 			path.Count() : INFINITY;
 }
 
