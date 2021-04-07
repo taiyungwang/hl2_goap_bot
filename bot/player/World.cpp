@@ -30,36 +30,34 @@ bool World::think(Blackboard& blackboard) {
 	updateState(WorldProp::USING_BEST_WEAP,
 			armory.getBestWeaponIdx() == armory.getCurrWeaponIdx());
 	edict_t* blocker = blackboard.getBlocker();
-	bool inRange = true;
-	const Player* enemy = blackboard.getTargetedPlayer();
-	const Bot* self = blackboard.getSelf();
-	const Vector& pos = self->getCurrentPosition();
-	const Weapon* weap = armory.getCurrWeapon();
-	if (enemy == nullptr) {
-		inRange = true;
-	} else if (weap != nullptr) {
-		inRange = weap->isInRange(pos.DistTo(enemy->getCurrentPosition()));
-	}
-	if (blocker == nullptr || BaseEntity(blocker).isDestroyedOrUsed()) {
+	if (blocker != nullptr && BaseEntity(blocker).isDestroyedOrUsed()) {
+		blocker = nullptr;
 		blackboard.setBlocker(nullptr);
-		inRange = true;
-	} else {
-		Vector blockerPos = blocker->GetCollideable()->GetCollisionOrigin();
-		extern IVEngineServer* engine;
-		auto& players = Player::getPlayers();
-		auto i = players.Find(engine->IndexOfEdict(blocker));
-		if (players.IsValidIndex(i)) {
-			if (players[i]->isDead()) {
-				blackboard.setBlocker(nullptr);
-				inRange = true;
+	}
+	bool inRange = true;
+	const Bot* self = blackboard.getSelf();
+	const Weapon* weap = armory.getCurrWeapon();
+	const Player* enemy = blackboard.getTargetedPlayer();
+	if (weap != nullptr) {
+		const Vector& pos = self->getCurrentPosition();
+		if (enemy != nullptr) {
+			inRange = weap->isInRange(pos.DistTo(enemy->getCurrentPosition()));
+		} else if (blocker != nullptr) {
+			extern IVEngineServer* engine;
+			auto& players = Player::getPlayers();
+			auto i = players.Find(engine->IndexOfEdict(blocker));
+			if (players.IsValidIndex(i)) {
+				if (players[i]->isDead()) {
+					blackboard.setBlocker(nullptr);
+				} else {
+					blackboard.setViewTarget(players[i]->getEyesPos());
+				}
 			} else {
-				blackboard.setViewTarget(players[i]->getEyesPos());
+				blackboard.setViewTarget(blocker->GetCollideable()->GetCollisionOrigin());
 			}
-		} else {
-			blackboard.setViewTarget(blockerPos);
-		}
-		if (!inRange && weap != nullptr) {
-			inRange = weap->isInRange(pos.DistTo(blockerPos));
+			if (blackboard.getBlocker() != nullptr) {
+				inRange = weap->isInRange(pos.DistTo(blackboard.getViewTarget()));
+			}
 		}
 	}
 	updateState(WorldProp::WEAPON_IN_RANGE, inRange);

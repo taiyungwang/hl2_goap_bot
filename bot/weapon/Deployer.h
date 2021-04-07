@@ -13,4 +13,7 @@ public:
 	virtual bool execute(Blackboard& blackboard);
 
 	virtual void undeploy(Blackboard& blackboard);
+
+private:
+	bool isDeploying = false;
 };

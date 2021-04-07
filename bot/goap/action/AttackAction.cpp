@@ -48,14 +48,11 @@ bool AttackAction::execute() {
 	Vector targetLoc = blackboard.getViewTarget();
 	float dist = targetLoc.DistTo(self->getCurrentPosition());
 	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
-	if (weapon == nullptr) {
+	if (weapon == nullptr || dur-- < 1 || targetDestroyed() || weapon->isClipEmpty()) {
 		return true;
 	}
-	if (!weapon->isDeployed()&& weapon->getMinDeployRange() < dist) {
-		return weapon->getDeployer()->execute(blackboard);
-	}
-	if (dur-- < 1 || targetDestroyed() || weapon->isClipEmpty()) {
-		return true;
+	if (weapon->getMinDeployRange() < dist && !weapon->getDeployer()->execute(blackboard)) {
+		return false;
 	}
 	edict_t* targetEnt = getTargetedEdict();
 	Vector eyes = self->getEyesPos();

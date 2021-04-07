@@ -32,7 +32,4 @@ protected:
 	virtual void calculateFacing();
 
 	virtual bool findTargetLoc();
-
-private:
-	bool deployed = false;
 };

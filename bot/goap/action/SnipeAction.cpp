@@ -19,7 +19,6 @@ SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 }
 
 bool SnipeAction::onPlanningFinished() {
-	deployed = false;
 	int team = blackboard.getSelf()->getTeam();
 	if (!GoToAction::onPlanningFinished()) {
 		selector->update(selectorId, team, false);
@@ -47,17 +46,14 @@ bool SnipeAction::execute() {
 	Vector aim;
 	AngleVectors(facing, &aim);
 	blackboard.setViewTarget(aim * 100.0f + blackboard.getSelf()->getCurrentPosition());
-	Deployer* deployer = blackboard.getArmory().getCurrWeapon()->getDeployer();
-	if (deployer == nullptr) {
-		deployed = true;
-	} else if (!deployed && blackboard.getAimAccuracy(blackboard.getViewTarget()) > 0.8f) {
-		deployed = deployer->execute(blackboard);
-	}
-	if (deployed) {
-		blackboard.getButtons().hold(IN_DUCK);
-	}
 	blackboard.lookStraight();
-	return deployed && --duration <= 0;
+	Deployer* deployer = blackboard.getArmory().getCurrWeapon()->getDeployer();
+	if (deployer != nullptr && blackboard.getAimAccuracy(blackboard.getViewTarget()) > 0.8f
+			&& !deployer->execute(blackboard)) {
+		return false;
+	}
+	blackboard.getButtons().hold(IN_DUCK);
+	return --duration <= 0;
 }
 
 bool SnipeAction::goalComplete() {
