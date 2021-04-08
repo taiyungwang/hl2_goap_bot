@@ -20,7 +20,6 @@
 AttackAction::AttackAction(Blackboard& blackboard) :
 		Action(blackboard) {
 	moveCtx = new MoveStateContext(blackboard);
-	crouch = false;
 	effects = {WorldProp::IS_BLOCKED, false};
 	precond.Insert(WorldProp::WEAPON_IN_RANGE, true);
 	precond.Insert(WorldProp::WEAPON_LOADED, true);
@@ -57,15 +56,32 @@ bool AttackAction::execute() {
 	if (weapon->getDeployer() != nullptr && !weapon->isDeployed()) {
 		return true;
 	}
-	edict_t* targetEnt = getTargetedEdict();
-	Vector eyes = self->getEyesPos();
-	Buttons& buttons = blackboard.getButtons();
 	edict_t* selfEnt = self->getEdict();
 	WeaponFunction* weapFunc = weapon->chooseWeaponFunc(selfEnt, dist);
+	if ((!weapFunc->isMelee() && weapFunc->getClip() != -1
+			&& weapFunc->getClip() < 1) || !weapFunc->isInRange(dist)) {
+		return true;
+	}
+	edict_t* targetEnt = getTargetedEdict();
 	if (weapFunc->isExplosive()) {
 		targetLoc = targetEnt->GetCollideable()->GetCollisionOrigin();
 	}
-	if (weapFunc->isMelee() && !crouch) {
+	Vector eyes = self->getEyesPos();
+	if (adjustAim) {
+		targetLoc = weapFunc->getAim(targetLoc, eyes);
+		adjustAim = false;
+	}
+	bool crouch = ((weapFunc->isMelee() && dist <= 32.0f)
+			|| (!weapFunc->isMelee()
+					&& blackboard.getAimAccuracy(targetLoc) > 1.0f - 10.0f / MAX(dist, 0.1f)))
+							&& (!UTIL_IsVisible(targetLoc, blackboard, targetEnt)
+									|| (weapFunc->isMelee() && eyes.z - targetLoc.z > 20.0f));
+	Buttons& buttons = blackboard.getButtons();
+	blackboard.setViewTarget(targetLoc);
+	extern ConVar mybot_debug;
+	if (crouch) {
+		buttons.hold(IN_DUCK);
+	} else if (weapFunc->isMelee()) {
 		moveCtx->setGoal(
 				(targetLoc - self->getCurrentPosition()).Normalized()
 						* (dist - 25.0f) + self->getCurrentPosition());
@@ -74,19 +90,6 @@ bool AttackAction::execute() {
 		moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
 		buttons.hold(IN_SPEED);
 	}
-	if (adjustAim) {
-		targetLoc = weapFunc->getAim(targetLoc, eyes);
-		adjustAim = false;
-	}
-	if ((!weapFunc->isMelee() && weapFunc->getClip() != -1
-			&& weapFunc->getClip() < 1) || !weapFunc->isInRange(dist)) {
-		return true;
-	}
-	blackboard.setViewTarget(targetLoc);
-	extern ConVar mybot_debug;
-	if (crouch) {
-		buttons.hold(IN_DUCK);
-	}
 	if (mybot_debug.GetBool()) {
 		extern IVDebugOverlay *debugoverlay;
 		debugoverlay->AddLineOverlay(eyes, targetLoc, 255, 0, 255, true,
@@ -94,23 +97,14 @@ bool AttackAction::execute() {
 		debugoverlay->AddLineOverlay(eyes, eyes + blackboard.getFacing() * dist, 0, 255, 0, true,
 		NDEBUG_PERSIST_TILL_NEXT_SERVER);
 	}
-	if (weapFunc->isMelee() || blackboard.getAimAccuracy(targetLoc)
-			> 1.0f - 10.0f / MAX(dist, 0.1f)) {
-		if ((!UTIL_IsVisible(targetLoc, blackboard, targetEnt)
-				|| (weapFunc->isMelee() && eyes.z - targetLoc.z > 20.0f))
-				&& !crouch) {
-			// try crouching
-			crouch = true;
-		}
-	}
 	weapFunc->attack(buttons, dist);
 	return false;
 }
 
 bool AttackAction::goalComplete() {
+	abort();
 	if (targetDestroyed()) {
 		blackboard.setBlocker(nullptr);
-		abort();
 		return true;
 	}
 	return false;

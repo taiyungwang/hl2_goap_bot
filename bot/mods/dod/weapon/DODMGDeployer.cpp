@@ -35,12 +35,11 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 	if (proneRequired) {
 		extern ConVar mybot_var;
 		auto self = blackboard.getSelf();
-		edict_t* selfEnt = self->getEdict();
+		edict_t* selfEnt = blackboard.getSelf()->getEdict();
 		if (DodPlayer(selfEnt).isProne()) {
 			Buttons& buttons = blackboard.getButtons();
 			if (target != nullptr && !target->isDead()) {
 				trace_t result;
-				auto self = blackboard.getSelf();
 				UTIL_IsVisible(result, self->getEyesPos(), blackboard, target->getEdict());
 				extern ConVar nav_slope_limit;
 				if (result.DidHit()) {

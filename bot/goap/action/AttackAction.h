@@ -13,10 +13,6 @@ public:
 
 	virtual ~AttackAction();
 
-	void init() {
-		crouch = false;
-	}
-
 	virtual bool precondCheck();
 
 	bool execute();
@@ -43,7 +39,5 @@ private:
 	CUtlLinkedList<CUtlString> objectNames;
 
 	MoveStateContext* moveCtx;
-
-	bool crouch;
 };
 
