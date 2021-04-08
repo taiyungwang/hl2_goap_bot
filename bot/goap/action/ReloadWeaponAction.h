@@ -7,4 +7,8 @@ public:
 	ReloadWeaponAction(Blackboard& blackboard);
 
 	bool execute();
+
+	bool isInterruptable() const {
+		return false;
+	}
 };
