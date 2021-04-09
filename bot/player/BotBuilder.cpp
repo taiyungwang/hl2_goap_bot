@@ -15,10 +15,14 @@
 #include <goap/GoalManager.h>
 #include <util/BasePlayer.h>
 
+extern IVEngineServer* engine;
+
 BotBuilder::BotBuilder(GameManager* objectives): objectives(objectives) {
 	addCommand("mybot_add_bot", "Add a bot to the server", &BotBuilder::addBot);
 	addCommand("mybot_add_all_bots", "Fill server with bots", &BotBuilder::addAllBots);
 	addCommand("mybot_kick_all_bots", "Kicks all bots", &BotBuilder::kickAllBots);
+	addCommand("mybot_kick_all_bots_except", "Kicks all bots except bot with given name",
+			&BotBuilder::kickAllExcept);
 	extern ICvar* cVars;
 	teamPlay = cVars->FindVar("mp_teamplay")->GetBool();
 }
@@ -57,12 +61,20 @@ void BotBuilder::kickAllBots(const CCommand &command) const {
 	auto& players = Player::getPlayers();
 	FOR_EACH_MAP_FAST(players, i) {
 		if (dynamic_cast<Bot*>(players[i]) != nullptr) {
-			extern IVEngineServer* engine;
 			engine->ServerCommand((CUtlString("kickid ") + players[i]->getUserId() + "\n").Get());
 		}
 	}
 }
 
+void BotBuilder::kickAllExcept(const CCommand &command) const {
+	auto& players = Player::getPlayers();
+	FOR_EACH_MAP_FAST(players, i) {
+		if (dynamic_cast<Bot*>(players[i]) != nullptr
+				&& CUtlString(players[i]->getName()) != command.Arg(1)) {
+			engine->ServerCommand((CUtlString("kickid ") + players[i]->getUserId() + "\n").Get());
+		}
+	}
+}
 
 void BotBuilder::onNavMeshLoad() {
 	hidingSpotSelector = new HidingSpotSelector();
@@ -109,11 +121,13 @@ void BotBuilder::addAllBots(const CCommand &command) const {
 	extern CGlobalVars *gpGlobals;
 	for (int i = 0; i < gpGlobals->maxClients - 2; i++) {
 		const char* team = i % 2 == 0 ? "2" : "3";
+		CUtlString name("Bot");
+		name += i;
 		if (command.ArgC() > 1) {
-			const char* args[] = {"addbot", "Bot", team, command.Arg(1) };
+			const char* args[] = {"addbot", name.Get(), team, command.Arg(1) };
 			addBot(CCommand(4, args));
 		} else {
-			const char* args[] = {"addbot", "Bot", team };
+			const char* args[] = {"addbot", name.Get(), team };
 			addBot(CCommand(3, args));
 		}
 	}
