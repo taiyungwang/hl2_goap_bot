@@ -62,6 +62,8 @@ public:
 		return reachedGoal(targetOffset);
 	}
 
+	bool isAtTarget(const Vector& target, float targetOffset) const;
+
 	bool reachedGoal(float targetOffset);
 
 	void setLadderDir(CNavLadder::LadderDirectionType ladderDir) {

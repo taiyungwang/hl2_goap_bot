@@ -29,6 +29,7 @@ static edict_t* getEdict(const trace_t& result) {
 
 MoveState* Avoid::move(const Vector& pos) {
 	if (ctx.reachedGoal()) {
+		ctx.setTargetOffset(0);
 		delete nextState;
 		return new Stopped(ctx);
 	}

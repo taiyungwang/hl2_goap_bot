@@ -44,73 +44,60 @@ bool Navigator::step() {
 	const Player* self = blackboard.getSelf();
 	Vector loc = self->getCurrentPosition();
 	CNavArea* area = getCurrentArea(loc);
-	if (area == lastArea) {
-		areaTime++;
-	} else {
-		areaTime = 0;
-	}
 	lastArea = area;
-	Vector goal(finalGoal);
-	if (getNextArea(loc, area)) {
-		touchedAreaCenter = false;
-	}
-	int attributes = nextArea->GetAttributes();
+	Vector goal(moveCtx->getGoal());
+	int attributes = nextArea == nullptr ? area->GetAttributes() : nextArea->GetAttributes();
 	bool crouching = attributes & NAV_MESH_CROUCH;
-	bool foundGoalToNextArea = getPortalToNextArea(goal);
-	Vector closest;
-	nextArea->GetClosestPointOnArea(loc, &closest);
-	if (area == nextArea
-			// or we are very close to the lastArea
-			|| (closest.DistTo(loc) <= HalfHumanWidth)) {
-		attributes &= ~NAV_MESH_JUMP;
+	if (path->Count() > 0 && getNextArea(goal, loc, area) && !moveCtx->nextGoalIsLadderStart()) {
+		moveCtx->setGoal(goal);
+	}
+	touchedAreaCenter = touchedAreaCenter
+			|| (!moveCtx->hasGoal()
+					&& moveCtx->isAtTarget(nextArea->GetCenter(), moveCtx->getTargetOffset()));
+	if (area == nextArea) {
+		attributes = nextArea->GetAttributes() & ~NAV_MESH_JUMP;
+		bool hasPortalToNext = getPortalToNextArea(goal);
 		if (!touchedAreaCenter) {
-			touchedAreaCenter = loc.DistTo(nextArea->GetCenter()) <= 32.0f;
-		}
-		if (touchedAreaCenter) {
-			if (path->Count() == 0) {
-				if (!canMoveTo(goal, crouching)) {
-					nextArea->GetClosestPointOnArea(finalGoal, &goal);
-					float dist = loc.DistTo(goal);
-					if (dist <= 32.0f || dist >= loc.DistTo(finalGoal)) {
-						goal = finalGoal;
-						moveCtx->setTargetOffset(targetRadius);
-					}
-				} else {
-					moveCtx->setTargetOffset(targetRadius);
-				}
-			} else if (!foundGoalToNextArea) {
-				setLadderStart();
-			}
-		} else if ((attributes & NAV_MESH_PRECISE)
-					|| (path->Count() == 0 && !canMoveTo(goal, crouching))
+			if (!moveCtx->hasGoal() || ((!hasPortalToNext || (attributes & NAV_MESH_PRECISE)
 					|| ((path->Count() > 0 && ((path->Top()->GetAttributes() & NAV_MESH_JUMP)
-							|| !foundGoalToNextArea)))) {
-			goal = nextArea->GetCenter();
-		}
-	} else {
-		if (!foundGoalToNextArea || !canMoveTo(goal,crouching)) {
-			goal = nextArea->GetCenter();
-		}
-		// target for area center if the next area is a drop
-		if (loc.z - goal.z <= StepHeight && !canMoveTo(goal, crouching)) {
-			nextArea->GetClosestPointOnArea(loc, &goal);
-			if (path->Count() == 0 && (loc.DistTo(goal) < 32.0f || !canMoveTo(goal, crouching))) {
-				moveCtx->setTargetOffset(targetRadius);
-				goal = finalGoal;
+							|| !canMoveTo(goal, crouching)))))
+					&& canMoveTo(nextArea->GetCenter(), crouching))) {
+				goal = nextArea->GetCenter();
 			}
+		} else if (!hasPortalToNext && path->Count() > 0) {
+			setLadderStart();
+		} else {
+			getPortalToNextArea(goal);
+		}
+		if (!moveCtx->nextGoalIsLadderStart() && goal != moveCtx->getGoal()) {
+			moveCtx->setGoal(goal);
+		}
+	}
+	if (!touchedAreaCenter && !moveCtx->hasGoal() && !moveCtx->nextGoalIsLadderStart()) {
+		moveCtx->setGoal(nextArea->GetCenter());
+	}
+	if (path->Count() == 0 && moveCtx->getGoal() != finalGoal) {
+		nextArea->GetClosestPointOnArea(finalGoal, &goal);
+		moveCtx->setGoal(goal);
+		if (canMoveTo(finalGoal, crouching)
+				|| moveCtx->reachedGoal(moveCtx->getTargetOffset())) {
+			moveCtx->setTargetOffset(targetRadius);
+			moveCtx->setGoal(finalGoal);
 		}
 	}
 	if (mybot_debug.GetBool()) {
 		nextArea->Draw();
-	}
-	if (!moveCtx->nextGoalIsLadderStart()) {
-		moveCtx->setGoal(goal);
 	}
 	// magic number from https://developer.valvesoftware.com/wiki/Dimensions#Horizontal_.28To_Equal_Height.29
 	if (((attributes & NAV_MESH_JUMP) ||
 			((attributes & NAV_MESH_CROUCH) && !(area->GetAttributes() & NAV_MESH_CROUCH)))
 			&& goal.AsVector2D().DistTo(loc.AsVector2D()) > 136.0f) {
 		attributes = NAV_MESH_INVALID;
+	}
+	if (area == lastArea) {
+		areaTime++;
+	} else {
+		areaTime = 0;
 	}
 	int maxTime = maxAreaTime.GetInt();
 	if ((attributes & NAV_MESH_CROUCH) || moveCtx->nextGoalIsLadderStart()) {
@@ -256,30 +243,29 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	return true;
 }
 
-bool Navigator::getNextArea(const Vector& loc, const CNavArea* area) {
-	if (path->Count() == 0) {
-		return false;
-	}
-	if (nextArea == nullptr || !moveCtx->hasGoal() || area == path->Top()) {
+bool Navigator::getNextArea(Vector& goal, const Vector& loc, const CNavArea* area) {
+	if (nextArea == nullptr || area == path->Top() ||
+			(!moveCtx->hasGoal() && getPortalToNextArea(goal)
+					&& (moveCtx->isAtTarget(goal, HalfHumanWidth)
+							|| canMoveTo(goal, nextArea->GetAttributes() & NAV_MESH_CROUCH)))) {
 		path->Pop(nextArea);
+		touchedAreaCenter = false;
+		if (path->Count() > 0 && !getPortalToNextArea(goal)) {
+			setLadderStart();
+		}
 		return true;
 	}
-	Vector goal;
 	bool crouching = nextArea->GetAttributes() & NAV_MESH_CROUCH;
-	if (!canMoveTo(moveCtx->getGoal(), nextArea->GetAttributes() & NAV_MESH_CROUCH)
-			|| moveCtx->nextGoalIsLadderStart() || blackboard.isOnLadder()
-			|| !getPortalToNextArea(goal) || !canMoveTo(goal, crouching)) {
-		return false;
-	}
-	path->Top()->GetClosestPointOnArea(loc, &goal);
 	if ((nextArea->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE))
+			|| moveCtx->nextGoalIsLadderStart() || blackboard.isOnLadder()
 			// don't skip areas above and below ground height
 			|| fabs(nextArea->GetCenter().z - path->Top()->GetCenter().z) > StepHeight
 			|| fabs(loc.z - nextArea->GetCenter().z) > StepHeight
-			// don't skip if we can't get to the closest point on the next.
-			|| !canMoveTo(goal, crouching)) {
+			|| !canMoveTo(goal, crouching)
+			|| !getPortalToNextArea(goal) || !canMoveTo(goal, crouching)) {
 		return false;
 	}
+	touchedAreaCenter = false;
 	path->Pop(nextArea);
 	return true;
 }

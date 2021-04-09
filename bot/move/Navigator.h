@@ -65,7 +65,7 @@ private:
 
 	bool touchedAreaCenter = false;
 
-	bool getNextArea(const Vector& loc, const CNavArea* area);
+	bool getNextArea(Vector& goal, const Vector& loc, const CNavArea* area);
 
 	bool canMoveTo(Vector to, bool crouch) const;
 

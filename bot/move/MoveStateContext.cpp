@@ -58,12 +58,14 @@ const bool MoveStateContext::hasGoal() const {
 	return dynamic_cast<Stopped*>(state) == nullptr;
 }
 
-bool MoveStateContext::reachedGoal(float targetOffset) {
+bool MoveStateContext::isAtTarget(const Vector& target, float targetOffset) const {
 	const Vector& pos = blackboard.getSelf()->getCurrentPosition();
-	Vector goalGround(goal);
-	goalGround.z = pos.z;
-	if (((goal.z > pos.z && goal.z - pos.z < 20.0f) || pos.z - goal.z < HumanHeight)
-			&& goalGround.DistTo(pos) < targetOffset + HalfHumanWidth) {
+	return ((target.z > pos.z && target.z - pos.z < 20.0f) || pos.z - target.z < HumanHeight)
+			&& Vector(target.x, target.y, pos.z).DistTo(pos) < targetOffset + HalfHumanWidth;
+}
+
+bool MoveStateContext::reachedGoal(float targetOffset) {
+	if (isAtTarget(goal, targetOffset)) {
 		stuck = false;
 		return true;
 	}
