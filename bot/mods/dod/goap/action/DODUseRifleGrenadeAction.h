@@ -13,7 +13,6 @@ public:
 	virtual bool precondCheck();
 
 protected:
-
 	const Player* target = nullptr;
 
 	virtual bool canUse(const char* weaponName) const;

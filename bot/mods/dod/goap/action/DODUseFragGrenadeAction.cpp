@@ -14,27 +14,17 @@ bool DODUseFragGrenadeAction::precondCheck() {
 	return success;
 }
 
-// TODO: change to using player index in case of player logging off.
 bool DODUseFragGrenadeAction::execute() {
 	Weapon* weapon = armory.getWeapon(weapIdx);
-	if (target == nullptr || target->getEdict()->IsFree() || target->isDead()
-			|| weapon == nullptr) {
+	if (!DODUseSmokeGrenadeAction::precondCheck() || primeDuration++ >= 300) {
 		return true;
 	}
 	float dist = blackboard.getTargetEntDistance();
 	const Player* self = blackboard.getSelf();
-	WeaponFunction* grenade = weapon->chooseWeaponFunc(
-			self->getEdict(), dist);
-	blackboard.setViewTarget(
-			grenade->getAim(target->getCurrentPosition(), self->getEyesPos()));
-	if (primeDuration++ >= 300
-			|| !grenade->isInRange(
-					target->getCurrentPosition().DistTo(
-							self->getCurrentPosition()))
-			|| !UTIL_IsVisible(blackboard.getViewTarget(), blackboard,
-					target->getEdict())) {
-		return true;
-	}
+	WeaponFunction* grenade = weapon->chooseWeaponFunc(self->getEdict(),
+			dist);
+	blackboard.setViewTarget(grenade->getAim(target->getCurrentPosition(),
+			self->getEyesPos()));
 	grenade->attack(blackboard.getButtons(), dist);
 	return false;
 }

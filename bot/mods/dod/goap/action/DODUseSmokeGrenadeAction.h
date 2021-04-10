@@ -9,7 +9,7 @@ public:
 		effects = {WorldProp::MULTIPLE_ENEMY_SIGHTED, false};
 	}
 
-	bool precondCheck();
+	virtual bool precondCheck();
 
 	virtual bool execute();
 

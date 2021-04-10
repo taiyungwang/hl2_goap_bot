@@ -6,18 +6,19 @@
 #include <weapon/WeaponFunction.h>
 
 bool DODUseSmokeGrenadeAction::precondCheck() {
-	return UseSpecificWeaponAction::precondCheck()
-			&& blackboard.getTargetedPlayer() != nullptr
-			&& !blackboard.getTargetedPlayer()->isDead();
+	auto target = blackboard.getTargetedPlayer();
+	return target != nullptr && !target->getEdict()->IsFree() && !target->isDead()
+			&& UseSpecificWeaponAction::precondCheck()
+			&& armory.getWeapon(weapIdx) != nullptr
+			&& armory.getWeapon(weapIdx)->isInRange(target->getCurrentPosition().DistTo(blackboard.getSelf()->getCurrentPosition()));
 }
 
 bool DODUseSmokeGrenadeAction::execute() {
-	auto target = blackboard.getTargetedPlayer();
-	if (target == nullptr || target->isDead()) {
+	if (!precondCheck()) {
 		return true;
 	}
 	auto self = blackboard.getSelf();
-	Vector targetLoc = target->getCurrentPosition();
+	Vector targetLoc = blackboard.getTargetedPlayer()->getCurrentPosition();
 	float dist = self->getEyesPos().DistTo(targetLoc);
 	WeaponFunction* grenade = armory.getWeapon(weapIdx)->chooseWeaponFunc(
 			self->getEdict(), dist);

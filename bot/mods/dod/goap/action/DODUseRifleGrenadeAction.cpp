@@ -25,20 +25,18 @@ bool DODUseRifleGrenadeAction::precondCheck() {
 				targetPos.DistTo(blackboard.getSelf()->getCurrentPosition()))) {
 			continue;
 		}
+		float dist = 0;
 		FOR_EACH_VEC(enemies, j)
 		{
-			if (enemies[i] == enemies[j]) {
-				continue;
-			}
 			const Player* enemyOther = Player::getPlayer(enemies[j]);
-			if (enemyOther == nullptr) {
+			if (enemyOther == nullptr || enemyOther == enemy) {
 				continue;
 			}
-			float dist = targetPos.DistTo(enemyOther->getCurrentPosition());
-			if (dist < minDist) {
-				target = enemy;
-				minDist = dist;
-			}
+			dist += targetPos.DistTo(enemyOther->getCurrentPosition());
+		}
+		if (dist < minDist) {
+			target = enemy;
+			minDist = dist;
 		}
 	}
 	return target != nullptr;
