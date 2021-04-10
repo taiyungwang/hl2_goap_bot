@@ -8,25 +8,21 @@
 
 SwitchToBestLoadedWeaponAction::SwitchToBestLoadedWeaponAction(
 		Blackboard& blackboard) :
-		WeaponAction(blackboard) {
+		SwitchToDesiredWeaponAction(blackboard) {
 	effects = {WorldProp::WEAPON_LOADED, true};
 }
 
 static bool ignore(const Weapon* weap, Blackboard& blackboard, float dist) {
 	Armory& armory = blackboard.getArmory();
 	auto& weapons = armory.getWeapons();
-	return weap->isClipEmpty()
-			|| !weap->isInRange(dist)
-			|| weap == armory.getCurrWeapon();
+	return weap->isClipEmpty() || !weap->isInRange(dist);
 }
 
 bool SwitchToBestLoadedWeaponAction::precondCheck() {
-	nextBest = armory.getBestWeapon(blackboard, ignore);
-	return nextBest != 0;
-}
-
-bool SwitchToBestLoadedWeaponAction::execute() {
-	blackboard.getCmd().weaponselect = nextBest;
-	armory.setCurrentWeaponIdx(nextBest);
+	int best = armory.getBestWeapon(blackboard, ignore);
+	if (best == 0) {
+		return false;
+	}
+	armory.setDesiredWeaponIdx(best);
 	return true;
 }

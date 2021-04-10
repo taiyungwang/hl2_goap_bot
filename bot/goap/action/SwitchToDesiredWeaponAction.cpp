@@ -2,7 +2,10 @@
 
 #include <player/Blackboard.h>
 
-bool SwitchToDesiredWeaponAction::execute() {
+void SwitchToDesiredWeaponAction::init() {
 	blackboard.getCmd().weaponselect = armory.getDesiredWeaponIdx();
-	return true;
+}
+
+bool SwitchToDesiredWeaponAction::execute() {
+	return armory.getDesiredWeaponIdx() == armory.getCurrWeaponIdx();
 }

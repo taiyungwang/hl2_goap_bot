@@ -33,10 +33,6 @@ public:
 
 	Weapon* getWeapon(int key) const;
 
-	void setCurrentWeaponIdx(int currentWeapon) {
-		this->currWeapIdx = currentWeapon;
-	}
-
 	CUtlMap<int, Weapon*>& getWeapons() {
 		return weapons;
 	}

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "WeaponAction.h"
+#include "SwitchToDesiredWeaponAction.h"
 
 /**
  * Switches to the next best loaded weapon.
  */
-class SwitchToBestLoadedWeaponAction: public WeaponAction {
+class SwitchToBestLoadedWeaponAction: public SwitchToDesiredWeaponAction {
 public:
 	SwitchToBestLoadedWeaponAction(Blackboard& blackboard);
 
@@ -14,9 +14,4 @@ public:
 	float getCost() {
 		return 1.5f;
 	}
-
-	bool execute();
-
-private:
-	int nextBest = -1;
 };

@@ -9,5 +9,7 @@ public:
 		effects = {WorldProp::USING_DESIRED_WEAPON, true};
 	}
 
+	void init();
+
 	bool execute();
 };

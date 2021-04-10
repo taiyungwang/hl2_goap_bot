@@ -13,9 +13,10 @@ bool SwitchWeaponAction::precondCheck() {
 			&& armory.getCurrWeaponIdx() != armory.getBestWeaponIdx();
 }
 
+void SwitchWeaponAction::init() {
+	blackboard.getCmd().weaponselect = armory.getBestWeaponIdx();
+}
+
 bool SwitchWeaponAction::execute() {
-	int idx = armory.getBestWeaponIdx();
-	armory.setCurrentWeaponIdx(idx);
-	blackboard.getCmd().weaponselect = idx;
-	return true;
+	return armory.getBestWeaponIdx() == armory.getCurrWeaponIdx();
 }
