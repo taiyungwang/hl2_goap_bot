@@ -38,40 +38,37 @@ MoveState* Avoid::move(const Vector& pos) {
 	trace_t& result = ctx.getTraceResult();
 	Vector goal = ctx.getGoal();
 	MoveTraceFilter filter(*blackboard.getSelf(), blackboard.getTarget());
-	if (result.startsolid) {
-		UTIL_TraceLine(pos, goal, MASK_SOLID_BRUSHONLY, &filter, &result);
-	}
 	edict_t* currBlocker = getEdict(result);
 	const char* currBlockerName = currBlocker == nullptr || currBlocker->IsFree() ? nullptr: currBlocker->GetClassName();
-	if (ctx.isStuck()) {
-		extern IVEngineServer* engine;
-		extern CGlobalVars *gpGlobals;
-		int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
-		if ((idx > 0 && idx <= gpGlobals->maxClients)
-						|| Q_stristr(currBlockerName, "physics") != nullptr
-						|| Q_stristr(currBlockerName, "breakable") != nullptr
-						|| Q_stristr(currBlockerName, "func_team") != nullptr) {
-			blocker = currBlocker;
-		}
-		auto& players = Player::getPlayers();
-		int team = blackboard.getSelf()->getTeam();
-		if (blocker != nullptr && !blocker->IsFree()
-				&& blocker->GetCollideable() != nullptr) {
-			const char* blockerName = blocker->GetClassName();
-			if (Q_stristr(blockerName, "physics") != nullptr
-					|| Q_stristr(blockerName, "breakable") != nullptr) {
-				blackboard.setBlocker(blocker);
-			} else {
-				int idx = engine->IndexOfEdict(blocker);
-				if (idx <= gpGlobals->maxClients) {
-					auto i = players.Find(idx);
-					if (team < 2|| (players.IsValidIndex(i)
-							&& players[i]->getTeam() != blackboard.getSelf()->getTeam())) {
-						blackboard.setBlocker(blocker);
-					}
+	extern IVEngineServer* engine;
+	extern CGlobalVars *gpGlobals;
+	int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
+	if ((idx > 0 && idx <= gpGlobals->maxClients)
+					|| Q_stristr(currBlockerName, "physics") != nullptr
+					|| Q_stristr(currBlockerName, "breakable") != nullptr
+					|| Q_stristr(currBlockerName, "func_team") != nullptr) {
+		blocker = currBlocker;
+	}
+	auto& players = Player::getPlayers();
+	int team = blackboard.getSelf()->getTeam();
+	if (blocker != nullptr && !blocker->IsFree()
+			&& blocker->GetCollideable() != nullptr) {
+		const char* blockerName = blocker->GetClassName();
+		if (Q_stristr(blockerName, "physics") != nullptr
+				|| Q_stristr(blockerName, "breakable") != nullptr) {
+			blackboard.setBlocker(blocker);
+		} else {
+			int idx = engine->IndexOfEdict(blocker);
+			if (idx <= gpGlobals->maxClients) {
+				auto i = players.Find(idx);
+				if (team < 2|| (players.IsValidIndex(i)
+						&& players[i]->getTeam() != blackboard.getSelf()->getTeam())) {
+					blackboard.setBlocker(blocker);
 				}
 			}
 		}
+	}
+	if (ctx.isStuck()) {
 		ctx.setStuck(false);
 		if (blackboard.isOnLadder()) {
 			if (ctx.nextGoalIsLadderStart()) {
@@ -79,7 +76,7 @@ MoveState* Avoid::move(const Vector& pos) {
 			}
 			return nextState;
 		}
-		if (dynamic_cast<Stopped*>(nextState) != nullptr) {
+		if (result.startsolid || dynamic_cast<Stopped*>(nextState) != nullptr) {
 			// completely stuck.
 			ctx.setStuck(true);
 			if (blocker != nullptr && Q_stristr(blocker->GetClassName(), "func_team") != nullptr) {
