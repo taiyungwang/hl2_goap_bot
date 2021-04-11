@@ -40,8 +40,11 @@ bool SnipeAction::findTargetLoc() {
 }
 
 bool SnipeAction::execute() {
-	if (!GoToAction::goalComplete()) {
+	if (!GoToAction::goalComplete() ) {
 		return GoToAction::execute();
+	}
+	if (blackboard.isOnLadder()) {
+		return true;
 	}
 	Vector aim;
 	AngleVectors(facing, &aim);
