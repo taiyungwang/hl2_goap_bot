@@ -50,17 +50,18 @@ bool AttackAction::execute() {
 	if (weapon == nullptr || dur-- < 1 || targetDestroyed() || weapon->isClipEmpty()) {
 		return true;
 	}
-	if (weapon->getMinDeployRange() < dist && !weapon->getDeployer()->execute(blackboard)) {
-		return false;
-	}
-	if (weapon->getDeployer() != nullptr && !weapon->isDeployed()) {
-		return true;
-	}
 	edict_t* selfEnt = self->getEdict();
 	WeaponFunction* weapFunc = weapon->chooseWeaponFunc(selfEnt, dist);
-	if ((!weapFunc->isMelee() && weapFunc->getClip() != -1
-			&& weapFunc->getClip() < 1) || !weapFunc->isInRange(dist)) {
+	if (!weapFunc->isMelee() && !weapFunc->isInRange(dist)) {
 		return true;
+	}
+	if (weapon->getDeployer() != nullptr && weapon->getMinDeployRange() < dist) {
+		if (!weapon->getDeployer()->execute(blackboard)) {
+			return false;
+		}
+		if (!weapon->isDeployed()) {
+			return true;
+		}
 	}
 	edict_t* targetEnt = getTargetedEdict();
 	if (weapFunc->isExplosive()) {
@@ -71,11 +72,9 @@ bool AttackAction::execute() {
 		targetLoc = weapFunc->getAim(targetLoc, eyes);
 		adjustAim = false;
 	}
-	bool crouch = ((weapFunc->isMelee() && dist <= 32.0f)
-			|| (!weapFunc->isMelee()
-					&& blackboard.getAimAccuracy(targetLoc) > 1.0f - 10.0f / MAX(dist, 0.1f)))
-							&& (!UTIL_IsVisible(targetLoc, blackboard, targetEnt)
-									|| (weapFunc->isMelee() && eyes.z - targetLoc.z > 20.0f));
+	bool crouch = weapFunc->isMelee()
+			&& eyes.z - targetLoc.z > 20.0f
+			&& moveCtx->getTraceResult().startsolid;
 	Buttons& buttons = blackboard.getButtons();
 	blackboard.setViewTarget(targetLoc);
 	extern ConVar mybot_debug;
@@ -103,8 +102,8 @@ bool AttackAction::execute() {
 
 bool AttackAction::goalComplete() {
 	abort();
+	blackboard.setBlocker(nullptr);
 	if (targetDestroyed()) {
-		blackboard.setBlocker(nullptr);
 		return true;
 	}
 	return false;
