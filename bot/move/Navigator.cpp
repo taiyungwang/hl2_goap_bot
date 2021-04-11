@@ -77,7 +77,7 @@ bool Navigator::step() {
 	if (path->Count() == 0 && moveCtx->getGoal() != finalGoal) {
 		nextArea->GetClosestPointOnArea(finalGoal, &goal);
 		moveCtx->setGoal(goal);
-		if (finalGoal.AsVector2D().DistTo(goal.AsVector2D ()) <= targetRadius
+		if ((touchedAreaCenter && finalGoal.AsVector2D().DistTo(goal.AsVector2D ()) <= targetRadius)
 				|| canMoveTo(finalGoal, crouching)
 				|| moveCtx->reachedGoal(moveCtx->getTargetOffset())) {
 			moveCtx->setTargetOffset(targetRadius);
