@@ -72,9 +72,8 @@ bool MoveStateContext::reachedGoal(float targetOffset) {
 	return false;
 }
 
-const trace_t& MoveStateContext::trace(Vector goal, bool crouch) {
+const trace_t& MoveStateContext::trace(const Vector& pos, Vector goal, bool crouch) {
 	const Player* self = blackboard.getSelf();
-	Vector pos = self->getCurrentPosition();
 	MoveTraceFilter filter(*self, blackboard.getTarget());
 	edict_t* edict = self->getEdict();
 	Vector mins = edict->GetCollideable()->OBBMins(),
@@ -89,4 +88,8 @@ const trace_t& MoveStateContext::trace(Vector goal, bool crouch) {
 	UTIL_TraceHull(pos, goal, mins, maxs,
 			MASK_SOLID_BRUSHONLY, filter, &traceResult, mybot_debug.GetBool());
 	return traceResult;
+}
+
+const trace_t& MoveStateContext::trace(Vector goal, bool crouch) {
+	return trace(blackboard.getSelf()->getCurrentPosition(), goal, crouch);
 }

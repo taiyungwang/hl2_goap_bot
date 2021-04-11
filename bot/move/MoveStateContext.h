@@ -106,6 +106,8 @@ public:
 		trace(goal, crouch);
 	}
 
+	const trace_t& trace(const Vector& start, Vector goal, bool crouch);
+
 	const trace_t& trace(Vector goal, bool crouch);
 
 	trace_t& getTraceResult() {
