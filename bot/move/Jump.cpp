@@ -7,7 +7,7 @@
 #include <player/Buttons.h>
 
 MoveState* Jump::move(const Vector& currPos) {
-	Vector pos(currPos), goal((ctx.getGoal() - currPos).Normalized() * 136.0f + pos);
+	Vector pos(currPos), goal((ctx.getGoal() - currPos).Normalized() * 64.0f + pos);
 	pos.z += 48.0f;
 	goal.z = pos.z;
 	if ((!ctx.getBlackboard().isOnLadder() && ctx.trace(pos, goal, true).DidHit())
