@@ -83,7 +83,7 @@ const trace_t& MoveStateContext::trace(const Vector& pos, Vector goal, bool crou
 		// for some reason the OBBMaxs returns 60
 		maxs.z -= 24.0f;
 	}
-	mins.z += StepHeight;
+	mins.z += 5.0f;
 	extern ConVar mybot_debug;
 	UTIL_TraceHull(pos, goal, mins, maxs,
 			MASK_SOLID_BRUSHONLY, filter, &traceResult, mybot_debug.GetBool());
