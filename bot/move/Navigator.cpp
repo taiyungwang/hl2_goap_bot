@@ -51,9 +51,8 @@ bool Navigator::step() {
 	if (path->Count() > 0 && getNextArea(goal, loc, area) && !moveCtx->nextGoalIsLadderStart()) {
 		moveCtx->setGoal(goal);
 	}
-	touchedAreaCenter = touchedAreaCenter
-			|| (!moveCtx->hasGoal()
-					&& moveCtx->isAtTarget(nextArea->GetCenter(), moveCtx->getTargetOffset()));
+	touchedAreaCenter = touchedAreaCenter || loc.DistTo(nextArea->GetCenter()) < HalfHumanWidth
+			|| (!moveCtx->hasGoal() && moveCtx->isAtTarget(nextArea->GetCenter(), moveCtx->getTargetOffset()));
 	if (area == nextArea) {
 		attributes = nextArea->GetAttributes() & ~NAV_MESH_JUMP;
 		bool hasPortalToNext = getPortalToNextArea(goal);
@@ -69,17 +68,17 @@ bool Navigator::step() {
 		} else {
 			getPortalToNextArea(goal);
 		}
-		if (!moveCtx->nextGoalIsLadderStart() && goal != moveCtx->getGoal()) {
+		if (!moveCtx->hasGoal() && !moveCtx->nextGoalIsLadderStart() && goal != moveCtx->getGoal()) {
 			moveCtx->setGoal(goal);
 		}
-	}
-	if (!touchedAreaCenter && !moveCtx->hasGoal() && !moveCtx->nextGoalIsLadderStart()) {
+	} else if (!touchedAreaCenter && !moveCtx->hasGoal() && !moveCtx->nextGoalIsLadderStart()) {
 		moveCtx->setGoal(nextArea->GetCenter());
 	}
 	if (path->Count() == 0 && moveCtx->getGoal() != finalGoal) {
 		nextArea->GetClosestPointOnArea(finalGoal, &goal);
 		moveCtx->setGoal(goal);
-		if (canMoveTo(finalGoal, crouching)
+		if (finalGoal.AsVector2D().DistTo(goal.AsVector2D ()) <= targetRadius
+				|| canMoveTo(finalGoal, crouching)
 				|| moveCtx->reachedGoal(moveCtx->getTargetOffset())) {
 			moveCtx->setTargetOffset(targetRadius);
 			moveCtx->setGoal(finalGoal);
