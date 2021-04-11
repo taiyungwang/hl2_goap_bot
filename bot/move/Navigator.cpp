@@ -71,8 +71,12 @@ bool Navigator::step() {
 		if (!moveCtx->hasGoal() && !moveCtx->nextGoalIsLadderStart() && goal != moveCtx->getGoal()) {
 			moveCtx->setGoal(goal);
 		}
-	} else if (!touchedAreaCenter && !moveCtx->hasGoal() && !moveCtx->nextGoalIsLadderStart()) {
-		moveCtx->setGoal(nextArea->GetCenter());
+	} else if (!moveCtx->hasGoal() && !moveCtx->nextGoalIsLadderStart()) {
+		getPortalToNextArea(goal);
+		if (!touchedAreaCenter && !canMoveTo(goal, crouching)) {
+			goal = nextArea->GetCenter();
+		}
+		moveCtx->setGoal(goal);
 	}
 	if (path->Count() == 0 && moveCtx->getGoal() != finalGoal) {
 		nextArea->GetClosestPointOnArea(finalGoal, &goal);
