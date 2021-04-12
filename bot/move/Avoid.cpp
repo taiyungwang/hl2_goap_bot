@@ -34,6 +34,12 @@ MoveState* Avoid::move(const Vector& pos) {
 		return new Stopped(ctx);
 	}
 	Blackboard& blackboard = ctx.getBlackboard();
+	if (blackboard.isOnLadder()) {
+		if (ctx.nextGoalIsLadderStart()) {
+			return new MoveLadder(ctx);
+		}
+		return nextState;
+	}
 	ctx.trace(ctx.getGoal(), ctx.getType() & NAV_MESH_CROUCH);
 	trace_t& result = ctx.getTraceResult();
 	Vector goal = ctx.getGoal();
@@ -42,12 +48,6 @@ MoveState* Avoid::move(const Vector& pos) {
 	const char* currBlockerName = currBlocker == nullptr || currBlocker->IsFree() ? nullptr: currBlocker->GetClassName();
 	if (ctx.isStuck()) {
 		ctx.setStuck(false);
-		if (blackboard.isOnLadder()) {
-			if (ctx.nextGoalIsLadderStart()) {
-				return new MoveLadder(ctx);
-			}
-			return nextState;
-		}
 		extern IVEngineServer* engine;
 		extern CGlobalVars *gpGlobals;
 		int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
