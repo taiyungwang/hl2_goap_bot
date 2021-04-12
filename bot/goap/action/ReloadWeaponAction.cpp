@@ -14,6 +14,10 @@ ReloadWeaponAction::ReloadWeaponAction(Blackboard& blackboard) :
 	precond.Insert(WorldProp::ENEMY_SIGHTED, false);
 }
 
+bool ReloadWeaponAction::precondCheck() {
+	return !blackboard.isOnLadder();
+}
+
 bool ReloadWeaponAction::execute() {
 	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
 	if (weapon == nullptr) {

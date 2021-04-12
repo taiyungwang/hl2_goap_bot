@@ -20,7 +20,7 @@ static bool ignore(const Weapon* weap, Blackboard& blackboard, float dist) {
 
 bool SwitchToBestLoadedWeaponAction::precondCheck() {
 	int best = armory.getBestWeapon(blackboard, ignore);
-	if (best == 0) {
+	if (!SwitchToDesiredWeaponAction::precondCheck() || best == 0) {
 		return false;
 	}
 	armory.setDesiredWeaponIdx(best);

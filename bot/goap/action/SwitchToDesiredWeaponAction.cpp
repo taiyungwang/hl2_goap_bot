@@ -2,6 +2,10 @@
 
 #include <player/Blackboard.h>
 
+bool SwitchToDesiredWeaponAction::precondCheck() {
+	return !blackboard.isOnLadder();
+}
+
 void SwitchToDesiredWeaponAction::init() {
 	blackboard.getCmd().weaponselect = armory.getDesiredWeaponIdx();
 }
