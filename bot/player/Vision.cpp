@@ -103,6 +103,7 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 			}
 			return v2->dist > v1->dist ? -1: 1;
 		});
+	auto lastTarget = blackboard.getTargetedPlayer();
 	blackboard.setTargetedPlayer(nullptr);
 	FOR_EACH_VEC(visibles, i) {
 		const Player* target = visibles[i].player;
@@ -144,6 +145,14 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 					NDEBUG_PERSIST_TILL_NEXT_SERVER);
 		}
 		visibleEnemies.AddToTail(engine->IndexOfEdict(target->getEdict()));
+	}
+	if (blackboard.getTargetedPlayer() != nullptr) {
+		memoryDur = 60;
+	} else if (lastTarget != nullptr && !lastTarget->isDead()) {
+		memoryDur--;
+		if (memoryDur > 0) {
+			blackboard.setTargetedPlayer(lastTarget);
+		}
 	}
 }
 

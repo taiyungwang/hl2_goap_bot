@@ -45,7 +45,7 @@ const char* Player::getWeaponName() const {
 }
 
 bool Player::isDead() const {
-	return info->IsDead() || info->GetHealth() <= 0;
+	return ent->IsFree() || info->IsDead() || info->GetHealth() <= 0;
 }
 
 int Player::getUserId() const {

@@ -16,5 +16,8 @@ bool UTIL_IsVisible(trace_t& result, const Vector &vecAbsEnd,
 
 class Vision {
 public:
-	static void updateVisiblity(Blackboard& blackboard);
+	void updateVisiblity(Blackboard& blackboard);
+
+private:
+	unsigned int memoryDur = 0;
 };

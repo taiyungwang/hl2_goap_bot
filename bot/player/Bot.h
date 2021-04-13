@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Player.h"
+#include "Vision.h"
 #include "move/RotationManager.h"
 #include <event/EventHandler.h>
 #include <utlvector.h>
@@ -66,6 +67,8 @@ public:
 
 private:
 	static PlayerClasses CLASSES;
+
+	Vision vision;
 
 	BasePlayer* playerClassVar = nullptr;
 

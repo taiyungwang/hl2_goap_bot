@@ -45,7 +45,7 @@ void Bot::think() {
 				planner->resetPlanning(false);
 				resetPlanner = false;
 			}
-			Vision::updateVisiblity(*blackboard);
+			vision.updateVisiblity(*blackboard);
 			if (inGame) {
 				cmd.Reset();
 				Armory& amory = blackboard->getArmory();
