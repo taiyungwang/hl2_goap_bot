@@ -22,8 +22,10 @@ jobs:
     - uses: actions/checkout@v2
       with:
         repository: alliedmodders/hl2sdk      
-        ref: sdk2013
-        
+        ref: sdk2013        
+    - name: Install CxxTest
+      run: sudo apt-get install cxxtest
+      
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
