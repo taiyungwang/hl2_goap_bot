@@ -19,7 +19,7 @@ jobs:
       with:
         path: hl2_goap_bot
     - name: Checkout and Build project 
-      uses: ./valve_source_plugin_navmesh/.github/actions/build
+      uses: ./hl2_goap_bot/.github/actions/build
       with:
         repo-path: hl2_goap_bot
         
