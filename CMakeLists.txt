@@ -9,7 +9,7 @@ set( steam_root "c:/Program Files (x86)/steam" )
 set(HL2SDK_DIR "${PROJECT_SOURCE_DIR}/../hl2sdk")
 set (HL2SDK_LIBS ${HL2SDK_DIR}/lib/public)
 set (VSP_NAVMESH ${PROJECT_SOURCE_DIR}/../plugin_navmesh)
-find_library(VSP_NAVMESH_LIB valve_navmesh ~/workspace/plugin_navmesh/nav_mesh/)
+find_library(VSP_NAVMESH_LIB valve_navmesh ${PROJECT_BINARY_DIR}/plugin_navmesh/nav_mesh/)
 find_library(VSP_UTIL_LIB plugin_util ~/workspace/plugin_navmesh/util)
 set (CXX_TEST_GEN cxxtestgen)
 
