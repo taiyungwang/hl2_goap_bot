@@ -5,8 +5,8 @@ inputs:
     description: 'Path to the plugin project source'
     required: true
 runs:
+  pre: sudo apt-get install cxxtest clang gcc-multilib g++-multilib
   pre-if: runner.os == 'ubuntu-20.04'
-  sudo apt-get install cxxtest clang gcc-multilib g++-multilib
   
   using: "composite"
   steps:
