@@ -5,6 +5,9 @@ inputs:
     description: 'Path to the plugin project source'
     required: true
 runs:
+  pre-if: runner.os == 'ubuntu-20.04'
+  sudo apt-get install cxxtest clang gcc-multilib g++-multilib
+  
   using: "composite"
   steps:
     - name: Checkout HL2SDK 
@@ -18,11 +21,7 @@ runs:
       with:
         repository: taiyungwang/valve_source_plugin_navmesh
         ref: master
-        path: valve_source_plugin_navmesh
-    - name: Install CxxTest and Clang
-      run: sudo apt-get install cxxtest clang gcc-multilib g++-multilib
-      shell: bash
-      
+        path: valve_source_plugin_navmesh      
     - name: Configure CMake for Navmesh Lib
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
