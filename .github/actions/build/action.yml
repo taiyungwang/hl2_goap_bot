@@ -5,11 +5,13 @@ inputs:
     description: 'Path to the plugin project source'
     required: true
 runs:
-  pre: sudo apt-get install cxxtest clang gcc-multilib g++-multilib
-  pre-if: runner.os == 'ubuntu-20.04'
-  
   using: "composite"
   steps:
+    - name: install Linux packages
+    run: sudo apt-get install cxxtest clang gcc-multilib g++-multilib
+    shell: bash
+    if: runner.os == 'ubuntu-20.04'
+    
     - name: Checkout HL2SDK 
       uses: actions/checkout@v2
       with:
