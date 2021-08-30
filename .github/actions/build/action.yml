@@ -7,10 +7,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: install Linux packages
-      run: sudo apt-get install cxxtest clang gcc-multilib g++-multilib
+    - name: Install Dependent packages
+      run: if $RUNNER_OS == 'Linux': then sudo apt-get install cxxtest clang gcc-multilib g++-multilib fi
       shell: bash
-      if: runner.os == 'ubuntu-20.04'
     
     - name: Checkout HL2SDK 
       uses: actions/checkout@v2
