@@ -9,12 +9,12 @@ runs:
   steps:
     - name: Install Dependent packages
       run: |
-      if [ $RUNNER_OS -eq Linux ]; 
-        then sudo apt-get install cxxtest clang gcc-multilib g++-multilib; 
-      elif [ $RUNNER_OS -eq macOS ];
-        then /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; 
-          brew install cmake cxxtest
-      fi      
+        if [ $RUNNER_OS -eq Linux ]; 
+          then sudo apt-get install cxxtest clang gcc-multilib g++-multilib; 
+        elif [ $RUNNER_OS -eq macOS ];
+          then /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; 
+            brew install cmake cxxtest
+        fi      
       shell: bash
     
     - name: Checkout HL2SDK 
