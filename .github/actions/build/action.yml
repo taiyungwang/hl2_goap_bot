@@ -13,8 +13,6 @@ runs:
           then sudo apt-get install cxxtest clang gcc-multilib g++-multilib; 
         elif [ $RUNNER_OS = macOS ];
           then brew install cxxtest
-        else # Windows
-          # conda install cxxtest
         fi        
       shell: bash
     
