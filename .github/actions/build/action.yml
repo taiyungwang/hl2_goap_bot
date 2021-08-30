@@ -8,7 +8,7 @@ runs:
   using: "composite"
   steps:
     - name: Install Dependent packages
-      run: if $RUNNER_OS == 'Linux': then sudo apt-get install cxxtest clang gcc-multilib g++-multilib fi
+      run: if $RUNNER_OS == 'Linux'; then sudo apt-get install cxxtest clang gcc-multilib g++-multilib fi
       shell: bash
     
     - name: Checkout HL2SDK 
