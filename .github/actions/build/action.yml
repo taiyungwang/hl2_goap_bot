@@ -12,9 +12,10 @@ runs:
         if [ $RUNNER_OS = Linux ]; 
           then sudo apt-get install cxxtest clang gcc-multilib g++-multilib; 
         elif [ $RUNNER_OS = macOS ];
-          then /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; 
-            brew install cmake cxxtest
-        fi      
+          then brew install cxxtest
+        else # Windows
+          conda install cxxtest
+        fi        
       shell: bash
     
     - name: Checkout HL2SDK 
