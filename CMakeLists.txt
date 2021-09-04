@@ -50,11 +50,11 @@ endif (${UNIX})
 
 #compiler specific settings
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14")
 	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 		add_definitions(-DCOMPILER_GCC -DGNUC)
 	else()
 		add_definitions(-D__clang__ )
+		set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dangling-else -Wno-c++11-narrowing -Wno-inconsistent-missing-override")
 	endif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set( ARCH_FLAGS "-mtune=i686 -march=pentium3 -mmmx -m32 -fpermissive" )
