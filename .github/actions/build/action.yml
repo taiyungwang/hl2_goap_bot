@@ -31,7 +31,7 @@ runs:
     - name: Configure CMake for Navmesh Lib
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -S "${{ github.workspace }}/valve_source_plugin_navmesh" -B "${{ github.workspace }}/build/valve_source_plugin_navmesh" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+      run: cmake -S "${{ github.workspace }}/valve_source_plugin_navmesh" -A Win32 -B "${{ github.workspace }}/build/valve_source_plugin_navmesh" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
       env: # specify compiler
         CC: clang
         CXX: clang++
@@ -48,16 +48,16 @@ runs:
     - name: Configure CMake for Bot Plugin
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -S "${{ github.workspace }}/${{ inputs.repo-path }}" -B "${{ github.workspace }}/build/${{ inputs.repo-path }}" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+      run: cmake -S "${{ github.workspace }}/${{ inputs.repo-path }}" -A Win32 -B "${{ github.workspace }}/build/${{ inputs.repo-path }}" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
       env: # specify compiler
         CC: clang
         CXX: clang++
         BUILD_TYPE: Release        
       shell: bash
 
-    - name: Build
+    - name: Build Bot plugin.
       # Build your program with the given configuration
       env: # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
         BUILD_TYPE: Release
-      run: cmake --build "${{ github.workspace }}/build/${{ inputs.repo-path }}" --config ${{ env.BUILD_TYPE }}
+      run: cmake --A Win32 -build "${{ github.workspace }}/build/${{ inputs.repo-path }}" --config ${{ env.BUILD_TYPE }}
       shell: bash
