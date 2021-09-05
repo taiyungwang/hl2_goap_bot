@@ -39,9 +39,16 @@ if (${UNIX})
 	set( UNDEF "-Usprintf -Ustrncpy -UPROTECTED_THINGS_ENABLE" )
 else ()
 	if(MSVC)
-		set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT /NODEFAULTLIB:LIBCD /NODEFAULTLIB:LIBC")
-		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+		add_compile_options(
+			$<$<CONFIG:>:/MT> #---------|
+			$<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
+			$<$<CONFIG:Release>:/MT> #--|
+			-arch:SSE -GS- -TP -W4 -fp:fast -GF -Zc:forScope -RTC1 -GR -Gd -Oy- -Fa -Fo -Fp -MP -Od -TP
+		)
+		string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+		add_link_options(/NODEFAULTLIB:libc /NODEFAULTLIB:libcd /NODEFAULTLIB:libcmtd /SUBSYSTEM:WINDOWS /SAFESEH:NO)
+		add_definitions(-DCOMPILER_MSVC -DCOMPILER_MSVC32 -D_CRT_NO_VA_START_VALIDATION -D_CRT_SECURE_NO_DEPRECATE 
+			-D_CRT_NONSTDC_NO_DEPRECATE)
 	endif()
 	set (CXX_DIR "c:/cxxtest")
 	set (CXX_TEST_GEN "${CXX_DIR}/bin/cxxtestgen")		
