@@ -38,18 +38,6 @@ if (${UNIX})
 	link_directories(${steam_root}/ubuntu12_32/steam-runtime/i386/usr/lib/i386-linux-gnu ${steam_root}/ubuntu12_32)
 	set( UNDEF "-Usprintf -Ustrncpy -UPROTECTED_THINGS_ENABLE" )
 else ()
-	if(MSVC)
-		add_compile_options(
-			$<$<CONFIG:>:/MT> #---------|
-			$<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
-			$<$<CONFIG:Release>:/MT> #--|
-			-arch:SSE -GS- -TP -W4 -fp:fast -GF -Zc:forScope -RTC1 -GR -Gd -Oy- -Fa -Fo -Fp -MP -Od -TP
-		)
-		string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-		add_link_options(/NODEFAULTLIB:libc /NODEFAULTLIB:libcd /NODEFAULTLIB:libcmtd /SUBSYSTEM:WINDOWS /SAFESEH:NO)
-		add_definitions(-DCOMPILER_MSVC -DCOMPILER_MSVC32 -D_CRT_NO_VA_START_VALIDATION -D_CRT_SECURE_NO_DEPRECATE 
-			-D_CRT_NONSTDC_NO_DEPRECATE)
-	endif()
 	set (CXX_DIR "c:/cxxtest")
 	set (CXX_TEST_GEN "${CXX_DIR}/bin/cxxtestgen")		
 	set (LEGACY_STDIO legacy_stdio_definitions)
@@ -68,6 +56,17 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL
 	add_definitions(-D_POSIX -DPOSIX -DGNUC -DNO_HOOK_MALLOC -DNO_MALLOC_OVERRIDE)
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-non-virtual-dtor -Wno-invalid-offsetof" )
 	add_definitions(-DSWDS -D_finite=finite -Dstricmp=strcasecmp  -Dstrnicmp=strncasecmp -D_vsnprintf=vsnprintf -D_alloca=alloca)	
+else () # MSVC
+	add_compile_options(
+		$<$<CONFIG:>:/MT> #---------|
+		$<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
+		$<$<CONFIG:Release>:/MT> #--|
+		-arch:SSE -GS- -TP -W4 -fp:fast -GF -Zc:forScope -RTC1 -GR -Gd -Oy- -Fa -Fo -Fp -MP -Od -TP
+	)
+	string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+	add_link_options(/NODEFAULTLIB:libc /NODEFAULTLIB:libcd /NODEFAULTLIB:libcmtd /SUBSYSTEM:WINDOWS /SAFESEH:NO)
+	add_definitions(-DCOMPILER_MSVC -DCOMPILER_MSVC32 -D_CRT_NO_VA_START_VALIDATION -D_CRT_SECURE_NO_DEPRECATE 
+		-D_CRT_NONSTDC_NO_DEPRECATE)
 endif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${ARCH_FLAGS}" )
 SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${ARCH_FLAGS}" )
