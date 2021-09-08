@@ -68,10 +68,6 @@ else () # MSVC
 	)
 	string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 	add_link_options(/NODEFAULTLIB:libcmt
-		#/NODEFAULTLIB:libc 		
-		#/NODEFAULTLIB:libcd
-		#/NODEFAULTLIB:libcmtd 
-		#/SUBSYSTEM:WINDOWS 
 		/SAFESEH:NO)
 	add_definitions(-DCOMPILER_MSVC -DCOMPILER_MSVC32 -D_CRT_NO_VA_START_VALIDATION -D_CRT_SECURE_NO_DEPRECATE 
 		-D_CRT_NONSTDC_NO_DEPRECATE)
@@ -80,6 +76,23 @@ SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${ARCH_FLAGS}" )
 SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${ARCH_FLAGS}" )
 
 include_directories(${PROJECT_SOURCE_DIR} ${VSP_NAVMESH} ${HL2SDK_DIR}/common utils/common ${HL2SDK_DIR}/public ${HL2SDK_DIR}/public/mathlib ${HL2SDK_DIR}/public/tier0 ${HL2SDK_DIR}/public/tier1 ${HL2SDK_DIR}/public/game/server ${HL2SDK_DIR}/public/engine ${HL2SDK_DIR}/game/shared ${HL2SDK_DIR}/game/server)
+link_directories(${HL2SDK_LIBS})	
+
+add_library(public STATIC ${HL2SDK_DIR}/public/collisionutils.cpp)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/bot)
+add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+
+find_library(VSP_NAVMESH_LIB valve_navmesh ${PROJECT_BINARY_DIR}/../valve_source_plugin_navmesh/nav_mesh/${BUILD_DIR})
+find_library(VSP_UTIL_LIB plugin_util ${PROJECT_BINARY_DIR}/../valve_source_plugin_navmesh/util/${BUILD_DIR})
+
+set(CMAKE_SHARED_LIBRARY_PREFIX "")
+set(PLUGIN_NAME my_bot)
+add_library(${PLUGIN_NAME} SHARED  VSPlugin.cpp)
+target_link_libraries(${PLUGIN_NAME}  
+	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player goap goap_actions
+	 weapon_sys event bot_move ${VSP_NAVMESH_LIB} ${VSP_UTIL_LIB}
+	 tier1 mathlib vstdlib public tier0 ${tier2} ${LEGACY_STDIO})
 
 #find installed mods on system.
 set (mods "tf;dod;hl2mp")
@@ -89,34 +102,10 @@ foreach(GAME ${games})
 	foreach(mod ${mods})
 		if (EXISTS ${GAME}/${mod})
 			set( src_dir "${GAME}" )
-			list(APPEND mod_dirs "${GAME}/${mod}")
 		endif (EXISTS ${GAME}/${mod})
 	endforeach(mod ${mods})
 endforeach(GAME ${games})
-link_directories("${src_dir}/bin" ${HL2SDK_LIBS})	
 if (NOT DEFINED src_dir)
     message (WARNING "No supported mods found.")
 endif (NOT DEFINED src_dir)
 
-set(PLUGIN_NAME my_bot)
-
-add_library(public STATIC ${HL2SDK_DIR}/public/collisionutils.cpp)
-
-add_subdirectory(${PROJECT_SOURCE_DIR}/bot)
-add_subdirectory(${PROJECT_SOURCE_DIR}/test)
-
-set(CMAKE_SHARED_LIBRARY_PREFIX "")
-add_library(${PLUGIN_NAME} SHARED  VSPlugin.cpp)
-find_library(VSP_NAVMESH_LIB valve_navmesh ${PROJECT_BINARY_DIR}/../valve_source_plugin_navmesh/nav_mesh/${BUILD_DIR})
-find_library(VSP_UTIL_LIB plugin_util ${PROJECT_BINARY_DIR}/../valve_source_plugin_navmesh/util/${BUILD_DIR})
-target_link_libraries(${PLUGIN_NAME}  
-	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player goap goap_actions
-	 weapon_sys event bot_move ${VSP_NAVMESH_LIB} ${VSP_UTIL_LIB}
-	 tier1 mathlib vstdlib public tier0 ${tier2} ${LEGACY_STDIO})
-
-foreach(mod_dir ${mod_dirs})
-	if (EXISTS ${mod_dir}/addons)
-	    set( install_dir ${mod_dir}/addons )
-        install (TARGETS ${PLUGIN_NAME} DESTINATION ${install_dir})
-	endif (EXISTS ${mod_dir}/addons)
-endforeach(mod_dir ${mod_dirs})
