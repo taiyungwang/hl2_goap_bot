@@ -81,6 +81,7 @@ link_directories(${HL2SDK_LIBS})
 add_library(public STATIC ${HL2SDK_DIR}/public/collisionutils.cpp)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bot)
+set(CMAKE_STATIC_LIBRARY_PREFIX "")
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 
 find_library(VSP_NAVMESH_LIB valve_navmesh ${PROJECT_BINARY_DIR}/../valve_source_plugin_navmesh/nav_mesh/${BUILD_DIR})
