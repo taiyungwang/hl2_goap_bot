@@ -12,6 +12,7 @@ runs:
         if [ $RUNNER_OS = Linux ]
           then sudo apt-get install cxxtest clang gcc-multilib g++-multilib; 
         else
+          ls /usr/bin
           pacman -S wget
           wget https://github.com/CxxTest/cxxtest/releases/download/4.4/cxxtest-4.4.tar.gz && tar xvzf cxxtest-4.4.tar.gz -C /c/;
         fi        
