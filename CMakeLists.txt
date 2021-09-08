@@ -67,7 +67,8 @@ else () # MSVC
 		-arch:SSE -GS- -TP -W4 -fp:fast -GF -Zc:forScope -RTC1 -GR -Gd -Oy- -Fa -Fo -Fp -MP -Od -TP
 	)
 	string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-	add_link_options(/NODEFAULTLIB:libcmt
+	add_link_options($<$<CONFIG:Debug>:/NODEFAULTLIB:libcmt> 
+		$<$<CONFIG:Release>:/NODEFAULTLIB:libcmtd> 
 		/SAFESEH:NO)
 	add_definitions(-DCOMPILER_MSVC -DCOMPILER_MSVC32 -D_CRT_NO_VA_START_VALIDATION -D_CRT_SECURE_NO_DEPRECATE 
 		-D_CRT_NONSTDC_NO_DEPRECATE)
