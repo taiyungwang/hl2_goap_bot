@@ -36,7 +36,7 @@ runs:
         if [ $runner_os == Windows ] 
           then cmake -S "${{ github.workspace }}/valve_source_plugin_navmesh" -A Win32  -B "${{ github.workspace }}/build/valve_source_plugin_navmesh" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
         else
-          make -S "${{ github.workspace }}/valve_source_plugin_navmesh" -B "${{ github.workspace }}/build/valve_source_plugin_navmesh" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+          cmake -S "${{ github.workspace }}/valve_source_plugin_navmesh" -B "${{ github.workspace }}/build/valve_source_plugin_navmesh" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
         fi
       env: # specify compiler
         CC: clang
