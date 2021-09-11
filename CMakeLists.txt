@@ -14,13 +14,17 @@ set (VSP_NAVMESH ${PROJECT_SOURCE_DIR}/../valve_source_plugin_navmesh)
 set (BUILD_DIR "")
 set (CXX_TEST_GEN cxxtestgen)
 
-set(tier2 tier2)
+set (tier1 tier1)
+set (tier2 tier2)
+set (mathlib mathlib)
 set (LEGACY_STDIO legacy_stdio_definitions)
 
 if (${UNIX})
 	set (SRC_HOME $ENV{HOME})
 	set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lm")
-	set(tier2 :tier2.a)
+	set (tier1 :tier1.a)
+	set (tier2 :tier2.a)
+	set (mathlib :mathlib.a)
 	if( ${APPLE} )
 		set (HL2SDK_LIBS ${HL2SDK_LIBS}/osx32)
 		add_definitions(-D_OSX -DOSX)
@@ -33,7 +37,6 @@ if (${UNIX})
 		add_definitions(-D_LINUX -DLINUX) 
 		set( steam_root "${SRC_HOME}/.local/share/Steam" )
 	endif( ${APPLE} )
-	link_directories(${steam_root}/ubuntu12_32/steam-runtime/i386/usr/lib/i386-linux-gnu ${steam_root}/ubuntu12_32)
 	set( UNDEF "-Usprintf -Ustrncpy -UPROTECTED_THINGS_ENABLE" )
 else ()
 	set (CXX_DIR "${DRIVE}:/cxxtest-4.4")
@@ -95,7 +98,7 @@ add_library(${PLUGIN_NAME} SHARED  VSPlugin.cpp)
 target_link_libraries(${PLUGIN_NAME}  
 	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player goap goap_actions
 	 weapon_sys event bot_move ${VSP_NAVMESH_LIB} ${VSP_UTIL_LIB}
-	 tier1 mathlib vstdlib public tier0 ${tier2} ${LEGACY_STDIO})
+	 ${tier1} ${mathlib} vstdlib public tier0 ${tier2} ${LEGACY_STDIO})
 
 #find installed mods on system.
 set (mods "tf;dod;hl2mp")
