@@ -8,8 +8,8 @@ name: Upload Release Asset
 
 jobs:
   build:
-    name: Upload Release Asset
-    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
