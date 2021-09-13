@@ -32,25 +32,21 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-      - name: Upload Linux Release Asset
-        if: matrix.config.os == 'ubuntu-20.04' 
-        id: upload-linux-release-asset
+      - name: Copy Artifact
+        run: |
+          if [ $RUNNER_OS = Linux ]
+            then cp ${{github.workspace}}/build/my_bot.so ${{github.workspace}}/hl2_goap_bot/addons
+          else
+            then cp ${{github.workspace}}/build/Release/my_bot.dll ${{github.workspace}}/hl2_goap_bot/addons          
+          fi
+      - name: Compress Release Assets
+        run: pushd ${{github.workspace}}/hl2_goap_bot && tar ${{github.workspace}}/hl2_goap_bot.zip -acf addons && popd
+      - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ${{github.workspace}}/build/my_bot.so
-          asset_name: my_bot.so
-          asset_content_type: application/octet-stream
-      - name: Upload Windows Release Asset
-        if: matrix.config.os == 'windows-2019' 
-        id: upload-windows-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ${{github.workspace}}/build/Release/my_bot.dll
-          asset_name: my_bot.dll
-          asset_content_type: application/octet-stream          
+          asset_path: ${{github.workspace}}/hl2_goap_bot.zip
+          asset_name: hl2_goap_bot.zip
+          asset_content_type: application/zip
