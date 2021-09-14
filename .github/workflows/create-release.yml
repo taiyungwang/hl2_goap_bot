@@ -11,6 +11,8 @@ defaults:
 jobs:
   create_release:
     runs-on: ubuntu-latest
+  outputs:
+    upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Create Release
         id: create_release
@@ -22,7 +24,7 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false    
-  build_and_upload_release:
+  build_and_upload_assets:
     needs: create_release  
     name: ${{ matrix.config.name }}
     # The CMake configure and build commands are platform agnostic and should work equally
