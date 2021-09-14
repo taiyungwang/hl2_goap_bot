@@ -40,7 +40,7 @@ jobs:
           if [ $RUNNER_OS = Linux ]
             then cp ${{github.workspace}}/build/my_bot.so ${{github.workspace}}/hl2_goap_bot/addons
           else
-            then cp ${{github.workspace}}/build/Release/my_bot.dll ${{github.workspace}}/hl2_goap_bot/addons          
+            cp ${{github.workspace}}/build/Release/my_bot.dll ${{github.workspace}}/hl2_goap_bot/addons          
           fi
       - name: Compress Release Assets
         run: pushd ${{github.workspace}}/hl2_goap_bot && tar ${{github.workspace}}/hl2_goap_bot.zip -acf addons && popd
