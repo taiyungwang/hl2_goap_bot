@@ -51,7 +51,7 @@ jobs:
             cp "${{github.workspace}}/build/hl2_goap_bot/Release/my_bot.dll" "${{github.workspace}}/hl2_goap_bot/addons";
           fi
       - name: Compress Release Assets
-        run: pushd "${{github.workspace}}/hl2_goap_bot" && tar -acf "${{github.workspace}}/hl2_goap_bot.zip" addons && popd
+        run: pushd "${{github.workspace}}"/hl2_goap_bot && tar -acf "${{github.workspace}}"/hl2_goap_bot.zip addons && popd
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
