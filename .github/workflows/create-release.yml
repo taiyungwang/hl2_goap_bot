@@ -36,10 +36,10 @@ jobs:
           draft: false
           prerelease: false
       - name: Linux Copy Artifact 
-        if: ${{ matrix.os }} == ubuntu-20.04
+        if: matrix.os == 'ubuntu-20.04'
         run: cp ${{github.workspace}}/build/hl2_goap_bot/my_bot.so ${{github.workspace}}/hl2_goap_bot/addons
       - name: Windows Copy Artifact
-        if: ${{ matrix.os }} == windows-2019
+        if: matrix.os == 'windows-2019'
         run: cp ${{github.workspace}}/build/hl2_goap_bot/Release/my_bot.dll ${{github.workspace}}/hl2_goap_bot/addons
       - name: Compress Release Assets
         run: pushd ${{github.workspace}}/hl2_goap_bot && tar ${{github.workspace}}/hl2_goap_bot.zip -acf addons && popd
