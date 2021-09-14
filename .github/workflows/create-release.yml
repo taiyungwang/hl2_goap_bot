@@ -10,7 +10,7 @@ defaults:
     shell: bash
 jobs:
   create_release:
-    runs-on: unbuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Create Release
         id: create_release
