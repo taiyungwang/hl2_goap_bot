@@ -88,6 +88,8 @@ find_library(VSP_UTIL_LIB plugin_util ${PROJECT_BINARY_DIR}/../valve_source_plug
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bot)
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
+enable_testing()
+include(CTest)
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
@@ -106,6 +108,8 @@ foreach(GAME ${games})
 	foreach(mod ${mods})
 		if (EXISTS ${GAME}/${mod})
 			set( src_dir "${GAME}" )
+			set( install_dir ${GAME}/${mod}/addons )
+	        install (TARGETS ${PLUGIN_NAME} DESTINATION ${install_dir})
 		endif (EXISTS ${GAME}/${mod})
 	endforeach(mod ${mods})
 endforeach(GAME ${games})
