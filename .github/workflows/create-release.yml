@@ -47,7 +47,8 @@ jobs:
         if: matrix.os == 'windows-2019'
         run: cp ${{github.workspace}}/build/hl2_goap_bot/Release/my_bot.dll ${{github.workspace}}/hl2_goap_bot/addons
       - name: Compress Release Assets
-        run: pushd ${{github.workspace}}/hl2_goap_bot; tar -acf ${{github.workspace}}/hl2_goap_bot.zip addons; popd
+        working-directory: ${{github.workspace}}/hl2_goap_bot
+        run: tar -acf ${{github.workspace}}/hl2_goap_bot.zip addons
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
