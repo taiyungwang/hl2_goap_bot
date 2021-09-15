@@ -28,7 +28,7 @@ jobs:
         repo-path: hl2_goap_bot
         
     - name: Test
-      working-directory: ${{github.workspace}}/build
+      working-directory: ${{github.workspace}}/build/hl2_goap_bot
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C Release
