@@ -5,9 +5,6 @@ on:
     - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 name: Upload Release Asset
-defaults:
-  run:
-    shell: bash
 jobs:
   create_release:
     runs-on: ubuntu-latest
@@ -43,15 +40,14 @@ jobs:
         uses: ./hl2_goap_bot/.github/actions/build
         with:
           repo-path: hl2_goap_bot
-      - name: Copy Artifact 
-        run: |
-          if [ $RUNNER_OS = Linux ]
-            then cp ${{github.workspace}}/build/hl2_goap_bot/my_bot.so ${{github.workspace}}/hl2_goap_bot/addons; 
-          else
-            cp "${{github.workspace}}/build/hl2_goap_bot/Release/my_bot.dll" "${{github.workspace}}/hl2_goap_bot/addons";
-          fi
+      - name: Copy Artifact Linux
+        if: matrix.os == 'ubuntu-20.04'
+        run: cp ${{github.workspace}}/build/hl2_goap_bot/my_bot.so ${{github.workspace}}/hl2_goap_bot/addons
+      - name: Copy Artifact Windows
+        if: matrix.os == 'windows-2019'
+        run: cp ${{github.workspace}}/build/hl2_goap_bot/Release/my_bot.dll ${{github.workspace}}/hl2_goap_bot/addons
       - name: Compress Release Assets
-        run: pushd "${{github.workspace}}"/hl2_goap_bot && tar -acf "${{github.workspace}}"/hl2_goap_bot.zip addons && popd
+        run: pushd ${{github.workspace}}/hl2_goap_bot; tar -acf ${{github.workspace}}/hl2_goap_bot.zip addons; popd
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
