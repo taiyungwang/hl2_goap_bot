@@ -6,7 +6,17 @@ The navigation mesh generated provided by Valve generates hiding spots based on 
 The bot currently supports Valve's [Day of Defeat Source](https://en.wikipedia.org/wiki/Day_of_Defeat:_Source) and [Half-Life 2 Deathmatch](https://en.wikipedia.org/wiki/Half-Life_2:_Deathmatch).  This bot is still in the Alpha stage--please see the TODO section for future work needed.
 
 ## Compiling the Bot ##
-The bot can be built on Windows and LINUX with [CMake](https://cmake.org/) and [Valve's Source SDK](alliedmodders/hl2sdk). The toplevel CMakeList.txt file needs to be edited to point to the appropriate location of the plugin navigation mesh, the Valve Source SDK, and [CxxTest](https://cxxtest.com/). It assumed that [Steam](https://store.steampowered.com/about/) is installed within the HOMEPATH for the OS X and LINUX build environment.  When building against Windows, the location of Steam in the CMakeList.txt may need to be updated. Please see the [Valve Source SDK Wiki on compiling](https://developer.valvesoftware.com/wiki/Source_SDK_2013) for all other platform specific dependencies.  
+The bot can be built on Windows and LINUX with [CMake](https://cmake.org/) and [Valve's Source SDK](alliedmodders/hl2sdk). The toplevel CMakeList.txt assumes that hl2sdk and valve_plugin_navmesh are in the same subdirectory as this repo.  It assumes that [CxxTest](https://cxxtest.com/) is installed via apt in LINUX, and in Windows it is installed in the root of drive that is specified (defaults to C:). It assumed that [Steam](https://store.steampowered.com/about/) is installed within the HOMEPATH for the LINUX build environment.  Please see the [Valve Source SDK Wiki on compiling](https://developer.valvesoftware.com/wiki/Source_SDK_2013) for all other platform specific dependencies.  
+
+## Installing the Bot ##
+Extract the tgz files into desired game directory, e.g. C:\program files (x86)\steam\steamapps\common\day of defeat source\dod
+
+## Running the Bot ##
+On Windows, you would need to launch the game with the -insecure option.  For Linux, execute the following from console:
+```
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/i386/lib/i386-linux-gnu:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/i386/usr/lib/i386-linux-gnu:bin $HOME/.local/share/Steam/steamapps/common/<game dir>/hl2_linux -game <mod dir>
+```
+Where "game dir" is either "Day of Defeat Source" or "Half-Life 2 Deathmatch" and "mod dir" is either dod or hl2mp respectively.
 
 ## TODO ##
 * Make the bots more player friendly.  Currently the bots are nearly 100% accurate with their aim, and have nearly no latency when reacting.  
