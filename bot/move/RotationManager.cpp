@@ -42,36 +42,28 @@ void RotationManager::getUpdatedPosition(QAngle &desiredPos, QAngle currentPos,
 	normalize(currentPos);
 	desiredPos.x = getUpdatedPos(momentum->x, desiredPos.x, currentPos.x);
 	desiredPos.y = getUpdatedPos(momentum->y, desiredPos.y, currentPos.y);
+	// need to normalize again in case the rotation for y axis is something like -170 to 180 along
+	normalize(desiredPos);
 }
 
 float RotationManager::getUpdatedPos(float &speed, float desiredSpeed,
 		float currentPos) {
-	if (desiredSpeed == currentPos && speed == 0.0f) {
-		return currentPos;
+	float accel = desiredSpeed > 0.0f ? accelMagnitude : -accelMagnitude;
+	// almost stopped
+	if (std::abs(speed) <= accelMagnitude
+			// magnitude of desired speed is less than that of acceleration.
+			&& std::abs(desiredSpeed) <= accelMagnitude
+			&& (isSameDir(desiredSpeed, speed)
+					|| std::abs(speed + accel) >= std::abs(desiredSpeed))) {
+		speed = 0.0f;
+		return desiredSpeed + currentPos;
 	}
-	float accel = desiredSpeed >= speed ? accelMagnitude : -accelMagnitude;
-	// do we need to brake
-	if (std::abs(speed) > 0 && isSameSign(speed, desiredSpeed)
-			&& speed * speed / accelMagnitude * 0.5f
-					>= std::abs(desiredSpeed)) {
-		// if we are not already braking
-		if (isSameSign(accel, speed)) {
-			accel = -accel;
-		}
-		// if we are close to stopping and current speed will cause us to overshoot target
-		if (std::abs(speed) <= accelMagnitude
-				&& accelMagnitude > std::abs(desiredSpeed)) {
-			speed = 0;
-			return currentPos + desiredSpeed;
-		}
-	}
-	// if we are going to overshoot
-	if (isSameSign(accel, speed)
-			&& std::abs(accel + speed) > std::abs(desiredSpeed)) {
-		currentPos += speed > 0 ? speed : desiredSpeed;
-		speed = 0;
-		return currentPos;
+	// want to accelerate
+	if (isSameDir(speed, desiredSpeed)
+			// estimated distance to decelerate is less than amount of distance left
+			&& speed * speed / accelMagnitude * 0.5f > std::abs(desiredSpeed)) {
+		accel = -accel;
 	}
 	speed += accel;
-	return currentPos + speed;
+	return speed + currentPos;
 }
