@@ -61,7 +61,7 @@ float RotationManager::getUpdatedPos(float &speed, float desiredSpeed,
 	// want to accelerate
 	if (isSameDir(speed, desiredSpeed)
 			// estimated distance to decelerate is less than amount of distance left
-			&& speed * speed / accelMagnitude * 0.5f > std::abs(desiredSpeed)) {
+			&& speed * speed / accelMagnitude * 0.5f >= std::abs(desiredSpeed)) {
 		accel = -accel;
 	}
 	speed += accel;

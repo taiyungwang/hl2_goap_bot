@@ -46,9 +46,6 @@ void RotationManagerTest::testNegDir() {
 	update(rotation);
 	update(rotation);
 	update(rotation);
-	desired->x = goal->x = -1.0f;
-	update(rotation);
-	TS_ASSERT_EQUALS(-2.0f, desired->x)
 }
 
 void RotationManagerTest::testOverShootWhileSpeedingUp() {
