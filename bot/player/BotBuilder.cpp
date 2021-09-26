@@ -41,7 +41,7 @@ void BotBuilder::addBot(const CCommand &command) const {
 	int team = rand() % 2 + 2;
 	botCount %= 32;
 	if (command.ArgC() > 2) {
-		team = atoi(command.Arg(2)) % 2 + 2;
+		team = (atoi(command.Arg(2)) - 1) % 2 + 2;
 	}
 	edict_t *pEdict = botmanager->CreateBot(
 			command.ArgC() > 1 ?
