@@ -16,36 +16,24 @@ void RotationManagerTest::tearDown() {
 }
 
 void RotationManagerTest::testNoDirChange() {
-	RotationManager rotation;
-	rotation.getUpdatedPosition(*desired, *current, accel);
-	TS_ASSERT_EQUALS(1.0f, desired->x)
-	update(rotation);
-	update(rotation);
-	TS_ASSERT_EQUALS(6.0f, desired->x)
-	update(rotation);
-	update(rotation);
-	update(rotation);
-	TS_ASSERT_EQUALS(goal->x, desired->x)
+	float expectedPosition[] = { 1.0f, 3.0f, 6.0f, 8.0f, 9.0f, 10.0f, 10.0f };
+	test(expectedPosition, sizeof(expectedPosition) / sizeof(float));
 }
 
 void RotationManagerTest::testDirChange() {
 	RotationManager rotation;
-	rotation.getUpdatedPosition(*desired, *current, accel);
-	goal->x = -10.0f;
 	update(rotation);
-	TS_ASSERT_EQUALS(1.0f, desired->x)
+	desired->x = goal->x = -10.0f;
 	update(rotation);
-	TS_ASSERT_EQUALS(0.0f, desired->x)
+	TS_ASSERT_EQUALS(1.0f, current->x)
+	update(rotation);
+	TS_ASSERT_EQUALS(0.0f, current->x)
 }
 
 void RotationManagerTest::testNegDir() {
-	RotationManager rotation;
 	desired->x = goal->x = -10.0f;
-	rotation.getUpdatedPosition(*desired, *current, accel);
-	TS_ASSERT_EQUALS(-1.0f, desired->x)
-	update(rotation);
-	update(rotation);
-	update(rotation);
+	float expected[] = { -1.0f, -3.0f, -6.0f, -8.0f, -9.0f, -10.0f, -10.0f };
+	test(expected, sizeof(expected) / sizeof(float));
 }
 
 void RotationManagerTest::testOverShootWhileSpeedingUp() {
@@ -71,7 +59,15 @@ void RotationManagerTest::testNormalize() {
 }
 
 void RotationManagerTest::update(RotationManager& rotation) {
+	rotation.getUpdatedPosition(*desired, *current, accel);
 	*current = *desired;
 	*desired = *goal;
-	rotation.getUpdatedPosition(*desired, *current, accel);
+}
+
+void RotationManagerTest::test(float position[], int positionLen) {
+	RotationManager rotation;
+	for (int i = 0; i < positionLen; i++) {
+		update(rotation);
+		TS_ASSERT_EQUALS(position[i], current->x);
+	}
 }
