@@ -12,7 +12,7 @@ class GoalManager;
 class Action;
 class BasePlayer;
 class Goal;
-class Armory;
+class Arsenal;
 class World;
 class CBotCmd;
 

@@ -8,7 +8,7 @@
 #include <goap/GoalManager.h>
 #include <move/Navigator.h>
 #include <move/RotationManager.h>
-#include <weapon/Armory.h>
+#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <nav_mesh/nav_area.h>
 #include <util/SimpleException.h>
@@ -48,7 +48,7 @@ void Bot::think() {
 			vision.updateVisiblity(*blackboard);
 			if (inGame) {
 				cmd.Reset();
-				Armory& amory = blackboard->getArmory();
+				Arsenal& amory = blackboard->getArsenal();
 				amory.update(*blackboard);
 				int currentWeapon = amory.getCurrWeaponIdx();
 				if (currentWeapon > 0

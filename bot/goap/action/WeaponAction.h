@@ -2,12 +2,12 @@
 
 #include "Action.h"
 
-class Armory;
+class Arsenal;
 
 class WeaponAction: public Action {
 public:
 	WeaponAction(Blackboard& blackboard);
 
 protected:
-	Armory& armory;
+	Arsenal& arsenal;
 };

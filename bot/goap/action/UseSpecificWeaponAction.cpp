@@ -9,16 +9,16 @@ UseSpecificWeaponAction::UseSpecificWeaponAction(Blackboard& blackboard) :
 }
 
 bool UseSpecificWeaponAction::precondCheck() {
-	auto& weapons = armory.getWeapons();
+	auto& weapons = arsenal.getWeapons();
 	weapIdx = 0;
 	FOR_EACH_MAP_FAST(weapons, i) {
-		const char* name = Armory::getWeaponName(weapons.Key(i));
+		const char* name = Arsenal::getWeaponName(weapons.Key(i));
 		if (name != nullptr && canUse(name)) {
 			weapIdx = weapons.Key(i);
-			if (armory.getWeapon(weapIdx) == nullptr) {
+			if (arsenal.getWeapon(weapIdx) == nullptr) {
 				return false;
 			}
-			armory.setDesiredWeaponIdx(weapIdx);
+			arsenal.setDesiredWeaponIdx(weapIdx);
 			return true;
 		}
 	}

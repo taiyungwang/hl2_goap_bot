@@ -15,7 +15,7 @@ bool DODUseFragGrenadeAction::precondCheck() {
 }
 
 bool DODUseFragGrenadeAction::execute() {
-	Weapon* weapon = armory.getWeapon(weapIdx);
+	Weapon* weapon = arsenal.getWeapon(weapIdx);
 	if (!DODUseSmokeGrenadeAction::precondCheck() || primeDuration++ >= 300) {
 		return true;
 	}

@@ -135,7 +135,7 @@ void Navigator::start(CUtlStack<CNavArea*>* path, const Vector& goal, float targ
 }
 
 bool Navigator::checkCanMove() {
-	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
+	Weapon* weapon = blackboard.getArsenal().getCurrWeapon();
 	if (weapon != nullptr && weapon->isDeployed()) {
 		weapon->undeploy(blackboard);
 		return false;

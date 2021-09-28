@@ -8,11 +8,11 @@ class Blackboard;
 
 typedef bool (*WeaponFilter)(const Weapon*, Blackboard& blackboard, float dist);
 
-class Armory {
+class Arsenal {
 public:
 	static const char* getWeaponName(int key);
 
-	Armory();
+	Arsenal();
 
 	int getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) const;
 

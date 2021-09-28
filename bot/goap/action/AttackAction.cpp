@@ -46,7 +46,7 @@ bool AttackAction::execute() {
 	const Player* self = blackboard.getSelf();
 	Vector targetLoc = blackboard.getViewTarget();
 	float dist = targetLoc.DistTo(self->getCurrentPosition());
-	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
+	Weapon* weapon = blackboard.getArsenal().getCurrWeapon();
 	if (weapon == nullptr || dur-- < 1 || targetDestroyed() || weapon->isClipEmpty()) {
 		return true;
 	}
@@ -111,7 +111,7 @@ bool AttackAction::goalComplete() {
 
 
 void AttackAction::abort() {
-	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
+	Weapon* weapon = blackboard.getArsenal().getCurrWeapon();
 	if (weapon != nullptr) {
 		weapon->undeploy(blackboard);
 	}

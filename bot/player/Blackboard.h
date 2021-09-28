@@ -1,7 +1,7 @@
 #pragma once
 
-#include <weapon/Armory.h>
 #include "Buttons.h"
+#include <weapon/Arsenal.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
 
@@ -69,8 +69,8 @@ public:
 		return cmd;
 	}
 
-	Armory& getArmory() {
-		return armory;
+	Arsenal& getArsenal() {
+		return arsenal;
 	}
 
 	Navigator* getNavigator() {
@@ -95,7 +95,7 @@ public:
 private:
 	const Bot* self;
 
-	Armory armory;
+	Arsenal arsenal;
 
 	const Player *targetedPlayer;
 

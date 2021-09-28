@@ -24,7 +24,7 @@ bool UseGravityGunAction::execute() {
 	}
 	if (blackboard.getAimAccuracy(blackboard.getViewTarget())
 			> 1.0f - 30.0f / (dist == 0.0f ? 0.0001f : dist)) {
-		armory.getCurrWeapon()->getPrimary()->attack(blackboard.getButtons(),
+		arsenal.getCurrWeapon()->getPrimary()->attack(blackboard.getButtons(),
 				dist);
 	}
 	return false;

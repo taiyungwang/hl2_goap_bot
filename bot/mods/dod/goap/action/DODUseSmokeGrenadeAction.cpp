@@ -9,8 +9,8 @@ bool DODUseSmokeGrenadeAction::precondCheck() {
 	auto target = blackboard.getTargetedPlayer();
 	return target != nullptr && !target->getEdict()->IsFree() && !target->isDead()
 			&& UseSpecificWeaponAction::precondCheck()
-			&& armory.getWeapon(weapIdx) != nullptr
-			&& armory.getWeapon(weapIdx)->isInRange(target->getCurrentPosition().DistTo(blackboard.getSelf()->getCurrentPosition()));
+			&& arsenal.getWeapon(weapIdx) != nullptr
+			&& arsenal.getWeapon(weapIdx)->isInRange(target->getCurrentPosition().DistTo(blackboard.getSelf()->getCurrentPosition()));
 }
 
 bool DODUseSmokeGrenadeAction::execute() {
@@ -20,7 +20,7 @@ bool DODUseSmokeGrenadeAction::execute() {
 	auto self = blackboard.getSelf();
 	Vector targetLoc = blackboard.getTargetedPlayer()->getCurrentPosition();
 	float dist = self->getEyesPos().DistTo(targetLoc);
-	WeaponFunction* grenade = armory.getWeapon(weapIdx)->chooseWeaponFunc(
+	WeaponFunction* grenade = arsenal.getWeapon(weapIdx)->chooseWeaponFunc(
 			self->getEdict(), dist);
 	blackboard.setViewTarget(
 			grenade->getAim(targetLoc, self->getEyesPos()));

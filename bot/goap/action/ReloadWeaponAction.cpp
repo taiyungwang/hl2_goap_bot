@@ -19,7 +19,7 @@ bool ReloadWeaponAction::precondCheck() {
 }
 
 bool ReloadWeaponAction::execute() {
-	Weapon* weapon = blackboard.getArmory().getCurrWeapon();
+	Weapon* weapon = blackboard.getArsenal().getCurrWeapon();
 	if (weapon == nullptr) {
 		return true;
 	}

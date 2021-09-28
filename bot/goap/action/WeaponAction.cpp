@@ -3,5 +3,5 @@
 #include <player/Blackboard.h>
 
 WeaponAction::WeaponAction(Blackboard& blackboard) :
-		Action(blackboard), armory(blackboard.getArmory()) {
+		Action(blackboard), arsenal(blackboard.getArsenal()) {
 }

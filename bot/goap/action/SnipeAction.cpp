@@ -50,7 +50,7 @@ bool SnipeAction::execute() {
 	AngleVectors(facing, &aim);
 	blackboard.setViewTarget(aim * 100.0f + blackboard.getSelf()->getCurrentPosition());
 	blackboard.lookStraight();
-	Deployer* deployer = blackboard.getArmory().getCurrWeapon()->getDeployer();
+	Deployer* deployer = blackboard.getArsenal().getCurrWeapon()->getDeployer();
 	if (deployer != nullptr && blackboard.getAimAccuracy(blackboard.getViewTarget()) > 0.8f
 			&& !deployer->execute(blackboard)) {
 		return false;
@@ -62,7 +62,7 @@ bool SnipeAction::execute() {
 bool SnipeAction::goalComplete() {
 	int team = blackboard.getSelf()->getTeam();
 	selector->setInUse(selectorId, team, false);
-	blackboard.getArmory().getCurrWeapon()->undeploy(blackboard);
+	blackboard.getArsenal().getCurrWeapon()->undeploy(blackboard);
 	if (GoToAction::goalComplete()) {
 		// if we are at our location, and we didn't see an enemy, then count it as failure
 		selector->update(selectorId, team, 
@@ -81,7 +81,7 @@ void SnipeAction::abort() {
 		// if we see an enemy at our spot, then it's successful.
 		selector->update(selectorId, team, true);
 	}
-	auto weapon = blackboard.getArmory().getCurrWeapon();
+	auto weapon = blackboard.getArsenal().getCurrWeapon();
 	if (weapon != nullptr) {
 		weapon->undeploy(blackboard);
 	}

@@ -12,7 +12,6 @@ set (HL2SDK_LIBS ${HL2SDK_DIR}/lib/public)
 set (VSP_NAVMESH ${PROJECT_SOURCE_DIR}/../valve_source_plugin_navmesh)
 
 set (BUILD_DIR "")
-set (CXX_TEST_GEN cxxtestgen)
 
 set (tier2 tier2)
 set (LEGACY_STDIO legacy_stdio_definitions)
@@ -88,6 +87,8 @@ find_library(VSP_UTIL_LIB plugin_util ${PROJECT_BINARY_DIR}/../valve_source_plug
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bot)
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
+set (CXX_DIR $ENV{HOME}/cxxtest)
+set (CXX_TEST_GEN ${CXX_DIR}/bin/cxxtestgen)
 enable_testing()
 include(CTest)
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)

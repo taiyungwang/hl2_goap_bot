@@ -7,9 +7,9 @@ bool SwitchToDesiredWeaponAction::precondCheck() {
 }
 
 void SwitchToDesiredWeaponAction::init() {
-	blackboard.getCmd().weaponselect = armory.getDesiredWeaponIdx();
+	blackboard.getCmd().weaponselect = arsenal.getDesiredWeaponIdx();
 }
 
 bool SwitchToDesiredWeaponAction::execute() {
-	return armory.getDesiredWeaponIdx() == armory.getCurrWeaponIdx();
+	return arsenal.getDesiredWeaponIdx() == arsenal.getCurrWeaponIdx();
 }

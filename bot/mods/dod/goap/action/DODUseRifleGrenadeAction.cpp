@@ -10,7 +10,7 @@ bool DODUseRifleGrenadeAction::precondCheck() {
 	if (!DODUseSmokeGrenadeAction::precondCheck()) {
 		return false;
 	}
-	Weapon *grenade = armory.getWeapon(weapIdx);
+	Weapon *grenade = arsenal.getWeapon(weapIdx);
 	target = nullptr;
 	auto& enemies = blackboard.getVisibleEnemies();
 	float minDist = grenade->getPrimary()->getRange()[0];

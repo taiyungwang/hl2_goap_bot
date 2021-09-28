@@ -1,4 +1,4 @@
-#include "Armory.h"
+#include "Arsenal.h"
 
 #include "WeaponBuilder.h"
 #include "Weapon.h"
@@ -14,18 +14,18 @@
 #include <eiface.h>
 #include <shareddefs.h>
 
-const char* Armory::getWeaponName(int key) {
+const char* Arsenal::getWeaponName(int key) {
 	extern IVEngineServer* engine;
 	edict_t* weap = engine->PEntityOfEntIndex(key);
 	return weap == nullptr || weap->IsFree() ? nullptr: weap->GetClassName();
 }
 
-Armory::Armory()  {
+Arsenal::Arsenal()  {
 	SetDefLessFunc(weapons);
 	reset();
 }
 
-int Armory::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) const {
+int Arsenal::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) const {
 	auto best = weapons.InvalidIndex();
 	auto* targetedPlayer = blackboard.getTargetedPlayer();
 	edict_t* target = nullptr;
@@ -56,7 +56,7 @@ int Armory::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) co
 	return weapons.IsValidIndex(best) ? weapons.Key(best): 0;
 }
 
-void Armory::reset() {
+void Arsenal::reset() {
 	currWeapIdx = bestWeapIdx = 0;
 	weapons.PurgeAndDeleteElements();
 	FOR_EACH_MAP_FAST(weapons, i)
@@ -68,7 +68,7 @@ void Armory::reset() {
 }
 
 
-void Armory::update(Blackboard& blackboard) {
+void Arsenal::update(Blackboard& blackboard) {
 	extern EntityClassManager* classManager;
 	extern IVEngineServer* engine;
 	edict_t* self = blackboard.getSelf()->getEdict();
@@ -108,7 +108,7 @@ void Armory::update(Blackboard& blackboard) {
 	}
 }
 
-Weapon* Armory::getWeapon(int key) const {
+Weapon* Arsenal::getWeapon(int key) const {
 	auto index = weapons.Find(key);
 	return weapons.IsValidIndex(index) ? weapons[index] : nullptr;
 }

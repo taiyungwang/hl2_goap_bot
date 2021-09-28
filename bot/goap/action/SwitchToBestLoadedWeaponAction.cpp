@@ -1,10 +1,10 @@
 #include "SwitchToBestLoadedWeaponAction.h"
 
-#include <weapon/Armory.h>
-#include <weapon/Weapon.h>
 #include <player/Blackboard.h>
 #include <player/Player.h>
 #include <util/BasePlayer.h>
+#include <weapon/Arsenal.h>
+#include <weapon/Weapon.h>
 
 SwitchToBestLoadedWeaponAction::SwitchToBestLoadedWeaponAction(
 		Blackboard& blackboard) :
@@ -13,16 +13,16 @@ SwitchToBestLoadedWeaponAction::SwitchToBestLoadedWeaponAction(
 }
 
 static bool ignore(const Weapon* weap, Blackboard& blackboard, float dist) {
-	Armory& armory = blackboard.getArmory();
-	auto& weapons = armory.getWeapons();
+	Arsenal& arsenal = blackboard.getArsenal();
+	auto& weapons = arsenal.getWeapons();
 	return weap->isClipEmpty() || !weap->isInRange(dist);
 }
 
 bool SwitchToBestLoadedWeaponAction::precondCheck() {
-	int best = armory.getBestWeapon(blackboard, ignore);
+	int best = arsenal.getBestWeapon(blackboard, ignore);
 	if (!SwitchToDesiredWeaponAction::precondCheck() || best == 0) {
 		return false;
 	}
-	armory.setDesiredWeaponIdx(best);
+	arsenal.setDesiredWeaponIdx(best);
 	return true;
 }

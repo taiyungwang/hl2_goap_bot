@@ -9,14 +9,14 @@ SwitchWeaponAction::SwitchWeaponAction(Blackboard& blackboard) :
 }
 
 bool SwitchWeaponAction::precondCheck() {
-	return !blackboard.isOnLadder() && armory.getBestWeaponIdx() != 0
-			&& armory.getCurrWeaponIdx() != armory.getBestWeaponIdx();
+	return !blackboard.isOnLadder() && arsenal.getBestWeaponIdx() != 0
+			&& arsenal.getCurrWeaponIdx() != arsenal.getBestWeaponIdx();
 }
 
 void SwitchWeaponAction::init() {
-	blackboard.getCmd().weaponselect = armory.getBestWeaponIdx();
+	blackboard.getCmd().weaponselect = arsenal.getBestWeaponIdx();
 }
 
 bool SwitchWeaponAction::execute() {
-	return armory.getBestWeaponIdx() == armory.getCurrWeaponIdx();
+	return arsenal.getBestWeaponIdx() == arsenal.getCurrWeaponIdx();
 }
