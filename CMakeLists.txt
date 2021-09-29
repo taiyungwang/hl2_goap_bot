@@ -6,6 +6,7 @@ project (PluginBot)
 add_definitions(-DRAD_TELEMETRY_DISABLED)
 
 set(DRIVE c CACHE STRING "User specified drive for Windows")
+set (CXX_DIR "" CACHE STRING "CXX Path")
 set( steam_root "${DRIVE}:/Program Files (x86)/steam" )
 set(HL2SDK_DIR "${PROJECT_SOURCE_DIR}/../hl2sdk")
 set (HL2SDK_LIBS ${HL2SDK_DIR}/lib/public)
@@ -87,7 +88,6 @@ find_library(VSP_UTIL_LIB plugin_util ${PROJECT_BINARY_DIR}/../valve_source_plug
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bot)
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
-set (CXX_DIR $ENV{HOME}/cxxtest)
 set (CXX_TEST_GEN ${CXX_DIR}/bin/cxxtestgen)
 enable_testing()
 include(CTest)
