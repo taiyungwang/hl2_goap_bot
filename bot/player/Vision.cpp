@@ -58,11 +58,11 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 	FOR_EACH_VEC(visibles, i) {
 		const Player* target = visibles[i].player;
 		Vector targetPos = target->getEyesPos();
-		if (!blackboard.checkVisible(targetPos, target->getEdict())) {
+		if (!self->canSee(targetPos, target->getEdict())) {
 			targetPos = target->getCurrentPosition();
 			targetPos.z += 31.0f; // center mass
 			trace_t result;
-			if (!blackboard.checkVisible(result, targetPos, target->getEdict())) {
+			if (!self->canSee(result, targetPos, target->getEdict())) {
 				// see if the target is obscured by another enemy.
 				bool visible = false;
 				if (result.m_pEnt != nullptr) {

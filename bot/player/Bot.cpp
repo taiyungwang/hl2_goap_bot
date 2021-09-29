@@ -13,6 +13,7 @@
 #include <nav_mesh/nav_area.h>
 #include <util/SimpleException.h>
 #include <util/BasePlayer.h>
+#include <util/UtilTrace.h>
 #include <ivdebugoverlay.h>
 #include <in_buttons.h>
 
@@ -158,6 +159,54 @@ int Bot::getPlayerClass() const {
 }
 
 
+class FilterSelfAndEnemies: public CTraceFilter {
+public:
+	FilterSelfAndEnemies(edict_t* self,
+			edict_t* target) : self(self), target(target) {
+	}
+
+	virtual ~FilterSelfAndEnemies() {
+	}
+
+	bool ShouldHitEntity(IHandleEntity *pHandleEntity, int contentsMask) {
+		auto& players = Player::getPlayers();
+		if (target != nullptr && pHandleEntity == target->GetIServerEntity()) {
+			return true;
+		}
+		if (pHandleEntity == self->GetIServerEntity()) {
+			return false;
+		}
+		FOR_EACH_MAP_FAST(players, i) {
+			if (!players[i]->isDead()
+					&& players[i]->getEdict()->GetIServerEntity()
+							== pHandleEntity) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+private:
+	edict_t* self, *target;
+};
+
+bool Bot::canSee(trace_t& result, const Vector &vecAbsEnd, edict_t* target) const {
+	if (target == nullptr) {
+		return false;
+	}
+	result.fraction = 0.0f;
+	Vector start = getEyesPos();
+	FilterSelfAndTarget filter(getEdict()->GetIServerEntity(),
+			target->GetIServerEntity());
+	UTIL_TraceLine(start, vecAbsEnd, MASK_ALL, &filter, &result);
+	return !result.DidHit();
+}
+
+bool Bot::canSee(const Vector &vecAbsEnd, edict_t* target) const {
+	trace_t result;
+	return canSee(result, vecAbsEnd, target);
+}
+
 void Bot::despawn() {
 	planner->resetPlanning(true);
 	blackboard->getButtons().tap(IN_ATTACK);
@@ -183,7 +232,7 @@ void Bot::listen() {
 			position.z += 31.0f; // center mass
 			if ((noiseRange > loudest
 					|| (noiseRange == loudest && dist < closest))
-					&& blackboard->checkVisible(position, players[i]->getEdict())) {
+					&& canSee(position, players[i]->getEdict())) {
 				loudest = noiseRange;
 				closest = dist;
 				blackboard->setViewTarget(players[i]->getEyesPos());

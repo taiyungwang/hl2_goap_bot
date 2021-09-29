@@ -17,8 +17,9 @@ bool UseGravityGunAction::execute() {
 	if (blocker == nullptr) {
 		return true;
 	}
-	float dist = blackboard.getViewTarget().DistTo(blackboard.getSelf()->getCurrentPosition());
-	if (dist > 130.0f || !blackboard.checkVisible(blackboard.getViewTarget(), blocker)) {
+	Bot* self = blackboard.getSelf();
+	float dist = blackboard.getViewTarget().DistTo(self->getCurrentPosition());
+	if (dist > 130.0f || !self->canSee(blackboard.getViewTarget(), blocker)) {
 		blackboard.setBlocker(nullptr);
 		return true;
 	}

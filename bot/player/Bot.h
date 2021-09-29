@@ -14,6 +14,7 @@ class Goal;
 class Arsenal;
 class World;
 class CBotCmd;
+class CGameTrace;
 
 typedef const char* (*PlayerClasses)[2][6];
 
@@ -67,6 +68,10 @@ public:
 	void setWantToListen(bool wantToListen) {
 		this->wantToListen = wantToListen;
 	}
+
+	bool canSee(const Vector &vecAbsEnd, edict_t* target) const;
+
+	bool canSee(CGameTrace& result, const Vector &vecAbsEnd, edict_t* target) const;
 
 private:
 	static PlayerClasses CLASSES;
