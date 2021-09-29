@@ -22,6 +22,7 @@ bool DODUseSmokeGrenadeAction::execute() {
 	float dist = self->getEyesPos().DistTo(targetLoc);
 	WeaponFunction* grenade = arsenal.getWeapon(weapIdx)->chooseWeaponFunc(
 			self->getEdict(), dist);
+	self->setWantToListen(false);
 	blackboard.setViewTarget(
 			grenade->getAim(targetLoc, self->getEyesPos()));
 	if (blackboard.getAimAccuracy(targetLoc) < 0.9f) {

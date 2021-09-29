@@ -40,7 +40,7 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 			Buttons& buttons = blackboard.getButtons();
 			if (target != nullptr && !target->isDead()) {
 				trace_t result;
-				UTIL_IsVisible(result, self->getEyesPos(), blackboard, target->getEdict());
+				blackboard.checkVisible(result, self->getEyesPos(), target->getEdict());
 				extern ConVar nav_slope_limit;
 				if (result.DidHit()) {
 					if (result.endpos.DistTo(result.startpos) > HalfHumanWidth

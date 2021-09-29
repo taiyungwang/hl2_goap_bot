@@ -44,6 +44,7 @@ void MoveStateContext::move(int type) {
 		blackboard.getBlocker()->GetCollideable()->WorldSpaceTriggerBounds(&mins, &maxs);
 		blocker = (maxs + mins) / 2.0f;
 		if (blocker.DistTo(pos) < 130.0f) {
+			blackboard.getSelf()->setWantToListen(false);
 			blackboard.setViewTarget(blocker);
 		} else {
 			blackboard.setBlocker(nullptr);

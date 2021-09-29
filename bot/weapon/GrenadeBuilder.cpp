@@ -8,6 +8,7 @@ Weapon* GrenadeBuilder::build(edict_t* weap) {
 	WeaponFunction *primary = new WeaponFunction(0.9f);
 	weapon->setGrenade(true);
 	primary->setExplosive(true);
+	primary->setSilent(true);
 	primary->getRange()[0] = 250.0f;
 	primary->getRange()[1] = 330.0f;
 	weapon->setPrimary(primary);

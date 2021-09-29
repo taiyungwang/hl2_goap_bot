@@ -26,17 +26,17 @@ bool World::think(Blackboard& blackboard) {
 	bool& enemySighted = states[states.Find(WorldProp::ENEMY_SIGHTED)];
 	updateState(WorldProp::MULTIPLE_ENEMY_SIGHTED,
 			blackboard.getVisibleEnemies().Count() > 1);
-	Arsenal& armory = blackboard.getSelf()->getArsenal();
+	Arsenal& arsenal = blackboard.getSelf()->getArsenal();
 	updateState(WorldProp::USING_BEST_WEAP,
-			armory.getBestWeaponIdx() == armory.getCurrWeaponIdx());
+			arsenal.getBestWeaponIdx() == arsenal.getCurrWeaponIdx());
 	edict_t* blocker = blackboard.getBlocker();
 	if (blocker != nullptr && BaseEntity(blocker).isDestroyedOrUsed()) {
 		blocker = nullptr;
 		blackboard.setBlocker(nullptr);
 	}
 	bool inRange = true;
-	const Bot* self = blackboard.getSelf();
-	const Weapon* weap = armory.getCurrWeapon();
+	Bot* self = blackboard.getSelf();
+	const Weapon* weap = arsenal.getCurrWeapon();
 	const Player* enemy = blackboard.getTargetedPlayer();
 	if (weap != nullptr) {
 		const Vector& pos = self->getCurrentPosition();
@@ -50,6 +50,7 @@ bool World::think(Blackboard& blackboard) {
 				if (players[i]->isDead()) {
 					blackboard.setBlocker(nullptr);
 				} else {
+					self->setWantToListen(false);
 					blackboard.setViewTarget(players[i]->getEyesPos());
 				}
 			} else {
@@ -61,8 +62,8 @@ bool World::think(Blackboard& blackboard) {
 		}
 	}
 	updateState(WorldProp::WEAPON_IN_RANGE, inRange);
-	auto& weapons = armory.getWeapons();
-	int currentWeap = armory.getCurrWeaponIdx();
+	auto& weapons = arsenal.getWeapons();
+	int currentWeap = arsenal.getCurrWeaponIdx();
 	if (currentWeap > 0 && weapons.IsValidIndex(weapons.Find(currentWeap))) {
 		Weapon *currWeap = weapons[weapons.Find(currentWeap)];
 		updateState(WorldProp::WEAPON_LOADED,

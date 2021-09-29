@@ -8,6 +8,7 @@ class BasePlayer;
 class Player;
 class Bot;
 class Navigator;
+class CGameTrace;
 struct edict_t;
 
 class Blackboard {
@@ -87,6 +88,11 @@ public:
 	}
 
 	Vector getFacing() const;
+
+	bool checkVisible(const Vector &vecAbsEnd, edict_t* target) const;
+
+	bool checkVisible(CGameTrace& result, const Vector &vecAbsEnd, edict_t* target) const;
+
 private:
 	Bot* self;
 

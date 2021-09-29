@@ -20,9 +20,10 @@ bool DODUseFragGrenadeAction::execute() {
 		return true;
 	}
 	float dist = blackboard.getTargetEntDistance();
-	const Player* self = blackboard.getSelf();
+	Bot* self = blackboard.getSelf();
 	WeaponFunction* grenade = weapon->chooseWeaponFunc(self->getEdict(),
 			dist);
+	self->setWantToListen(false);
 	blackboard.setViewTarget(grenade->getAim(target->getCurrentPosition(),
 			self->getEyesPos()));
 	grenade->attack(blackboard.getButtons(), dist);

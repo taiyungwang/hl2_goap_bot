@@ -79,19 +79,23 @@ public:
 		return clip == nullptr ? 0 : *clip;
 	}
 
+	void setSilent(bool silent) {
+		this->silent = silent;
+	}
+
+	bool isSilent() const {
+		return silent;
+	}
+
 protected:
-	float range[2];
-
-	int clipId, button;
-
-	int *clip = nullptr;
+	int clipId, button, *clip = nullptr;
 
 	/**
 	 * Amount of damage from 0 to 1.  Used for weapon selection.
 	 * TODO: consider parsing weapon file information.
 	 */
-	float damageRating;
+	float damageRating, range[2];
 
-	bool explosive, melee, fullAuto;
+	bool explosive, melee, fullAuto, silent = false;
 
 };

@@ -34,7 +34,7 @@ public:
 
 	virtual ~Player();
 
-	virtual Vector getCurrentPosition() const;
+	Vector getCurrentPosition() const;
 
 	edict_t* getEdict() const {
 		return ent;
@@ -77,6 +77,9 @@ public:
 
 	virtual bool handle(EventInfo* event);
 
+	float getNoiseRange() const {
+		return noiseRange;
+	}
 
 protected:
 	static CUtlMap<int, Player*> players;
@@ -89,6 +92,8 @@ private:
 	IPlayerInfo* info;
 
 	edict_t* ent;
+
+	float noiseRange = 0.0f;
 };
 
 #endif /* UTILS_MYBOT_PLAYER_H_ */

@@ -25,7 +25,7 @@ bool FindCoverAction::operator() (CNavArea *area, CNavArea *priorArea, float tra
 	eyes.z += HumanEyeHeight;
 	if (currentArea != area
 			&& !area->IsPotentiallyVisible(Navigator::getArea(target, blackboard.getSelf()->getTeam()))
-			&& !UTIL_IsVisible(eyes, blackboard, target)) {
+			&& !blackboard.checkVisible(eyes, target)) {
 		this->hideArea = area;
 		return true;
 	}

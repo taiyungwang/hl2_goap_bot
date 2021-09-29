@@ -43,7 +43,7 @@ bool AttackAction::precondCheck() {
 }
 
 bool AttackAction::execute() {
-	Player* self = blackboard.getSelf();
+	Bot* self = blackboard.getSelf();
 	Vector targetLoc = blackboard.getViewTarget();
 	float dist = targetLoc.DistTo(self->getCurrentPosition());
 	Weapon* weapon = self->getArsenal().getCurrWeapon();
@@ -76,6 +76,7 @@ bool AttackAction::execute() {
 			&& eyes.z - targetLoc.z > 20.0f
 			&& moveCtx->getTraceResult().startsolid;
 	Buttons& buttons = blackboard.getButtons();
+	self->setWantToListen(false);
 	blackboard.setViewTarget(targetLoc);
 	extern ConVar mybot_debug;
 	if (crouch) {

@@ -7,56 +7,6 @@
 #include <eiface.h>
 #include <ivdebugoverlay.h>
 
-class FilterSelfAndEnemies: public CTraceFilter {
-public:
-	FilterSelfAndEnemies(edict_t* self,
-			edict_t* target) : self(self), target(target) {
-	}
-
-	virtual ~FilterSelfAndEnemies() {
-	}
-
-	bool ShouldHitEntity(IHandleEntity *pHandleEntity, int contentsMask) {
-		auto& players = Player::getPlayers();
-		if (target != nullptr && pHandleEntity == target->GetIServerEntity()) {
-			return true;
-		}
-		if (pHandleEntity == self->GetIServerEntity()) {
-			return false;
-		}
-		FOR_EACH_MAP_FAST(players, i) {
-			if (!players[i]->isDead()
-					&& players[i]->getEdict()->GetIServerEntity()
-							== pHandleEntity) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-private:
-	edict_t* self, *target;
-};
-
-bool UTIL_IsVisible(trace_t& result, const Vector &vecAbsEnd,
-		Blackboard& blackboard, edict_t* target) {
-	if (target == nullptr) {
-		return false;
-	}
-	result.fraction = 0.0f;
-	auto self = blackboard.getSelf();
-	Vector start = self->getEyesPos();
-	FilterSelfAndTarget filter(blackboard.getSelf()->getEdict()->GetIServerEntity(), target->GetIServerEntity());
-	UTIL_TraceLine(start, vecAbsEnd, MASK_ALL, &filter, &result);
-	return !result.DidHit();
-}
-
-bool UTIL_IsVisible(const Vector &vecAbsEnd,
-		Blackboard& blackboard, edict_t* target) {
-	trace_t result;
-	return UTIL_IsVisible(result, vecAbsEnd, blackboard, target);
-}
-
 void Vision::updateVisiblity(Blackboard& blackboard) {
 	auto self = blackboard.getSelf();
 	Vector facing = blackboard.getFacing();
@@ -108,11 +58,11 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 	FOR_EACH_VEC(visibles, i) {
 		const Player* target = visibles[i].player;
 		Vector targetPos = target->getEyesPos();
-		if (!UTIL_IsVisible(targetPos, blackboard, target->getEdict())) {
+		if (!blackboard.checkVisible(targetPos, target->getEdict())) {
 			targetPos = target->getCurrentPosition();
 			targetPos.z += 31.0f; // center mass
 			trace_t result;
-			if (!UTIL_IsVisible(result, targetPos, blackboard, target->getEdict())) {
+			if (!blackboard.checkVisible(result, targetPos, target->getEdict())) {
 				// see if the target is obscured by another enemy.
 				bool visible = false;
 				if (result.m_pEnt != nullptr) {
@@ -134,6 +84,7 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 			}
 		}
 		if (blackboard.getTargetedPlayer() == nullptr) {
+			self->setWantToListen(false);
 			blackboard.setViewTarget(targetPos);
 			blackboard.setTargetedPlayer(target);
 		}
@@ -151,6 +102,7 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 	} else if (lastTarget != nullptr && !lastTarget->isDead()) {
 		memoryDur--;
 		if (memoryDur > 0) {
+			self->setWantToListen(false);
 			blackboard.setTargetedPlayer(lastTarget);
 		}
 	}

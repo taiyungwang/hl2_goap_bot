@@ -1,8 +1,12 @@
 #include "Player.h"
 
+#include <weapon/Weapon.h>
+#include <weapon/WeaponFunction.h>
 #include <event/EventInfo.h>
+#include <util/BasePlayer.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
+#include <in_buttons.h>
 
 CUtlMap<int, Player*> Player::players;
 
@@ -53,7 +57,23 @@ void Player::think() {
 	if (isDead()) {
 		inGame = false;
 	} else {
+		noiseRange = 0.0f;
 		arsenal.update(ent);
+		if (BasePlayer(ent).getVelocity().Length() > 150.0f) {
+			noiseRange = 100.0f;
+		}
+		int buttons = info->GetLastUserCommand().buttons;
+		int currentWeap = arsenal.getCurrWeaponIdx();
+		auto& weapons = arsenal.getWeapons();
+		if (currentWeap > 0 && weapons.IsValidIndex(weapons.Find(currentWeap))) {
+			Weapon *currWeap = weapons[weapons.Find(currentWeap)];
+			if (((buttons & IN_ATTACK) && !currWeap->getPrimary()->isSilent())
+					|| ((buttons & IN_ATTACK2) && currWeap->getSecondary() != nullptr
+							&& !currWeap->getSecondary()->isSilent())) {
+				noiseRange = 1000.0f;
+			}
+		}
+
 	}
 }
 

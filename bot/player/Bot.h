@@ -64,6 +64,10 @@ public:
 
 	int getPlayerClass() const;
 
+	void setWantToListen(bool wantToListen) {
+		this->wantToListen = wantToListen;
+	}
+
 private:
 	static PlayerClasses CLASSES;
 
@@ -81,7 +85,9 @@ private:
 
 	RotationManager rotation;
 
-	bool hookEnabled = false, resetPlanner = false;
+	bool hookEnabled = false, resetPlanner = false, wantToListen = true;
 
 	void despawn();
+
+	void listen();
 };

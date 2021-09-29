@@ -32,8 +32,8 @@ Bot::~Bot() {
 }
 
 void Bot::think() {
-	Player::think();
 	try {
+		Player::think();
 		CBotCmd& cmd = blackboard->getCmd();
 		if (isDead()) {
 			despawn();
@@ -48,6 +48,7 @@ void Bot::think() {
 			}
 			vision.updateVisiblity(*blackboard);
 			if (inGame) {
+				wantToListen = true;
 				cmd.Reset();
 				int best = arsenal.getBestWeapon(*blackboard,
 						[] (const Weapon*, Blackboard&, float) {
@@ -62,6 +63,7 @@ void Bot::think() {
 					world->updateState(WorldProp::USING_BEST_WEAP, false);
 				}
 				planner->execute();
+				listen();
 				extern ConVar mybot_debug;
 				if (mybot_debug.GetBool()) {
 					extern IVDebugOverlay *debugoverlay;
@@ -125,6 +127,7 @@ bool Bot::handle(EventInfo* event) {
 			auto& players = Player::getPlayers();
 			FOR_EACH_MAP_FAST(players, i) {
 				if (players[i]->getUserId() == attacker) {
+					wantToListen = false;
 					blackboard->setViewTarget(players[i]->getEyesPos());
 					blackboard->setTargetedPlayer(players[i]);
 					break;
@@ -158,4 +161,33 @@ int Bot::getPlayerClass() const {
 void Bot::despawn() {
 	planner->resetPlanning(true);
 	blackboard->getButtons().tap(IN_ATTACK);
+}
+
+void Bot::listen() {
+	if (!wantToListen) {
+		return;
+	}
+	float loudest = 0.0f;
+	float closest = INFINITY;
+	auto& players = Player::getPlayers();
+	FOR_EACH_MAP_FAST(players, i) {
+		if (players[i] == this) {
+			continue;
+		}
+		Vector position = players[i]->getCurrentPosition();
+		float noiseRange = players[i]->getNoiseRange(),
+				dist = getCurrentPosition().DistTo(position) < noiseRange;
+		int team = getTeam();
+		if ((team < 1 || team != players[i]->getTeam() || dist > 100.0f)
+				&& dist < noiseRange) {
+			position.z += 31.0f; // center mass
+			if ((noiseRange > loudest
+					|| (noiseRange == loudest && dist < closest))
+					&& blackboard->checkVisible(position, players[i]->getEdict())) {
+				loudest = noiseRange;
+				closest = dist;
+				blackboard->setViewTarget(players[i]->getEyesPos());
+			}
+		}
+	}
 }
