@@ -68,15 +68,14 @@ void Arsenal::reset() {
 }
 
 
-void Arsenal::update(Blackboard& blackboard) {
+void Arsenal::update(edict_t* self) {
 	extern EntityClassManager* classManager;
-	extern IVEngineServer* engine;
-	edict_t* self = blackboard.getSelf()->getEdict();
 	CBaseHandle* weapList =
 			classManager->getClass("CBaseCombatCharacter")->getEntityVar(
 					"m_hMyWeapons").getPtr<CBaseHandle>(self);
 	for (int i = 0; i < MAX_WEAPONS; i++) {
 		int entIdx = weapList[i].GetEntryIndex();
+		extern IVEngineServer* engine;
 		edict_t* weaponEnt = engine->PEntityOfEntIndex(entIdx);
 		if (weaponEnt == nullptr || weaponEnt->IsFree()) {
 			continue;
@@ -98,13 +97,6 @@ void Arsenal::update(Blackboard& blackboard) {
 		if (weapState == WEAPON_IS_ACTIVE) {
 			currWeapIdx = weapons.Key(j);
 		}
-	}
-	int best = getBestWeapon(blackboard,
-			[] (const Weapon*, Blackboard&, float) {
-		return false;
-	});
-	if (best != 0) {
-		this->bestWeapIdx = best;
 	}
 }
 

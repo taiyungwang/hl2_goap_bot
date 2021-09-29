@@ -1,5 +1,6 @@
 #include "Player.h"
 
+#include <event/EventInfo.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
 
@@ -48,6 +49,15 @@ bool Player::isDead() const {
 	return ent->IsFree() || info->IsDead() || info->GetHealth() <= 0;
 }
 
+void Player::think() {
+	if (isDead()) {
+		inGame = false;
+	} else {
+		arsenal.update(ent);
+	}
+}
+
+
 int Player::getUserId() const {
 	extern IVEngineServer* engine;
 	return engine->GetPlayerUserId(ent);
@@ -70,6 +80,22 @@ int Player::getHealth() const {
 
 int Player::getMaxHealth() const {
 	return info->GetMaxHealth();
+}
+
+bool Player::handle(EventInfo* event) {
+	CUtlString name(event->getName());
+	int eventUserId = event->getInt("userid");
+	// bot owns this event.
+	if (eventUserId == getUserId()) {
+		if (name == "player_spawn") {
+			arsenal.reset();
+			inGame = true;
+		}
+		if (name == "player_death" && inGame) {
+			inGame = false;
+		}
+	}
+	return false;
 }
 
 QAngle Player::getFacingAngle() const {

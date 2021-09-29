@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Buttons.h"
-#include <weapon/Arsenal.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
 
@@ -41,7 +40,7 @@ public:
 
 	float getTargetEntDistance() const;
 
-	const Bot* getSelf() const {
+	Bot* getSelf() {
 		return self;
 	}
 
@@ -69,10 +68,6 @@ public:
 		return cmd;
 	}
 
-	Arsenal& getArsenal() {
-		return arsenal;
-	}
-
 	Navigator* getNavigator() {
 		return navigator;
 	}
@@ -93,9 +88,7 @@ public:
 
 	Vector getFacing() const;
 private:
-	const Bot* self;
-
-	Arsenal arsenal;
+	Bot* self;
 
 	const Player *targetedPlayer;
 

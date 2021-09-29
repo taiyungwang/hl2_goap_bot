@@ -109,7 +109,7 @@ Bot* BotBuilder::build(edict_t* ent) const {
 	planner->addAction<SwitchToBestInRangeWeaponAction>(0.0f);
 	updatePlanner(*planner, *blackboard);
 	bot->setPlanner(planner);
-	initWeapons(blackboard->getArsenal().getWeaponFactory());
+	initWeapons(bot->getArsenal().getWeaponFactory());
 	return bot;
 }
 

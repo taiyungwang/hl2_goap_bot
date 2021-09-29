@@ -32,6 +32,7 @@ Bot::~Bot() {
 }
 
 void Bot::think() {
+	Player::think();
 	try {
 		CBotCmd& cmd = blackboard->getCmd();
 		if (isDead()) {
@@ -48,11 +49,16 @@ void Bot::think() {
 			vision.updateVisiblity(*blackboard);
 			if (inGame) {
 				cmd.Reset();
-				Arsenal& amory = blackboard->getArsenal();
-				amory.update(*blackboard);
-				int currentWeapon = amory.getCurrWeaponIdx();
+				int best = arsenal.getBestWeapon(*blackboard,
+						[] (const Weapon*, Blackboard&, float) {
+					return false;
+				});
+				if (best != 0) {
+					arsenal.setBestWeaponIdx(best);
+				}
+				int currentWeapon = arsenal.getCurrWeaponIdx();
 				if (currentWeapon > 0
-						&& amory.getWeapon(currentWeapon)->isOutOfAmmo(getEdict())) {
+						&& arsenal.getWeapon(currentWeapon)->isOutOfAmmo(getEdict())) {
 					world->updateState(WorldProp::USING_BEST_WEAP, false);
 				}
 				planner->execute();
@@ -80,7 +86,6 @@ void Bot::think() {
 			auto& players = Player::getPlayers();
 			cmd = players[players.Find(1)]->getInfo()->GetLastUserCommand();
 		}
-
 		extern IBotManager *botmanager;
 		if (!hookEnabled) {
 			botmanager->GetBotController(getEdict())->RunPlayerMove(&cmd);
@@ -91,16 +96,9 @@ void Bot::think() {
 }
 
 bool Bot::handle(EventInfo* event) {
+	Player::handle(event);
 	CUtlString name(event->getName());
 	int eventUserId = event->getInt("userid");
-	if (name == "player_death" || name == "player_disconnect") {
-		auto targeted = blackboard->getTargetedPlayer();
-		extern IVEngineServer* engine;
-		if (targeted != nullptr && eventUserId == targeted->getUserId()) {
-			blackboard->setTargetedPlayer(nullptr);
-		}
-		return false;
-	}
 	// bot owns this event.
 	if (eventUserId == getUserId()) {
 		if (name == "player_spawn") {
@@ -109,12 +107,12 @@ bool Bot::handle(EventInfo* event) {
 			if (area != nullptr) {
 				area->IncreaseDanger(getTeam(), 1.0f);
 			}
-			resetPlanner = inGame = true;
+			resetPlanner = true;
 			blackboard->reset();
 			world->reset();
 			return true;
 		}
-		if (name == "player_death" && inGame) {
+		if (name == "player_death") {
 			despawn();
 			return false;
 		}
@@ -134,6 +132,12 @@ bool Bot::handle(EventInfo* event) {
 			}
 			return true;
 		}
+	} else if (name == "player_death" || name == "player_disconnect") {
+		auto targeted = blackboard->getTargetedPlayer();
+		extern IVEngineServer* engine;
+		if (targeted != nullptr && eventUserId == targeted->getUserId()) {
+			blackboard->setTargetedPlayer(nullptr);
+		}
 	}
 	return false;
 }
@@ -152,7 +156,6 @@ int Bot::getPlayerClass() const {
 
 
 void Bot::despawn() {
-	inGame = false;
 	planner->resetPlanning(true);
 	blackboard->getButtons().tap(IN_ATTACK);
 }

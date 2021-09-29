@@ -1,6 +1,7 @@
 #include "ReloadWeaponAction.h"
 
 #include <player/Blackboard.h>
+#include <player/Bot.h>
 #include <player/Buttons.h>
 #include <weapon/Reloader.h>
 #include <weapon/Weapon.h>
@@ -19,7 +20,7 @@ bool ReloadWeaponAction::precondCheck() {
 }
 
 bool ReloadWeaponAction::execute() {
-	Weapon* weapon = blackboard.getArsenal().getCurrWeapon();
+	Weapon* weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
 	if (weapon == nullptr) {
 		return true;
 	}

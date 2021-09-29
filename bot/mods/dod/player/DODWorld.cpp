@@ -43,7 +43,7 @@ bool DODWorld::handle(EventInfo* event) {
 }
 
 bool DODWorld::update(Blackboard& blackboard) {
-	Arsenal& armory = blackboard.getArsenal();
+	Arsenal& armory = blackboard.getSelf()->getArsenal();
 	auto& weapons = armory.getWeapons();
 	int currentWeap = armory.getCurrWeaponIdx();
 	if (currentWeap > 0) {

@@ -1,6 +1,7 @@
 #include "UseSpecificWeaponAction.h"
 
 #include <player/Blackboard.h>
+#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 
 UseSpecificWeaponAction::UseSpecificWeaponAction(Blackboard& blackboard) :

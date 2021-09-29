@@ -3,7 +3,6 @@
 #include "Player.h"
 #include "Vision.h"
 #include "move/RotationManager.h"
-#include <event/EventHandler.h>
 #include <utlvector.h>
 #include <utlqueue.h>
 
@@ -18,7 +17,7 @@ class CBotCmd;
 
 typedef const char* (*PlayerClasses)[2][6];
 
-class Bot: public Player, public EventHandler {
+class Bot: public Player {
 public:
 
 	static void setClasses(PlayerClasses options) {
@@ -82,7 +81,7 @@ private:
 
 	RotationManager rotation;
 
-	bool inGame = false, hookEnabled = false, resetPlanner = false;
+	bool hookEnabled = false, resetPlanner = false;
 
 	void despawn();
 };

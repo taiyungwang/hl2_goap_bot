@@ -16,7 +16,6 @@ Blackboard::Blackboard(Bot *self, BasePlayer *entInstance) :
 void Blackboard::reset() {
 	blocker = nullptr;
 	targetedPlayer = nullptr;
-	arsenal.reset();
 }
 
 Blackboard::~Blackboard() {

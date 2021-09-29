@@ -5,6 +5,7 @@
 
 class Weapon;
 class Blackboard;
+struct edict_t;
 
 typedef bool (*WeaponFilter)(const Weapon*, Blackboard& blackboard, float dist);
 
@@ -14,11 +15,15 @@ public:
 
 	Arsenal();
 
+	~Arsenal() {
+		reset();
+	}
+
 	int getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) const;
 
 	void reset();
 
-	void update(Blackboard& blackboard);
+	void update(edict_t* self);
 
 	int getCurrWeaponIdx() const {
 		return currWeapIdx;

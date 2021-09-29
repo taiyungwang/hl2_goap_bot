@@ -1,7 +1,7 @@
 #include "SwitchToBestLoadedWeaponAction.h"
 
 #include <player/Blackboard.h>
-#include <player/Player.h>
+#include <player/Bot.h>
 #include <util/BasePlayer.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
@@ -13,7 +13,7 @@ SwitchToBestLoadedWeaponAction::SwitchToBestLoadedWeaponAction(
 }
 
 static bool ignore(const Weapon* weap, Blackboard& blackboard, float dist) {
-	Arsenal& arsenal = blackboard.getArsenal();
+	Arsenal& arsenal = blackboard.getSelf()->getArsenal();
 	auto& weapons = arsenal.getWeapons();
 	return weap->isClipEmpty() || !weap->isInRange(dist);
 }

@@ -26,7 +26,7 @@ bool World::think(Blackboard& blackboard) {
 	bool& enemySighted = states[states.Find(WorldProp::ENEMY_SIGHTED)];
 	updateState(WorldProp::MULTIPLE_ENEMY_SIGHTED,
 			blackboard.getVisibleEnemies().Count() > 1);
-	Arsenal& armory = blackboard.getArsenal();
+	Arsenal& armory = blackboard.getSelf()->getArsenal();
 	updateState(WorldProp::USING_BEST_WEAP,
 			armory.getBestWeaponIdx() == armory.getCurrWeaponIdx());
 	edict_t* blocker = blackboard.getBlocker();

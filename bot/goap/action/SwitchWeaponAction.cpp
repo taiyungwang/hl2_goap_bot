@@ -1,5 +1,6 @@
 #include "SwitchWeaponAction.h"
 
+#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <player/Blackboard.h>
 
