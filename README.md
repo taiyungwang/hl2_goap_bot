@@ -24,7 +24,6 @@ Where "game dir" is either "Day of Defeat Source" or "Half-Life 2 Deathmatch" an
 * To add a bot:  ```mybot_add_bot <name> <team> <class>``` where team and class are number as indicated in the game menu for Day of Defeat Source.
 ## TODO ##
 * Make the bots more player friendly.  Currently the bots are nearly 100% accurate with their aim, and have nearly no latency when reacting.  
-* Add a ability for bots to "listen" for things like gun fire and footsteps.
 * Add action for bots to drop ammo for allies
 * Add a framework in HL2DM for bots to determine which items to pick up.
 * Add logic for bots to pick up a substitue weapon when current out of ammo for primary weapon.
