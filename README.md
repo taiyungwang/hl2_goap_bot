@@ -19,6 +19,10 @@ Where "game dir" is either "Day of Defeat Source" or "Half-Life 2 Deathmatch" an
 * Generate a navigation mesh for the map if one has not been generated yet.  See [here](https://steamcommunity.com/sharedfiles/filedetails/?id=485737805) and [here](https://developer.valvesoftware.com/wiki/Nav_Mesh) for for tips on how to generate and edit navigation meshes.  
 * To fill (30 total) the server with bots, enter in the console: ```mybot_add_all_bots```
 * To add a bot:  ```mybot_add_bot <name> <team> <class>``` where team and class are number as indicated in the game menu for Day of Defeat Source.
+
+## Compiling the Bot ##
+The bot can be built on Windows (Visual Studio 2012 or higher) and LINUX with [CMake](https://cmake.org/) and [Valve's Source SDK](alliedmodders/hl2sdk). The toplevel CMakeList.txt assumes that hl2sdk and valve_plugin_navmesh are in the same subdirectory as this repo.  It assumes that [CxxTest](https://cxxtest.com/) is installed via apt in LINUX, and in Windows it is installed in the root of drive that is specified (defaults to C:). It assumed that [Steam](https://store.steampowered.com/about/) is installed within the HOMEPATH for the LINUX build environment.  Please see the [Valve Source SDK Wiki on compiling](https://developer.valvesoftware.com/wiki/Source_SDK_2013) for all other platform specific dependencies.  
+
 ## TODO ##
 * Make the bots more player friendly.  Currently the bots are nearly 100% accurate with their aim, and have nearly no latency when reacting.  
 * Add action for bots to drop ammo for allies
@@ -26,6 +30,3 @@ Where "game dir" is either "Day of Defeat Source" or "Half-Life 2 Deathmatch" an
 * Add logic for bots to pick up a substitue weapon when current out of ammo for primary weapon.
 * Save the Thompson Sampling results after each game.
 * Refactor aiming behavior defined in the GOAP Action classes into an aiming subsystem.
-
-## Compiling the Bot ##
-The bot can be built on Windows (Visual Studio 2012 or higher) and LINUX with [CMake](https://cmake.org/) and [Valve's Source SDK](alliedmodders/hl2sdk). The toplevel CMakeList.txt assumes that hl2sdk and valve_plugin_navmesh are in the same subdirectory as this repo.  It assumes that [CxxTest](https://cxxtest.com/) is installed via apt in LINUX, and in Windows it is installed in the root of drive that is specified (defaults to C:). It assumed that [Steam](https://store.steampowered.com/about/) is installed within the HOMEPATH for the LINUX build environment.  Please see the [Valve Source SDK Wiki on compiling](https://developer.valvesoftware.com/wiki/Source_SDK_2013) for all other platform specific dependencies.  
