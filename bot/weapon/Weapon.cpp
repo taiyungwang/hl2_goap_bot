@@ -13,22 +13,7 @@ Weapon::Weapon(edict_t* ent) :
 	minDeployRange = INFINITY;
 }
 
-Weapon::~Weapon() {
-	for (int i = 0; i < 2; i++) {
-		if (function[i] != nullptr) {
-			delete function[i];
-			function[i] = nullptr;
-		}
-	}
-	if (deployer != nullptr) {
-		delete deployer;
-	}
-	if (reloader != nullptr) {
-		delete reloader;
-	}
-}
-
-void Weapon::setWeaponFunc(int i, WeaponFunction* func) {
+void Weapon::setWeaponFunc(int i, const std::shared_ptr<WeaponFunction>& func) {
 	BaseCombatWeapon combatWeap(weap);
 	function[i] = func;
 	function[i]->setClip(combatWeap.getClipIndex(i));
@@ -45,7 +30,7 @@ bool Weapon::isDeployed() const {
 }
 
 void Weapon::undeploy(Blackboard& blackboard) {
-	 if (deployer != nullptr) {
+	 if (deployer) {
 		 deployer->undeploy(blackboard);
 	 }
 }
@@ -76,14 +61,13 @@ bool Weapon::isInRange(float distance) const {
 }
 
 WeaponFunction* Weapon::chooseWeaponFunc(edict_t* self, float dist) const {
-	return function[1] != nullptr
-			&& function[1]->getDamageRating(self, dist)
+	return function[1] && function[1]->getDamageRating(self, dist)
 					> function[0]->getDamageRating(self, dist) ?
-			function[1] : function[0];
+			function[1].get() : function[0].get();
 }
 
 template<typename Func>
 bool Weapon::checkAmmo(const Func& getAmmo) const {
-	return (!function[0]->isMelee() && getAmmo(function[0]) == 0)
-		|| (function[1] != nullptr && !function[1]->isMelee() && getAmmo(function[1]) == 0);
+	return (!function[0]->isMelee() && getAmmo(function[0].get()) == 0)
+		|| (function[1] && !function[1]->isMelee() && getAmmo(function[1].get()) == 0);
 }

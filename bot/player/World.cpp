@@ -62,10 +62,8 @@ bool World::think(Blackboard& blackboard) {
 		}
 	}
 	updateState(WorldProp::WEAPON_IN_RANGE, inRange);
-	auto& weapons = arsenal.getWeapons();
-	int currentWeap = arsenal.getCurrWeaponIdx();
-	if (currentWeap > 0 && weapons.IsValidIndex(weapons.Find(currentWeap))) {
-		Weapon *currWeap = weapons[weapons.Find(currentWeap)];
+	Weapon* currWeap = arsenal.getCurrWeapon();
+	if (currWeap != nullptr) {
 		updateState(WorldProp::WEAPON_LOADED,
 				!currWeap->isClipEmpty());
 		updateState(WorldProp::OUT_OF_AMMO,

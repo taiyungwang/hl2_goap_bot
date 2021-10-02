@@ -26,12 +26,12 @@ public:
 	virtual ~DeployableWeaponBuilder() {
 	}
 
-	virtual Weapon* build(edict_t* weap) {
-		Weapon* weapon = ReloadableWeaponBuilder<T>::build(weap);
-		weapon->setPrimary(new WeaponFunction(damage));
+	virtual std::shared_ptr<Weapon> build(edict_t* weap) const {
+		auto weapon = ReloadableWeaponBuilder<T>::build(weap);
+		weapon->setPrimary(std::make_shared<WeaponFunction>(damage));
 		weapon->getPrimary()->getRange()[1] = 1000.0f;
 		weapon->setDeployable(deployableCheck, zoomDist);
-		weapon->setDeployer(new U(*weapon));
+		weapon->setDeployer(std::make_shared<U>(*weapon));
 		float* ranges = weapon->getPrimary()->getRange();
 		ranges[0] = minRange;
 		ranges[1] = maxRange;

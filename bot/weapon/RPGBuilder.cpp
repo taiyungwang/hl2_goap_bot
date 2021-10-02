@@ -3,9 +3,9 @@
 #include "Weapon.h"
 #include "WeaponFunction.h"
 
-Weapon* RPGBuilder::build(edict_t* weap) {
-	Weapon* weapon = ReloadableWeaponBuilder::build(weap);
-	WeaponFunction *primary = new WeaponFunction(0.91f);
+std::shared_ptr<Weapon> RPGBuilder::build(edict_t* weap) const {
+	auto weapon = ReloadableWeaponBuilder::build(weap);
+	auto primary = std::make_shared<WeaponFunction>(0.91f);
 	primary->setExplosive(true);
 	primary->getRange()[0] = 400.0f;
 	primary->getRange()[1] = 2000.0f;

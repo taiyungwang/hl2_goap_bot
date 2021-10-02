@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 class Blackboard;
 class EntityVar;
 class WeaponFunction;
@@ -15,24 +17,22 @@ public:
 
 	Weapon(edict_t* ent);
 
-	~Weapon();
-
-	void setPrimary(WeaponFunction* func) {
+	void setPrimary(const std::shared_ptr<WeaponFunction>& func) {
 		setWeaponFunc(0, func);
 	}
 
-	void setSecondary(WeaponFunction* func) {
+	void setSecondary(const std::shared_ptr<WeaponFunction>& func) {
 		setWeaponFunc(1, func);
 	}
 
 	int getWeaponState() const;
 
 	WeaponFunction* getPrimary() const {
-		return function[0];
+		return function[0].get();
 	}
 
 	WeaponFunction* getSecondary() const {
-		return function[1];
+		return function[1].get();
 	}
 
 	bool isGrenade() const {
@@ -88,23 +88,23 @@ public:
 	}
 
 	Deployer* getDeployer() const {
-		return deployer;
+		return deployer.get();
 	}
 
-	void setDeployer(Deployer* deployer) {
+	void setDeployer(const std::shared_ptr<Deployer>& deployer) {
 		this->deployer = deployer;
 	}
 
 	Reloader* getReloader() const {
-		return reloader;
+		return reloader.get();
 	}
 
-	void setReloader(Reloader* reloader) {
+	void setReloader(const std::shared_ptr<Reloader>& reloader) {
 		this->reloader = reloader;
 	}
 
 private:
-	WeaponFunction* function[2];
+	std::shared_ptr<WeaponFunction> function[2];
 
 	const char* weaponName;
 
@@ -116,11 +116,11 @@ private:
 
 	edict_t* weap;
 
-	Deployer* deployer = nullptr;
+	std::shared_ptr<Deployer> deployer;
 
-	Reloader* reloader = nullptr;
+	std::shared_ptr<Reloader> reloader;
 
-	void setWeaponFunc(int i, WeaponFunction* func);
+	void setWeaponFunc(int i, const std::shared_ptr<WeaponFunction>& func);
 
 	template<typename Func>
 	bool checkAmmo(const Func& getAmmo) const;

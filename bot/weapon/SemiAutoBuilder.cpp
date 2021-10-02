@@ -3,9 +3,9 @@
 #include "Weapon.h"
 #include "WeaponFunction.h"
 
-Weapon* SemiAutoBuilder::build(edict_t* weap) {
-	Weapon* weapon = ReloadableWeaponBuilder::build(weap);
-	weapon->setPrimary(new WeaponFunction(damage1));
+std::shared_ptr<Weapon> SemiAutoBuilder::build(edict_t* weap) const {
+	auto weapon = ReloadableWeaponBuilder::build(weap);
+	weapon->setPrimary(std::make_shared<WeaponFunction>(damage1));
 	weapon->getPrimary()->getRange()[1] = 1000.0f;
 	return weapon;
 }

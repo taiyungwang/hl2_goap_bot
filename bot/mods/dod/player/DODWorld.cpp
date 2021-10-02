@@ -43,23 +43,11 @@ bool DODWorld::handle(EventInfo* event) {
 }
 
 bool DODWorld::update(Blackboard& blackboard) {
-	Arsenal& armory = blackboard.getSelf()->getArsenal();
-	auto& weapons = armory.getWeapons();
-	int currentWeap = armory.getCurrWeaponIdx();
-	if (currentWeap > 0) {
-		Weapon* currWeap = armory.getCurrWeapon();
-	}
-	bool hasBomb = false;
-	FOR_EACH_MAP_FAST(weapons, i) {
-		if (CUtlString("weapon_basebomb") == armory.getWeaponName(weapons.Key(i))) {
-			hasBomb = true;
-			break;
-		}
-	}
-	updateState(WorldProp::HAS_BOMB, hasBomb);
 	if (reset) {
 		reset = false;
 		return true;
 	}
+	updateState(WorldProp::HAS_BOMB,
+			blackboard.getSelf()->getArsenal().getWeaponIdByName("weapon_basebomb") != 0);
 	return false;
 }

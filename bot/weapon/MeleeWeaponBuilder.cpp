@@ -3,9 +3,9 @@
 #include "Weapon.h"
 #include "WeaponFunction.h"
 
-Weapon* MeleeWeaponBuilder::build(edict_t* weap) {
-	Weapon* weapon = new Weapon(weap);
-	WeaponFunction *primary = new WeaponFunction(0.1f);
+std::shared_ptr<Weapon> MeleeWeaponBuilder::build(edict_t* weap) const {
+	auto weapon = std::make_shared<Weapon>(weap);
+	auto primary = std::make_shared<WeaponFunction>(0.1f);
 	weapon->setUnderWater(true);
 	primary->setMelee(true);
 	primary->setFullAuto(true);

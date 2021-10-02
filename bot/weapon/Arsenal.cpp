@@ -14,19 +14,12 @@
 #include <eiface.h>
 #include <shareddefs.h>
 
-const char* Arsenal::getWeaponName(int key) {
-	extern IVEngineServer* engine;
-	edict_t* weap = engine->PEntityOfEntIndex(key);
-	return weap == nullptr || weap->IsFree() ? nullptr: weap->GetClassName();
-}
-
 Arsenal::Arsenal()  {
-	SetDefLessFunc(weapons);
 	reset();
 }
 
 int Arsenal::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) const {
-	auto best = weapons.InvalidIndex();
+	int best = 0;
 	auto* targetedPlayer = blackboard.getTargetedPlayer();
 	edict_t* target = nullptr;
 	if (targetedPlayer != nullptr) {
@@ -37,36 +30,30 @@ int Arsenal::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) c
 	float targetDist = target == nullptr ? -1.0f:
 			target->GetCollideable()->GetCollisionOrigin().DistTo(
 					blackboard.getSelf()->getCurrentPosition());
-	edict_t* self = blackboard.getSelf()->getEdict();
-	bool underWater = BasePlayer(self).isUnderWater();
-	FOR_EACH_MAP_FAST(weapons, i) {
-		if ((!weapons[i]->isUnderWater() && underWater)
-				|| (targetDist < 0.0f && weapons[i]->getPrimary()->isMelee()
-						&& !underWater)
+	visit([&best, targetDist, &blackboard=blackboard,
+		   ignore, this](int i, const Weapon* weapon) mutable
+			-> bool {
+		edict_t* self = blackboard.getSelf()->getEdict();
+		bool underWater = BasePlayer(self).isUnderWater();
+		if ((!weapon->isUnderWater() && underWater)
+				|| (targetDist < 0.0f && weapon->getPrimary()->isMelee() && !underWater)
 				// TODO: assumes primary and secondary weapons have similar ranges.
-				|| weapons[i]->isGrenade() || weapons[i]->isOutOfAmmo(self)
-				|| ignore(weapons[i], blackboard, targetDist)
-				|| (weapons.IsValidIndex(best)
-						&& weapons[i]->getDamage(self, targetDist)
-								<= weapons[best]->getDamage(self, targetDist))) {
-			continue;
+				|| weapon->isGrenade() || weapon->isOutOfAmmo(self)
+				|| ignore(weapon, blackboard, targetDist)
+				|| (best > 0 && weapon->getDamage(self, targetDist)
+								<= weapons.at(best)->getDamage(self, targetDist))) {
+			return false;
 		}
 		best = i;
-	}
-	return weapons.IsValidIndex(best) ? weapons.Key(best): 0;
+		return false;
+	});
+	return best;
 }
 
 void Arsenal::reset() {
 	currWeapIdx = bestWeapIdx = 0;
-	weapons.PurgeAndDeleteElements();
-	FOR_EACH_MAP_FAST(weapons, i)
-	{
-		delete weapons[i];
-		weapons[i] = nullptr;
-	}
-	weapons.RemoveAll();
+	weapons.clear();
 }
-
 
 void Arsenal::update(edict_t* self) {
 	extern EntityClassManager* classManager;
@@ -84,24 +71,33 @@ void Arsenal::update(edict_t* self) {
 		if (weapState == WEAPON_NOT_CARRIED) {
 			continue;
 		}
-		auto j = weapons.Find(entIdx);
-		if (!weapons.IsValidIndex(j)) {
+		if (weapons.find(entIdx) == weapons.end()) {
 			const char* weapName = weaponEnt->GetClassName();
 			WeaponBuilder* builder = factory.getInstance(weapName);
 			if (builder == nullptr) {
 				Warning("Weapon is not registered: %s.\n", weapName);
 				continue;
 			}
-			j = weapons.Insert(entIdx, builder->build(weaponEnt));
+			weapons[entIdx] = builder->build(weaponEnt);
 		}
 		if (weapState == WEAPON_IS_ACTIVE) {
-			currWeapIdx = weapons.Key(j);
+			currWeapIdx = entIdx;
 		}
 	}
 }
 
-Weapon* Arsenal::getWeapon(int key) const {
-	auto index = weapons.Find(key);
-	return weapons.IsValidIndex(index) ? weapons[index] : nullptr;
+int Arsenal::getWeaponIdByName(const char* name) const {
+	int id = 0;
+	visit([&id, name] (int i, const Weapon* weapon) mutable -> bool {
+		extern IVEngineServer* engine;
+		edict_t* weap = engine->PEntityOfEntIndex(i);
+		if (weap != nullptr && !weap->IsFree()
+				&& std::string(name) == name) {
+			id = i;
+			return true;
+		}
+		return false;
+	});
+	return id;
 }
 

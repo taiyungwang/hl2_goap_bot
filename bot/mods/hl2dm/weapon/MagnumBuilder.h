@@ -8,5 +8,5 @@ public:
 			SemiAutoBuilder(0.7f) {
 	}
 
-	Weapon* build(edict_t* weap);
+	std::shared_ptr<Weapon> build(edict_t* weap) const;
 };

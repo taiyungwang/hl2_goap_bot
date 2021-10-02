@@ -9,9 +9,9 @@
 template<typename T>
 class SimpleWeaponBuilder: public ReloadableWeaponBuilder<> {
 public:
-	Weapon* build(edict_t* weap) {
-		Weapon* weapon = ReloadableWeaponBuilder::build(weap);
-		weapon->setPrimary(new T());
+	virtual std::shared_ptr<Weapon> build(edict_t* weap) const {
+		auto weapon = ReloadableWeaponBuilder::build(weap);
+		weapon->setPrimary(std::make_shared<T>());
 		return weapon;
 	}
 };

@@ -3,9 +3,9 @@
 #include "Weapon.h"
 #include "WeaponFunction.h"
 
-Weapon* GrenadeBuilder::build(edict_t* weap) {
-	Weapon* weapon = new Weapon(weap);
-	WeaponFunction *primary = new WeaponFunction(0.9f);
+std::shared_ptr<Weapon> GrenadeBuilder::build(edict_t* weap) const {
+	auto weapon = std::make_shared<Weapon>(weap);
+	auto primary = std::make_shared<WeaponFunction>(0.9f);
 	weapon->setGrenade(true);
 	primary->setExplosive(true);
 	primary->setSilent(true);

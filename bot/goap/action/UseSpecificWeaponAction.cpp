@@ -10,18 +10,17 @@ UseSpecificWeaponAction::UseSpecificWeaponAction(Blackboard& blackboard) :
 }
 
 bool UseSpecificWeaponAction::precondCheck() {
-	auto& weapons = arsenal.getWeapons();
 	weapIdx = 0;
-	FOR_EACH_MAP_FAST(weapons, i) {
-		const char* name = Arsenal::getWeaponName(weapons.Key(i));
-		if (name != nullptr && canUse(name)) {
-			weapIdx = weapons.Key(i);
-			if (arsenal.getWeapon(weapIdx) == nullptr) {
-				return false;
-			}
+	arsenal.visit([this](int i, const Weapon* weapon) mutable -> bool {
+		extern IVEngineServer* engine;
+		edict_t* ent = engine->PEntityOfEntIndex(i);
+		if (ent != nullptr && !ent->IsFree()
+				&& this->canUse(ent->GetClassName())) {
+			weapIdx = i;
 			arsenal.setDesiredWeaponIdx(weapIdx);
 			return true;
 		}
-	}
-	return false;
+		return false;
+	});
+	return weapIdx > 0;
 }

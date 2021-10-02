@@ -3,6 +3,9 @@
 #include "WeaponBuilderFactory.h"
 #include <goap/WorldCond.h>
 
+#include <unordered_map>
+#include <memory>
+
 class Weapon;
 class Blackboard;
 struct edict_t;
@@ -11,8 +14,6 @@ typedef bool (*WeaponFilter)(const Weapon*, Blackboard& blackboard, float dist);
 
 class Arsenal {
 public:
-	static const char* getWeaponName(int key);
-
 	Arsenal();
 
 	~Arsenal() {
@@ -36,11 +37,24 @@ public:
 		return getWeapon(currWeapIdx);
 	}
 
-	Weapon* getWeapon(int key) const;
-
-	CUtlMap<int, Weapon*>& getWeapons() {
-		return weapons;
+	Weapon* getWeapon(int key) const {
+		return weapons.find(key) == weapons.end() ? nullptr : weapons.at(key).get();
 	}
+
+	template<typename Func>
+	void visit(Func visitor) const {
+		for (auto const weapon: weapons) {
+			if (visitor(weapon.first, weapon.second.get())) {
+				break;
+			}
+		}
+	}
+
+	/**
+	 * @return Weapon id if the arsenal contains a weapon matching current name,
+	 * otherwise 0.
+	 */
+	int getWeaponIdByName(const char* name) const;
 
 	int getDesiredWeaponIdx() const {
 		return desiredWeapIdx;
@@ -65,7 +79,7 @@ public:
 private:
 	int currWeapIdx, bestWeapIdx, desiredWeapIdx = 0;
 
-	CUtlMap<int, Weapon*> weapons;
+	std::unordered_map<int, std::shared_ptr<Weapon>> weapons;
 
 	WeaponBuilderFactory factory;
 };

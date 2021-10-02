@@ -7,5 +7,5 @@ class CrossbowBuilder: public DeployableWeaponBuilder<Reloader> {
 public:
 	CrossbowBuilder();
 
-	Weapon* build(edict_t* weap);
+	std::shared_ptr<Weapon> build(edict_t* weap) const;
 };

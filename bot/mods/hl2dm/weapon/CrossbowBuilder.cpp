@@ -7,8 +7,8 @@ CrossbowBuilder::CrossbowBuilder() :
 				"m_bInZoom", 1000.0f) {
 }
 
-Weapon* CrossbowBuilder::build(edict_t* weap) {
-	Weapon* weapon = DeployableWeaponBuilder<Reloader>::build(weap);
+std::shared_ptr<Weapon> CrossbowBuilder::build(edict_t* weap) const{
+	auto weapon = DeployableWeaponBuilder<Reloader>::build(weap);
 	weapon->getPrimary()->setSilent(true);
 	weapon->setUnderWater(true);
 	return weapon;

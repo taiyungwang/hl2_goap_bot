@@ -115,15 +115,14 @@ bool DODBotBuilder::handle(EventInfo *event) {
 }
 
 void DODBotBuilder::initWeapons(WeaponBuilderFactory &weaponFac) const {
-	class GrenadeLauncherBuilder: public SimpleWeaponBuilder<
-			GrenadeLauncherFunction> {
+	class GrenadeLauncherBuilder: public SimpleWeaponBuilder<GrenadeLauncherFunction> {
 	public:
 		GrenadeLauncherBuilder(float zMultiplier) :
 				zMultiplier(zMultiplier) {
 		}
 
-		Weapon* build(edict_t *weap) {
-			Weapon *weapon =
+		std::shared_ptr<Weapon> build(edict_t* weap) const {
+			auto weapon =
 					SimpleWeaponBuilder<GrenadeLauncherFunction>::build(weap);
 			weapon->setGrenade(true);
 			dynamic_cast<GrenadeLauncherFunction*>(weapon->getPrimary())->setZMultiplier(
@@ -143,8 +142,8 @@ void DODBotBuilder::initWeapons(WeaponBuilderFactory &weaponFac) const {
 						"CDODBaseRocketWeapon", "m_bDeployed") {
 		}
 
-		Weapon* build(edict_t *weap) {
-			Weapon *weapon = DeployableWeaponBuilder<Reloader>::build(weap);
+		std::shared_ptr<Weapon> build(edict_t* weap) const {
+			auto weapon = DeployableWeaponBuilder<Reloader>::build(weap);
 			weapon->getPrimary()->setExplosive(true);
 			return weapon;
 		}
@@ -156,8 +155,8 @@ void DODBotBuilder::initWeapons(WeaponBuilderFactory &weaponFac) const {
 				PistolBuilder(0.2f) {
 		}
 
-		Weapon* build(edict_t *weap) {
-			Weapon *weapon = PistolBuilder::build(weap);
+		std::shared_ptr<Weapon> build(edict_t* weap) const {
+			auto weapon = PistolBuilder::build(weap);
 			weapon->getPrimary()->setFullAuto(true);
 			return weapon;
 		}

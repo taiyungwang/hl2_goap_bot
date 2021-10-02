@@ -3,8 +3,8 @@
 #include <weapon/WeaponFunction.h>
 #include <weapon/Weapon.h>
 
-Weapon* DODMGBuilder::build(edict_t* weap) {
-	Weapon* weapon = DeployableWeaponBuilder::build(weap);
+std::shared_ptr<Weapon> DODMGBuilder::build(edict_t* weap) const {
+	auto weapon = DeployableWeaponBuilder::build(weap);
 	weapon->getPrimary()->setFullAuto(true);
 	return weapon;
 }

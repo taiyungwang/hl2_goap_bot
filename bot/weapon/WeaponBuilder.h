@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 class Weapon;
 struct edict_t;
 
@@ -11,7 +13,7 @@ public:
 	virtual ~WeaponBuilder() {
 	}
 
-	virtual Weapon* build(edict_t* weap) = 0;
+	virtual std::shared_ptr<Weapon> build(edict_t* weap) const = 0;
 
 protected:
 	float damage1, damage2;

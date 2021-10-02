@@ -8,7 +8,7 @@ public:
 			maxRange(maxRange) {
 	}
 
-	Weapon* build(edict_t* weap);
+	std::shared_ptr<Weapon> build(edict_t* weap) const;
 
 private:
 	int maxRange;

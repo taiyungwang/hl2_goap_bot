@@ -12,9 +12,9 @@ public:
 	}
 };
 
-Weapon* SMGBuilder::build(edict_t* weap) {
-	Weapon* weapon = FullAutoGunBuilder::build(weap);
+std::shared_ptr<Weapon> SMGBuilder::build(edict_t* weap) const {
+	auto weapon = FullAutoGunBuilder::build(weap);
 	weapon->getPrimary()->getRange()[1] = 750.0f;
-	weapon->setSecondary(new SMGGrenadeLauncher());
+	weapon->setSecondary(std::make_shared<SMGGrenadeLauncher>());
 	return weapon;
 }

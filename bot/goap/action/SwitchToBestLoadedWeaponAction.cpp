@@ -13,8 +13,6 @@ SwitchToBestLoadedWeaponAction::SwitchToBestLoadedWeaponAction(
 }
 
 static bool ignore(const Weapon* weap, Blackboard& blackboard, float dist) {
-	Arsenal& arsenal = blackboard.getSelf()->getArsenal();
-	auto& weapons = arsenal.getWeapons();
 	return weap->isClipEmpty() || !weap->isInRange(dist);
 }
 

@@ -10,5 +10,5 @@ public:
 					"CDODFireSelectWeapon", "m_bSemiAuto", 1000.0f) {
 	}
 
-	Weapon* build(edict_t* weap);
+	std::shared_ptr<Weapon> build(edict_t* weap) const;
 };
