@@ -26,7 +26,7 @@ The bot can be built on Windows (Visual Studio 2012 or higher) and LINUX with [C
 ## TODO ##
 * Make the bots more player friendly.  Currently the bots are nearly 100% accurate with their aim, and have nearly no latency when reacting.  
 * Add action for bots to drop ammo for allies
-* Add a framework in HL2DM for bots to determine which items to pick up.
+* Add heuristics or bots to determine which items to pick up in HL2DM.
 * Add logic for bots to pick up a substitue weapon when current out of ammo for primary weapon.
 * Save the Thompson Sampling results after each game.
 * Refactor aiming behavior defined in the GOAP Action classes into an aiming subsystem.
