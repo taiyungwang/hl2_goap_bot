@@ -4,6 +4,7 @@
 #include <player/Bot.h>
 #include <player/Buttons.h>
 #include <weapon/Reloader.h>
+#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <util/SimpleException.h>
 #include <in_buttons.h>

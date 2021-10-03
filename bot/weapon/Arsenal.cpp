@@ -14,10 +14,6 @@
 #include <eiface.h>
 #include <shareddefs.h>
 
-Arsenal::Arsenal()  {
-	reset();
-}
-
 int Arsenal::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) const {
 	int best = 0;
 	auto* targetedPlayer = blackboard.getTargetedPlayer();
@@ -73,7 +69,7 @@ void Arsenal::update(edict_t* self) {
 		}
 		if (weapons.find(entIdx) == weapons.end()) {
 			const char* weapName = weaponEnt->GetClassName();
-			WeaponBuilder* builder = factory.getInstance(weapName);
+			const WeaponBuilder* builder = builders.at(weapName).get();
 			if (builder == nullptr) {
 				Warning("Weapon is not registered: %s.\n", weapName);
 				continue;

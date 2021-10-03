@@ -2,7 +2,9 @@
 
 #include "event/EventInfo.h"
 #include "mods/hl2dm/player/HL2DMBotBuilder.h"
+#include "mods/hl2dm/weapon/HL2DMArsenalBuilder.h"
 #include "mods/dod/player/DODBotBuilder.h"
+#include "mods/dod/weapon/DODArsenalBuilder.h"
 #include "player/Bot.h"
 #include "player/GameManager.h"
 #include "player/VTableHook.h"
@@ -35,16 +37,17 @@ PluginAdaptor::PluginAdaptor() {
 	gpGlobals = playerinfomanager->GetGlobalVars();
 	TheNavMesh = new CNavMesh;
 	botBuilder = nullptr;
-	SetDefLessFunc(Player::getPlayers());
 	SetDefLessFunc(blockers);
 	engine->GetGameDir(modPath, 256);
 	// TODO: make mod checking more stringent.
 	if (Q_stristr(modPath, "hl2mp")) {
-		botBuilder = new HL2DMBotBuilder();
+		arsenalBuilder = std::make_shared<HL2DMArsenalBuilder>();
+		botBuilder = new HL2DMBotBuilder(*arsenalBuilder.get());
 		TheNavMesh->addPlayerSpawnName("info_player_start");
 	} else if (Q_stristr(modPath, "dod")) {
 		gameManager = new DODObjectives();
-		botBuilder = new DODBotBuilder(gameManager);
+		arsenalBuilder = std::make_shared<DODArsenalBuilder>();
+		botBuilder = new DODBotBuilder(gameManager, *arsenalBuilder.get());
 		enableHook = true;
 		TheNavMesh->addPlayerSpawnName("info_player_axis");
 		TheNavMesh->addPlayerSpawnName("info_player_allies");
@@ -85,9 +88,8 @@ void PluginAdaptor::gameFrame(bool simulating) {
 	while (!activationQ.IsEmpty()) {
 		edict_t* ent = activationQ.RemoveAtHead();
 		auto& players = Player::getPlayers();
-		auto i = players.Find(engine->IndexOfEdict(ent));
-		if (i == players.InvalidIndex()) {
-			new Player(ent);
+		if (players.find(engine->IndexOfEdict(ent)) == players.end()) {
+			new Player(ent, arsenalBuilder->build());
 		} else if (enableHook) {
 			hookPlayerRunCommand(ent);
 		}
@@ -109,9 +111,8 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		}
 		TheNavMesh->Update();
 	}
-	auto& players = Player::getPlayers();
-	FOR_EACH_MAP_FAST(players, i) {
-		players[i]->think();
+	for (auto player: Player::getPlayers()) {
+		player.second->think();
 	}
 }
 
@@ -121,8 +122,8 @@ void PluginAdaptor::clientDisconnect(edict_t *pEntity) {
 
 void PluginAdaptor::levelShutdown() {
 	auto& players = Player::getPlayers();
-	while(players.Count() > 0) {
-		delete players[players.FirstInorder()];
+	while(players.size() > 0) {
+		delete players.begin()->second;
 	}
 	blockers.PurgeAndDeleteElements();
 	if (gameManager != nullptr) {

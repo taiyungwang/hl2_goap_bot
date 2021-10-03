@@ -1,5 +1,6 @@
 #include "Player.h"
 
+#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
 #include <event/EventInfo.h>
@@ -8,7 +9,7 @@
 #include <iplayerinfo.h>
 #include <in_buttons.h>
 
-CUtlMap<int, Player*> Player::players;
+std::unordered_map<int, Player*> Player::players;
 
 extern IVEngineServer* engine;
 
@@ -16,18 +17,18 @@ Player* Player::getPlayer(edict_t* ent) {
 	return getPlayer(engine->IndexOfEdict(ent));
 }
 
-Player::Player(edict_t* ent) :
-		ent(ent) {
+Player::Player(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal) :
+		ent(ent), arsenal(arsenal) {
 	extern IPlayerInfoManager *playerinfomanager;
 	info = playerinfomanager->GetPlayerInfo(ent);
-	players.Insert(engine->IndexOfEdict(ent), this);
+	players[engine->IndexOfEdict(ent)] = this;
 }
 
 Player::~Player() {
 	// Cant' rely on server index for server shutting down.
-	FOR_EACH_MAP_FAST(players, i) {
-		if (players[i] == this) {
-			players.RemoveAt(i);
+	for(auto player: players) {
+		if (player.second == this) {
+			players.erase(player.first);
 			return;
 		}
 	}
@@ -58,12 +59,12 @@ void Player::think() {
 		inGame = false;
 	} else {
 		noiseRange = 0.0f;
-		arsenal.update(ent);
+		arsenal->update(ent);
 		if (BasePlayer(ent).getVelocity().Length() > 150.0f) {
 			noiseRange = 100.0f;
 		}
 		int buttons = info->GetLastUserCommand().buttons;
-		Weapon *currWeap = arsenal.getCurrWeapon();
+		Weapon *currWeap = arsenal->getCurrWeapon();
 		if (currWeap != nullptr
 				&& (((buttons & IN_ATTACK) && !currWeap->getPrimary()->isSilent())
 						|| ((buttons & IN_ATTACK2) && currWeap->getSecondary() != nullptr
@@ -105,7 +106,7 @@ bool Player::handle(EventInfo* event) {
 	// bot owns this event.
 	if (eventUserId == getUserId()) {
 		if (name == "player_spawn") {
-			arsenal.reset();
+			arsenal->reset();
 			inGame = true;
 		}
 		if (name == "player_death" && inGame) {

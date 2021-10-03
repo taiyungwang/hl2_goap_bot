@@ -7,16 +7,14 @@ class HL2DMWorld;
 
 class HL2DMBotBuilder: public BotBuilder {
 public:
-	HL2DMBotBuilder(): BotBuilder(nullptr) {
+	HL2DMBotBuilder(const ArsenalBuilder &arsenalBuilder) :
+			BotBuilder(nullptr, arsenalBuilder) {
 	}
 
 private:
+	void updatePlanner(GoalManager &planner, Blackboard &blackboard) const;
 
-	void initWeapons(WeaponBuilderFactory& factory) const;
-
-	void updatePlanner(GoalManager& planner, Blackboard& blackboard) const;
-
-	BasePlayer* buildEntity(edict_t* ent) const;
+	BasePlayer* buildEntity(edict_t *ent) const;
 
 	World* buildWorld() const;
 };

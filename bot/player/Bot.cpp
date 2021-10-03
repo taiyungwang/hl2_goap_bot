@@ -51,16 +51,16 @@ void Bot::think() {
 			if (inGame) {
 				wantToListen = true;
 				cmd.Reset();
-				int best = arsenal.getBestWeapon(*blackboard,
+				int best = arsenal->getBestWeapon(*blackboard,
 						[] (const Weapon*, Blackboard&, float) {
 					return false;
 				});
 				if (best != 0) {
-					arsenal.setBestWeaponIdx(best);
+					arsenal->setBestWeaponIdx(best);
 				}
-				int currentWeapon = arsenal.getCurrWeaponIdx();
+				int currentWeapon = arsenal->getCurrWeaponIdx();
 				if (currentWeapon > 0
-						&& arsenal.getWeapon(currentWeapon)->isOutOfAmmo(getEdict())) {
+						&& arsenal->getWeapon(currentWeapon)->isOutOfAmmo(getEdict())) {
 					world->updateState(WorldProp::USING_BEST_WEAP, false);
 				}
 				planner->execute();
@@ -87,7 +87,7 @@ void Bot::think() {
 		cmd.tick_count = gpGlobals->tickcount;
 		if (mybot_mimic.GetBool()) {
 			auto& players = Player::getPlayers();
-			cmd = players[players.Find(1)]->getInfo()->GetLastUserCommand();
+			cmd = Player::getPlayers()[1]->getInfo()->GetLastUserCommand();
 		}
 		extern IBotManager *botmanager;
 		if (!hookEnabled) {
@@ -125,12 +125,11 @@ bool Bot::handle(EventInfo* event) {
 				return false;
 			}
 			world->updateState(WorldProp::HURT, true);
-			auto& players = Player::getPlayers();
-			FOR_EACH_MAP_FAST(players, i) {
-				if (players[i]->getUserId() == attacker) {
+			for (auto player: Player::getPlayers()) {
+				if (player.second->getUserId() == attacker) {
 					wantToListen = false;
-					blackboard->setViewTarget(players[i]->getEyesPos());
-					blackboard->setTargetedPlayer(players[i]);
+					blackboard->setViewTarget(player.second->getEyesPos());
+					blackboard->setTargetedPlayer(player.second);
 					break;
 				}
 			}
@@ -169,16 +168,15 @@ public:
 	}
 
 	bool ShouldHitEntity(IHandleEntity *pHandleEntity, int contentsMask) {
-		auto& players = Player::getPlayers();
 		if (target != nullptr && pHandleEntity == target->GetIServerEntity()) {
 			return true;
 		}
 		if (pHandleEntity == self->GetIServerEntity()) {
 			return false;
 		}
-		FOR_EACH_MAP_FAST(players, i) {
-			if (!players[i]->isDead()
-					&& players[i]->getEdict()->GetIServerEntity()
+		for (auto player: Player::getPlayers()) {
+			if (!player.second->isDead()
+					&& player.second->getEdict()->GetIServerEntity()
 							== pHandleEntity) {
 				return false;
 			}
@@ -218,24 +216,23 @@ void Bot::listen() {
 	}
 	float loudest = 0.0f;
 	float closest = INFINITY;
-	auto& players = Player::getPlayers();
-	FOR_EACH_MAP_FAST(players, i) {
-		if (players[i] == this) {
+	for (auto player: Player::getPlayers()) {
+		if (player.second == this) {
 			continue;
 		}
-		Vector position = players[i]->getCurrentPosition();
-		float noiseRange = players[i]->getNoiseRange(),
+		Vector position = player.second->getCurrentPosition();
+		float noiseRange = player.second->getNoiseRange(),
 				dist = getCurrentPosition().DistTo(position) < noiseRange;
 		int team = getTeam();
-		if ((team < 1 || team != players[i]->getTeam() || dist > 100.0f)
+		if ((team < 1 || team != player.second->getTeam() || dist > 100.0f)
 				&& dist < noiseRange) {
 			position.z += 31.0f; // center mass
 			if ((noiseRange > loudest
 					|| (noiseRange == loudest && dist < closest))
-					&& canSee(position, players[i]->getEdict())) {
+					&& canSee(position, player.second->getEdict())) {
 				loudest = noiseRange;
 				closest = dist;
-				blackboard->setViewTarget(players[i]->getEyesPos());
+				blackboard->setViewTarget(player.second->getEyesPos());
 			}
 		}
 	}

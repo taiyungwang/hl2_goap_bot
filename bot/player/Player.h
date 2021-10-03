@@ -8,29 +8,28 @@
 #define UTILS_MYBOT_PLAYER_H_
 
 #include <event/EventHandler.h>
-#include <weapon/Arsenal.h>
-#include <utlmap.h>
+#include <unordered_map>
+#include <memory>
 
 class IPlayerInfo;
 class Vector;
+class Arsenal;
 class QAngle;
 struct edict_t;
 
 class Player: public EventHandler {
 public:
-	static CUtlMap<int, Player*>& getPlayers() {
+	static std::unordered_map<int, Player*>& getPlayers() {
 		return players;
 	}
-
-	static Player* build(edict_t* ent);
 
 	static Player* getPlayer(edict_t* ent);
 
 	static Player* getPlayer(int idx) {
-		return players[players.Find(idx)];
+		return players[idx];
 	}
 
-	Player(edict_t* ent);
+	Player(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal);
 
 	virtual ~Player();
 
@@ -72,7 +71,7 @@ public:
 	}
 
 	Arsenal& getArsenal() {
-		return arsenal;
+		return *arsenal.get();
 	}
 
 	virtual bool handle(EventInfo* event);
@@ -82,9 +81,9 @@ public:
 	}
 
 protected:
-	static CUtlMap<int, Player*> players;
+	static std::unordered_map<int, Player*> players;
 
-	Arsenal arsenal;
+	std::shared_ptr<Arsenal> arsenal;
 
 	bool inGame = false;
 

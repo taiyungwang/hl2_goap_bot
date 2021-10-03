@@ -7,17 +7,7 @@
 #include <mods/dod/goap/action/DODBombTargetAction.h>
 #include <mods/dod/goap/action/DODDefendPointAction.h>
 #include <mods/dod/goap/action/DODUseFragGrenadeAction.h>
-#include <mods/dod/weapon/DODSMGBuilder.h>
-#include <mods/dod/weapon/DODAssaultRifleBuilder.h>
-#include <mods/dod/weapon/DODMGBuilder.h>
-#include <mods/dod/weapon/DODMGDeployer.h>
-#include <mods/dod/weapon/DODFragGrenadeFunction.h>
 #include <mods/dod/util/DodPlayer.h>
-#include <weapon/PistolBuilder.h>
-#include <weapon/WeaponBuilderFactory.h>
-#include <weapon/SimpleWeaponBuilder.h>
-#include <weapon/MeleeWeaponBuilder.h>
-#include <weapon/UtilityToolBuilder.h>
 #include <player/Bot.h>
 #include <player/Blackboard.h>
 #include <move/Navigator.h>
@@ -34,7 +24,8 @@ static const char *CLASSES[2][CLASS_COUNT] { { "cls_garand", "cls_tommy",
 		"cls_bar", "cls_spring", "cls_30cal", "cls_bazooka" }, { "cls_mk98",
 		"cls_mp40", "cls_mp44", "cls_k98s", "cls_mg42", "cls_pschreck" } };
 
-DODBotBuilder::DODBotBuilder(GameManager* objectives): BotBuilder(objectives) {
+DODBotBuilder::DODBotBuilder(GameManager* objectives,
+		const ArsenalBuilder& arsenalBuilder): BotBuilder(objectives, arsenalBuilder) {
 	Bot::setClasses(&CLASSES);
 	teamPlay = true;
 }
@@ -112,93 +103,6 @@ bool DODBotBuilder::handle(EventInfo *event) {
 		return false;
 	}
 	return false;
-}
-
-void DODBotBuilder::initWeapons(WeaponBuilderFactory &weaponFac) const {
-	class GrenadeLauncherBuilder: public SimpleWeaponBuilder<GrenadeLauncherFunction> {
-	public:
-		GrenadeLauncherBuilder(float zMultiplier) :
-				zMultiplier(zMultiplier) {
-		}
-
-		std::shared_ptr<Weapon> build(edict_t* weap) const {
-			auto weapon =
-					SimpleWeaponBuilder<GrenadeLauncherFunction>::build(weap);
-			weapon->setGrenade(true);
-			dynamic_cast<GrenadeLauncherFunction*>(weapon->getPrimary())->setZMultiplier(
-					zMultiplier);
-			weapon->getPrimary()->getRange()[1] = 1200.0f;
-			return weapon;
-		}
-
-	private:
-		float zMultiplier;
-	};
-
-	class AntiTankBuilder: public DeployableWeaponBuilder<Reloader> {
-	public:
-		AntiTankBuilder() :
-				DeployableWeaponBuilder<Reloader>(0.9f, 500.0f, 2000.0f,
-						"CDODBaseRocketWeapon", "m_bDeployed") {
-		}
-
-		std::shared_ptr<Weapon> build(edict_t* weap) const {
-			auto weapon = DeployableWeaponBuilder<Reloader>::build(weap);
-			weapon->getPrimary()->setExplosive(true);
-			return weapon;
-		}
-	};
-
-	class C96Builder: public PistolBuilder {
-	public:
-		C96Builder() :
-				PistolBuilder(0.2f) {
-		}
-
-		std::shared_ptr<Weapon> build(edict_t* weap) const {
-			auto weapon = PistolBuilder::build(weap);
-			weapon->getPrimary()->setFullAuto(true);
-			return weapon;
-		}
-	};
-	weaponFac.addInstance("weapon_riflegren_us",
-			new GrenadeLauncherBuilder(2.0f));
-	weaponFac.addInstance("weapon_riflegren_ger",
-			new GrenadeLauncherBuilder(2.0f));
-	weaponFac.addInstance("weapon_amerknife", new MeleeWeaponBuilder());
-	weaponFac.addInstance("weapon_spade", new MeleeWeaponBuilder());
-	weaponFac.addInstance("weapon_garand",
-			new DeployableWeaponBuilder<Reloader>(0.8f, 100.0f, 1600.0f,
-					"CWeaponGarand", "m_bZoomed", 1000.0f));
-	weaponFac.addInstance("weapon_k98",
-			new DeployableWeaponBuilder<Reloader>(0.8f, 100.0f, 1600.0f,
-					"CWeaponK98", "m_bZoomed", 1000.0f));
-	weaponFac.addInstance("weapon_thompson", new DODSMGBuilder());
-	weaponFac.addInstance("weapon_mp40", new DODSMGBuilder());
-	weaponFac.addInstance("weapon_colt", new PistolBuilder(0.2f));
-	weaponFac.addInstance("weapon_p38", new PistolBuilder(0.2f));
-	weaponFac.addInstance("weapon_smoke_us",
-			new GrenadeLauncherBuilder(400.0f));
-	weaponFac.addInstance("weapon_smoke_ger",
-			new GrenadeLauncherBuilder(400.0f));
-	weaponFac.addInstance("weapon_frag_us", new GrenadeLauncherBuilder(600.0f));
-	weaponFac.addInstance("weapon_frag_ger",
-			new GrenadeLauncherBuilder(600.0f));
-	weaponFac.addInstance("weapon_bar", new DODAssaultRifleBuilder());
-	weaponFac.addInstance("weapon_mp44", new DODAssaultRifleBuilder());
-	weaponFac.addInstance("weapon_spring",
-			new DeployableWeaponBuilder<Reloader>(0.8f, 500.0f, 3600.0f,
-					"CDODSniperWeapon", "m_bZoomed"));
-	weaponFac.addInstance("weapon_k98_scoped",
-			new DeployableWeaponBuilder<Reloader>(0.8f, 500.0f, 3600.0f,
-					"CDODSniperWeapon", "m_bZoomed"));
-	weaponFac.addInstance("weapon_mg42", new DODMGBuilder());
-	weaponFac.addInstance("weapon_30cal", new DODMGBuilder());
-	weaponFac.addInstance("weapon_pschreck", new AntiTankBuilder());
-	weaponFac.addInstance("weapon_bazooka", new AntiTankBuilder());
-	weaponFac.addInstance("weapon_m1carbine", new PistolBuilder(0.4f));
-	weaponFac.addInstance("weapon_c96", new C96Builder());
-	weaponFac.addInstance("weapon_basebomb", new UtilityToolBuilder());
 }
 
 World* DODBotBuilder::buildWorld() const {

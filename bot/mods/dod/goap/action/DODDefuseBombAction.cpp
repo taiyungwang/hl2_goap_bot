@@ -52,12 +52,11 @@ bool DODDefuseBombAction::isAvailable(edict_t* ent) {
 	if (!CapturePointAction::isAvailable(ent)) {
 		return false;
 	}
-	auto& players = Player::getPlayers();
-	FOR_EACH_MAP_FAST(players, i) {
-		if (players[i] != blackboard.getSelf()
-				&& players[i]->getTeam() == blackboard.getSelf()->getTeam()
-				&& players[i]->getCurrentPosition().DistTo(ent->GetCollideable()->GetCollisionOrigin()) < 100.0f) {
-			if (DodPlayer(players[i]->getEdict()).isDefusing()) {
+	for (auto player: Player::getPlayers()) {
+		if (player.second != blackboard.getSelf()
+				&& player.second->getTeam() == blackboard.getSelf()->getTeam()
+				&& player.second->getCurrentPosition().DistTo(ent->GetCollideable()->GetCollisionOrigin()) < 100.0f) {
+			if (DodPlayer(player.second->getEdict()).isDefusing()) {
 				return false;
 			}
 		}

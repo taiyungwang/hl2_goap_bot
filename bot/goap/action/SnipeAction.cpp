@@ -4,6 +4,7 @@
 #include <player/Buttons.h>
 #include <player/Bot.h>
 #include <player/HidingSpotSelector.h>
+#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <weapon/Deployer.h>
 #include <nav_mesh/nav_mesh.h>

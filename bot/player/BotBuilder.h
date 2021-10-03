@@ -9,15 +9,15 @@ class Bot;
 class BasePlayer;
 class Player;
 class GoalManager;
-class WeaponBuilderFactory;
 class World;
 class HidingSpotSelector;
+class ArsenalBuilder;
 struct edict_t;
 
 class BotBuilder: public ICommandCallback {
 public:
 
-	BotBuilder(GameManager* objectives);
+	BotBuilder(GameManager* objectives, const ArsenalBuilder& arsenalBuilder);
 
 	virtual ~BotBuilder();
 
@@ -36,8 +36,6 @@ protected:
 
 	bool teamPlay = false;
 
-	virtual void initWeapons(WeaponBuilderFactory& factory) const = 0;
-
 	virtual void updatePlanner(GoalManager& planner,
 			Blackboard& blackboard) const = 0;
 
@@ -49,6 +47,8 @@ protected:
 	}
 
 private:
+	const ArsenalBuilder& arsenalBuilder;
+
 	typedef void (BotBuilder::*CmdFuncPtr)(const CCommand &command) const;
 
 	HidingSpotSelector* hidingSpotSelector = nullptr;

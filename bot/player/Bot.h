@@ -11,7 +11,6 @@ class GoalManager;
 class Action;
 class BasePlayer;
 class Goal;
-class Arsenal;
 class World;
 class CBotCmd;
 class CGameTrace;
@@ -25,7 +24,8 @@ public:
 		CLASSES = options;
 	}
 
-	Bot(edict_t* ent): Player(ent) {
+	Bot(edict_t *ent, const std::shared_ptr<Arsenal> &arsenal) :
+			Player(ent, arsenal) {
 	}
 
 	~Bot();

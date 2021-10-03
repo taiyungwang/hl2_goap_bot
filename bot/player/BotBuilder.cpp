@@ -13,11 +13,14 @@
 #include <goap/action/SwitchToBestLoadedWeaponAction.h>
 #include <goap/action/SwitchWeaponAction.h>
 #include <goap/GoalManager.h>
+#include <weapon/ArsenalBuilder.h>
 #include <util/BasePlayer.h>
 
 extern IVEngineServer* engine;
 
-BotBuilder::BotBuilder(GameManager* objectives): objectives(objectives) {
+BotBuilder::BotBuilder(GameManager* objectives,
+		const ArsenalBuilder& arsenalBuilder): objectives(objectives),
+		arsenalBuilder(arsenalBuilder) {
 	addCommand("mybot_add_bot", "Add a bot to the server", &BotBuilder::addBot);
 	addCommand("mybot_add_all_bots", "Fill server with bots", &BotBuilder::addAllBots);
 	addCommand("mybot_kick_all_bots", "Kicks all bots", &BotBuilder::kickAllBots);
@@ -58,20 +61,18 @@ void BotBuilder::addBot(const CCommand &command) const {
 }
 
 void BotBuilder::kickAllBots(const CCommand &command) const {
-	auto& players = Player::getPlayers();
-	FOR_EACH_MAP_FAST(players, i) {
-		if (dynamic_cast<Bot*>(players[i]) != nullptr) {
-			engine->ServerCommand((CUtlString("kickid ") + players[i]->getUserId() + "\n").Get());
+	for (auto player : Player::getPlayers()) {
+		if (dynamic_cast<Bot*>(player.second) != nullptr) {
+			engine->ServerCommand((CUtlString("kickid ") + player.second->getUserId() + "\n").Get());
 		}
 	}
 }
 
 void BotBuilder::kickAllExcept(const CCommand &command) const {
-	auto& players = Player::getPlayers();
-	FOR_EACH_MAP_FAST(players, i) {
-		if (dynamic_cast<Bot*>(players[i]) != nullptr
-				&& CUtlString(players[i]->getName()) != command.Arg(1)) {
-			engine->ServerCommand((CUtlString("kickid ") + players[i]->getUserId() + "\n").Get());
+	for (auto player : Player::getPlayers()) {
+		if (dynamic_cast<Bot*>(player.second) != nullptr
+				&& CUtlString(player.second->getName()) != command.Arg(1)) {
+			engine->ServerCommand((CUtlString("kickid ") + player.second->getUserId() + "\n").Get());
 		}
 	}
 }
@@ -90,7 +91,7 @@ public:
 };
 
 Bot* BotBuilder::build(edict_t* ent) const {
-	Bot* bot = new Bot(ent);
+	Bot* bot = new Bot(ent, arsenalBuilder.build());
 	Blackboard *blackboard = new Blackboard(bot, buildEntity(ent));
 	blackboard->setNavigator(new Navigator(*blackboard));
 	bot->setBlackboard(blackboard);
@@ -109,7 +110,6 @@ Bot* BotBuilder::build(edict_t* ent) const {
 	planner->addAction<SwitchToBestInRangeWeaponAction>(0.0f);
 	updatePlanner(*planner, *blackboard);
 	bot->setPlanner(planner);
-	initWeapons(bot->getArsenal().getWeaponFactory());
 	return bot;
 }
 

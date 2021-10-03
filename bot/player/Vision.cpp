@@ -26,9 +26,8 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 		float dist;
 	};
 	CUtlVector<Visible> visibles;
-	const auto& players = Player::getPlayers();
-	FOR_EACH_MAP_FAST(players, i) {
-		auto* target = players[i];
+	for (auto player: Player::getPlayers()) {
+		auto* target = player.second;
 		if (target == self || target->isDead()
 				|| (team > 0 && team == target->getTeam())) {
 			continue;

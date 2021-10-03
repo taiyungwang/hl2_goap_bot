@@ -1,6 +1,5 @@
 #pragma once
 
-#include "WeaponBuilderFactory.h"
 #include <goap/WorldCond.h>
 
 #include <unordered_map>
@@ -8,13 +7,18 @@
 
 class Weapon;
 class Blackboard;
+class WeaponBuilder;
 struct edict_t;
 
+
 typedef bool (*WeaponFilter)(const Weapon*, Blackboard& blackboard, float dist);
+typedef std::unordered_map<std::string, std::shared_ptr<WeaponBuilder>> WeaponBuilders;
 
 class Arsenal {
 public:
-	Arsenal();
+	Arsenal(const WeaponBuilders& builders) : builders(builders) {
+		reset();
+	}
 
 	~Arsenal() {
 		reset();
@@ -72,14 +76,10 @@ public:
 		this->bestWeapIdx = bestWeapon;
 	}
 
-	WeaponBuilderFactory& getWeaponFactory() {
-		return factory;
-	}
-
 private:
 	int currWeapIdx, bestWeapIdx, desiredWeapIdx = 0;
 
 	std::unordered_map<int, std::shared_ptr<Weapon>> weapons;
 
-	WeaponBuilderFactory factory;
+	const WeaponBuilders& builders;
 };

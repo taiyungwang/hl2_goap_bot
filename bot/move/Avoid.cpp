@@ -68,9 +68,9 @@ MoveState* Avoid::move(const Vector& pos) {
 			} else {
 				int idx = engine->IndexOfEdict(blocker);
 				if (idx <= gpGlobals->maxClients) {
-					auto i = players.Find(idx);
-					if (team < 2|| (players.IsValidIndex(i)
-							&& players[i]->getTeam() != blackboard.getSelf()->getTeam())) {
+					auto player = players.find(idx);
+					if (team < 2 || (player != players.end()
+							&& player->second->getTeam() != blackboard.getSelf()->getTeam())) {
 						blackboard.setBlocker(blocker);
 					}
 				}

@@ -2,6 +2,7 @@
 
 #include "Blackboard.h"
 #include "Bot.h"
+#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <util/BaseEntity.h>
 #include <eiface.h>
@@ -45,13 +46,13 @@ bool World::think(Blackboard& blackboard) {
 		} else if (blocker != nullptr) {
 			extern IVEngineServer* engine;
 			auto& players = Player::getPlayers();
-			auto i = players.Find(engine->IndexOfEdict(blocker));
-			if (players.IsValidIndex(i)) {
-				if (players[i]->isDead()) {
+			auto player = players.find(engine->IndexOfEdict(blocker));
+			if (player != players.end()) {
+				if (player->second->isDead()) {
 					blackboard.setBlocker(nullptr);
 				} else {
 					self->setWantToListen(false);
-					blackboard.setViewTarget(players[i]->getEyesPos());
+					blackboard.setViewTarget(player->second->getEyesPos());
 				}
 			} else {
 				blackboard.setViewTarget(blocker->GetCollideable()->GetCollisionOrigin());

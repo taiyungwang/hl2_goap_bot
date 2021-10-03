@@ -5,6 +5,7 @@
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
+#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <nav_mesh/nav_mesh.h>
 #include <nav_mesh/nav_pathfind.h>

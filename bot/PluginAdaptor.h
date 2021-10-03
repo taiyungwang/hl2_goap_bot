@@ -3,10 +3,12 @@
 #include "event/EventHandler.h"
 #include <strtools.h>
 #include <utlqueue.h>
+#include <memory>
 
 class Thinker;
 class GameManager;
 class BotBuilder;
+class ArsenalBuilder;
 struct edict_t;
 
 /**
@@ -49,6 +51,8 @@ private:
 	GameManager* gameManager = nullptr;
 
 	BotBuilder* botBuilder;
+
+	std::shared_ptr<ArsenalBuilder> arsenalBuilder;
 
 	CUtlQueue<edict_t*> activationQ;
 
