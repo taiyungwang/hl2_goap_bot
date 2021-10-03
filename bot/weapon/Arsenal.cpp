@@ -3,7 +3,6 @@
 #include "WeaponBuilder.h"
 #include "Weapon.h"
 #include "WeaponFunction.h"
-#include "WeaponBuilderFactory.h"
 #include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <util/EntityClassManager.h>
