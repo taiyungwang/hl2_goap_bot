@@ -18,9 +18,10 @@
 
 extern IVEngineServer* engine;
 
-BotBuilder::BotBuilder(GameManager* objectives,
+BotBuilder::BotBuilder(GameManager* objectives, CommandHandler& commandHandler,
 		const ArsenalBuilder& arsenalBuilder): objectives(objectives),
-		arsenalBuilder(arsenalBuilder) {
+				commandHandler(commandHandler),
+				arsenalBuilder(arsenalBuilder) {
 	addCommand("mybot_add_bot", "Add a bot to the server", &BotBuilder::addBot);
 	addCommand("mybot_add_all_bots", "Fill server with bots", &BotBuilder::addAllBots);
 	addCommand("mybot_kick_all_bots", "Kicks all bots", &BotBuilder::kickAllBots);
@@ -38,7 +39,7 @@ BotBuilder::~BotBuilder() {
 	}
 }
 
-void BotBuilder::addBot(const CCommand &command) const {
+void BotBuilder::addBot(const CCommand &command) {
 	static int botCount = 0;
 	extern IBotManager *botmanager;
 	int team = rand() % 2 + 2;
@@ -60,7 +61,7 @@ void BotBuilder::addBot(const CCommand &command) const {
 	modHandleCommand(command, build(pEdict));
 }
 
-void BotBuilder::kickAllBots(const CCommand &command) const {
+void BotBuilder::kickAllBots(const CCommand &command) {
 	for (auto player : Player::getPlayers()) {
 		if (dynamic_cast<Bot*>(player.second) != nullptr) {
 			engine->ServerCommand((CUtlString("kickid ") + player.second->getUserId() + "\n").Get());
@@ -68,7 +69,7 @@ void BotBuilder::kickAllBots(const CCommand &command) const {
 	}
 }
 
-void BotBuilder::kickAllExcept(const CCommand &command) const {
+void BotBuilder::kickAllExcept(const CCommand &command) {
 	for (auto player : Player::getPlayers()) {
 		if (dynamic_cast<Bot*>(player.second) != nullptr
 				&& CUtlString(player.second->getName()) != command.Arg(1)) {
@@ -90,8 +91,9 @@ public:
 	}
 };
 
-Bot* BotBuilder::build(edict_t* ent) const {
-	Bot* bot = new Bot(ent, arsenalBuilder.build());
+Bot* BotBuilder::build(edict_t* ent) {
+	Bot* bot = new Bot(ent, arsenalBuilder.build(), commandHandler,
+			voiceMessageSender);
 	Blackboard *blackboard = new Blackboard(bot, buildEntity(ent));
 	blackboard->setNavigator(new Navigator(*blackboard));
 	bot->setBlackboard(blackboard);
@@ -117,7 +119,7 @@ BasePlayer* BotBuilder::buildEntity(edict_t* ent) const {
 	return new BasePlayer(ent);
 }
 
-void BotBuilder::addAllBots(const CCommand &command) const {
+void BotBuilder::addAllBots(const CCommand &command) {
 	extern CGlobalVars *gpGlobals;
 	for (int i = 0; i < gpGlobals->maxClients - 2; i++) {
 		const char* team = i % 2 == 0 ? "2" : "3";

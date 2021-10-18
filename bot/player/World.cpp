@@ -2,6 +2,8 @@
 
 #include "Blackboard.h"
 #include "Bot.h"
+#include <voice/AreaClearVoiceMessage.h>
+#include <voice/VoiceMessageSender.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <util/BaseEntity.h>
@@ -20,6 +22,7 @@ void World::reset() {
 	states.Insert(WorldProp::OUT_OF_AMMO, false);
 	states.Insert(WorldProp::WEAPON_IN_RANGE, false);
 	states.Insert(WorldProp::ROUND_STARTED, roundStarted);
+	states.Insert(WorldProp::HEARD_AREA_CLEAR, roundStarted);
 	addStates();
 }
 
@@ -76,6 +79,14 @@ bool World::think(Blackboard& blackboard) {
 	updateState(WorldProp::IS_BLOCKED, blackboard.getBlocker() != nullptr);
 	// reset planner if this is first time we see enemy.
 	bool noEnemy = !enemySighted;
+	if (enemySighted && enemy == nullptr
+			&& !states[states.Find(WorldProp::HEARD_AREA_CLEAR)]) {
+		self->getVoiceMessageSender().sendMessage(std::make_shared<AreaClearVoiceMessage>(self->getEdict()));
+		updateState(WorldProp::HEARD_AREA_CLEAR, true);
+	}
 	enemySighted = enemy != nullptr;
+	if (enemySighted) {
+		updateState(WorldProp::HEARD_AREA_CLEAR, false);
+	}
 	return update(blackboard) || (noEnemy && enemySighted) || hurt;
 }

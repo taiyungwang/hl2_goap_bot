@@ -42,12 +42,12 @@ PluginAdaptor::PluginAdaptor() {
 	// TODO: make mod checking more stringent.
 	if (Q_stristr(modPath, "hl2mp")) {
 		arsenalBuilder = std::make_shared<HL2DMArsenalBuilder>();
-		botBuilder = new HL2DMBotBuilder(*arsenalBuilder.get());
+		botBuilder = new HL2DMBotBuilder(commandHandler, *arsenalBuilder.get());
 		TheNavMesh->addPlayerSpawnName("info_player_start");
 	} else if (Q_stristr(modPath, "dod")) {
 		gameManager = new DODObjectives();
 		arsenalBuilder = std::make_shared<DODArsenalBuilder>();
-		botBuilder = new DODBotBuilder(gameManager, *arsenalBuilder.get());
+		botBuilder = new DODBotBuilder(gameManager, commandHandler, *arsenalBuilder.get());
 		enableHook = true;
 		TheNavMesh->addPlayerSpawnName("info_player_axis");
 		TheNavMesh->addPlayerSpawnName("info_player_allies");

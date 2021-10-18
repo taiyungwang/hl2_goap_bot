@@ -4,8 +4,6 @@
 
 class EventInfo;
 class CUtlString;
-class EventHandler;
-
 
 class EventHandler {
 public:

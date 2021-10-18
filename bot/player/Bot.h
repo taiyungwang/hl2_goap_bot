@@ -2,6 +2,7 @@
 
 #include "Player.h"
 #include "Vision.h"
+#include "CommandHandler.h"
 #include "move/RotationManager.h"
 #include <utlvector.h>
 #include <utlqueue.h>
@@ -14,18 +15,22 @@ class Goal;
 class World;
 class CBotCmd;
 class CGameTrace;
+class VoiceMessageSender;
 
-typedef const char* (*PlayerClasses)[2][6];
+typedef const char *(*PlayerClasses)[2][6];
 
-class Bot: public Player {
+class Bot: public Player, public CommandHandler::Receiver {
 public:
 
 	static void setClasses(PlayerClasses options) {
 		CLASSES = options;
 	}
 
-	Bot(edict_t *ent, const std::shared_ptr<Arsenal> &arsenal) :
-			Player(ent, arsenal) {
+	Bot(edict_t *ent, const std::shared_ptr<Arsenal> &arsenal,
+			CommandHandler& commandHandler,
+			VoiceMessageSender &voiceMessageSender) :
+			Player(ent, arsenal), Receiver(commandHandler),
+			voiceMessageSender(voiceMessageSender) {
 	}
 
 	~Bot();
@@ -37,17 +42,19 @@ public:
 
 	void think();
 
-	void setBlackboard(Blackboard* blackboard) {
+	void setBlackboard(Blackboard *blackboard) {
 		this->blackboard = blackboard;
 	}
 
-	void setWorld(World* world);
+	void setWorld(World *world);
 
-	void setPlanner(GoalManager* planner) {
+	void setPlanner(GoalManager *planner) {
 		this->planner = planner;
 	}
 
-	bool handle(EventInfo* event);
+	bool handle(EventInfo *event);
+
+	bool receive(edict_t* sender, const CCommand&) override;
 
 	CBotCmd* getCmd() const;
 
@@ -69,24 +76,31 @@ public:
 		this->wantToListen = wantToListen;
 	}
 
-	bool canSee(const Vector &vecAbsEnd, edict_t* target) const;
+	bool canSee(const Vector &vecAbsEnd, edict_t *target) const;
 
-	bool canSee(CGameTrace& result, const Vector &vecAbsEnd, edict_t* target) const;
+	bool canSee(CGameTrace &result, const Vector &vecAbsEnd,
+			edict_t *target) const;
+
+	VoiceMessageSender& getVoiceMessageSender() {
+		return voiceMessageSender;
+	}
 
 private:
 	static PlayerClasses CLASSES;
 
+	VoiceMessageSender &voiceMessageSender;
+
 	Vision vision;
 
-	BasePlayer* playerClassVar = nullptr;
+	BasePlayer *playerClassVar = nullptr;
 
-	Blackboard* blackboard = nullptr;
+	Blackboard *blackboard = nullptr;
 
 	int desiredClassId = -1;
 
-	GoalManager* planner = nullptr;
+	GoalManager *planner = nullptr;
 
-	World* world = nullptr;
+	World *world = nullptr;
 
 	RotationManager rotation;
 

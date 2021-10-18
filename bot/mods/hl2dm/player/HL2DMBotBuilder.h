@@ -7,8 +7,8 @@ class HL2DMWorld;
 
 class HL2DMBotBuilder: public BotBuilder {
 public:
-	HL2DMBotBuilder(const ArsenalBuilder &arsenalBuilder) :
-			BotBuilder(nullptr, arsenalBuilder) {
+	HL2DMBotBuilder(CommandHandler& commandHandler, const ArsenalBuilder &arsenalBuilder) :
+			BotBuilder(nullptr, commandHandler, arsenalBuilder) {
 	}
 
 private:

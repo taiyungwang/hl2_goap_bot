@@ -1,5 +1,6 @@
 #pragma once
 
+#include <voice/VoiceMessageSender.h>
 #include <convar.h>
 #include <utlhashtable.h>
 
@@ -7,6 +8,7 @@ class GameManager;
 class Blackboard;
 class Bot;
 class BasePlayer;
+class CommandHandler;
 class Player;
 class GoalManager;
 class World;
@@ -17,7 +19,8 @@ struct edict_t;
 class BotBuilder: public ICommandCallback {
 public:
 
-	BotBuilder(GameManager* objectives, const ArsenalBuilder& arsenalBuilder);
+	BotBuilder(GameManager* objectives, CommandHandler& commandHandler,
+			const ArsenalBuilder& arsenalBuilder);
 
 	virtual ~BotBuilder();
 
@@ -36,6 +39,8 @@ protected:
 
 	bool teamPlay = false;
 
+	VoiceMessageSender voiceMessageSender;
+
 	virtual void updatePlanner(GoalManager& planner,
 			Blackboard& blackboard) const = 0;
 
@@ -49,7 +54,7 @@ protected:
 private:
 	const ArsenalBuilder& arsenalBuilder;
 
-	typedef void (BotBuilder::*CmdFuncPtr)(const CCommand &command) const;
+	typedef void (BotBuilder::*CmdFuncPtr)(const CCommand &command);
 
 	HidingSpotSelector* hidingSpotSelector = nullptr;
 
@@ -57,15 +62,17 @@ private:
 
 	CUtlLinkedList<ConCommand*> commands;
 
-	Bot* build(edict_t* ent) const;
+	CommandHandler& commandHandler;
 
-	void addAllBots(const CCommand &command) const;
+	Bot* build(edict_t* ent);
 
-	void addBot(const CCommand &command) const;
+	void addAllBots(const CCommand &command);
 
-	void kickAllBots(const CCommand &command) const;
+	void addBot(const CCommand &command);
 
-	void kickAllExcept(const CCommand &command) const;
+	void kickAllBots(const CCommand &command);
+
+	void kickAllExcept(const CCommand &command);
 
 	void addCommand(const char* name, const char* description, CmdFuncPtr ptr);
 };

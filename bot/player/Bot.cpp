@@ -8,6 +8,8 @@
 #include <goap/GoalManager.h>
 #include <move/Navigator.h>
 #include <move/RotationManager.h>
+#include <voice/AreaClearVoiceMessage.h>
+#include <voice/VoiceMessageSender.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <nav_mesh/nav_area.h>
@@ -145,6 +147,16 @@ bool Bot::handle(EventInfo* event) {
 	return false;
 }
 
+bool Bot::receive(edict_t* sender, const CCommand& command) {
+	Player *player = getPlayer(sender);
+	if (player->getTeam() == getTeam()
+			&& canSee(player->getEyesPos(), player->getEdict())
+			&& std::string(command.Arg(0)) == voiceMessageSender.getMessage<AreaClearVoiceMessage>()) {
+		world->updateState(WorldProp::HEARD_AREA_CLEAR, true);
+	}
+	return false;
+}
+
 void Bot::setWorld(World* world) {
 	this->world = world;
 }
@@ -224,7 +236,7 @@ void Bot::listen() {
 		float noiseRange = player.second->getNoiseRange(),
 				dist = getCurrentPosition().DistTo(position) < noiseRange;
 		int team = getTeam();
-		if ((team < 1 || team != player.second->getTeam() || dist > 100.0f)
+		if ((team < 1 || team != player.second->getTeam() || dist > 300.0f)
 				&& dist < noiseRange) {
 			position.z += 31.0f; // center mass
 			if ((noiseRange > loudest

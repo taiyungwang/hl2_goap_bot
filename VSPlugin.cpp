@@ -144,6 +144,12 @@ void VSPlugin::Unload(void) {
 	DisconnectTier2Libraries();
 }
 
+PLUGIN_RESULT VSPlugin::ClientCommand(edict_t *pEntity,
+		const CCommand &args) {
+	adaptor->clientCommand(pEntity, args);
+	return PLUGIN_CONTINUE;
+}
+
 void VSPlugin::FireGameEvent(IGameEvent *event) {
 	adaptor->handEvent(event);
 }

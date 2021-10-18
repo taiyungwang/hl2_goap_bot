@@ -1,6 +1,7 @@
 #pragma once
 
 #include "event/EventHandler.h"
+#include "player/CommandHandler.h"
 #include <strtools.h>
 #include <utlqueue.h>
 #include <memory>
@@ -9,6 +10,7 @@ class Thinker;
 class GameManager;
 class BotBuilder;
 class ArsenalBuilder;
+class VoiceCommand;
 struct edict_t;
 
 /**
@@ -45,14 +47,22 @@ public:
 
 	bool handle(EventInfo* event);
 
+	void clientCommand(edict_t* player, const CCommand& command) {
+		commandHandler.handle(player, command);
+	}
+
 private:
 	bool enableHook = false;
 
 	GameManager* gameManager = nullptr;
 
+	CommandHandler commandHandler;
+
 	BotBuilder* botBuilder;
 
 	std::shared_ptr<ArsenalBuilder> arsenalBuilder;
+
+	std::shared_ptr<VoiceCommand> voiceCommand;
 
 	CUtlQueue<edict_t*> activationQ;
 

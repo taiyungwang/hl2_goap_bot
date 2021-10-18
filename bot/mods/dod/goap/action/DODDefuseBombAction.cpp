@@ -5,6 +5,8 @@
 #include <mods/dod/util/DodPlayer.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
+#include <voice/NeedBackupVoiceMessage.h>
+#include <voice/VoiceMessageSender.h>
 #include <nav_mesh/nav.h>
 #include <util/UtilTrace.h>
 #include <in_buttons.h>
@@ -37,11 +39,13 @@ bool DODDefuseBombAction::execute() {
 		return true;
 	}
 	interruptable = false;
+	Bot *self = blackboard.getSelf();
+	self->getVoiceMessageSender().sendMessage(std::make_shared<NeedBackupVoiceMessage>(self->getEdict()));
 	blackboard.getButtons().hold(IN_USE);
 	Vector itemPos = UTIL_FindGround(
 				item->GetCollideable()->GetCollisionOrigin());
 	itemPos.z += HumanEyeHeight - 15.0f;
-	if (blackboard.getSelf()->getEyesPos().z - itemPos.z > 10.0f) {
+	if (self->getEyesPos().z - itemPos.z > 10.0f) {
 		blackboard.getButtons().hold(IN_DUCK);
 	}
 	blackboard.setViewTarget(itemPos);

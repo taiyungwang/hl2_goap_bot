@@ -10,5 +10,5 @@ public:
 					"CDODFireSelectWeapon", "m_bSemiAuto", 1000.0f) {
 	}
 
-	std::shared_ptr<Weapon> build(edict_t* weap) const;
+	std::shared_ptr<Weapon> build(edict_t* weap) const override;
 };

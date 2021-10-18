@@ -1,15 +1,17 @@
 #include "DODBotBuilder.h"
 
 #include "DODWorld.h"
-#include <event/EventHandler.h>
-#include <event/EventInfo.h>
-#include <goap/action/AttackAction.h>
 #include <mods/dod/goap/action/DODBombTargetAction.h>
 #include <mods/dod/goap/action/DODDefendPointAction.h>
 #include <mods/dod/goap/action/DODUseFragGrenadeAction.h>
+#include <mods/dod/voice/DODVoiceMessage.h>
 #include <mods/dod/util/DodPlayer.h>
+#include <event/EventHandler.h>
+#include <event/EventInfo.h>
+#include <goap/action/AttackAction.h>
 #include <player/Bot.h>
 #include <player/Blackboard.h>
+#include <voice/AreaClearVoiceMessage.h>
 #include <move/Navigator.h>
 #include <util/EntityClassManager.h>
 #include <util/EntityClass.h>
@@ -24,10 +26,22 @@ static const char *CLASSES[2][CLASS_COUNT] { { "cls_garand", "cls_tommy",
 		"cls_bar", "cls_spring", "cls_30cal", "cls_bazooka" }, { "cls_mk98",
 		"cls_mp40", "cls_mp44", "cls_k98s", "cls_mg42", "cls_pschreck" } };
 
-DODBotBuilder::DODBotBuilder(GameManager* objectives,
-		const ArsenalBuilder& arsenalBuilder): BotBuilder(objectives, arsenalBuilder) {
+class FireInTheHole: public VoiceMessage {
+public:
+	FireInTheHole(edict_t *sender) :
+			VoiceMessage(sender) {
+
+	}
+};
+
+DODBotBuilder::DODBotBuilder(GameManager *objectives,
+		CommandHandler &commandHandler, const ArsenalBuilder &arsenalBuilder) :
+		BotBuilder(objectives, commandHandler, arsenalBuilder) {
 	Bot::setClasses(&CLASSES);
 	teamPlay = true;
+	voiceMessageSender.addMessage<AreaClearVoiceMessage>("voice_areaclear");
+	voiceMessageSender.addMessage<NeedBackupVoiceMessage>("voice_backup");
+	voiceMessageSender.addMessage<DODVoiceMessage::FireInTheHole>("voice_fireinhole");
 }
 
 void DODBotBuilder::updatePlanner(GoalManager &planner,

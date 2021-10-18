@@ -53,10 +53,10 @@ public:
 		// store client info
 		return PLUGIN_CONTINUE;
 	}
+
 	virtual PLUGIN_RESULT ClientCommand(edict_t *pEntity,
-			const CCommand &args) {
-		return PLUGIN_CONTINUE;
-	}
+			const CCommand &args);
+
 	virtual PLUGIN_RESULT NetworkIDValidated(const char *pszUserName,
 			const char *pszNetworkID) {
 		return PLUGIN_CONTINUE;
@@ -65,8 +65,10 @@ public:
 			edict_t *pPlayerEntity, EQueryCvarValueStatus eStatus,
 			const char *pCvarName, const char *pCvarValue) {
 	}
+
 	virtual void OnEdictAllocated(edict_t *edict) {
 	}
+
 	virtual void OnEdictFreed(const edict_t *edict) {
 	}
 

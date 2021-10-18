@@ -9,7 +9,8 @@ class HL2DMWorld;
 
 class DODBotBuilder: public BotBuilder, public EventHandler {
 public:
-	DODBotBuilder(GameManager* objectives, const ArsenalBuilder& arsenalBuilder);
+	DODBotBuilder(GameManager* objectives, CommandHandler& commandHandler,
+			const ArsenalBuilder& arsenalBuilder);
 
 	bool handle(EventInfo* event);
 
