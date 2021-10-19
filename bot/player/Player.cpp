@@ -50,14 +50,11 @@ const char* Player::getWeaponName() const {
 	return info->GetWeaponName();
 }
 
-bool Player::isDead() const {
-	return ent->IsFree() || info->IsDead() || info->GetHealth() <= 0;
-}
-
 void Player::think() {
-	if (isDead()) {
+	if (inGame && (ent->IsFree() || info->IsDead() || info->GetHealth() <= 0)) {
 		inGame = false;
-	} else {
+	}
+	if (inGame) {
 		noiseRange = 0.0f;
 		arsenal->update(ent);
 		if (BasePlayer(ent).getVelocity().Length() > 150.0f) {

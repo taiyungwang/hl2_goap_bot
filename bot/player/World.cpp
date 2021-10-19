@@ -51,7 +51,7 @@ bool World::think(Blackboard& blackboard) {
 			auto& players = Player::getPlayers();
 			auto player = players.find(engine->IndexOfEdict(blocker));
 			if (player != players.end()) {
-				if (player->second->isDead()) {
+				if (!player->second->isInGame()) {
 					blackboard.setBlocker(nullptr);
 				} else {
 					self->setWantToListen(false);

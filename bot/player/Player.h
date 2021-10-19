@@ -49,8 +49,6 @@ public:
 
 	int getUserId() const;
 
-	bool isDead() const;
-
 	Vector getEyesPos() const;
 
 	int getArmor() const;
@@ -78,6 +76,10 @@ public:
 
 	float getNoiseRange() const {
 		return noiseRange;
+	}
+
+	bool isInGame() const {
+		return inGame;
 	}
 
 protected:

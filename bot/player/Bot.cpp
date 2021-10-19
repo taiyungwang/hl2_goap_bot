@@ -38,50 +38,44 @@ void Bot::think() {
 	try {
 		Player::think();
 		CBotCmd& cmd = blackboard->getCmd();
-		if (isDead()) {
-			despawn();
-		} else if (getPlayerClass() != desiredClassId) {
+		if (getPlayerClass() != desiredClassId) {
 			extern IServerPluginHelpers* helpers;
 			helpers->ClientCommand(getEdict(), (*CLASSES)[getTeam() - 2][desiredClassId]);
-		} else {
+		} else if (inGame) {
 			if ((resetPlanner || world->think(*blackboard))
 					&& !blackboard->isOnLadder()) {
 				planner->resetPlanning(false);
 				resetPlanner = false;
 			}
 			vision.updateVisiblity(*blackboard);
-			if (inGame) {
-				wantToListen = true;
-				cmd.Reset();
-				int best = arsenal->getBestWeapon(*blackboard,
-						[] (const Weapon*, Blackboard&, float) {
-					return false;
-				});
-				if (best != 0) {
-					arsenal->setBestWeaponIdx(best);
-				}
-				int currentWeapon = arsenal->getCurrWeaponIdx();
-				if (currentWeapon > 0
-						&& arsenal->getWeapon(currentWeapon)->isOutOfAmmo(getEdict())) {
-					world->updateState(WorldProp::USING_BEST_WEAP, false);
-				}
-				planner->execute();
-				listen();
-				extern ConVar mybot_debug;
-				if (mybot_debug.GetBool()) {
-					extern IVDebugOverlay *debugoverlay;
-					debugoverlay->AddLineOverlay(getEyesPos(), blackboard->getViewTarget(), 0,
-							255, 0, true,
-							NDEBUG_PERSIST_TILL_NEXT_SERVER);
-				}
-				VectorAngles(blackboard->getViewTarget() - getEyesPos(), cmd.viewangles);
-				rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle(),
-						mybot_rot_speed.GetFloat());
-				if (cmd.weaponselect != 0) {
-					world->updateState(WorldProp::USING_BEST_WEAP, true);
-				}
-			} else {
-				blackboard->getButtons().tap(IN_ATTACK);
+			wantToListen = true;
+			cmd.Reset();
+			int best = arsenal->getBestWeapon(*blackboard,
+					[] (const Weapon*, Blackboard&, float) {
+				return false;
+			});
+			if (best != 0) {
+				arsenal->setBestWeaponIdx(best);
+			}
+			int currentWeapon = arsenal->getCurrWeaponIdx();
+			if (currentWeapon > 0
+					&& arsenal->getWeapon(currentWeapon)->isOutOfAmmo(getEdict())) {
+				world->updateState(WorldProp::USING_BEST_WEAP, false);
+			}
+			planner->execute();
+			listen();
+			extern ConVar mybot_debug;
+			if (mybot_debug.GetBool()) {
+				extern IVDebugOverlay *debugoverlay;
+				debugoverlay->AddLineOverlay(getEyesPos(), blackboard->getViewTarget(), 0,
+						255, 0, true,
+						NDEBUG_PERSIST_TILL_NEXT_SERVER);
+			}
+			VectorAngles(blackboard->getViewTarget() - getEyesPos(), cmd.viewangles);
+			rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle(),
+					mybot_rot_speed.GetFloat());
+			if (cmd.weaponselect != 0) {
+				world->updateState(WorldProp::USING_BEST_WEAP, true);
 			}
 		}
 		cmd.buttons = blackboard->getButtons().getPressed();
@@ -107,7 +101,6 @@ bool Bot::handle(EventInfo* event) {
 	// bot owns this event.
 	if (eventUserId == getUserId()) {
 		if (name == "player_spawn") {
-			despawn();
 			CNavArea* area = blackboard->getNavigator()->getLastArea();
 			if (area != nullptr) {
 				area->IncreaseDanger(getTeam(), 1.0f);
@@ -118,7 +111,8 @@ bool Bot::handle(EventInfo* event) {
 			return true;
 		}
 		if (name == "player_death") {
-			despawn();
+			planner->resetPlanning(true);
+			blackboard->getButtons().tap(IN_ATTACK);
 			return false;
 		}
 		if (name == "player_hurt") {
@@ -187,7 +181,7 @@ public:
 			return false;
 		}
 		for (auto player: Player::getPlayers()) {
-			if (!player.second->isDead()
+			if (player.second->isInGame()
 					&& player.second->getEdict()->GetIServerEntity()
 							== pHandleEntity) {
 				return false;
@@ -215,11 +209,6 @@ bool Bot::canSee(trace_t& result, const Vector &vecAbsEnd, edict_t* target) cons
 bool Bot::canSee(const Vector &vecAbsEnd, edict_t* target) const {
 	trace_t result;
 	return canSee(result, vecAbsEnd, target);
-}
-
-void Bot::despawn() {
-	planner->resetPlanning(true);
-	blackboard->getButtons().tap(IN_ATTACK);
 }
 
 void Bot::listen() {

@@ -17,7 +17,7 @@ bool KillAction::precondCheck() {
 
 bool KillAction::targetDestroyed() const {
 	return blackboard.getTargetedPlayer() == nullptr
-			|| blackboard.getTargetedPlayer()->isDead();
+			|| !blackboard.getTargetedPlayer()->isInGame();
 }
 
 edict_t* KillAction::getTargetedEdict() const {

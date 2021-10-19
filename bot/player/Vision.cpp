@@ -28,7 +28,7 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 	CUtlVector<Visible> visibles;
 	for (auto player: Player::getPlayers()) {
 		auto* target = player.second;
-		if (target == self || target->isDead()
+		if (target == self || !target->isInGame()
 				|| (team > 0 && team == target->getTeam())) {
 			continue;
 		}
@@ -98,7 +98,7 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 	}
 	if (blackboard.getTargetedPlayer() != nullptr) {
 		memoryDur = 60;
-	} else if (lastTarget != nullptr && !lastTarget->isDead()) {
+	} else if (lastTarget != nullptr && lastTarget->isInGame()) {
 		memoryDur--;
 		if (memoryDur > 0) {
 			self->setWantToListen(false);

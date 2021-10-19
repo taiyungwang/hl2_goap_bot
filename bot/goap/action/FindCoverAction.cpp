@@ -73,7 +73,7 @@ void FindCoverAction::PostSearch(void) {
 
 edict_t* FindCoverAction::getTarget() const {
 	auto targetPlayer = blackboard.getTargetedPlayer();
-	return targetPlayer == nullptr || targetPlayer->isDead() ? nullptr : targetPlayer->getEdict();
+	return targetPlayer == nullptr || !targetPlayer->isInGame() ? nullptr : targetPlayer->getEdict();
 }
 
 

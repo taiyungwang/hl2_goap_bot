@@ -106,7 +106,5 @@ private:
 
 	bool hookEnabled = false, resetPlanner = false, wantToListen = true;
 
-	void despawn();
-
 	void listen();
 };

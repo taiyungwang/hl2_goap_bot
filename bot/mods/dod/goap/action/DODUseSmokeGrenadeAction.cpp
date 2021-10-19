@@ -8,7 +8,7 @@
 
 bool DODUseSmokeGrenadeAction::precondCheck() {
 	auto target = blackboard.getTargetedPlayer();
-	return target != nullptr && !target->getEdict()->IsFree() && !target->isDead()
+	return target != nullptr && !target->getEdict()->IsFree() && target->isInGame()
 			&& UseSpecificWeaponAction::precondCheck()
 			&& arsenal.getWeapon(weapIdx) != nullptr
 			&& arsenal.getWeapon(weapIdx)->isInRange(target->getCurrentPosition().DistTo(blackboard.getSelf()->getCurrentPosition()));

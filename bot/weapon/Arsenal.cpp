@@ -68,11 +68,11 @@ void Arsenal::update(edict_t* self) {
 		}
 		if (weapons.find(entIdx) == weapons.end()) {
 			const char* weapName = weaponEnt->GetClassName();
-			const WeaponBuilder* builder = builders.at(weapName).get();
-			if (builder == nullptr) {
+			if (builders.find(weapName) == builders.end()) {
 				Warning("Weapon is not registered: %s.\n", weapName);
 				continue;
 			}
+			const WeaponBuilder* builder = builders.at(weapName).get();
 			weapons[entIdx] = builder->build(weaponEnt);
 		}
 		if (weapState == WEAPON_IS_ACTIVE) {

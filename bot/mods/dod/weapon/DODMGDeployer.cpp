@@ -38,7 +38,7 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 		edict_t* selfEnt = blackboard.getSelf()->getEdict();
 		if (DodPlayer(selfEnt).isProne()) {
 			Buttons& buttons = blackboard.getButtons();
-			if (target != nullptr && !target->isDead()) {
+			if (target != nullptr && target->isInGame()) {
 				trace_t result;
 				self->canSee(result, self->getEyesPos(), target->getEdict());
 				extern ConVar nav_slope_limit;
