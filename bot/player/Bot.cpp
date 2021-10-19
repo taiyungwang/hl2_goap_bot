@@ -164,7 +164,6 @@ int Bot::getPlayerClass() const {
 	return playerClassVar == nullptr ? -1 : playerClassVar->getPlayerClass();
 }
 
-
 class FilterSelfAndEnemies: public CTraceFilter {
 public:
 	FilterSelfAndEnemies(edict_t* self,
