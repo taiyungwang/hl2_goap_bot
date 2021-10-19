@@ -8,4 +8,6 @@ public:
 
 private:
 	bool isAvailable(const DODObjective& obj);
+
+	bool isTeammateActing(edict_t* teammate) const override;
 };

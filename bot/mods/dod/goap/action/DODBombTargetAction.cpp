@@ -17,3 +17,7 @@ bool DODBombTargetAction::isAvailable(const DODObjective &obj) {
 			&& blackboard.getSelf()->getTeam() != obj.getOwner()
 			&& obj.hasBombs() && obj.hasBombTargetInState(DODObjective::BombState::AVAILABLE);
 }
+
+bool DODBombTargetAction::isTeammateActing(edict_t* teammate) const {
+	return DodPlayer(teammate).isPlanting();
+}

@@ -2,8 +2,6 @@
 
 #include "CapturePointAction.h"
 
-class DodPlayer;
-
 class DODDefuseBombAction : public CapturePointAction {
 public:
 	DODDefuseBombAction(Blackboard& blackboard);
@@ -22,6 +20,8 @@ protected:
 	bool interruptable = true;
 
 	virtual bool isAvailable(const DODObjective& obj);
+
+	virtual bool isTeammateActing(edict_t* teammate) const;
 
 private:
 

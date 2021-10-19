@@ -1,7 +1,5 @@
 #pragma once
 
-#include <goap/WorldCond.h>
-
 #include <unordered_map>
 #include <memory>
 

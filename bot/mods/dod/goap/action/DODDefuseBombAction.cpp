@@ -59,10 +59,9 @@ bool DODDefuseBombAction::isAvailable(edict_t* ent) {
 	for (auto player: Player::getPlayers()) {
 		if (player.second != blackboard.getSelf()
 				&& player.second->getTeam() == blackboard.getSelf()->getTeam()
-				&& player.second->getCurrentPosition().DistTo(ent->GetCollideable()->GetCollisionOrigin()) < 100.0f) {
-			if (DodPlayer(player.second->getEdict()).isDefusing()) {
-				return false;
-			}
+				&& player.second->getCurrentPosition().DistTo(ent->GetCollideable()->GetCollisionOrigin()) < 100.0f
+				&& isTeammateActing(player.second->getEdict())) {
+			return false;
 		}
 	}
 	return true;
@@ -73,4 +72,8 @@ bool DODDefuseBombAction::isAvailable(const DODObjective& obj) {
 			&& blackboard.getSelf()->getTeam() == obj.getOwner()
 			&& obj.hasBombs()
 			&& obj.hasBombTargetInState(DODObjective::BombState::ACTIVE);
+}
+
+bool DODDefuseBombAction::isTeammateActing(edict_t* teammate) const {
+	return DodPlayer(teammate).isDefusing();
 }
