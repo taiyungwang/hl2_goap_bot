@@ -119,7 +119,7 @@ private:
 	Blackboard& blackboard;
 	bool stuck;
 	int type;
-	Vector goal, ladderEnd, previousPos;
+	Vector goal, ladderEnd;
 	CNavLadder::LadderDirectionType ladderDir;
 	MoveState* state = nullptr;
 	edict_t* blocker = nullptr;

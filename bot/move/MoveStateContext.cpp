@@ -22,7 +22,6 @@ void MoveStateContext::stop() {
 	if (state != nullptr) {
 		delete state;
 	}
-	previousPos = blackboard.getSelf()->getCurrentPosition();
 	state = new Stopped(*this);
 }
 

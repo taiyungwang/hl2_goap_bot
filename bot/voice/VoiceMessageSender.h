@@ -26,9 +26,9 @@ public:
 	bool sendMessage(const std::shared_ptr<VoiceMessage>& message);
 
 	template<typename T>
-	const char* getMessage() const {
-		return messages.find(typeid(T)) != messages.end() ?
-				messages.at(typeid(T)).c_str() : nullptr;
+	bool isMessage(const char* message) const {
+		return messages.find(typeid(T)) != messages.end()
+				&& messages.at(typeid(T)).c_str() == message;
 	}
 
 private:

@@ -38,10 +38,12 @@ void Bot::think() {
 	try {
 		Player::think();
 		CBotCmd& cmd = blackboard->getCmd();
-		if (getPlayerClass() != desiredClassId) {
+		if (!inGame) {
+			blackboard->getButtons().tap(IN_ATTACK);
+		} else if (getPlayerClass() != desiredClassId) {
 			extern IServerPluginHelpers* helpers;
 			helpers->ClientCommand(getEdict(), (*CLASSES)[getTeam() - 2][desiredClassId]);
-		} else if (inGame) {
+		} else {
 			if ((resetPlanner || world->think(*blackboard))
 					&& !blackboard->isOnLadder()) {
 				planner->resetPlanning(false);
@@ -112,7 +114,6 @@ bool Bot::handle(EventInfo* event) {
 		}
 		if (name == "player_death") {
 			planner->resetPlanning(true);
-			blackboard->getButtons().tap(IN_ATTACK);
 			return false;
 		}
 		if (name == "player_hurt") {
@@ -145,7 +146,7 @@ bool Bot::receive(edict_t* sender, const CCommand& command) {
 	Player *player = getPlayer(sender);
 	if (player->getTeam() == getTeam()
 			&& canSee(player->getEyesPos(), player->getEdict())
-			&& std::string(command.Arg(0)) == voiceMessageSender.getMessage<AreaClearVoiceMessage>()) {
+			&& voiceMessageSender.isMessage<AreaClearVoiceMessage>(command.Arg(0))) {
 		world->updateState(WorldProp::HEARD_AREA_CLEAR, true);
 	}
 	return false;

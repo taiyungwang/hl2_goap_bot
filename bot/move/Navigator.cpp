@@ -24,7 +24,7 @@ extern ConVar mybot_debug;
 
 static ConVar maxAreaTime("my_bot_max_area_time", "70");
 
-static ConVar mybotStuckThreshold("mybot_stuck_threshold", "80.0f");
+static ConVar mybotStuckThreshold("mybot_stuck_threshold", "90.0f");
 
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
