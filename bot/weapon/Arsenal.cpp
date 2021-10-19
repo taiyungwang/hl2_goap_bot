@@ -87,7 +87,7 @@ int Arsenal::getWeaponIdByName(const char* name) const {
 		extern IVEngineServer* engine;
 		edict_t* weap = engine->PEntityOfEntIndex(i);
 		if (weap != nullptr && !weap->IsFree()
-				&& std::string(name) == name) {
+				&& std::string(name) == weap->GetClassName()) {
 			id = i;
 			return true;
 		}
