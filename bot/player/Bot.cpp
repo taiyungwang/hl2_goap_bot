@@ -21,7 +21,7 @@
 
 PlayerClasses Bot::CLASSES = nullptr;
 
-static ConVar mybot_rot_speed("mybot_rot_speed", "0.1", 0,
+static ConVar mybot_rot_speed("mybot_rot_speed", "0.15", 0,
 		"determines rotational acceleration rate in degrees");
 ConVar mybot_mimic("mybot_mimic", "0");
 
