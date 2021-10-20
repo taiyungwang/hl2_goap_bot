@@ -6,19 +6,13 @@
 #include <in_buttons.h>
 
 bool Deployer::execute(Blackboard& blackboard) {
-	if (weapon.isDeployed()) {
-		isDeploying = false;
-		return true;
-	}
-	if (!isDeploying) {
+	if (!weapon.isDeployed()) {
 		blackboard.getButtons().tap(IN_ATTACK2);
-		isDeploying = true;
 	}
-	return false;
+	return true;
 }
 
 void Deployer::undeploy(Blackboard& blackboard) {
-	isDeploying = false;
 	if (weapon.isDeployed()) {
 		blackboard.getButtons().tap(IN_ATTACK2);
 	}
