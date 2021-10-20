@@ -28,9 +28,9 @@ bool FindCoverAction::operator() (CNavArea *area, CNavArea *priorArea, float tra
 			&& !area->IsPotentiallyVisible(Navigator::getArea(target, self->getTeam()))
 			&& !self->canSee(eyes, target)) {
 		this->hideArea = area;
-		return true;
+		return false;
 	}
-	return false;
+	return true;
 }
 
 float FindCoverAction::getCost() {
