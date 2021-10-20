@@ -15,7 +15,7 @@ public:
 
 	virtual bool precondCheck();
 
-	bool execute();
+	virtual bool execute() override;
 
 	bool goalComplete();
 

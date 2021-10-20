@@ -105,10 +105,7 @@ bool AttackAction::execute() {
 bool AttackAction::goalComplete() {
 	abort();
 	blackboard.setBlocker(nullptr);
-	if (targetDestroyed()) {
-		return true;
-	}
-	return false;
+	return targetDestroyed();
 }
 
 
