@@ -50,10 +50,6 @@ bool DODDefendPointAction::findTargetLoc() {
 	return false;
 }
 
-void DODDefendPointAction::calculateFacing() {
-	VectorAngles(guardTarget - targetLoc, facing);
-}
-
 bool DODDefendPointAction::isTargetValid() const {
 	bool ours = target->getOwner() == blackboard.getSelf()->getTeam();
 	return (ours && (!objectives->isDetonation() || (target->hasBombs() && target->hasBombTargetInState(DODObjective::BombState::AVAILABLE))))

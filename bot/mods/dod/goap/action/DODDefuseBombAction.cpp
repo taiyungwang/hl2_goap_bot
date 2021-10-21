@@ -26,16 +26,13 @@ bool DODDefuseBombAction::findTargetLoc() {
 
 bool DODDefuseBombAction::execute() {
 	if (isDepleted()) {
+		interruptable = true;
 		return true;
 	}
 	if (!GoToEntityAction::execute()) {
 		return false;
 	}
 	if (!GoToAction::goalComplete()) {
-		interruptable = true;
-		return true;
-	}
-	if (!isAvailable(item)) {
 		return true;
 	}
 	interruptable = false;

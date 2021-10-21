@@ -228,13 +228,16 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 		path.Push(area);
 	}
 	if (path.Top() != buildPathStartArea) {
-		Vector loc = blackboard.getSelf()->getCurrentPosition(), goal;
+		Vector loc = buildPathStartArea->GetCenter(), goal;
 		path.Top()->GetClosestPointOnArea(loc, &goal);
 		if (this->moveCtx->trace(goal, path.Top()->GetAttributes() & NAV_MESH_CROUCH).DidHit()) {
 			Warning("Can't get to start area %d, distance is %f.\n", path.Top()->GetID(),
 					loc.DistTo(goal));
 			if (mybot_debug.GetBool()) {
+				buildPathStartArea->Draw();
 				path.Top()->Draw();
+				debugoverlay->AddLineOverlay(loc, goal, 255, 0, 0, true,
+						NDEBUG_PERSIST_TILL_NEXT_SERVER);
 			}
 			buildPathStartArea = nullptr;
 			return false;

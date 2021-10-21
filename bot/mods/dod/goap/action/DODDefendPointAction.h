@@ -27,7 +27,5 @@ private:
 
 	bool findTargetLoc();
 
-	void calculateFacing();
-
 	bool isTargetValid() const;
 };
