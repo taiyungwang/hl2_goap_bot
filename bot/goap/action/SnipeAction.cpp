@@ -63,7 +63,10 @@ bool SnipeAction::execute() {
 bool SnipeAction::goalComplete() {
 	int team = blackboard.getSelf()->getTeam();
 	selector->setInUse(selectorId, team, false);
-	blackboard.getSelf()->getArsenal().getCurrWeapon()->undeploy(blackboard);
+	auto weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
+	if (weapon != nullptr) {
+		weapon->undeploy(blackboard);
+	}
 	if (GoToAction::goalComplete()) {
 		// if we are at our location, and we didn't see an enemy, then count it as failure
 		selector->update(selectorId, team, 
