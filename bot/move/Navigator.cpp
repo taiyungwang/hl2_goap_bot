@@ -200,48 +200,31 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	}
 	CNavArea* closest = nullptr;
 	if (!NavAreaBuildPath(buildPathStartArea, goalArea, &targetLoc,
-			ShortestPathCost(self->getTeam()), &closest, 0.0f, self->getTeam()) && closest == nullptr) {
-		if (mybot_debug.GetBool()) {
-			debugoverlay->AddLineOverlay(buildPathStartArea->GetCenter(),
-					targetLoc, 255, 0, 0, true,
-					NDEBUG_PERSIST_TILL_NEXT_SERVER);
-		}
-		buildPathStartArea = nullptr;
-		Warning("Unable to get to goal area %d.\n", goalArea->GetID());
+			ShortestPathCost(self->getTeam()), &closest, 0.0f, self->getTeam())) {
 		if (mybot_debug.GetBool()) {
 			goalArea->Draw();
 		}
-		return false;
-	}
-	static const float MAX_DIST = 300.0f;
-	if (goalArea == nullptr) {
-		float dist = closest->GetCenter().DistTo(targetLoc);
-		if (dist > MAX_DIST) {
-			buildPathStartArea = nullptr;
-			Warning("Unable to find goal area for location. Closest is %f\n", dist);
+		if (closest == nullptr) {
+			Warning("Unable to get to goal area %d.\n", goalArea->GetID());
 			return false;
 		}
-		goalArea = closest;
+		if (closest != nullptr) {
+			if (mybot_debug.GetBool()) {
+				debugoverlay->AddLineOverlay(closest->GetCenter(),
+						goalArea->GetCenter(), 255, 0, 0, true,
+						NDEBUG_PERSIST_TILL_NEXT_SERVER);
+			}
+			float dist = closest->GetCenter().DistTo(targetLoc);
+			if (dist > 300.0f) {
+				Warning("Unable to find goal area for location. Closest is %f\n", dist);
+				return false;
+			}
+			goalArea = closest;
+		}
 	}
 	for (CNavArea* area = goalArea; area != nullptr;
 			area = area->GetParent()) {
 		path.Push(area);
-	}
-	if (path.Top() != buildPathStartArea) {
-		Vector loc = buildPathStartArea->GetCenter(), goal;
-		path.Top()->GetClosestPointOnArea(loc, &goal);
-		if (this->moveCtx->trace(goal, path.Top()->GetAttributes() & NAV_MESH_CROUCH).DidHit()) {
-			Warning("Can't get to start area %d, distance is %f.\n", path.Top()->GetID(),
-					loc.DistTo(goal));
-			if (mybot_debug.GetBool()) {
-				buildPathStartArea->Draw();
-				path.Top()->Draw();
-				debugoverlay->AddLineOverlay(loc, goal, 255, 0, 0, true,
-						NDEBUG_PERSIST_TILL_NEXT_SERVER);
-			}
-			buildPathStartArea = nullptr;
-			return false;
-		}
 	}
 	buildPathStartArea = goalArea;
 	return true;
