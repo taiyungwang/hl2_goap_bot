@@ -180,6 +180,16 @@ CNavArea* Navigator::getCurrentArea(const Vector& pos) const {
 bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 	path.Clear();
 	const Player* self = blackboard.getSelf();
+	CNavArea* goalArea = getCurrentArea(targetLoc);
+	if (goalArea == nullptr) {
+		if (mybot_debug.GetBool()) {
+			debugoverlay->AddLineOverlay(self->getEyesPos(),
+					targetLoc, 255, 0, 0, true,
+					NDEBUG_PERSIST_TILL_NEXT_SERVER);
+		}
+		Warning("Unable to find area for goal.\n");
+		return false;
+	}
 	if (buildPathStartArea == nullptr) {
 		buildPathStartArea = getCurrentArea(self->getCurrentPosition());
 		if (buildPathStartArea == nullptr) {
@@ -187,20 +197,10 @@ bool Navigator::buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path) {
 			return false;
 		}
 	}
-	CNavArea* goalArea = getCurrentArea(targetLoc);
-	if (goalArea == nullptr) {
-		buildPathStartArea = nullptr;
-		Warning("Unable to find area for goal.\n");
-		if (mybot_debug.GetBool()) {
-			debugoverlay->AddLineOverlay(self->getEyesPos(),
-					targetLoc, 255, 0, 0, true,
-					NDEBUG_PERSIST_TILL_NEXT_SERVER);
-		}
-		return false;
-	}
 	CNavArea* closest = nullptr;
 	if (!NavAreaBuildPath(buildPathStartArea, goalArea, &targetLoc,
 			ShortestPathCost(self->getTeam()), &closest, 0.0f, self->getTeam())) {
+		buildPathStartArea = nullptr;
 		if (mybot_debug.GetBool()) {
 			goalArea->Draw();
 		}
