@@ -79,11 +79,14 @@ MoveState* Avoid::move(const Vector& pos) {
 		if (result.startsolid || dynamic_cast<Stopped*>(nextState) != nullptr) {
 			// completely stuck.
 			ctx.setStuck(true);
-			if (blocker != nullptr && Q_stristr(blocker->GetClassName(), "func_team") != nullptr) {
-				extern CUtlMap<int, NavEntity*> blockers;
+			extern CUtlMap<int, NavEntity*> blockers;
+			int edictId = engine->IndexOfEdict(blocker);
+			if (blocker != nullptr && Q_stristr(blocker->GetClassName(), "func_team") != nullptr
+					&& !blockers.IsValidIndex(blockers.Find(edictId))) {
+				// assume the first team that gets block correctly identifies the team blocker.
 				CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
 				navBlocker->setBlockedTeam(team);
-				blockers.Insert(engine->IndexOfEdict(blocker), navBlocker);
+				blockers.Insert(edictId, navBlocker);
 			}
 		}
 		return nextState;
