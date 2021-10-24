@@ -128,6 +128,7 @@ void Navigator::start(CUtlStack<CNavArea*>* path, const Vector& goal, float targ
 	lastArea = nextArea = buildPathStartArea = nullptr;
 	this->targetRadius = targetRadius;
 	this->path = path;
+	areaTime = 0;
 	moveCtx->setGoal(blackboard.getSelf()->getCurrentPosition());
 	moveCtx->stop();
 	if (path->Count() == 0) {
