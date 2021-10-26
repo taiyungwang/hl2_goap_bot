@@ -223,6 +223,10 @@ void Navigator::setGoalForNextArea(const Vector& loc) {
 				float halfWidth;
 				lastArea->ComputePortal(path.top(),
 						static_cast<NavDirType>(dirToTop), &goal, &halfWidth);
+				if (moveCtx->hasGoal() && !canMoveTo(goal, crouching)) {
+					// if we are still moving don't set goal if we're blocked.
+					return;
+				}
 			}
 		}
 	}
@@ -269,8 +273,9 @@ bool Navigator::canMoveTo(Vector goal, bool crouch) const {
 }
 
 bool Navigator::reachedGoal() const {
-	return path.empty() && moveCtx->getGoal() == finalGoal
-			&& moveCtx->reachedGoal(targetRadius);
+	return blackboard.getSelf()->getCurrentPosition().DistTo(finalGoal) < targetRadius
+		|| (path.empty() && moveCtx->getGoal() == finalGoal
+			&& moveCtx->reachedGoal(targetRadius));
 }
 
 bool Navigator::setLadderStart() {
