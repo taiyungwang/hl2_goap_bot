@@ -33,25 +33,8 @@ bool FindCoverAction::operator() (CNavArea *area, CNavArea *priorArea, float tra
 	return true;
 }
 
-float FindCoverAction::getCost() {
-	return getTarget() == nullptr || (findTargetLoc()
-			&& blackboard.getNavigator()->buildPath(targetLoc, path)) ?
-			path.Count() : INFINITY;
-}
-
 bool FindCoverAction::onPlanningFinished() {
-	edict_t *target = getTarget();
-	if (target == nullptr) {
-		return false;
-	}
-	CNavArea *targetArea = Navigator::getArea(target,
-			blackboard.getSelf()->getTeam());
-	for (int i = 0; i < path.Count(); i++) {
-		if (path[i] == targetArea) {
-			return false;
-		}
-	}
-	return true;
+	return getTarget() != nullptr;
 }
 
 bool FindCoverAction::findTargetLoc() {

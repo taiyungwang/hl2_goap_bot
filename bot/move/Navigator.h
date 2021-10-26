@@ -2,7 +2,7 @@
 
 #include <utlvector.h>
 #include <shareddefs.h>
-#include <utlstack.h>
+#include <stack>
 
 class Blackboard;
 class MoveStateContext;
@@ -32,9 +32,7 @@ public:
 
 	bool reachedGoal() const;
 
-	void start(CUtlStack<CNavArea*>* path, const Vector& goal, float targetRadius);
-
-	bool buildPath(const Vector& targetLoc, CUtlStack<CNavArea*>& path);
+	void start(const Vector& goal, float targetRadius);
 
 	CNavArea* getLastArea() const {
 		return lastArea;
@@ -46,34 +44,41 @@ protected:
 	virtual bool checkCanMove();
 
 private:
+	Vector finalGoal;
+
+	std::stack<CNavArea*> path;
+
+	CNavArea *lastArea = nullptr;
+
+	MoveStateContext* moveCtx;
+
+	float targetRadius = 25.0f;
+
+	int areaTime = 0, dirToTop = 4;
+
+	void setDirToTop();
+
+	bool buildPath();
+
+	bool canGetNextArea(const Vector& loc) const;
+
+	void setGoalForNextArea(const Vector& loc);
+
 	/**
 	 * Gets the portal of the to area if it is connected without using a ladder.
 	 * @Return True if it is connected without using a ladder.
 	 */
 	bool getPortalToNextArea(Vector& portal) const;
 
-	Vector finalGoal;
-
-	CUtlStack<CNavArea*>* path = nullptr;
-
-	CNavArea *buildPathStartArea = nullptr, *nextArea = nullptr, *lastArea = nullptr;
-
-	MoveStateContext* moveCtx;
-
-	float targetRadius = 25.0f;
-	int areaTime = 0;
-
-	bool touchedAreaCenter = false;
-
-	bool getNextArea(Vector& goal, const Vector& loc, const CNavArea* area);
-
 	bool canMoveTo(Vector to, bool crouch) const;
 
-	CNavArea* getCurrentArea(const Vector& pos) const;
+	CNavArea* getCurrentArea() const;
+
+	CNavArea* getGoalArea(const Vector& pos) const;
 
 	/**
 	 * Finds the start for a ladder to the next area.  Assumes that getPortalToNextArea()
 	 * was called to see if the two areas does not require traversing a ladder.
 	 */
-	void setLadderStart();
+	bool setLadderStart();
 };

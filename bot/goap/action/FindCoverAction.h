@@ -15,9 +15,6 @@ public:
 		return getTarget() == nullptr || GoToAction::execute();
 	}
 
-
-	float getCost();
-
 	bool onPlanningFinished();
 
 	bool operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar );

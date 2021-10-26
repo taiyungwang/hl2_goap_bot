@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Action.h"
-#include <utlstack.h>
 #include <utllinkedlist.h>
 
 class CNavArea;
@@ -17,8 +16,6 @@ public:
 
 	virtual void init();
 
-	virtual bool onPlanningFinished();
-
 	virtual float getCost();
 
 	virtual bool goalComplete();
@@ -28,8 +25,6 @@ public:
 	}
 
 protected:
-	CUtlStack<CNavArea*> path;
-
 	Vector targetLoc;
 
 	float targetRadius = 5.0f;
