@@ -5,7 +5,6 @@
 #include "MoveStateContext.h"
 #include "StepLeft.h"
 #include "Jump.h"
-#include "MoveTraceFilter.h"
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
@@ -15,6 +14,8 @@
 #include <util/BasePlayer.h>
 #include <eiface.h>
 #include <in_buttons.h>
+
+using namespace std;
 
 // how much should blocker push back against our movement.
 static ConVar mybot_avoid_move_factor("mybot_avoid_move_factor", "1");
@@ -27,6 +28,26 @@ static edict_t* getEdict(const trace_t& result) {
 	return servergameents->BaseEntityToEdict(result.m_pEnt);
 }
 
+class IgnoreSelfAndTeamWall: public CTraceFilterEntitiesOnly {
+public:
+	IgnoreSelfAndTeamWall(edict_t* self): self(self) {
+	}
+
+	virtual ~IgnoreSelfAndTeamWall() {
+	}
+
+	bool ShouldHitEntity(IHandleEntity *pHandleEntity,
+			int contentsMask) override {
+		edict_t* hit = reinterpret_cast<IServerUnknown*>(const_cast<IHandleEntity*>(pHandleEntity))
+						->GetNetworkable()->GetEdict();
+		string name(hit->GetClassName());
+		return hit != self && name.find("func_team") == string::npos;
+	}
+
+private:
+	edict_t* self;
+};
+
 MoveState* Avoid::move(const Vector& pos) {
 	if (ctx.reachedGoal()) {
 		ctx.setTargetOffset(0);
@@ -34,10 +55,8 @@ MoveState* Avoid::move(const Vector& pos) {
 		return new Stopped(ctx);
 	}
 	Blackboard& blackboard = ctx.getBlackboard();
-	ctx.trace(ctx.getGoal(), ctx.getType() & NAV_MESH_CROUCH);
-	trace_t& result = ctx.getTraceResult();
+	const trace_t& result = ctx.getTraceResult();
 	Vector goal = ctx.getGoal();
-	MoveTraceFilter filter(*blackboard.getSelf(), blackboard.getTarget());
 	edict_t* currBlocker = getEdict(result);
 	const char* currBlockerName = currBlocker == nullptr || currBlocker->IsFree() ? nullptr: currBlocker->GetClassName();
 	if (ctx.isStuck()) {
@@ -66,13 +85,9 @@ MoveState* Avoid::move(const Vector& pos) {
 					|| Q_stristr(blockerName, "breakable") != nullptr) {
 				blackboard.setBlocker(blocker);
 			} else {
-				int idx = engine->IndexOfEdict(blocker);
+				idx = engine->IndexOfEdict(blocker);
 				if (idx <= gpGlobals->maxClients) {
-					auto player = players.find(idx);
-					if (team < 2 || (player != players.end()
-							&& player->second->getTeam() != blackboard.getSelf()->getTeam())) {
-						blackboard.setBlocker(blocker);
-					}
+					blackboard.setBlocker(blocker);
 				}
 			}
 		}
@@ -80,13 +95,20 @@ MoveState* Avoid::move(const Vector& pos) {
 			// completely stuck.
 			ctx.setStuck(true);
 			extern CUtlMap<int, NavEntity*> blockers;
-			int edictId = engine->IndexOfEdict(blocker);
+			idx = engine->IndexOfEdict(blocker);
 			if (blocker != nullptr && Q_stristr(blocker->GetClassName(), "func_team") != nullptr
-					&& !blockers.IsValidIndex(blockers.Find(edictId))) {
-				// assume the first team that gets block correctly identifies the team blocker.
-				CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
-				navBlocker->setBlockedTeam(team);
-				blockers.Insert(edictId, navBlocker);
+					&& !blockers.IsValidIndex(blockers.Find(idx))) {
+				// ensure that nothing else is blocking us.
+				edict_t* self = blackboard.getSelf()->getEdict();
+				if (!ctx.trace(pos, goal, ctx.getType() & NAV_MESH_CROUCH,
+						IgnoreSelfAndTeamWall(self)).DidHit()) {
+					// assume the first team that gets block correctly identifies the team blocker.
+					CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
+					navBlocker->setBlockedTeam(team);
+					blockers.Insert(idx, navBlocker);
+				} else {
+					blocker = getEdict(result);
+				}
 			}
 		}
 		return nextState;
