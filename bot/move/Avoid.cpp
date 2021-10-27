@@ -28,6 +28,21 @@ static edict_t* getEdict(const trace_t& result) {
 	return servergameents->BaseEntityToEdict(result.m_pEnt);
 }
 
+class IgnoreAllButPhysicsAndBreakable: public CTraceFilterEntitiesOnly {
+public:
+	virtual ~IgnoreAllButPhysicsAndBreakable() {
+	}
+
+	bool ShouldHitEntity(IHandleEntity *pHandleEntity,
+			int contentsMask) override {
+		string name(reinterpret_cast<IServerUnknown*>(const_cast<IHandleEntity*>(pHandleEntity))
+				->GetNetworkable()->GetEdict()->GetClassName());
+		return name.find("physics") != string::npos
+				|| name.find("breakable") != string::npos;
+	}
+
+};
+
 class IgnoreSelfAndTeamWall: public CTraceFilterEntitiesOnly {
 public:
 	IgnoreSelfAndTeamWall(edict_t* self): self(self) {
@@ -58,6 +73,7 @@ MoveState* Avoid::move(const Vector& pos) {
 	const trace_t& result = ctx.getTraceResult();
 	Vector goal = ctx.getGoal();
 	edict_t* currBlocker = getEdict(result);
+	bool crouching = ctx.getType() & NAV_MESH_CROUCH;
 	const char* currBlockerName = currBlocker == nullptr || currBlocker->IsFree() ? nullptr: currBlocker->GetClassName();
 	if (ctx.isStuck()) {
 		ctx.setStuck(false);
@@ -79,17 +95,14 @@ MoveState* Avoid::move(const Vector& pos) {
 		auto& players = Player::getPlayers();
 		int team = blackboard.getSelf()->getTeam();
 		if (blocker != nullptr && !blocker->IsFree()
-				&& blocker->GetCollideable() != nullptr) {
-			const char* blockerName = blocker->GetClassName();
-			if (Q_stristr(blockerName, "physics") != nullptr
-					|| Q_stristr(blockerName, "breakable") != nullptr) {
-				blackboard.setBlocker(blocker);
-			} else {
-				idx = engine->IndexOfEdict(blocker);
-				if (idx <= gpGlobals->maxClients) {
-					blackboard.setBlocker(blocker);
-				}
+				&& blocker->GetCollideable() != nullptr
+				&& Q_stristr(currBlockerName, "func_team") == nullptr) {
+			if (Q_stristr(blocker->GetClassName(), "player") != nullptr
+				&& ctx.trace(pos, goal, crouching,
+						IgnoreAllButPhysicsAndBreakable()).DidHit()) {
+				blocker = getEdict(result);
 			}
+			blackboard.setBlocker(blocker);
 		}
 		if (result.startsolid || dynamic_cast<Stopped*>(nextState) != nullptr) {
 			// completely stuck.
@@ -100,14 +113,14 @@ MoveState* Avoid::move(const Vector& pos) {
 					&& !blockers.IsValidIndex(blockers.Find(idx))) {
 				// ensure that nothing else is blocking us.
 				edict_t* self = blackboard.getSelf()->getEdict();
-				if (!ctx.trace(pos, goal, ctx.getType() & NAV_MESH_CROUCH,
+				if (!ctx.trace(pos, goal, crouching,
 						IgnoreSelfAndTeamWall(self)).DidHit()) {
 					// assume the first team that gets block correctly identifies the team blocker.
 					CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
 					navBlocker->setBlockedTeam(team);
 					blockers.Insert(idx, navBlocker);
 				} else {
-					blocker = getEdict(result);
+					blackboard.setBlocker(getEdict(result));
 				}
 			}
 		}

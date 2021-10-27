@@ -1,7 +1,6 @@
 #include "MoveStateContext.h"
 
 #include "Stopped.h"
-#include "MoveTraceFilter.h"
 #include <player/Bot.h>
 #include <player/Blackboard.h>
 #include <player/Button.h>
@@ -74,7 +73,7 @@ bool MoveStateContext::reachedGoal(float targetOffset) {
 
 const trace_t& MoveStateContext::trace(const Vector& pos, const Vector& goal, bool crouch) {
 	return trace(pos, goal, crouch,
-			MoveTraceFilter(*blackboard.getSelf(), blackboard.getTarget()));
+			FilterList().add(blackboard.getSelf()->getEdict()) .add(blackboard.getTarget()));
 }
 
 const trace_t& MoveStateContext::trace(const Vector& goal, bool crouch) {

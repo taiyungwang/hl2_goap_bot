@@ -115,7 +115,8 @@ public:
 		return traceResult;
 	}
 
-	const trace_t& trace(const Vector& start, const Vector& goal, bool crouch, const ITraceFilter& filter);
+	const trace_t& trace(const Vector& start, const Vector& goal, bool crouch,
+			const ITraceFilter& filter);
 
 private:
 	float targetOffset;
