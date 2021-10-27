@@ -68,7 +68,7 @@ private:
 	 * Gets the portal of the to area if it is connected without using a ladder.
 	 * @Return True if it is connected without using a ladder.
 	 */
-	bool getPortalToNextArea(Vector& portal) const;
+	bool getPortalToTopArea(Vector& portal) const;
 
 	bool canMoveTo(Vector to, bool crouch) const;
 

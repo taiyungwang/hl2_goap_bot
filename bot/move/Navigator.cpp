@@ -194,14 +194,14 @@ bool Navigator::canGetNextArea(const Vector& loc) const {
 			&& ((!moveCtx->hasGoal()
 					&& (path.top() == lastArea || path.top()->Contains(loc)
 							// close to next path.top()
-							|| (getPortalToNextArea(goal) && goal == moveCtx->getGoal())
+							|| (getPortalToTopArea(goal) && goal == moveCtx->getGoal())
 							|| moveCtx->getGoal() == path.top()->GetCenter()))
 					|| (!(lastArea->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE))
 							&& (!moveCtx->nextGoalIsLadderStart() && !blackboard.isOnLadder())
 							// don't skip areas above and below ground height
 							&& fabs(lastArea->GetCenter().z - path.top()->GetCenter().z) <= StepHeight
 							&& fabs(loc.z - lastArea->GetCenter().z) <= StepHeight
-							&& (getPortalToNextArea(goal)
+							&& (getPortalToTopArea(goal)
 									&& canMoveTo(goal, lastArea->GetAttributes() & NAV_MESH_CROUCH))));
 }
 
@@ -216,8 +216,9 @@ void Navigator::setGoalForNextArea(const Vector& loc) {
 		bool crouching =
 				(path.empty() ? lastArea : path.top())->GetAttributes()
 						& NAV_MESH_CROUCH;
-		if (!canMoveTo(goal, crouching)) {
-			if (!getPortalToNextArea(goal)) {
+		if (!canMoveTo(goal, crouching)
+				|| fabs(lastArea->GetCenter().z - path.top()->GetCenter().z) > StepHeight) {
+			if (!getPortalToTopArea(goal)) {
 				path.top()->GetClosestPointOnArea(loc, &goal);
 			} else if (!canMoveTo(goal, crouching)) {
 				float halfWidth;
@@ -318,11 +319,12 @@ bool Navigator::setLadderStart() {
 }
 
 
-bool Navigator::getPortalToNextArea(Vector& portal) const {
+bool Navigator::getPortalToTopArea(Vector& portal) const {
 	if (dirToTop >= NUM_DIRECTIONS || lastArea == nullptr) {
 		return false;
 	}
 	float halfWidth;
-	path.top()->ComputePortal(lastArea, static_cast<NavDirType>(dirToTop), &portal, &halfWidth);
+	path.top()->ComputePortal(lastArea, OppositeDirection(static_cast<NavDirType>(dirToTop)),
+			&portal, &halfWidth);
 	return true;
 }
