@@ -51,8 +51,8 @@ bool World::think(Blackboard& blackboard) {
 			auto& players = Player::getPlayers();
 			auto player = players.find(engine->IndexOfEdict(blocker));
 			if (player != players.end()) {
-				if (!player->second->isInGame() || player->second->getTeam() <= 0
-						|| player->second->getTeam() != self->getTeam()) {
+				if (!player->second->isInGame() || (player->second->getTeam() > 0
+						&& player->second->getTeam() == self->getTeam())) {
 					blackboard.setBlocker(nullptr);
 				} else {
 					self->setWantToListen(false);
