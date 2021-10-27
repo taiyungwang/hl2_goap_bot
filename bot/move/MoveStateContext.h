@@ -6,6 +6,7 @@
 class MoveState;
 class EntityInstance;
 class Blackboard;
+class ITraceFilter;
 class CBotCmd;
 
 /**
@@ -106,13 +107,15 @@ public:
 		trace(goal, crouch);
 	}
 
-	const trace_t& trace(const Vector& start, Vector goal, bool crouch);
+	const trace_t& trace(const Vector& start, const Vector& goal, bool crouch);
 
-	const trace_t& trace(Vector goal, bool crouch);
+	const trace_t& trace(const Vector& goal, bool crouch);
 
-	trace_t& getTraceResult() {
+	const trace_t& getTraceResult() const {
 		return traceResult;
 	}
+
+	const trace_t& trace(const Vector& start, const Vector& goal, bool crouch, const ITraceFilter& filter);
 
 private:
 	float targetOffset;
