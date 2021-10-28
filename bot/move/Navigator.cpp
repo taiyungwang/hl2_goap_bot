@@ -196,7 +196,8 @@ bool Navigator::canGetNextArea(const Vector& loc) const {
 							// close to next path.top()
 							|| (getPortalToTopArea(goal) && goal == moveCtx->getGoal())
 							|| moveCtx->getGoal() == path.top()->GetCenter()))
-					|| (!(lastArea->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE))
+					|| (canMoveTo(moveCtx->getGoal(), lastArea->GetAttributes() & NAV_MESH_CROUCH)
+							&& !(lastArea->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE))
 							&& (!moveCtx->nextGoalIsLadderStart() && !blackboard.isOnLadder())
 							// don't skip areas above and below ground height
 							&& fabs(lastArea->GetCenter().z - path.top()->GetCenter().z) <= StepHeight
