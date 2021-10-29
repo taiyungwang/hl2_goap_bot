@@ -21,6 +21,8 @@ public:
 	virtual MoveState* move(const Vector& currPos);
 
 private:
+	static void setTeamWall(edict_t* blocker, int team);
+
 	edict_t* blocker;
 
 	MoveState* nextState;

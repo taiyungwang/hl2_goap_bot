@@ -62,7 +62,7 @@ DODArsenalBuilder::DODArsenalBuilder() {
 		addPair<GrenadeLauncherBuilder>("weapon_riflegren_us", "weapon_riflegren_ger", 2.0f);
 		addPair<MeleeWeaponBuilder>("weapon_amerknife", "weapon_spade");
 		addPair<DeployableWeaponBuilder<Reloader>>("weapon_garand", "weapon_k98",
-				0.8f, 100.0f, 1600.0f, "CWeaponGarand", "m_bZoomed", 1000.0f);
+				0.8f, 100.0f, 1600.0f, "CDODSniperWeapon", "m_bZoomed", 1000.0f);
 		addPair<DODSMGBuilder>("weapon_thompson", "weapon_mp40");
 		addPair<PistolBuilder>("weapon_colt", "weapon_p38", 0.2f);
 		addPair<GrenadeLauncherBuilder>("weapon_smoke_us", "weapon_smoke_ger", 400.0f);

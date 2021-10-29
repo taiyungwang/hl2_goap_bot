@@ -75,7 +75,8 @@ bool AttackAction::execute() {
 	}
 	bool crouch = weapFunc->isMelee()
 			&& eyes.z - targetLoc.z > 20.0f
-			&& moveCtx->getTraceResult().startsolid;
+			&& (moveCtx->getTraceResult().startsolid
+				|| dist < HalfHumanWidth * 2.0f);
 	Buttons& buttons = blackboard.getButtons();
 	self->setWantToListen(false);
 	blackboard.setViewTarget(targetLoc);

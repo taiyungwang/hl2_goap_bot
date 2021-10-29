@@ -14,6 +14,7 @@ struct edict_t;
  */
 class Weapon {
 public:
+	static float MELEE_RANGE;
 
 	Weapon(edict_t* ent);
 

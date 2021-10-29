@@ -107,13 +107,13 @@ public:
 		trace(goal, crouch);
 	}
 
-	const trace_t& trace(const Vector& start, const Vector& goal, bool crouch);
-
-	const trace_t& trace(const Vector& goal, bool crouch);
-
 	const trace_t& getTraceResult() const {
 		return traceResult;
 	}
+
+	const trace_t& trace(const Vector& goal, bool crouch);
+
+	const trace_t& trace(const Vector& start, const Vector& goal, bool crouch);
 
 	const trace_t& trace(const Vector& start, const Vector& goal, bool crouch,
 			const ITraceFilter& filter);

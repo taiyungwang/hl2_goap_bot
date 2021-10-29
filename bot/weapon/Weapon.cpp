@@ -6,6 +6,8 @@
 #include <util/BaseCombatWeapon.h>
 #include <edict.h>
 
+float Weapon::MELEE_RANGE = 50.0f;
+
 Weapon::Weapon(edict_t* ent) :
 		weap(ent), weaponName(ent->GetNetworkable()->GetClassName()) {
 	function[0] = function[1] = nullptr;
