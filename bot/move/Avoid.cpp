@@ -21,9 +21,6 @@ using namespace std;
 
 extern IVEngineServer* engine;
 
-// how much should blocker push back against our movement.
-static ConVar mybot_avoid_move_factor("mybot_avoid_move_factor", "1");
-
 static edict_t* getEdict(const trace_t& result) {
 	if (result.m_pEnt == nullptr) {
 		return nullptr;
@@ -144,8 +141,7 @@ MoveState* Avoid::move(const Vector& pos) {
 		Vector avoid(currBlocker->GetCollideable()->GetCollisionOrigin());
 		avoid = avoid.x == 0.0f && avoid.y == 0.0f && avoid.z == 0.0f
 			? result.plane.normal: (result.endpos - avoid).Normalized();
-		goal += avoid / Max(0.000001f, result.endpos.DistTo(pos))
-				* mybot_avoid_move_factor.GetFloat();
+		goal += avoid * HalfHumanWidth;
 	}
 	moveStraight(goal);
 	return nullptr;
