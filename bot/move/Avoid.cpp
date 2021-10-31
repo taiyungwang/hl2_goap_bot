@@ -160,7 +160,7 @@ MoveState* Avoid::move(const Vector& pos) {
 			dir = inverse2D(dir);
 			if (trace(pos, dir + traceTarget) < dist) {
 				avoid = dir + traceTarget;
-			} else
+			}
 			avoid = pos - avoid - traceTarget;
 		}
 		goal += avoid.Normalized() * HalfHumanWidth;
