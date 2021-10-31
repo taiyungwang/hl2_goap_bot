@@ -21,6 +21,10 @@ using namespace std;
 
 extern IVEngineServer* engine;
 
+extern ConVar nav_slope_limit;
+
+const static float MIN_DIST = 0.00001f;
+
 static edict_t* getEdict(const trace_t& result) {
 	if (result.m_pEnt == nullptr) {
 		return nullptr;
@@ -108,7 +112,7 @@ MoveState* Avoid::move(const Vector& pos) {
 			}
 			blackboard.setBlocker(blocker);
 		}
-		if (result.startsolid || dynamic_cast<Stopped*>(nextState) != nullptr) {
+		if (dynamic_cast<Stopped*>(nextState) != nullptr) {
 			// completely stuck.
 			ctx.setStuck(true);
 		}
@@ -130,18 +134,36 @@ MoveState* Avoid::move(const Vector& pos) {
 			blackboard.setBlocker(currBlocker);
 		}
 	}
-	extern ConVar nav_slope_limit;
-	// TODO: the plane / world spawn avoidance doesn't really work, since using the plane
-	// as a avoidance adjustment doesn't necessarily push the bot toward the right direction.
-	if (result.DidHit() && !result.startsolid
-			&& currBlocker != nullptr
+	if (result.DidHit() && currBlocker != nullptr
 			&& Q_stristr(currBlockerName, "func_team") == nullptr
 			&& (result.plane.normal.LengthSqr() == 0.0f
 					|| result.plane.normal.z > nav_slope_limit.GetFloat())) {
-		Vector avoid(currBlocker->GetCollideable()->GetCollisionOrigin());
-		avoid = avoid.x == 0.0f && avoid.y == 0.0f && avoid.z == 0.0f
-			? result.plane.normal: (result.endpos - avoid).Normalized();
-		goal += avoid * HalfHumanWidth;
+		auto collideable = currBlocker->GetCollideable();
+		Vector avoid(collideable->GetCollisionOrigin());
+		float dist = Max(MIN_DIST, result.endpos.DistTo(pos));
+		if (!result.startsolid && avoid.LengthSqr() == 0.0f) {
+			Vector mins, maxs;
+			collideable->WorldSpaceSurroundingBounds(&mins, &maxs);
+			avoid = (maxs + mins) / 2.0f;
+		}
+		if (avoid.LengthSqr() > 0.0f && !result.startsolid) {
+			avoid = result.endpos - avoid;
+		} else {
+			Vector traceTarget = goal;
+			traceTarget.z += StepHeight;
+			if (result.startsolid) {
+				traceTarget = (traceTarget - pos).Normalized() * HalfHumanWidth * 2.0f + pos;
+			}
+			Vector dir = perpLeft2D(traceTarget, pos).Normalized() * HalfHumanWidth;
+			avoid = dir + traceTarget;
+			dist = trace(pos, avoid);
+			dir = inverse2D(dir);
+			if (trace(pos, dir + traceTarget) < dist) {
+				avoid = dir + traceTarget;
+			} else
+			avoid = pos - avoid - traceTarget;
+		}
+		goal += avoid.Normalized() * HalfHumanWidth;
 	}
 	moveStraight(goal);
 	return nullptr;
@@ -157,4 +179,23 @@ void Avoid::setTeamWall(edict_t *blocker, int team) {
 	CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
 	navBlocker->setBlockedTeam(team);
 	blockers.Insert(idx, navBlocker);
+}
+
+float Avoid::trace(const Vector& pos, const Vector& goal) const {
+	auto &blackboard = ctx.getBlackboard();
+	FilterList filter;
+	filter.add(blackboard.getSelf()->getEdict()).add(blackboard.getTarget());
+	trace_t tr;
+	for (;;) {
+		UTIL_TraceLine(pos, goal, MASK_PLAYERSOLID, &filter, &tr);
+		if (!tr.startsolid) {
+			break;
+		}
+		filter.add(getEdict(tr));
+	}
+	if (!tr.DidHit() || (tr.plane.normal.LengthSqr() > 0.0f
+			&& tr.plane.normal.z <= nav_slope_limit.GetFloat())) {
+		return goal.DistTo(pos);
+	}
+	return tr.startsolid ? MIN_DIST : Max(MIN_DIST, pos.DistTo(tr.endpos));
 }

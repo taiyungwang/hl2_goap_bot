@@ -26,4 +26,6 @@ private:
 	edict_t* blocker;
 
 	MoveState* nextState;
+
+	float trace(const Vector& pos, const Vector& goal) const;
 };

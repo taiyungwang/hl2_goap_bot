@@ -84,7 +84,13 @@ const trace_t& MoveStateContext::trace(const Vector& start, const Vector& goal, 
 		const ITraceFilter& filter) {
 	edict_t* edict = blackboard.getSelf()->getEdict();
 	Vector mins = edict->GetCollideable()->OBBMins(),
-			maxs = edict->GetCollideable()->OBBMaxs();
+			maxs = edict->GetCollideable()->OBBMaxs(),
+			heading(goal - start);
+	if (fabs(heading.x) > fabs(heading.y)) {
+		mins.x = maxs.x = 0.0f;
+	} else {
+		mins.y = maxs.y = 0.0f;
+	}
 	if (crouch) {
 		// magic number from https://developer.valvesoftware.com/wiki/Dimensions#Map_Grid_Units:_quick_reference
 		// for some reason the OBBMaxs returns 60
@@ -92,7 +98,7 @@ const trace_t& MoveStateContext::trace(const Vector& start, const Vector& goal, 
 	}
 	mins.z += 5.0f;
 	extern ConVar mybot_debug;
-	UTIL_TraceHull(start, goal, mins, maxs,
-			MASK_SOLID_BRUSHONLY, filter, &traceResult, mybot_debug.GetBool());
+	UTIL_TraceHull((goal - start).Normalized() * HalfHumanWidth + start,
+			goal, mins, maxs, MASK_PLAYERSOLID, filter, &traceResult, mybot_debug.GetBool());
 	return traceResult;
 }
