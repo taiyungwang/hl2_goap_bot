@@ -8,7 +8,7 @@ The bot currently supports Valve's [Day of Defeat Source](https://en.wikipedia.o
 ## Installing the Bot ##
 Extract the tgz files into desired game directory, e.g. C:\program files (x86)\steam\steamapps\common\day of defeat source\dod
 
-## Running the Bot as Listen Server ##
+## Running the Bot on A Listen Server ##
 On Windows, you would need to launch the game with the -insecure option.  For Linux, execute the following from console:
 ```
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/i386/lib/i386-linux-gnu:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/i386/usr/lib/i386-linux-gnu:bin $HOME/.local/share/Steam/steamapps/common/<game dir>/hl2_linux -game <mod dir>
