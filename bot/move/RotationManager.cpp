@@ -59,10 +59,15 @@ float RotationManager::getUpdatedPos(float &speed, float desiredSpeed,
 		return desiredSpeed + currentPos;
 	}
 	// want to accelerate
-	if (isSameDir(speed, desiredSpeed)
-			// estimated distance to decelerate is less than amount of distance left
-			&& speed * speed / accelMagnitude * 0.5f >= std::abs(desiredSpeed)) {
-		accel = -accel;
+	if (isSameDir(speed, desiredSpeed)) {
+		// estimated distance to decelerate is less than amount of distance left
+		if (speed * speed / accelMagnitude * 0.5f >= std::abs(desiredSpeed)) {
+			accel = -accel;
+		// accelerating in the same direction will cause us to overshoot in subsequent frames.
+		} else if (isSameDir(speed, accel)
+				&& powf(speed + accel, 2.0f) / accelMagnitude * 0.5 > std::abs(desiredSpeed)) {
+			accel = 0.0f;
+		}
 	}
 	speed += accel;
 	return speed + currentPos;

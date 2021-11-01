@@ -4,7 +4,7 @@
 #include <vector.h>
 
 void RotationManagerTest::setUp() {
-	desired = new QAngle(10.0f, 0.0f, 0.0f);
+	desired = new QAngle(20.0f, 0.0f, 0.0f);
 	current = new QAngle(0.0f, 0.0f, 0.0f);
 	goal = new QAngle(*desired);
 }
@@ -16,7 +16,7 @@ void RotationManagerTest::tearDown() {
 }
 
 void RotationManagerTest::testNoDirChange() {
-	float expectedPosition[] = { 1.0f, 3.0f, 6.0f, 8.0f, 9.0f, 10.0f, 10.0f };
+	float expectedPosition[] = {1.0f, 3.0f, 6.0f, 10.0f, 14.0f, 17.0f, 19.0f, 20.0f};
 	test(expectedPosition, sizeof(expectedPosition) / sizeof(float));
 }
 
