@@ -27,7 +27,7 @@ public:
 protected:
 	Vector targetLoc;
 
-	float targetRadius = 5.0f;
+	float targetRadius = 0.0f;
 
 	GoToAction(Blackboard& blackboard): Action(blackboard) {
 	}

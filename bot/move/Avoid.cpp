@@ -15,7 +15,6 @@
 #include <utlmap.h>
 #include <eiface.h>
 #include <in_buttons.h>
-#include <server_class.h>
 
 using namespace std;
 

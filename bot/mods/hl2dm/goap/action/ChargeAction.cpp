@@ -11,7 +11,6 @@ bool ChargeAction::precondCheck() {
 	if (!GoToConsumableEntityAction::precondCheck()) {
 		return false;
 	}
-	targetRadius += 30.0f;
 	chargeTime = 0;
 	return true;
 }
@@ -50,6 +49,5 @@ bool ChargeAction::findTargetLoc() {
 		return false;
 	}
 	// override the trigger distance
-	targetRadius = 13.0f;
 	return true;
 }

@@ -59,8 +59,8 @@ const bool MoveStateContext::hasGoal() const {
 
 bool MoveStateContext::isAtTarget(const Vector& target, float targetOffset) const {
 	const Vector& pos = blackboard.getSelf()->getCurrentPosition();
-	return ((target.z > pos.z && target.z - pos.z < 20.0f) || pos.z - target.z < HumanHeight)
-			&& Vector(target.x, target.y, pos.z).DistTo(pos) < targetOffset + HalfHumanWidth;
+	return fabs(target.z - pos.z) <= HalfHumanWidth * 2.0f
+			&& target.AsVector2D().DistTo(pos.AsVector2D()) < targetOffset + HalfHumanWidth;
 }
 
 bool MoveStateContext::reachedGoal(float targetOffset) {

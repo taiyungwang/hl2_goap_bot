@@ -52,7 +52,7 @@ private:
 
 	MoveStateContext* moveCtx;
 
-	float targetRadius = 25.0f;
+	float targetRadius = 0.0f;
 
 	int areaTime = 0, dirToTop = 4;
 

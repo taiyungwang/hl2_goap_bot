@@ -94,6 +94,9 @@ bool Navigator::step() {
 		Warning("Goal is too far from current position: %f.\n", goalDist);
 		return true;
 	}
+	if (path.empty()) {
+		moveCtx->setTargetOffset(targetRadius);
+	}
 	moveCtx->move(attributes);
 	if (mybot_debug.GetBool()) {
 		debugoverlay->AddLineOverlay(loc,
@@ -275,9 +278,7 @@ bool Navigator::canMoveTo(Vector goal, bool crouch) const {
 }
 
 bool Navigator::reachedGoal() const {
-	return blackboard.getSelf()->getCurrentPosition().DistTo(finalGoal) < targetRadius
-		|| (path.empty() && moveCtx->getGoal() == finalGoal
-			&& moveCtx->reachedGoal(targetRadius));
+	return path.empty() && moveCtx->getGoal() == finalGoal && moveCtx->reachedGoal(targetRadius);
 }
 
 bool Navigator::setLadderStart() {
