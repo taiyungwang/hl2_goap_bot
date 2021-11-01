@@ -121,7 +121,8 @@ BasePlayer* BotBuilder::buildEntity(edict_t* ent) const {
 
 void BotBuilder::addAllBots(const CCommand &command) {
 	extern CGlobalVars *gpGlobals;
-	for (int i = 0; i < gpGlobals->maxClients - 2; i++) {
+	int botsToAdd = gpGlobals->maxClients - 2 - Player::getPlayers().size();
+	for (int i = 0; i < botsToAdd; i++) {
 		const char* team = i % 2 == 0 ? "2" : "3";
 		CUtlString name("Bot");
 		name += i;
