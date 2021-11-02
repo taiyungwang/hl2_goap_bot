@@ -205,8 +205,8 @@ bool Navigator::canGetNextArea(const Vector& loc) const {
 							// don't skip areas above and below ground height
 							&& fabs(lastArea->GetCenter().z - path.top()->GetCenter().z) <= StepHeight
 							&& fabs(loc.z - lastArea->GetCenter().z) <= StepHeight
-							&& (getPortalToTopArea(goal)
-									&& canMoveTo(goal, lastArea->GetAttributes() & NAV_MESH_CROUCH))));
+							&& canMoveTo(path.top()->GetCenter(),
+									lastArea->GetAttributes() & NAV_MESH_CROUCH)));
 }
 
 void Navigator::setGoalForNextArea(const Vector& loc) {
