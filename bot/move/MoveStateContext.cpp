@@ -9,6 +9,8 @@
 #include <util/EntityUtils.h>
 #include <edict.h>
 
+const float MoveStateContext::TARGET_OFFSET = 8.0f;
+
 MoveStateContext::~MoveStateContext() {
 	delete state;
 }
@@ -58,9 +60,9 @@ const bool MoveStateContext::hasGoal() const {
 }
 
 bool MoveStateContext::isAtTarget(const Vector& target, float targetOffset) const {
-	const Vector& pos = blackboard.getSelf()->getCurrentPosition();
-	return fabs(target.z - pos.z) <= HalfHumanWidth * 2.0f
-			&& target.AsVector2D().DistTo(pos.AsVector2D()) < targetOffset + HalfHumanWidth;
+	Vector pos = blackboard.getSelf()->getCurrentPosition();
+	pos.z = target.z;
+	return pos.DistTo(target) < targetOffset + TARGET_OFFSET;
 }
 
 bool MoveStateContext::reachedGoal(float targetOffset) {

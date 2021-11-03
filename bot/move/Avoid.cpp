@@ -135,7 +135,7 @@ MoveState* Avoid::move(const Vector& pos) {
 	}
 	if (result.DidHit() && currBlocker != nullptr
 			&& Q_stristr(currBlockerName, "func_team") == nullptr
-			&& (result.plane.normal.LengthSqr() == 0.0f
+			&& (Q_stristr(currBlockerName, "worldspawn") == nullptr
 					|| result.plane.normal.z > nav_slope_limit.GetFloat())) {
 		auto collideable = currBlocker->GetCollideable();
 		Vector avoid(collideable->GetCollisionOrigin());
@@ -162,7 +162,7 @@ MoveState* Avoid::move(const Vector& pos) {
 			}
 			avoid = pos - avoid - traceTarget;
 		}
-		goal += avoid.Normalized() * HalfHumanWidth;
+		goal += avoid.Normalized() * MoveStateContext::TARGET_OFFSET;
 	}
 	moveStraight(goal);
 	return nullptr;

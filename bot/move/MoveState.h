@@ -8,7 +8,6 @@ class Vector;
  */
 class MoveState {
 public:
-
 	MoveState(MoveStateContext &ctx) :
 			ctx(ctx) {
 	}

@@ -14,6 +14,8 @@ class CBotCmd;
  */
 class MoveStateContext {
 public:
+	// Margin of error when determining goal has been reached.
+	static const float TARGET_OFFSET;
 
 	/**
 	 * @param pos Current position

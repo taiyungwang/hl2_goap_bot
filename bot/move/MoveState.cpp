@@ -9,7 +9,6 @@
 #include <ivdebugoverlay.h>
 #include <in_buttons.h>
 
-
 void MoveState::moveStraight(const Vector& destination) const {
 	// get distance from current position to destination.
 	int mvType = ctx.getType();
