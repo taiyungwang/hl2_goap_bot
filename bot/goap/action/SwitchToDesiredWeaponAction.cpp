@@ -7,10 +7,10 @@ bool SwitchToDesiredWeaponAction::precondCheck() {
 	return !blackboard.isOnLadder();
 }
 
-void SwitchToDesiredWeaponAction::init() {
-	blackboard.getCmd().weaponselect = arsenal.getDesiredWeaponIdx();
-}
-
 bool SwitchToDesiredWeaponAction::execute() {
-	return arsenal.getDesiredWeaponIdx() == arsenal.getCurrWeaponIdx();
+	if (arsenal.getDesiredWeaponIdx() == arsenal.getCurrWeaponIdx()) {
+		return true;
+	}
+	blackboard.getCmd().weaponselect = arsenal.getDesiredWeaponIdx();
+	return false;
 }

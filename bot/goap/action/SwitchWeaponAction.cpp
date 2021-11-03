@@ -14,10 +14,10 @@ bool SwitchWeaponAction::precondCheck() {
 			&& arsenal.getCurrWeaponIdx() != arsenal.getBestWeaponIdx();
 }
 
-void SwitchWeaponAction::init() {
-	blackboard.getCmd().weaponselect = arsenal.getBestWeaponIdx();
-}
-
 bool SwitchWeaponAction::execute() {
-	return arsenal.getBestWeaponIdx() == arsenal.getCurrWeaponIdx();
+	if (arsenal.getBestWeaponIdx() == arsenal.getCurrWeaponIdx()) {
+		return true;
+	}
+	blackboard.getCmd().weaponselect = arsenal.getBestWeaponIdx();
+	return false;
 }

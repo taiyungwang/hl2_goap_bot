@@ -11,7 +11,5 @@ public:
 
 	bool precondCheck();
 
-	void init();
-
 	bool execute();
 };

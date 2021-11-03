@@ -11,7 +11,5 @@ public:
 
 	virtual bool precondCheck();
 
-	void init();
-
 	bool execute();
 };
