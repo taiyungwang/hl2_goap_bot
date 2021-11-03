@@ -76,13 +76,19 @@ public:
 		this->wantToListen = wantToListen;
 	}
 
-	bool canSee(const Vector &vecAbsEnd, edict_t *target) const;
+	bool canShoot(const Vector &vecAbsEnd, edict_t *target) const;
 
-	bool canSee(CGameTrace &result, const Vector &vecAbsEnd,
+	bool canShoot(CGameTrace &result, const Vector &vecAbsEnd,
 			edict_t *target) const;
+
+	bool canSee(const Player& target) const;
 
 	VoiceMessageSender& getVoiceMessageSender() {
 		return voiceMessageSender;
+	}
+
+	const Vision& getVision() const {
+		return vision;
 	}
 
 private:

@@ -24,7 +24,11 @@ bool DODUseFragGrenadeAction::execute() {
 		self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::FireInTheHole>(self->getEdict()));
 		return true;
 	}
-	float dist = blackboard.getTargetEntDistance();
+	auto targetedPlayer = self->getVision().getTargetedPlayer();
+	float dist = targetedPlayer == nullptr ?
+				INFINITY :
+				(targetedPlayer->getEdict()->GetCollideable()->GetCollisionOrigin()
+						- self->getCurrentPosition()).Length();
 	WeaponFunction* grenade = weapon->chooseWeaponFunc(self->getEdict(),
 			dist);
 	self->setWantToListen(false);

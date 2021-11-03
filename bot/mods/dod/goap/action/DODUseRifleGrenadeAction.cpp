@@ -13,11 +13,10 @@ bool DODUseRifleGrenadeAction::precondCheck() {
 	}
 	Weapon *grenade = arsenal.getWeapon(weapIdx);
 	target = nullptr;
-	auto& enemies = blackboard.getVisibleEnemies();
 	float minDist = grenade->getPrimary()->getRange()[0];
-	FOR_EACH_VEC(enemies, i)
-	{
-		const Player* enemy = Player::getPlayer(enemies[i]);
+	auto enemies = blackboard.getSelf()->getVision().getVisibleEnemies();
+	for(int i : enemies) {
+		const Player* enemy = Player::getPlayer(i);
 		if (enemy == nullptr) {
 			continue;
 		}
@@ -27,9 +26,9 @@ bool DODUseRifleGrenadeAction::precondCheck() {
 			continue;
 		}
 		float dist = 0;
-		FOR_EACH_VEC(enemies, j)
+		for(int j : enemies)
 		{
-			const Player* enemyOther = Player::getPlayer(enemies[j]);
+			const Player* enemyOther = Player::getPlayer(j);
 			if (enemyOther == nullptr || enemyOther == enemy) {
 				continue;
 			}

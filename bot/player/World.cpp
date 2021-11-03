@@ -3,7 +3,6 @@
 #include "Blackboard.h"
 #include "Bot.h"
 #include <voice/AreaClearVoiceMessage.h>
-#include <voice/VoiceMessageSender.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <util/BaseEntity.h>
@@ -28,8 +27,9 @@ void World::reset() {
 
 bool World::think(Blackboard& blackboard) {
 	bool& enemySighted = states[states.Find(WorldProp::ENEMY_SIGHTED)];
+	Bot* self = blackboard.getSelf();
 	updateState(WorldProp::MULTIPLE_ENEMY_SIGHTED,
-			blackboard.getVisibleEnemies().Count() > 1);
+			!self->getVision().getVisibleEnemies().empty());
 	Arsenal& arsenal = blackboard.getSelf()->getArsenal();
 	updateState(WorldProp::USING_BEST_WEAP,
 			arsenal.getBestWeaponIdx() == arsenal.getCurrWeaponIdx());
@@ -39,9 +39,8 @@ bool World::think(Blackboard& blackboard) {
 		blackboard.setBlocker(nullptr);
 	}
 	bool inRange = true;
-	Bot* self = blackboard.getSelf();
 	const Weapon* weap = arsenal.getCurrWeapon();
-	const Player* enemy = blackboard.getTargetedPlayer();
+	const Player* enemy = self->getVision().getTargetedPlayer();
 	if (weap != nullptr) {
 		const Vector& pos = self->getCurrentPosition();
 		if (enemy != nullptr) {
@@ -51,8 +50,7 @@ bool World::think(Blackboard& blackboard) {
 			auto& players = Player::getPlayers();
 			auto player = players.find(engine->IndexOfEdict(blocker));
 			if (player != players.end()) {
-				if (!player->second->isInGame() || (player->second->getTeam() > 0
-						&& player->second->getTeam() == self->getTeam())) {
+				if (!self->isEnemy(*player->second)) {
 					blackboard.setBlocker(nullptr);
 				} else {
 					self->setWantToListen(false);
@@ -80,9 +78,8 @@ bool World::think(Blackboard& blackboard) {
 	updateState(WorldProp::IS_BLOCKED, blackboard.getBlocker() != nullptr);
 	// reset planner if this is first time we see enemy.
 	bool noEnemy = !enemySighted;
-	if (enemySighted && enemy == nullptr
+	if (enemySighted && (enemy == nullptr || !self->canShoot(blackboard.getViewTarget(), enemy->getEdict()))
 			&& !states[states.Find(WorldProp::HEARD_AREA_CLEAR)]) {
-		self->getVoiceMessageSender().sendMessage(std::make_shared<AreaClearVoiceMessage>(self->getEdict()));
 		updateState(WorldProp::HEARD_AREA_CLEAR, true);
 	}
 	enemySighted = enemy != nullptr;

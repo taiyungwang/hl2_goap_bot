@@ -14,7 +14,6 @@ Blackboard::Blackboard(Bot *self, BasePlayer *entInstance) :
 
 void Blackboard::reset() {
 	blocker = nullptr;
-	targetedPlayer = nullptr;
 }
 
 Blackboard::~Blackboard() {
@@ -31,13 +30,6 @@ float Blackboard::getAimAccuracy(const Vector& pos) const {
 
 bool Blackboard::isOnLadder() {
 	return entInstance->isOnLadder();
-}
-
-float Blackboard::getTargetEntDistance() const {
-	return targetedPlayer == nullptr ?
-			INFINITY :
-			(targetedPlayer->getEdict()->GetCollideable()->GetCollisionOrigin()
-					- self->getCurrentPosition()).Length();
 }
 
 void Blackboard::lookStraight() {

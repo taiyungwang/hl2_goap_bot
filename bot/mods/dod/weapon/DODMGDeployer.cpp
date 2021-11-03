@@ -40,7 +40,7 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 			Buttons& buttons = blackboard.getButtons();
 			if (target != nullptr && target->isInGame()) {
 				trace_t result;
-				self->canSee(result, self->getEyesPos(), target->getEdict());
+				self->canShoot(result, self->getEyesPos(), target->getEdict());
 				extern ConVar nav_slope_limit;
 				if (result.DidHit()) {
 					if (result.endpos.DistTo(result.startpos) > HalfHumanWidth
@@ -74,9 +74,30 @@ void DODMGDeployer::undeploy(Blackboard& blackboard) {
 	animationCounter = -1;
 }
 
+class FilterSelf: public CTraceFilter {
+public:
+	// It does have a base, but we'll never network anything below here..
+
+	FilterSelf(const IHandleEntity *passentity) :
+			m_pPassEnt(passentity) {
+	}
+
+	virtual ~FilterSelf() {
+	}
+
+	virtual bool ShouldHitEntity(IHandleEntity *pHandleEntity,
+			int contentsMask) {
+		return pHandleEntity != m_pPassEnt;
+	}
+
+protected:
+	const IHandleEntity *m_pPassEnt;
+
+};
+
 void DODMGDeployer::start(Blackboard& blackboard) {
-	const Player* self = blackboard.getSelf();
-	target = blackboard.getTargetedPlayer();
+	const Bot* self = blackboard.getSelf();
+	target = self->getVision().getTargetedPlayer();
 	if (target == nullptr && blackboard.getBlocker() == nullptr) {
 		blackboard.lookStraight();
 	}

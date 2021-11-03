@@ -7,7 +7,7 @@
 #include <weapon/WeaponFunction.h>
 
 bool DODUseSmokeGrenadeAction::precondCheck() {
-	auto target = blackboard.getTargetedPlayer();
+	auto target = blackboard.getSelf()->getVision().getTargetedPlayer();
 	return target != nullptr && !target->getEdict()->IsFree() && target->isInGame()
 			&& UseSpecificWeaponAction::precondCheck()
 			&& arsenal.getWeapon(weapIdx) != nullptr
@@ -19,7 +19,7 @@ bool DODUseSmokeGrenadeAction::execute() {
 		return true;
 	}
 	auto self = blackboard.getSelf();
-	Vector targetLoc = blackboard.getTargetedPlayer()->getCurrentPosition();
+	Vector targetLoc = self->getVision().getTargetedPlayer()->getCurrentPosition();
 	float dist = self->getEyesPos().DistTo(targetLoc);
 	WeaponFunction* grenade = arsenal.getWeapon(weapIdx)->chooseWeaponFunc(
 			self->getEdict(), dist);

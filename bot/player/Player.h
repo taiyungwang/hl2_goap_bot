@@ -43,6 +43,8 @@ public:
 
 	int getTeam() const;
 
+	bool isEnemy(const Player& other) const;
+
 	const char* getWeaponName() const;
 
 	virtual void think();

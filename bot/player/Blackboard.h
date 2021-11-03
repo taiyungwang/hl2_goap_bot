@@ -5,7 +5,6 @@
 #include <iplayerinfo.h>
 
 class BasePlayer;
-class Player;
 class Bot;
 class Navigator;
 struct edict_t;
@@ -38,18 +37,8 @@ public:
 
 	float getAimAccuracy(const Vector& pos) const;
 
-	float getTargetEntDistance() const;
-
 	Bot* getSelf() {
 		return self;
-	}
-
-	const Player* getTargetedPlayer() const {
-		return targetedPlayer;
-	}
-
-	void setTargetedPlayer(const Player* targetedPlayer) {
-		this->targetedPlayer = targetedPlayer;
 	}
 
 	edict_t* getBlocker() const {
@@ -58,10 +47,6 @@ public:
 
 	void setBlocker(edict_t* blocker) {
 		this->blocker = blocker;
-	}
-
-	CUtlVector<int>& getVisibleEnemies() {
-		return visibleEnemies;
 	}
 
 	CBotCmd& getCmd() {
@@ -90,10 +75,6 @@ public:
 
 private:
 	Bot* self;
-
-	const Player *targetedPlayer;
-
-	CUtlVector<int> visibleEnemies;
 
 	CBotCmd cmd;
 

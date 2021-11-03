@@ -15,7 +15,7 @@
 
 int Arsenal::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) const {
 	int best = 0;
-	auto* targetedPlayer = blackboard.getTargetedPlayer();
+	auto* targetedPlayer = blackboard.getSelf()->getVision().getTargetedPlayer();
 	edict_t* target = nullptr;
 	if (targetedPlayer != nullptr) {
 		target = targetedPlayer->getEdict();

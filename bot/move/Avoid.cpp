@@ -39,8 +39,7 @@ public:
 
 	bool ShouldHitEntity(IHandleEntity *pHandleEntity,
 			int contentsMask) override {
-		string name(reinterpret_cast<IServerUnknown*>(const_cast<IHandleEntity*>(pHandleEntity))
-				->GetNetworkable()->GetEdict()->GetClassName());
+		string name(entityFromEntityHandle(pHandleEntity)->GetClassName());
 		return name.find("physics") != string::npos
 				|| name.find("breakable") != string::npos;
 	}
@@ -56,8 +55,7 @@ public:
 
 	bool ShouldHitEntity(IHandleEntity *pHandleEntity,
 			int contentsMask) override {
-		edict_t* hit = reinterpret_cast<IServerUnknown*>(const_cast<IHandleEntity*>(pHandleEntity))
-						->GetNetworkable()->GetEdict();
+		edict_t* hit = entityFromEntityHandle(pHandleEntity);
 		return hit != self && string(hit->GetClassName()).find("func_team") == string::npos;
 	}
 

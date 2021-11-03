@@ -2,7 +2,6 @@
 
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <player/Vision.h>
 #include <move/Navigator.h>
 #include <edict.h>
 
@@ -26,7 +25,7 @@ bool FindCoverAction::operator() (CNavArea *area, CNavArea *priorArea, float tra
 	Bot* self = blackboard.getSelf();
 	if (currentArea != area
 			&& !area->IsPotentiallyVisible(Navigator::getArea(target, self->getTeam()))
-			&& !self->canSee(eyes, target)) {
+			&& !self->canShoot(eyes, target)) {
 		this->hideArea = area;
 		return false;
 	}
@@ -55,7 +54,7 @@ void FindCoverAction::PostSearch(void) {
 }
 
 edict_t* FindCoverAction::getTarget() const {
-	auto targetPlayer = blackboard.getTargetedPlayer();
+	auto targetPlayer = blackboard.getSelf()->getVision().getTargetedPlayer();
 	return targetPlayer == nullptr || !targetPlayer->isInGame() ? nullptr : targetPlayer->getEdict();
 }
 

@@ -42,6 +42,10 @@ int Player::getTeam() const {
 	return info->GetTeamIndex();
 }
 
+bool Player::isEnemy(const Player& other) const {
+	return &other != this && other.inGame && (getTeam() == 0 || other.getTeam() != getTeam());
+}
+
 Vector Player::getCurrentPosition() const {
 	return ent->GetCollideable()->GetCollisionOrigin();
 }

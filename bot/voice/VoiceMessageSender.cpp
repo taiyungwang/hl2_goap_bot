@@ -1,9 +1,14 @@
 #include "VoiceMessageSender.h"
 
 #include "VoiceMessage.h"
+#include <player/Bot.h>
+#include <player/Vision.h>
 #include <eiface.h>
 
 bool VoiceMessageSender::sendMessage(const std::shared_ptr<VoiceMessage> &message) {
+	if (dynamic_cast<Bot*>(Player::getPlayer(message->getSender()))->getVision().getNearbyTeammates().empty()) {
+		return false;
+	}
 	extern IVEngineServer *engine;
 	float time = engine->Time();
 	while (!sentMessages.empty()

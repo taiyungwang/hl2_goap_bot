@@ -2,10 +2,14 @@
 
 #include "Bot.h"
 #include "Blackboard.h"
+#include <voice/AreaClearVoiceMessage.h>
+#include <voice/VoiceMessageSender.h>
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
 #include <eiface.h>
 #include <ivdebugoverlay.h>
+#include <vector>
+#include <algorithm>
 
 void Vision::updateVisiblity(Blackboard& blackboard) {
 	auto self = blackboard.getSelf();
@@ -18,18 +22,22 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 		return;
 	}
 	float closest = INFINITY;
-	auto& visibleEnemies = blackboard.getVisibleEnemies();
-	visibleEnemies.RemoveAll();
-	int team = self->getTeam();
+	nearByTeammates.clear();
 	struct Visible {
 		const Player* player;
 		float dist;
 	};
-	CUtlVector<Visible> visibles;
-	for (auto player: Player::getPlayers()) {
-		auto* target = player.second;
-		if (target == self || !target->isInGame()
-				|| (team > 0 && team == target->getTeam())) {
+	std::vector<Visible> visibles;
+	for (auto itr: Player::getPlayers()) {
+		auto* target = itr.second;
+		if (target == self || !target->isInGame()) {
+			continue;
+		}
+		if (!self->isEnemy(*target)) {
+			// assume allies are visible on minimap.
+			if (self->getCurrentPosition().DistTo(target->getCurrentPosition()) < 500.0f) {
+				nearByTeammates.push_back(itr.first);
+			}
 			continue;
 		}
 		Vector targetMin, targetMax;
@@ -42,50 +50,33 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 				|| targetDir.Normalized().Dot(facing) <= 0.0f) {
 			continue;
 		}
-		visibles.AddToTail();
-		visibles.Tail().player = target;
-		visibles.Tail().dist = dist;
+		visibles.emplace_back();
+		visibles.back().player = target;
+		visibles.back().dist = dist;
 	}
-	visibles.Sort([] (const Visible* v1, const Visible* v2) {
-			if (v2->dist == v2->dist) {
-				return 0;
-			}
-			return v2->dist > v1->dist ? -1: 1;
-		});
-	auto lastTarget = blackboard.getTargetedPlayer();
-	blackboard.setTargetedPlayer(nullptr);
-	FOR_EACH_VEC(visibles, i) {
-		const Player* target = visibles[i].player;
-		Vector targetPos = target->getEyesPos();
-		if (!self->canSee(targetPos, target->getEdict())) {
-			targetPos = target->getCurrentPosition();
-			targetPos.z += 31.0f; // center mass
-			trace_t result;
-			if (!self->canSee(result, targetPos, target->getEdict())) {
-				// see if the target is obscured by another enemy.
-				bool visible = false;
-				if (result.m_pEnt != nullptr) {
-					extern IServerGameEnts *servergameents;
-					edict_t* target = servergameents->BaseEntityToEdict(result.m_pEnt);
-					extern CGlobalVars *gpGlobals;
-					if (engine->IndexOfEdict(target) < gpGlobals->maxClients) {
-						FOR_EACH_VEC(visibles, j) {
-							if (visibles[j].player->getEdict() == target) {
-								visible = true;
-								break;
-							}
-						}
-					}
+	std::sort(visibles.begin(), visibles.end(),
+			[](const Visible &v1, const Visible &v2) {
+				if (v2.dist == v2.dist) {
+					return 0;
 				}
-				if (!visible) {
-					continue;
-				}
-			}
+				return v2.dist > v1.dist ? -1 : 1;
+			});
+	const Player* lastTarget = targetedPlayer;
+	targetedPlayer = nullptr;
+	if (!visibleEnemies.empty() && visibles.empty()) {
+		self->getVoiceMessageSender().sendMessage(std::make_shared<AreaClearVoiceMessage>(self->getEdict()));
+	}
+	visibleEnemies.clear();
+	for(const auto &visible : visibles) {
+		const Player* target = visible.player;
+		if (!self->canSee(*target)) {
+			continue;
 		}
-		if (blackboard.getTargetedPlayer() == nullptr) {
+		Vector targetPos = target->getEyesPos();
+		if (targetedPlayer == nullptr) {
 			self->setWantToListen(false);
 			blackboard.setViewTarget(targetPos);
-			blackboard.setTargetedPlayer(target);
+			targetedPlayer = target;
 		}
 		extern ConVar mybot_debug;
 		if (mybot_debug.GetBool()) {
@@ -94,15 +85,15 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 					255, 0, true,
 					NDEBUG_PERSIST_TILL_NEXT_SERVER);
 		}
-		visibleEnemies.AddToTail(engine->IndexOfEdict(target->getEdict()));
+		visibleEnemies.push_back(engine->IndexOfEdict(target->getEdict()));
 	}
-	if (blackboard.getTargetedPlayer() != nullptr) {
+	if (targetedPlayer!= nullptr) {
 		memoryDur = 60;
 	} else if (lastTarget != nullptr && lastTarget->isInGame()) {
 		memoryDur--;
 		if (memoryDur > 0) {
 			self->setWantToListen(false);
-			blackboard.setTargetedPlayer(lastTarget);
+			targetedPlayer = lastTarget;
 		}
 	}
 }

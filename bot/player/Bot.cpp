@@ -15,15 +15,21 @@
 #include <nav_mesh/nav_area.h>
 #include <util/SimpleException.h>
 #include <util/BasePlayer.h>
+#include <util/EntityUtils.h>
 #include <util/UtilTrace.h>
 #include <ivdebugoverlay.h>
+#include <IEngineTrace.h>
 #include <in_buttons.h>
 
 PlayerClasses Bot::CLASSES = nullptr;
 
 static ConVar mybot_rot_speed("mybot_rot_speed", "0.15", 0,
 		"determines rotational acceleration rate in degrees");
+
 ConVar mybot_mimic("mybot_mimic", "0");
+
+extern IVEngineServer* engine;
+extern CGlobalVars *gpGlobals;
 
 Bot::~Bot() {
 	delete blackboard;
@@ -81,7 +87,6 @@ void Bot::think() {
 			}
 		}
 		cmd.buttons = blackboard->getButtons().getPressed();
-		extern CGlobalVars *gpGlobals;
 		cmd.tick_count = gpGlobals->tickcount;
 		if (mybot_mimic.GetBool()) {
 			auto& players = Player::getPlayers();
@@ -101,43 +106,37 @@ bool Bot::handle(EventInfo* event) {
 	CUtlString name(event->getName());
 	int eventUserId = event->getInt("userid");
 	// bot owns this event.
-	if (eventUserId == getUserId()) {
-		if (name == "player_spawn") {
-			CNavArea* area = blackboard->getNavigator()->getLastArea();
-			if (area != nullptr) {
-				area->IncreaseDanger(getTeam(), 1.0f);
-			}
-			resetPlanner = true;
-			blackboard->reset();
-			world->reset();
-			return true;
+	if (eventUserId != getUserId()) {
+		return false;
+	}
+	if (name == "player_spawn") {
+		CNavArea* area = blackboard->getNavigator()->getLastArea();
+		if (area != nullptr) {
+			area->IncreaseDanger(getTeam(), 1.0f);
 		}
-		if (name == "player_death") {
-			planner->resetPlanning(true);
+		resetPlanner = true;
+		blackboard->reset();
+		world->reset();
+		return true;
+	}
+	if (name == "player_death") {
+		planner->resetPlanning(true);
+		return false;
+	}
+	if (name == "player_hurt") {
+		int attacker = event->getInt("attacker");
+		if (event->getInt("attacker") == getUserId()) {
 			return false;
 		}
-		if (name == "player_hurt") {
-			int attacker = event->getInt("attacker");
-			if (event->getInt("attacker") == getUserId()) {
-				return false;
+		world->updateState(WorldProp::HURT, true);
+		for (auto player: Player::getPlayers()) {
+			if (player.second->getUserId() == attacker) {
+				wantToListen = false;
+				blackboard->setViewTarget(player.second->getEyesPos());
+				break;
 			}
-			world->updateState(WorldProp::HURT, true);
-			for (auto player: Player::getPlayers()) {
-				if (player.second->getUserId() == attacker) {
-					wantToListen = false;
-					blackboard->setViewTarget(player.second->getEyesPos());
-					blackboard->setTargetedPlayer(player.second);
-					break;
-				}
-			}
-			return true;
 		}
-	} else if (name == "player_death" || name == "player_disconnect") {
-		auto targeted = blackboard->getTargetedPlayer();
-		extern IVEngineServer* engine;
-		if (targeted != nullptr && eventUserId == targeted->getUserId()) {
-			blackboard->setTargetedPlayer(nullptr);
-		}
+		return true;
 	}
 	return false;
 }
@@ -145,7 +144,7 @@ bool Bot::handle(EventInfo* event) {
 bool Bot::receive(edict_t* sender, const CCommand& command) {
 	Player *player = getPlayer(sender);
 	if (player->getTeam() == getTeam()
-			&& canSee(player->getEyesPos(), player->getEdict())
+			&& canSee(*player)
 			&& voiceMessageSender.isMessage<AreaClearVoiceMessage>(command.Arg(0))) {
 		world->updateState(WorldProp::HEARD_AREA_CLEAR, true);
 	}
@@ -164,51 +163,61 @@ int Bot::getPlayerClass() const {
 	return playerClassVar == nullptr ? -1 : playerClassVar->getPlayerClass();
 }
 
-class FilterSelfAndEnemies: public CTraceFilter {
+class FilterSelfAndEnemies: public CTraceFilterEntitiesOnly {
 public:
-	FilterSelfAndEnemies(edict_t* self,
-			edict_t* target) : self(self), target(target) {
+	FilterSelfAndEnemies(edict_t* self) : self(self) {
 	}
 
 	virtual ~FilterSelfAndEnemies() {
 	}
 
-	bool ShouldHitEntity(IHandleEntity *pHandleEntity, int contentsMask) {
-		if (target != nullptr && pHandleEntity == target->GetIServerEntity()) {
-			return true;
-		}
+	bool ShouldHitEntity(IHandleEntity *pHandleEntity, int contentsMask) override {
 		if (pHandleEntity == self->GetIServerEntity()) {
 			return false;
 		}
-		for (auto player: Player::getPlayers()) {
-			if (player.second->isInGame()
-					&& player.second->getEdict()->GetIServerEntity()
-							== pHandleEntity) {
-				return false;
-			}
-		}
-		return true;
+		int idx = engine->IndexOfEdict(entityFromEntityHandle(const_cast<const IHandleEntity*>(pHandleEntity)));
+		return (idx < 1 || idx > gpGlobals->maxClients)
+				|| !Player::getPlayer(idx)->isEnemy(*Player::getPlayer(self));
 	}
 
 private:
-	edict_t* self, *target;
+	edict_t *self;
 };
 
-bool Bot::canSee(trace_t& result, const Vector &vecAbsEnd, edict_t* target) const {
+bool Bot::canShoot(trace_t& result, const Vector &vecAbsEnd, edict_t* target) const {
 	if (target == nullptr) {
 		return false;
 	}
 	result.fraction = 0.0f;
 	Vector start = getEyesPos();
-	FilterSelfAndTarget filter(getEdict()->GetIServerEntity(),
-			target->GetIServerEntity());
+	FilterSelfAndEnemies filter(getEdict());
 	UTIL_TraceLine(start, vecAbsEnd, MASK_ALL, &filter, &result);
 	return !result.DidHit();
 }
 
-bool Bot::canSee(const Vector &vecAbsEnd, edict_t* target) const {
+class VisionFilter: public CTraceFilter {
+public:
+	virtual ~VisionFilter() {
+	}
+
+	bool ShouldHitEntity( IHandleEntity *pServerEntity, int contentsMask ) override
+	{
+		return FClassnameIs(entityFromEntityHandle(pServerEntity), "worldspawn");
+	}
+};
+
+
+bool Bot::canSee(const Player& player) const {
 	trace_t result;
-	return canSee(result, vecAbsEnd, target);
+	VisionFilter filter;
+	UTIL_TraceLine(getEyesPos(), player.getEyesPos(),
+			MASK_ALL, &filter, &result);
+	return !result.DidHit();
+}
+
+bool Bot::canShoot(const Vector &vecAbsEnd, edict_t* target) const {
+	trace_t result;
+	return canShoot(result, vecAbsEnd, target);
 }
 
 void Bot::listen() {
@@ -224,13 +233,12 @@ void Bot::listen() {
 		Vector position = player.second->getCurrentPosition();
 		float noiseRange = player.second->getNoiseRange(),
 				dist = getCurrentPosition().DistTo(position) < noiseRange;
-		int team = getTeam();
-		if ((team < 1 || team != player.second->getTeam() || dist > 300.0f)
+		if ((isEnemy(*player.second) || dist > 300.0f)
 				&& dist < noiseRange) {
 			position.z += 31.0f; // center mass
 			if ((noiseRange > loudest
 					|| (noiseRange == loudest && dist < closest))
-					&& canSee(position, player.second->getEdict())) {
+					&& canSee(*player.second)) {
 				loudest = noiseRange;
 				closest = dist;
 				blackboard->setViewTarget(player.second->getEyesPos());
