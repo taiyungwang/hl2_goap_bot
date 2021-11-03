@@ -131,3 +131,8 @@ void DODBotBuilder::modHandleCommand(const CCommand &command, Bot* bot) const {
 	bot->setPlayerClassVar<DodPlayer>();
 	bot->setHookEnabled(true);
 }
+
+Bot *DODBotBuilder::modBuild(Bot * bot) {
+	bot->getVision().setMiniMapRange(500.0f);
+	return bot;
+}

@@ -96,7 +96,7 @@ protected:
 };
 
 void DODMGDeployer::start(Blackboard& blackboard) {
-	const Bot* self = blackboard.getSelf();
+	Bot* self = blackboard.getSelf();
 	target = self->getVision().getTargetedPlayer();
 	if (target == nullptr && blackboard.getBlocker() == nullptr) {
 		blackboard.lookStraight();

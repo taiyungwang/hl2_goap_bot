@@ -11,6 +11,10 @@
 #include <vector>
 #include <algorithm>
 
+Vision::Vision() {
+	miniMapRange = INFINITY;
+}
+
 void Vision::updateVisiblity(Blackboard& blackboard) {
 	auto self = blackboard.getSelf();
 	Vector facing = blackboard.getFacing();
@@ -35,7 +39,7 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 		}
 		if (!self->isEnemy(*target)) {
 			// assume allies are visible on minimap.
-			if (self->getCurrentPosition().DistTo(target->getCurrentPosition()) < 500.0f) {
+			if (self->getCurrentPosition().DistTo(target->getCurrentPosition()) < miniMapRange) {
 				nearByTeammates.push_back(itr.first);
 			}
 			continue;

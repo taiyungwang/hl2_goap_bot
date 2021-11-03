@@ -87,7 +87,7 @@ public:
 		return voiceMessageSender;
 	}
 
-	const Vision& getVision() const {
+	Vision& getVision() {
 		return vision;
 	}
 

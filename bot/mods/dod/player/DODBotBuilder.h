@@ -22,4 +22,6 @@ private:
 	World* buildWorld() const;
 
 	void modHandleCommand(const CCommand &command, Bot* bot) const;
+
+	Bot *modBuild(Bot *) override;
 };

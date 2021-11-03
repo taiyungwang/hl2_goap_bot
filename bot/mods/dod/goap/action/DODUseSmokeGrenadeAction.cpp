@@ -7,11 +7,13 @@
 #include <weapon/WeaponFunction.h>
 
 bool DODUseSmokeGrenadeAction::precondCheck() {
-	auto target = blackboard.getSelf()->getVision().getTargetedPlayer();
+	auto vision = blackboard.getSelf()->getVision();
+	auto target = vision.getTargetedPlayer();
 	return target != nullptr && !target->getEdict()->IsFree() && target->isInGame()
 			&& UseSpecificWeaponAction::precondCheck()
 			&& arsenal.getWeapon(weapIdx) != nullptr
-			&& arsenal.getWeapon(weapIdx)->isInRange(target->getCurrentPosition().DistTo(blackboard.getSelf()->getCurrentPosition()));
+			&& arsenal.getWeapon(weapIdx)->isInRange(target->getCurrentPosition().DistTo(blackboard.getSelf()->getCurrentPosition()))
+			&& !vision.getNearbyTeammates().empty();
 }
 
 bool DODUseSmokeGrenadeAction::execute() {

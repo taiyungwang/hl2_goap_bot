@@ -51,6 +51,10 @@ protected:
 	virtual void modHandleCommand(const CCommand &command, Bot* bot) const {
 	}
 
+	virtual Bot* modBuild(Bot *bot) {
+		return bot;
+	}
+
 private:
 	const ArsenalBuilder& arsenalBuilder;
 

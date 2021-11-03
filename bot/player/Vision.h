@@ -7,6 +7,8 @@ class Player;
 
 class Vision {
 public:
+	Vision();
+
 	void updateVisiblity(Blackboard& blackboard);
 
 	const std::list<int>& getVisibleEnemies() const {
@@ -21,10 +23,16 @@ public:
 		return targetedPlayer;
 	}
 
+	void setMiniMapRange(float miniMapRange) {
+		this->miniMapRange = miniMapRange;
+	}
+
 private:
 	unsigned int memoryDur = 0;
 
 	std::list<int> visibleEnemies, nearByTeammates;
 
 	const Player *targetedPlayer = nullptr;
+
+	float miniMapRange;
 };
