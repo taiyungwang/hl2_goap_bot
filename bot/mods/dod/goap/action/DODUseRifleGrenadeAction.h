@@ -12,6 +12,9 @@ public:
 
 	virtual bool precondCheck();
 
+	virtual bool execute() override;
+
+
 protected:
 	const Player* target = nullptr;
 

@@ -42,6 +42,11 @@ bool DODUseRifleGrenadeAction::precondCheck() {
 	return target != nullptr;
 }
 
+bool DODUseRifleGrenadeAction::execute() {
+	return blackboard.getSelf()->getArsenal().getCurrWeapon()->isClipEmpty()
+			|| DODUseSmokeGrenadeAction::execute();
+}
+
 bool DODUseRifleGrenadeAction::canUse(const char* weaponName) const {
 	return Q_strcmp(weaponName, "weapon_riflegren_us") == 0
 			|| Q_strcmp(weaponName, "weapon_riflegren_ger") == 0;
