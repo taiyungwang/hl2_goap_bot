@@ -29,7 +29,7 @@ bool World::think(Blackboard& blackboard) {
 	bool& enemySighted = states[states.Find(WorldProp::ENEMY_SIGHTED)];
 	Bot* self = blackboard.getSelf();
 	updateState(WorldProp::MULTIPLE_ENEMY_SIGHTED,
-			!self->getVision().getVisibleEnemies().empty());
+			self->getVision().getVisibleEnemies().size() > 1);
 	Arsenal& arsenal = blackboard.getSelf()->getArsenal();
 	updateState(WorldProp::USING_BEST_WEAP,
 			arsenal.getBestWeaponIdx() == arsenal.getCurrWeaponIdx());
