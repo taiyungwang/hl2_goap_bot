@@ -46,7 +46,7 @@ int Arsenal::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) c
 }
 
 void Arsenal::reset() {
-	currWeapIdx = bestWeapIdx = 0;
+	desiredWeapIdx = currWeapIdx = bestWeapIdx = 0;
 	weapons.clear();
 }
 
