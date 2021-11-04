@@ -22,6 +22,7 @@ MoveState* MoveLadder::move(const Vector& currPos) {
 	bool onLadder = ctx.getBlackboard().isOnLadder();
 	if (onLadder && !startedClimbing) {
 		startedClimbing = true;
+		ctx.getBlackboard().setViewTarget(ctx.getLadderEnd());
 	}
 	if (startedClimbing) {
 		remainingDist = ctx.getLadderEnd().DistTo(currPos);
