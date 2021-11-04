@@ -74,7 +74,8 @@ MoveState* Avoid::move(const Vector& pos) {
 	Vector goal = ctx.getGoal();
 	const trace_t& result = ctx.trace(goal, crouching);
 	edict_t* currBlocker = getEdict(result);
-	const char* currBlockerName = currBlocker == nullptr || currBlocker->IsFree() ? nullptr: currBlocker->GetClassName();
+	const char* currBlockerName = currBlocker == nullptr || currBlocker->IsFree()
+			? nullptr : currBlocker->GetClassName();
 	int team = blackboard.getSelf()->getTeam();
 	edict_t* self = blackboard.getSelf()->getEdict();
 	if (ctx.isStuck()) {
@@ -87,29 +88,21 @@ MoveState* Avoid::move(const Vector& pos) {
 		}
 		extern CGlobalVars *gpGlobals;
 		int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
-		if ((idx > 0 && idx <= gpGlobals->maxClients)
-						|| Q_stristr(currBlockerName, "physics") != nullptr
-						|| Q_stristr(currBlockerName, "breakable") != nullptr
-						|| Q_stristr(currBlockerName, "func_team") != nullptr) {
-			blocker = currBlocker;
-			if (Q_stristr(blocker->GetClassName(), "func_team") != nullptr
+		if (currBlocker != nullptr) {
+			if (Q_stristr(currBlocker->GetClassName(), "func_team") != nullptr) {
 				// ensure that nothing else is blocking us.
-				&& !ctx.trace(pos, goal, crouching, IgnoreSelfAndTeamWall(self)).DidHit()) {
-					setTeamWall(blocker, team);
-			}
-		}
-		auto& players = Player::getPlayers();
-		if (blocker != nullptr && !blocker->IsFree()
-				&& blocker->GetCollideable() != nullptr
-				&& Q_stristr(currBlockerName, "func_team") == nullptr) {
-			if (Q_stristr(currBlockerName, "physics") != nullptr
+				if (!ctx.trace(pos, goal, crouching, IgnoreSelfAndTeamWall(self)).DidHit()
+						|| (Q_stristr(getEdict(result)->GetClassName(), "worldspawn") != nullptr
+								&& result.plane.normal.z < nav_slope_limit.GetFloat())) {
+					setTeamWall(currBlocker, team);
+				}
+			} else if (Q_stristr(currBlockerName, "physics") != nullptr
 					|| Q_stristr(currBlockerName, "breakable") != nullptr
-					|| (Q_stristr(blocker->GetClassName(), "player") != nullptr
+					|| (Q_stristr(currBlockerName, "player") != nullptr
 							&& ctx.trace(pos, goal, crouching,
 									IgnoreAllButPhysicsAndBreakable()).DidHit())) {
-				blocker = getEdict(result);
+				blackboard.setBlocker(currBlocker);
 			}
-			blackboard.setBlocker(blocker);
 		}
 		if (dynamic_cast<Stopped*>(nextState) != nullptr) {
 			// completely stuck.
@@ -117,23 +110,19 @@ MoveState* Avoid::move(const Vector& pos) {
 		}
 		return nextState;
 	}
-	if (currBlocker != nullptr) {
-		Vector blockerPos = currBlocker->GetCollideable()->GetCollisionOrigin();
-		if (Q_stristr(currBlockerName, "func_team") != nullptr) {
-			Extent wallExtent;
-			wallExtent.Init(currBlocker);
-			if (wallExtent.Contains(pos)) {
-				// set team wall against other team if we can walk through.
-				setTeamWall(currBlocker, (team + 1) % 2);
-			}
-		}
-		if ((Q_stristr(currBlockerName, "physics") != nullptr
-				|| Q_stristr(currBlockerName, "breakable") != nullptr)
-				&& pos.DistTo(blockerPos) < Weapon::MELEE_RANGE) {
-			blackboard.setBlocker(currBlocker);
+	if (Q_stristr(currBlockerName, "func_team") != nullptr) {
+		blocker = currBlocker;
+	}
+	if (blocker != nullptr
+			&& Q_stristr(blocker->GetClassName(), "func_team") != nullptr) {
+		Extent wallExtent;
+		wallExtent.Init(blocker);
+		if (wallExtent.Contains(pos)) {
+			// set team wall against other team if we can walk through.
+			setTeamWall(blocker, (team + 1) % 2);
 		}
 	}
-	if (result.DidHit() && currBlocker != nullptr
+	if (currBlocker != nullptr
 			&& Q_stristr(currBlockerName, "func_team") == nullptr
 			&& (Q_stristr(currBlockerName, "worldspawn") == nullptr
 					|| result.plane.normal.z > nav_slope_limit.GetFloat())) {
@@ -179,7 +168,6 @@ void Avoid::setTeamWall(edict_t *blocker, int team) {
 	navBlocker->setBlockedTeam(team);
 	blockers.Insert(idx, navBlocker);
 }
-
 
 /**
  * A filter that maintains a list of entities to ignore;
