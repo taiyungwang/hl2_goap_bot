@@ -26,7 +26,8 @@ public:
 	static Player* getPlayer(edict_t* ent);
 
 	static Player* getPlayer(int idx) {
-		return players[idx];
+		return players.find(idx) != players.end() ?
+				players[idx] : nullptr;
 	}
 
 	Player(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal);

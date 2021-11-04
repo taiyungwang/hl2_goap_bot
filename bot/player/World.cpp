@@ -40,7 +40,7 @@ bool World::think(Blackboard& blackboard) {
 	}
 	bool inRange = true;
 	const Weapon* weap = arsenal.getCurrWeapon();
-	const Player* enemy = self->getVision().getTargetedPlayer();
+	const Player* enemy = Player::getPlayer(self->getVision().getTargetedPlayer());
 	if (weap != nullptr) {
 		const Vector& pos = self->getCurrentPosition();
 		if (enemy != nullptr) {

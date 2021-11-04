@@ -24,7 +24,7 @@ bool DODUseFragGrenadeAction::execute() {
 		self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::FireInTheHole>(self->getEdict()));
 		return true;
 	}
-	auto targetedPlayer = self->getVision().getTargetedPlayer();
+	auto targetedPlayer = Player::getPlayer(self->getVision().getTargetedPlayer());
 	float dist = targetedPlayer == nullptr ?
 				INFINITY :
 				(targetedPlayer->getEdict()->GetCollideable()->GetCollisionOrigin()

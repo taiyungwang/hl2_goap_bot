@@ -19,7 +19,7 @@ public:
 		return nearByTeammates;
 	}
 
-	const Player* getTargetedPlayer() const {
+	int getTargetedPlayer() const {
 		return targetedPlayer;
 	}
 
@@ -32,7 +32,7 @@ private:
 
 	std::list<int> visibleEnemies, nearByTeammates;
 
-	const Player *targetedPlayer = nullptr;
+	int targetedPlayer = 0;
 
 	float miniMapRange;
 };

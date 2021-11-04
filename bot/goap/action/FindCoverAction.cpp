@@ -42,7 +42,8 @@ bool FindCoverAction::findTargetLoc() {
 		return false;
 	}
 	this->hideArea = nullptr;
-	currentArea = Navigator::getArea(blackboard.getSelf()->getEdict(), blackboard.getSelf()->getTeam());
+	auto self = blackboard.getSelf();
+	currentArea = Navigator::getArea(self->getEdict(), self->getTeam());
 	SearchSurroundingAreas(currentArea, *this);
 	return hideArea != nullptr;
 }
@@ -54,7 +55,7 @@ void FindCoverAction::PostSearch(void) {
 }
 
 edict_t* FindCoverAction::getTarget() const {
-	auto targetPlayer = blackboard.getSelf()->getVision().getTargetedPlayer();
+	auto targetPlayer = Player::getPlayer(blackboard.getSelf()->getVision().getTargetedPlayer());
 	return targetPlayer == nullptr || !targetPlayer->isInGame() ? nullptr : targetPlayer->getEdict();
 }
 

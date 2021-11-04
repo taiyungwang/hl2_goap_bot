@@ -97,7 +97,7 @@ protected:
 
 void DODMGDeployer::start(Blackboard& blackboard) {
 	Bot* self = blackboard.getSelf();
-	target = self->getVision().getTargetedPlayer();
+	target = Player::getPlayer(self->getVision().getTargetedPlayer());
 	if (target == nullptr && blackboard.getBlocker() == nullptr) {
 		blackboard.lookStraight();
 	}

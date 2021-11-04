@@ -70,7 +70,7 @@ bool SnipeAction::goalComplete() {
 	if (GoToAction::goalComplete()) {
 		// if we are at our location, and we didn't see an enemy, then count it as failure
 		selector->update(selectorId, team, 
-			blackboard.getSelf()->getVision().getTargetedPlayer() != nullptr);
+			blackboard.getSelf()->getVision().getTargetedPlayer() != 0);
 		return true;
 	}
 	return false;
@@ -80,7 +80,7 @@ void SnipeAction::abort() {
 	auto self = blackboard.getSelf();
 	int team = self->getTeam();
 	selector->setInUse(selectorId, team, false);
-	if (self->getVision().getTargetedPlayer() != nullptr
+	if (self->getVision().getTargetedPlayer() != 0
 		&& GoToAction::goalComplete()) {
 		// if we see an enemy at our spot, then it's successful.
 		selector->update(selectorId, team, true);

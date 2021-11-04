@@ -28,7 +28,7 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 	float closest = INFINITY;
 	nearByTeammates.clear();
 	struct Visible {
-		const Player* player;
+		int player;
 		float dist;
 	};
 	std::vector<Visible> visibles;
@@ -55,7 +55,7 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 			continue;
 		}
 		visibles.emplace_back();
-		visibles.back().player = target;
+		visibles.back().player = itr.first;
 		visibles.back().dist = dist;
 	}
 	std::sort(visibles.begin(), visibles.end(),
@@ -65,22 +65,22 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 				}
 				return v2.dist > v1.dist ? -1 : 1;
 			});
-	const Player* lastTarget = targetedPlayer;
-	targetedPlayer = nullptr;
+	int lastTarget = targetedPlayer;
+	targetedPlayer = 0;
 	if (!visibleEnemies.empty() && visibles.empty()) {
 		self->getVoiceMessageSender().sendMessage(std::make_shared<AreaClearVoiceMessage>(self->getEdict()));
 	}
 	visibleEnemies.clear();
 	for(const auto &visible : visibles) {
-		const Player* target = visible.player;
+		auto target = Player::getPlayer(visible.player);
 		if (!self->canSee(*target)) {
 			continue;
 		}
 		Vector targetPos = target->getEyesPos();
-		if (targetedPlayer == nullptr) {
+		if (targetedPlayer == 0) {
 			self->setWantToListen(false);
 			blackboard.setViewTarget(targetPos);
-			targetedPlayer = target;
+			targetedPlayer = visible.player;
 		}
 		extern ConVar mybot_debug;
 		if (mybot_debug.GetBool()) {
@@ -89,11 +89,11 @@ void Vision::updateVisiblity(Blackboard& blackboard) {
 					255, 0, true,
 					NDEBUG_PERSIST_TILL_NEXT_SERVER);
 		}
-		visibleEnemies.push_back(engine->IndexOfEdict(target->getEdict()));
+		visibleEnemies.push_back(visible.player);
 	}
-	if (targetedPlayer!= nullptr) {
+	if (targetedPlayer != 0) {
 		memoryDur = 60;
-	} else if (lastTarget != nullptr && lastTarget->isInGame()) {
+	} else if (lastTarget != 0 && Player::getPlayer(lastTarget)->isInGame()) {
 		memoryDur--;
 		if (memoryDur > 0) {
 			self->setWantToListen(false);

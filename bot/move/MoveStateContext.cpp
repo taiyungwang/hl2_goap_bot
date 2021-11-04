@@ -49,7 +49,7 @@ void MoveStateContext::move(int type) {
 		} else {
 			blackboard.setBlocker(nullptr);
 		}
-	} else if (blackboard.getSelf()->getVision().getTargetedPlayer() == nullptr
+	} else if (blackboard.getSelf()->getVision().getTargetedPlayer() == 0
 			|| nextGoalIsLadderStart() || blackboard.isOnLadder()) {
 		blackboard.setViewTarget(look);
 	}

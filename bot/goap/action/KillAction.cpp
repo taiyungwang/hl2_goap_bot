@@ -16,14 +16,15 @@ bool KillAction::precondCheck() {
 	framesToWait = mybotAttackDelay.GetInt();
 	adjustAim = true;
 	dur = 600;
-	return blackboard.getSelf()->getVision().getTargetedPlayer() != nullptr;
+	return Player::getPlayer(blackboard.getSelf()->getVision().getTargetedPlayer()) != nullptr;
 }
 
 bool KillAction::targetDestroyed() const {
-	const Player* targetedPlayer =  blackboard.getSelf()->getVision().getTargetedPlayer();
+	const Player* targetedPlayer = Player::getPlayer(blackboard.getSelf()->getVision().getTargetedPlayer());
 	return targetedPlayer == nullptr || !targetedPlayer->isInGame();
 }
 
 edict_t* KillAction::getTargetedEdict() const {
-	return blackboard.getSelf()->getVision().getTargetedPlayer()->getEdict();
+	auto target = Player::getPlayer(blackboard.getSelf()->getVision().getTargetedPlayer());
+	return target == nullptr ? nullptr : target->getEdict();
 }
