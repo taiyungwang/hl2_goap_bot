@@ -43,7 +43,8 @@ bool DODUseRifleGrenadeAction::precondCheck() {
 }
 
 bool DODUseRifleGrenadeAction::execute() {
-	return blackboard.getSelf()->getArsenal().getCurrWeapon()->isClipEmpty()
+	Weapon* weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
+	return weapon == nullptr || weapon->isClipEmpty()
 			|| DODUseSmokeGrenadeAction::execute();
 }
 
