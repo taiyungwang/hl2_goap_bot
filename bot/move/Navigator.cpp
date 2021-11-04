@@ -177,9 +177,11 @@ bool Navigator::buildPath() {
 					goalArea->GetCenter(), 255, 0, 0, true,
 					NDEBUG_PERSIST_TILL_NEXT_SERVER);
 		}
-		float dist = closest->GetCenter().DistTo(finalGoal);
-		if (dist > 300.0f) {
-			Warning("Closest area is too far away: %f.\n", dist);
+		Vector loc;
+		closest->GetClosestPointOnArea(finalGoal, &loc);
+		if (moveCtx->trace(loc, (finalGoal - loc).Normalized() * (finalGoal.DistTo(loc) - targetRadius) + loc,
+				closest->GetAttributes() & NAV_MESH_CROUCH).DidHit()) {
+			Warning("Final goal is not reachable from closest area.\n");
 			return false;
 		}
 		goalArea = closest;
@@ -200,7 +202,7 @@ bool Navigator::canGetNextArea(const Vector& loc) const {
 							|| (getPortalToTopArea(goal) && goal == moveCtx->getGoal())
 							|| moveCtx->getGoal() == path.top()->GetCenter()))
 					|| (canMoveTo(moveCtx->getGoal(), lastArea->GetAttributes() & NAV_MESH_CROUCH)
-							&& !(lastArea->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE))
+							&& !(path.top()->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE | NAV_MESH_STAIRS))
 							&& (!moveCtx->nextGoalIsLadderStart() && !blackboard.isOnLadder())
 							// don't skip areas above and below ground height
 							&& fabs(lastArea->GetCenter().z - path.top()->GetCenter().z) <= StepHeight
