@@ -102,9 +102,11 @@ MoveState* Avoid::move(const Vector& pos) {
 		if (blocker != nullptr && !blocker->IsFree()
 				&& blocker->GetCollideable() != nullptr
 				&& Q_stristr(currBlockerName, "func_team") == nullptr) {
-			if (Q_stristr(blocker->GetClassName(), "player") != nullptr
-				&& ctx.trace(pos, goal, crouching,
-						IgnoreAllButPhysicsAndBreakable()).DidHit()) {
+			if (Q_stristr(currBlockerName, "physics") != nullptr
+					|| Q_stristr(currBlockerName, "breakable") != nullptr
+					|| (Q_stristr(blocker->GetClassName(), "player") != nullptr
+							&& ctx.trace(pos, goal, crouching,
+									IgnoreAllButPhysicsAndBreakable()).DidHit())) {
 				blocker = getEdict(result);
 			}
 			blackboard.setBlocker(blocker);
@@ -177,6 +179,40 @@ void Avoid::setTeamWall(edict_t *blocker, int team) {
 	navBlocker->setBlockedTeam(team);
 	blockers.Insert(idx, navBlocker);
 }
+
+
+/**
+ * A filter that maintains a list of entities to ignore;
+ */
+class FilterList: public CTraceFilter {
+public:
+	virtual ~FilterList() {
+	}
+
+	/**
+	 * Adds a new entity to the list.  Null values are ignored.
+	 */
+	FilterList& add(edict_t* ignore) {
+		if (ignore != nullptr) {
+			this->ignore.push_back(ignore->GetIServerEntity());
+		}
+		return *this;
+	}
+
+	bool ShouldHitEntity(IHandleEntity *pHandleEntity,
+			int contentsMask) override {
+		for (auto handle: ignore) {
+			if (pHandleEntity == handle) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+protected:
+	list<IHandleEntity*> ignore;
+};
+
 
 float Avoid::trace(const Vector& pos, const Vector& goal) const {
 	auto &blackboard = ctx.getBlackboard();

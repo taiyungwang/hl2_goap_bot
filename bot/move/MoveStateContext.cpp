@@ -73,9 +73,28 @@ bool MoveStateContext::reachedGoal(float targetOffset) {
 	return false;
 }
 
+class FilterSelfAndTarget: public CTraceFilter {
+public:
+	FilterSelfAndTarget(edict_t *self, edict_t *target) :
+			self(self->GetIServerEntity()),
+			target(target == nullptr ? nullptr : target->GetIServerEntity()) {
+	}
+
+	virtual ~FilterSelfAndTarget() {
+	}
+
+	bool ShouldHitEntity(IHandleEntity *pHandleEntity,
+			int contentsMask) override {
+		return pHandleEntity != self && pHandleEntity != target;
+	}
+
+private:
+	IHandleEntity *self, *target;
+};
+
 const trace_t& MoveStateContext::trace(const Vector& pos, const Vector& goal, bool crouch) {
 	return trace(pos, goal, crouch,
-			FilterList().add(blackboard.getSelf()->getEdict()) .add(blackboard.getTarget()));
+			FilterSelfAndTarget(blackboard.getSelf()->getEdict(), blackboard.getTarget()));
 }
 
 const trace_t& MoveStateContext::trace(const Vector& goal, bool crouch) {
