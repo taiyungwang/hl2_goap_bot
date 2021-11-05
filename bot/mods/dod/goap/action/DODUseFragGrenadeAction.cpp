@@ -18,9 +18,8 @@ bool DODUseFragGrenadeAction::precondCheck() {
 }
 
 bool DODUseFragGrenadeAction::execute() {
-	Weapon* weapon = arsenal.getWeapon(weapIdx);
 	Bot* self = blackboard.getSelf();
-	if (!DODUseSmokeGrenadeAction::precondCheck() || primeDuration++ >= 300) {
+	if (primeDuration++ >= 300) {
 		self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::FireInTheHole>(self->getEdict()));
 		return true;
 	}
@@ -29,12 +28,9 @@ bool DODUseFragGrenadeAction::execute() {
 				INFINITY :
 				(targetedPlayer->getEdict()->GetCollideable()->GetCollisionOrigin()
 						- self->getCurrentPosition()).Length();
-	WeaponFunction* grenade = weapon->chooseWeaponFunc(self->getEdict(),
-			dist);
 	self->setWantToListen(false);
-	blackboard.setViewTarget(grenade->getAim(target->getCurrentPosition(),
-			self->getEyesPos()));
-	grenade->attack(blackboard.getButtons(), dist);
+	arsenal.getWeapon(weapIdx)->chooseWeaponFunc(self->getEdict(),
+				dist)->attack(blackboard.getButtons(), dist);
 	return false;
 }
 
