@@ -59,4 +59,3 @@ edict_t* FindCoverAction::getTarget() const {
 	return targetPlayer == nullptr || !targetPlayer->isInGame() ? nullptr : targetPlayer->getEdict();
 }
 
-

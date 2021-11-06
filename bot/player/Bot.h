@@ -4,8 +4,6 @@
 #include "Vision.h"
 #include "CommandHandler.h"
 #include "move/RotationManager.h"
-#include <utlvector.h>
-#include <utlqueue.h>
 
 class Blackboard;
 class GoalManager;
@@ -83,12 +81,28 @@ public:
 
 	bool canSee(const Player& target) const;
 
+	bool canSee(edict_t* target) const;
+
 	VoiceMessageSender& getVoiceMessageSender() {
 		return voiceMessageSender;
 	}
 
 	Vision& getVision() {
 		return vision;
+	}
+
+	void lookStraight();
+
+	Vector getFacing() const;
+
+	float getAimAccuracy() const;
+
+	void setViewTarget(const Vector& target) {
+		this->viewTarget = target;
+	}
+
+	const Vector& getViewTarget() const {
+		return viewTarget;
 	}
 
 private:
@@ -109,6 +123,8 @@ private:
 	World *world = nullptr;
 
 	RotationManager rotation;
+
+	Vector viewTarget;
 
 	bool hookEnabled = false, resetPlanner = false, wantToListen = true;
 

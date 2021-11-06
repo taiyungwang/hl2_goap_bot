@@ -112,7 +112,7 @@ Bot* BotBuilder::build(edict_t* ent) {
 	planner->addAction<SwitchToBestInRangeWeaponAction>(0.0f);
 	updatePlanner(*planner, *blackboard);
 	bot->setPlanner(planner);
-	return bot;
+	return modBuild(bot);
 }
 
 BasePlayer* BotBuilder::buildEntity(edict_t* ent) const {

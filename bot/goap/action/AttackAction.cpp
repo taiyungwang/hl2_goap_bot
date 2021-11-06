@@ -45,7 +45,7 @@ bool AttackAction::precondCheck() {
 
 bool AttackAction::execute() {
 	Bot* self = blackboard.getSelf();
-	Vector targetLoc = blackboard.getViewTarget();
+	Vector targetLoc = self->getViewTarget();
 	float dist = targetLoc.DistTo(self->getCurrentPosition());
 	Weapon* weapon = self->getArsenal().getCurrWeapon();
 	if (weapon == nullptr || dur-- < 1 || targetDestroyed() || weapon->isClipEmpty()) {
@@ -79,7 +79,7 @@ bool AttackAction::execute() {
 				|| dist < HalfHumanWidth * 2.0f);
 	Buttons& buttons = blackboard.getButtons();
 	self->setWantToListen(false);
-	blackboard.setViewTarget(targetLoc);
+	self->setViewTarget(targetLoc);
 	extern ConVar mybot_debug;
 	if (crouch) {
 		buttons.hold(IN_DUCK);
@@ -96,7 +96,7 @@ bool AttackAction::execute() {
 		extern IVDebugOverlay *debugoverlay;
 		debugoverlay->AddLineOverlay(eyes, targetLoc, 255, 0, 255, true,
 		NDEBUG_PERSIST_TILL_NEXT_SERVER);
-		debugoverlay->AddLineOverlay(eyes, eyes + blackboard.getFacing() * dist, 0, 255, 0, true,
+		debugoverlay->AddLineOverlay(eyes, eyes + self->getFacing() * dist, 0, 255, 0, true,
 		NDEBUG_PERSIST_TILL_NEXT_SERVER);
 	}
 	weapFunc->attack(buttons, dist);

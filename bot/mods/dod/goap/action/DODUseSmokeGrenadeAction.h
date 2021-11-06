@@ -14,5 +14,7 @@ public:
 	virtual bool execute();
 
 protected:
+	Vector viewTarget;
+
 	virtual bool canUse(const char* weaponName) const;
 };

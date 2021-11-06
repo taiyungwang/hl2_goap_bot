@@ -55,7 +55,7 @@ void Bot::think() {
 				planner->resetPlanning(false);
 				resetPlanner = false;
 			}
-			vision.updateVisiblity(*blackboard);
+			vision.updateVisiblity(this);
 			wantToListen = true;
 			cmd.Reset();
 			int best = arsenal->getBestWeapon(*blackboard,
@@ -75,11 +75,11 @@ void Bot::think() {
 			extern ConVar mybot_debug;
 			if (mybot_debug.GetBool()) {
 				extern IVDebugOverlay *debugoverlay;
-				debugoverlay->AddLineOverlay(getEyesPos(), blackboard->getViewTarget(), 0,
+				debugoverlay->AddLineOverlay(getEyesPos(), viewTarget, 0,
 						255, 0, true,
 						NDEBUG_PERSIST_TILL_NEXT_SERVER);
 			}
-			VectorAngles(blackboard->getViewTarget() - getEyesPos(), cmd.viewangles);
+			VectorAngles(viewTarget - getEyesPos(), cmd.viewangles);
 			rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle(),
 					mybot_rot_speed.GetFloat());
 			if (cmd.weaponselect != 0) {
@@ -132,7 +132,7 @@ bool Bot::handle(EventInfo* event) {
 		for (auto player: Player::getPlayers()) {
 			if (player.second->getUserId() == attacker) {
 				wantToListen = false;
-				blackboard->setViewTarget(player.second->getEyesPos());
+				viewTarget = player.second->getEyesPos();
 				break;
 			}
 		}
@@ -215,6 +215,28 @@ bool Bot::canSee(const Player& player) const {
 	return !result.DidHit();
 }
 
+bool Bot::canSee(edict_t* target) const {
+	trace_t result;
+	VisionFilter filter;
+	UTIL_TraceLine(getEyesPos(), target->GetCollideable()->GetCollisionOrigin(),
+			MASK_ALL, &filter, &result);
+	return !result.DidHit();
+}
+
+Vector Bot::getFacing() const {
+	Vector facing;
+	AngleVectors(getFacingAngle(), &facing);
+	return facing;
+}
+
+void Bot::lookStraight() {
+	this->viewTarget.z = getEyesPos().z;
+}
+
+float Bot::getAimAccuracy() const {
+	return (viewTarget - getEyesPos()).Normalized().Dot(getFacing());
+}
+
 bool Bot::canShoot(const Vector &vecAbsEnd, edict_t* target) const {
 	trace_t result;
 	return canShoot(result, vecAbsEnd, target);
@@ -241,7 +263,7 @@ void Bot::listen() {
 					&& canSee(*player.second)) {
 				loudest = noiseRange;
 				closest = dist;
-				blackboard->setViewTarget(player.second->getEyesPos());
+				viewTarget = player.second->getEyesPos();
 			}
 		}
 	}

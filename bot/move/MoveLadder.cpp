@@ -22,7 +22,7 @@ MoveState* MoveLadder::move(const Vector& currPos) {
 	bool onLadder = ctx.getBlackboard().isOnLadder();
 	if (onLadder && !startedClimbing) {
 		startedClimbing = true;
-		ctx.getBlackboard().setViewTarget(ctx.getLadderEnd());
+		ctx.getBlackboard().getSelf()->setViewTarget(ctx.getLadderEnd());
 	}
 	if (startedClimbing) {
 		remainingDist = ctx.getLadderEnd().DistTo(currPos);
@@ -41,7 +41,7 @@ MoveState* MoveLadder::move(const Vector& currPos) {
 	} else if (!ctx.getBlackboard().isOnLadder()) {
 		buttons.tap(IN_USE);
 	}
-	if (ctx.getBlackboard().getAimAccuracy(ctx.getLadderEnd()) >= 0.7f) {
+	if (ctx.getBlackboard().getSelf()->getAimAccuracy() >= 0.9f) {
 		buttons.hold(IN_FORWARD);
 		moveStraight(ctx.getLadderEnd());
 	}

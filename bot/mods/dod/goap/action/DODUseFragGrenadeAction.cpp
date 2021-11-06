@@ -19,7 +19,7 @@ bool DODUseFragGrenadeAction::precondCheck() {
 
 bool DODUseFragGrenadeAction::execute() {
 	Bot* self = blackboard.getSelf();
-	if (primeDuration++ >= 300) {
+	if (self->getVision().getVisibleEnemies().size() < 2 || primeDuration++ >= 300) {
 		self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::FireInTheHole>(self->getEdict()));
 		return true;
 	}

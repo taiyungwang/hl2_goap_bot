@@ -3,7 +3,6 @@
 #include <player/Button.h>
 #include <player/Bot.h>
 #include <move/Navigator.h>
-#include <weapon/Weapon.h>
 #include <util/BasePlayer.h>
 #include <util/EntityUtils.h>
 
@@ -24,20 +23,7 @@ Blackboard::~Blackboard() {
 	reset();
 }
 
-float Blackboard::getAimAccuracy(const Vector& pos) const {
-	return (pos - self->getEyesPos()).Normalized().Dot(getFacing());
-}
-
 bool Blackboard::isOnLadder() {
 	return entInstance->isOnLadder();
 }
 
-void Blackboard::lookStraight() {
-	this->viewTarget.z = this->self->getEyesPos().z;
-}
-
-Vector Blackboard::getFacing() const {
-	Vector facing;
-	AngleVectors(self->getFacingAngle(), &facing);
-	return facing;
-}

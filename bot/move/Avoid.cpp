@@ -89,7 +89,7 @@ MoveState* Avoid::move(const Vector& pos) {
 		extern CGlobalVars *gpGlobals;
 		int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
 		if (currBlocker != nullptr) {
-			if (Q_stristr(currBlocker->GetClassName(), "func_team") != nullptr) {
+			if (Q_stristr(currBlockerName, "func_team") != nullptr) {
 				// ensure that nothing else is blocking us.
 				if (!ctx.trace(pos, goal, crouching, IgnoreSelfAndTeamWall(self)).DidHit()
 						|| (Q_stristr(getEdict(result)->GetClassName(), "worldspawn") != nullptr

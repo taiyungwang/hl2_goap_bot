@@ -19,12 +19,12 @@ bool UseGravityGunAction::execute() {
 		return true;
 	}
 	Bot* self = blackboard.getSelf();
-	float dist = blackboard.getViewTarget().DistTo(self->getCurrentPosition());
-	if (dist > 130.0f || !self->canShoot(blackboard.getViewTarget(), blocker)) {
+	float dist = self->getViewTarget().DistTo(self->getCurrentPosition());
+	if (dist > 130.0f || !self->canShoot(self->getViewTarget(), blocker)) {
 		blackboard.setBlocker(nullptr);
 		return true;
 	}
-	if (blackboard.getAimAccuracy(blackboard.getViewTarget())
+	if (self->getAimAccuracy()
 			> 1.0f - 30.0f / (dist == 0.0f ? 0.0001f : dist)) {
 		arsenal.getCurrWeapon()->getPrimary()->attack(blackboard.getButtons(),
 				dist);

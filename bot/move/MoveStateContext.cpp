@@ -28,7 +28,8 @@ void MoveStateContext::stop() {
 
 void MoveStateContext::move(int type) {
 	this->type = type;
-	Vector pos = blackboard.getSelf()->getCurrentPosition();
+	auto self = blackboard.getSelf();
+	Vector pos = self->getCurrentPosition();
 	MoveState* newState = state->move(pos);
 	if (newState != nullptr) {
 		delete state;
@@ -44,14 +45,14 @@ void MoveStateContext::move(int type) {
 		blackboard.getBlocker()->GetCollideable()->WorldSpaceTriggerBounds(&mins, &maxs);
 		blocker = (maxs + mins) / 2.0f;
 		if (blocker.DistTo(pos) < 130.0f) {
-			blackboard.getSelf()->setWantToListen(false);
-			blackboard.setViewTarget(blocker);
+			self->setWantToListen(false);
+			self->setViewTarget(blocker);
 		} else {
 			blackboard.setBlocker(nullptr);
 		}
 	} else if (blackboard.getSelf()->getVision().getTargetedPlayer() == 0
 			|| nextGoalIsLadderStart() || blackboard.isOnLadder()) {
-		blackboard.setViewTarget(look);
+		self->setViewTarget(look);
 	}
 }
 

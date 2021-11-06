@@ -1,6 +1,7 @@
 #include "ChargeAction.h"
 
 #include <player/Blackboard.h>
+#include <player/Bot.h>
 #include <nav_mesh/nav.h>
 #include <util/EntityVar.h>
 #include <util/UtilTrace.h>
@@ -32,7 +33,7 @@ bool ChargeAction::execute() {
 			item->GetCollideable()->GetCollisionOrigin());
 	itemPos.z += HumanHeight - 10.0f;
 	blackboard.getButtons().hold(IN_USE);
-	blackboard.setViewTarget(itemPos);
+	blackboard.getSelf()->setViewTarget(itemPos);
 	return false;
 }
 

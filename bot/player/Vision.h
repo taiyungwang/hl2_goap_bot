@@ -1,21 +1,25 @@
 #pragma once
 
-#include <list>
+#include <set>
+#include <string>
 
 class Blackboard;
-class Player;
+class Bot;
+class Vector;
+struct edict_t;
 
 class Vision {
 public:
 	Vision();
 
-	void updateVisiblity(Blackboard& blackboard);
+	void updateVisiblity(Bot *self);
 
-	const std::list<int>& getVisibleEnemies() const {
+
+	const std::set<int>& getVisibleEnemies() const {
 		return visibleEnemies;
 	}
 
-	const std::list<int>& getNearbyTeammates() const {
+	const std::set<int>& getNearbyTeammates() const {
 		return nearByTeammates;
 	}
 
@@ -27,12 +31,22 @@ public:
 		this->miniMapRange = miniMapRange;
 	}
 
+	void addClassName(const char* name) {
+		classNames.insert(name);
+	}
+
+	const std::set<int> &getVisibleEntities() const {
+		return visibleEntities;
+	}
+
 private:
 	unsigned int memoryDur = 0;
 
-	std::list<int> visibleEnemies, nearByTeammates;
+	std::set<int> visibleEnemies, nearByTeammates, visibleEntities;
 
 	int targetedPlayer = 0;
+
+	std::set<std::string> classNames;
 
 	float miniMapRange;
 };

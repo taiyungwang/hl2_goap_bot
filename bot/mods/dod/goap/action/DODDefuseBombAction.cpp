@@ -42,7 +42,7 @@ bool DODDefuseBombAction::execute() {
 	Vector itemPos = UTIL_FindGround(
 				item->GetCollideable()->GetCollisionOrigin());
 	itemPos.z += HumanEyeHeight - 15.0f;
-	blackboard.setViewTarget(itemPos);
+	self->setViewTarget(itemPos);
 	return false;
 }
 

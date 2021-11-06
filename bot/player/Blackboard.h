@@ -25,17 +25,7 @@ public:
 		return buttons;
 	}
 
-	void setViewTarget(const Vector& target) {
-		this->viewTarget = target;
-	}
-
-	const Vector& getViewTarget() const {
-		return viewTarget;
-	}
-
 	bool isOnLadder();
-
-	float getAimAccuracy(const Vector& pos) const;
 
 	Bot* getSelf() {
 		return self;
@@ -61,8 +51,6 @@ public:
 		this->navigator = navigator;
 	}
 
-	void lookStraight();
-
 	edict_t* getTarget() const {
 		return target;
 	}
@@ -70,8 +58,6 @@ public:
 	void setTarget(edict_t* target) {
 		this->target = target;
 	}
-
-	Vector getFacing() const;
 
 private:
 	Bot* self;
@@ -82,8 +68,6 @@ private:
 
 	edict_t* blocker = nullptr,
 		* target = nullptr;
-
-	Vector viewTarget;
 
 	Buttons buttons;
 

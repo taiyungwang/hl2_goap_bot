@@ -17,8 +17,8 @@ bool DODUseSmokeGrenadeAction::precondCheck() {
 			&& arsenal.getWeapon(weapIdx)->isInRange(target->getCurrentPosition().DistTo(blackboard.getSelf()->getCurrentPosition()))
 			&& !vision.getNearbyTeammates().empty()) {
 		Vector targetLoc = target->getCurrentPosition();
-		blackboard.setViewTarget(arsenal.getWeapon(weapIdx)->chooseWeaponFunc(self->getEdict(),
-				self->getEyesPos().DistTo(targetLoc))->getAim(targetLoc, self->getEyesPos()));
+		viewTarget = arsenal.getWeapon(weapIdx)->chooseWeaponFunc(self->getEdict(),
+				self->getEyesPos().DistTo(targetLoc))->getAim(targetLoc, self->getEyesPos());
 		return true;
 	}
 	return false;
@@ -27,12 +27,16 @@ bool DODUseSmokeGrenadeAction::precondCheck() {
 bool DODUseSmokeGrenadeAction::execute() {
 	auto self = blackboard.getSelf();
 	self->setWantToListen(false);
-	if (blackboard.getAimAccuracy(blackboard.getViewTarget()) < 0.9f) {
+	if (self->getAimAccuracy() < 0.9f) {
+		self->setViewTarget(viewTarget);
 		return false;
 	}
-	float dist = self->getEyesPos().DistTo(blackboard.getViewTarget());
-	arsenal.getWeapon(weapIdx)->chooseWeaponFunc(self->getEdict(),
-			dist)->attack(blackboard.getButtons(), dist);
+	float dist = self->getEyesPos().DistTo(self->getViewTarget());
+	Weapon *weapon = arsenal.getWeapon(weapIdx);
+	if (weapon == nullptr) {
+		return true;
+	}
+	weapon->chooseWeaponFunc(self->getEdict(),dist)->attack(blackboard.getButtons(), dist);
 	return true;
 }
 

@@ -24,7 +24,7 @@ bool CapturePointAction::execute() {
 	if (!GoToAction::goalComplete() || isDepleted()) {
 		return true;
 	}
-	blackboard.lookStraight();
+	blackboard.getSelf()->lookStraight();
 	blackboard.getButtons().hold(IN_DUCK);
 	return false;
 }

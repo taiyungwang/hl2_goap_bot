@@ -5,7 +5,9 @@
 #include <weapon/Weapon.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <utlstring.h>
+#include <voice/GrenadeVoiceMessage.h>
+#include <voice/VoiceMessageSender.h>
+#include <util/EntityUtils.h>
 
 void DODWorld::addStates() {
 	states.Insert(WorldProp::ALL_POINTS_CAPTURED, false);
@@ -46,6 +48,22 @@ bool DODWorld::update(Blackboard& blackboard) {
 	if (reset) {
 		reset = false;
 		return true;
+	}
+	Bot *self = blackboard.getSelf();
+	int team = self->getTeam();
+	for (auto i: blackboard.getSelf()->getVision().getVisibleEntities()) {
+		extern IVEngineServer *engine;
+		edict_t *entity = engine->PEntityOfEntIndex(i);
+		if (entity != nullptr && !entity->IsFree()
+				&& ((team == 2 && (FClassnameIs(entity, "grenade_frag_ger")
+				|| FClassnameIs(entity, "grenade_riflegren_ger")))
+				|| (team == 3 && (FClassnameIs(entity, "grenade_frag_us")
+						|| FClassnameIs(entity, "grenade_riflegren_us"))))
+				&& self->getCurrentPosition().DistTo(entity->GetCollideable()->GetCollisionOrigin()) < 100.0f) {
+			updateState(WorldProp::EXPLOSIVE_NEAR, true);
+			self->getVoiceMessageSender().sendMessage(std::make_shared<GrenadeVoiceMessage>(self->getEdict()));
+			break;
+		}
 	}
 	updateState(WorldProp::HAS_BOMB,
 			blackboard.getSelf()->getArsenal().getWeaponIdByName("weapon_basebomb") != 0);

@@ -49,10 +49,11 @@ bool SnipeAction::execute() {
 	}
 	Vector aim;
 	AngleVectors(facing, &aim);
-	blackboard.setViewTarget(aim * 100.0f + blackboard.getSelf()->getCurrentPosition());
-	blackboard.lookStraight();
+	auto self = blackboard.getSelf();
+	self->setViewTarget(aim * 100.0f + blackboard.getSelf()->getCurrentPosition());
+	self->lookStraight();
 	Deployer* deployer = blackboard.getSelf()->getArsenal().getCurrWeapon()->getDeployer();
-	if (deployer != nullptr && blackboard.getAimAccuracy(blackboard.getViewTarget()) > 0.8f
+	if (deployer != nullptr && self->getAimAccuracy() > 0.8f
 			&& !deployer->execute(blackboard)) {
 		return false;
 	}

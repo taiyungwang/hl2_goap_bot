@@ -61,7 +61,7 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 					return false;
 				}
 			}
-			if (blackboard.getAimAccuracy(blackboard.getViewTarget()) >= mybot_var.GetFloat()) {
+			if (self->getAimAccuracy() >= mybot_var.GetFloat()) {
 				buttons.tap(IN_ATTACK2);
 			}
 		}
@@ -99,9 +99,10 @@ void DODMGDeployer::start(Blackboard& blackboard) {
 	Bot* self = blackboard.getSelf();
 	target = Player::getPlayer(self->getVision().getTargetedPlayer());
 	if (target == nullptr && blackboard.getBlocker() == nullptr) {
-		blackboard.lookStraight();
+		self->lookStraight();
 	}
-	Vector pos(self->getCurrentPosition() + (blackboard.getViewTarget() - self->getCurrentPosition()).Normalized() * HalfHumanWidth);
+	Vector pos(self->getCurrentPosition()
+			+ (self->getViewTarget() - self->getCurrentPosition()).Normalized() * HalfHumanWidth);
 	pos.z += StepHeight;
 	trace_t result;
 	extern ConVar mybot_debug;

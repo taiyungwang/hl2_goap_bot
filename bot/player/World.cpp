@@ -21,12 +21,15 @@ void World::reset() {
 	states.Insert(WorldProp::OUT_OF_AMMO, false);
 	states.Insert(WorldProp::WEAPON_IN_RANGE, false);
 	states.Insert(WorldProp::ROUND_STARTED, roundStarted);
-	states.Insert(WorldProp::HEARD_AREA_CLEAR, roundStarted);
+	states.Insert(WorldProp::HEARD_AREA_CLEAR, false);
+	states.Insert(WorldProp::EXPLOSIVE_NEAR, false);
 	addStates();
 }
 
 bool World::think(Blackboard& blackboard) {
 	bool& enemySighted = states[states.Find(WorldProp::ENEMY_SIGHTED)];
+	updateState(WorldProp::HEARD_AREA_CLEAR, false);
+	updateState(WorldProp::EXPLOSIVE_NEAR, false);
 	Bot* self = blackboard.getSelf();
 	updateState(WorldProp::MULTIPLE_ENEMY_SIGHTED,
 			self->getVision().getVisibleEnemies().size() > 1);
@@ -54,13 +57,13 @@ bool World::think(Blackboard& blackboard) {
 					blackboard.setBlocker(nullptr);
 				} else {
 					self->setWantToListen(false);
-					blackboard.setViewTarget(player->second->getEyesPos());
+					self->setViewTarget(player->second->getEyesPos());
 				}
 			} else {
-				blackboard.setViewTarget(blocker->GetCollideable()->GetCollisionOrigin());
+				self->setViewTarget(blocker->GetCollideable()->GetCollisionOrigin());
 			}
 			if (blackboard.getBlocker() != nullptr) {
-				inRange = weap->isInRange(pos.DistTo(blackboard.getViewTarget()));
+				inRange = weap->isInRange(pos.DistTo(self->getViewTarget()));
 			}
 		}
 	}
@@ -78,13 +81,10 @@ bool World::think(Blackboard& blackboard) {
 	updateState(WorldProp::IS_BLOCKED, blackboard.getBlocker() != nullptr);
 	// reset planner if this is first time we see enemy.
 	bool noEnemy = !enemySighted;
-	if (enemySighted && (enemy == nullptr || !self->canShoot(blackboard.getViewTarget(), enemy->getEdict()))
+	if (enemySighted && (enemy == nullptr || !self->canShoot(self->getViewTarget(), enemy->getEdict()))
 			&& !states[states.Find(WorldProp::HEARD_AREA_CLEAR)]) {
 		updateState(WorldProp::HEARD_AREA_CLEAR, true);
 	}
 	enemySighted = enemy != nullptr;
-	if (enemySighted) {
-		updateState(WorldProp::HEARD_AREA_CLEAR, false);
-	}
 	return update(blackboard) || (noEnemy && enemySighted) || hurt;
 }

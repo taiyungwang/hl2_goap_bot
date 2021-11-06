@@ -12,6 +12,7 @@
 #include <player/Bot.h>
 #include <player/Blackboard.h>
 #include <voice/AreaClearVoiceMessage.h>
+#include <voice/GrenadeVoiceMessage.h>
 #include <move/Navigator.h>
 #include <util/EntityClassManager.h>
 #include <util/EntityClass.h>
@@ -40,6 +41,7 @@ DODBotBuilder::DODBotBuilder(GameManager *objectives,
 	Bot::setClasses(&CLASSES);
 	teamPlay = true;
 	voiceMessageSender.addMessage<AreaClearVoiceMessage>("voice_areaclear");
+	voiceMessageSender.addMessage<GrenadeVoiceMessage>("voice_grenade");
 	voiceMessageSender.addMessage<NeedBackupVoiceMessage>("voice_backup");
 	voiceMessageSender.addMessage<DODVoiceMessage::FireInTheHole>("voice_fireinhole");
 }
@@ -134,5 +136,9 @@ void DODBotBuilder::modHandleCommand(const CCommand &command, Bot* bot) const {
 
 Bot *DODBotBuilder::modBuild(Bot * bot) {
 	bot->getVision().setMiniMapRange(500.0f);
+	bot->getVision().addClassName("grenade_frag_ger");
+	bot->getVision().addClassName("grenade_frag_us");
+	bot->getVision().addClassName("grenade_riflegren_ger");
+	bot->getVision().addClassName("grenade_riflegren_us");
 	return bot;
 }
