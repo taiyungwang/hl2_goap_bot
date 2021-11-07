@@ -11,6 +11,7 @@ FindCoverAction::FindCoverAction(Blackboard& blackboard) :
 		GoToAction(blackboard) {
 	effects = {WorldProp::ENEMY_SIGHTED, false};
 	precond.Insert(WorldProp::OUT_OF_AMMO, false);
+	sprint = true;
 }
 
 bool FindCoverAction::ShouldSearch(CNavArea *adjArea, CNavArea *currentArea,

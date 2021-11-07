@@ -36,7 +36,7 @@ public:
 
 	bool reachedGoal() const;
 
-	void start(const Vector& goal, float targetRadius);
+	void start(const Vector& goal, float targetRadius, bool sprint);
 
 	CNavArea* getLastArea() const {
 		return lastArea;
@@ -59,6 +59,8 @@ private:
 	float targetRadius = 0.0f;
 
 	int areaTime = 0, dirToTop = 4;
+
+	bool sprint = false;
 
 	void setDirToTop();
 

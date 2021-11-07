@@ -22,7 +22,7 @@ extern IVDebugOverlay *debugoverlay;
 
 extern ConVar mybot_debug;
 
-static ConVar maxAreaTime("my_bot_max_area_time", "120");
+static ConVar maxAreaTime("my_bot_max_area_time", "150");
 
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
@@ -33,7 +33,8 @@ Navigator::~Navigator() {
 	delete moveCtx;
 }
 
-void Navigator::start(const Vector& goal, float targetRadius) {
+void Navigator::start(const Vector& goal, float targetRadius, bool sprint) {
+	this->sprint = sprint;
 	finalGoal = goal;
 	lastArea = nullptr;
 	areaTime = 0;
@@ -93,6 +94,9 @@ bool Navigator::step() {
 	}
 	if (path.empty()) {
 		moveCtx->setTargetOffset(targetRadius);
+	}
+	if (sprint) {
+		blackboard.getButtons().hold(IN_SPEED);
 	}
 	moveCtx->move(attributes);
 	if (mybot_debug.GetBool()) {

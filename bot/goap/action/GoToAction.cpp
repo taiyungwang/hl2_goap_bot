@@ -14,7 +14,7 @@ bool GoToAction::execute() {
 }
 
 void GoToAction::init() {
-	blackboard.getNavigator()->start(targetLoc, targetRadius);
+	blackboard.getNavigator()->start(targetLoc, targetRadius, sprint);
 }
 
 bool GoToAction::goalComplete() {
