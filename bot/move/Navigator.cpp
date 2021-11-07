@@ -22,9 +22,7 @@ extern IVDebugOverlay *debugoverlay;
 
 extern ConVar mybot_debug;
 
-static ConVar maxAreaTime("my_bot_max_area_time", "70");
-
-static ConVar mybotStuckThreshold("mybot_stuck_threshold", "90.0f");
+static ConVar maxAreaTime("my_bot_max_area_time", "100");
 
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
@@ -58,7 +56,7 @@ bool Navigator::step() {
 	}
 	const Player* self = blackboard.getSelf();
 	Vector loc = self->getCurrentPosition();
-	CNavArea* area = getCurrentArea();
+	CNavArea* area = getArea(self);
 	if (area == nullptr) {
 		return true;
 	}
@@ -84,8 +82,7 @@ bool Navigator::step() {
 	if ((attributes & NAV_MESH_CROUCH) || moveCtx->nextGoalIsLadderStart()) {
 		maxTime *= 1.5f;
 	}
-	if (areaTime++ > maxTime
-			&& BasePlayer(self->getEdict()).getVelocity().Length() < mybotStuckThreshold.GetFloat()) {
+	if (areaTime++ > maxTime) {
 		areaTime = 0;
 		moveCtx->setStuck(true);
 	}
@@ -149,7 +146,7 @@ bool Navigator::buildPath() {
 	std::stack<CNavArea*> empty;
 	path.swap(empty);
 	const Player* self = blackboard.getSelf();
-	CNavArea* goalArea = getGoalArea(finalGoal);
+	CNavArea* goalArea = getArea(finalGoal, self->getTeam());
 	if (goalArea == nullptr) {
 		if (mybot_debug.GetBool()) {
 			debugoverlay->AddLineOverlay(self->getEyesPos(),
@@ -159,7 +156,7 @@ bool Navigator::buildPath() {
 		Warning("Unable to find area for goal.\n");
 		return false;
 	}
-	CNavArea* buildPathStartArea = getCurrentArea();
+	CNavArea* buildPathStartArea = getArea(self);
 	if (buildPathStartArea == nullptr) {
 		Warning("Unable to get startArea.\n");
 		return false;
@@ -247,16 +244,7 @@ CNavArea* Navigator::getArea(edict_t* ent, int team) {
 	return area == nullptr || area->IsBlocked(team) ? TheNavMesh->GetNearestNavArea(ent) : area;
 }
 
-CNavArea* Navigator::getCurrentArea() const {
-	const auto self = blackboard.getSelf();
-	CNavArea* area = TheNavMesh->GetNavArea(self->getEdict(), 0);
-	if (area == nullptr)
-		area = getGoalArea(self->getCurrentPosition());
-	return area;
-}
-
-CNavArea* Navigator::getGoalArea(const Vector& pos) const {
-	int team = blackboard.getSelf()->getTeam();
+CNavArea* Navigator::getArea(const Vector& pos, int team) {
 	CNavArea* area = TheNavMesh->GetNavArea(pos);
 	if (area == nullptr || area->IsBlocked(team)) {
 		// TODO: does ground need to be checked?
@@ -269,6 +257,12 @@ CNavArea* Navigator::getGoalArea(const Vector& pos) const {
 		area = nullptr;
 	}
 	return area;
+}
+
+
+CNavArea* Navigator::getArea(const Player* player) {
+	CNavArea* area = TheNavMesh->GetNavArea(player->getEdict(), 0);
+	return area == nullptr ? getArea(player->getCurrentPosition(), player->getTeam()) : area;
 }
 
 bool Navigator::canMoveTo(Vector goal, bool crouch) const {

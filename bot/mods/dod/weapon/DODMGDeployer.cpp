@@ -40,7 +40,7 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 			Buttons& buttons = blackboard.getButtons();
 			if (target != nullptr && target->isInGame()) {
 				trace_t result;
-				self->canShoot(result, self->getEyesPos(), target->getEdict());
+				self->canShoot(result, self->getEyesPos());
 				extern ConVar nav_slope_limit;
 				if (result.DidHit()) {
 					if (result.endpos.DistTo(result.startpos) > HalfHumanWidth

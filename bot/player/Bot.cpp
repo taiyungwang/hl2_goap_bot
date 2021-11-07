@@ -3,6 +3,7 @@
 #include "Blackboard.h"
 #include "Vision.h"
 #include "World.h"
+#include "FilterSelfAndEnemies.h"
 #include <event/EventInfo.h>
 #include <goap/action/GoToAction.h>
 #include <goap/GoalManager.h>
@@ -27,9 +28,6 @@ static ConVar mybot_rot_speed("mybot_rot_speed", "0.15", 0,
 		"determines rotational acceleration rate in degrees");
 
 ConVar mybot_mimic("mybot_mimic", "0");
-
-extern IVEngineServer* engine;
-extern CGlobalVars *gpGlobals;
 
 Bot::~Bot() {
 	delete blackboard;
@@ -87,6 +85,7 @@ void Bot::think() {
 			}
 		}
 		cmd.buttons = blackboard->getButtons().getPressed();
+		extern CGlobalVars *gpGlobals;
 		cmd.tick_count = gpGlobals->tickcount;
 		if (mybot_mimic.GetBool()) {
 			auto& players = Player::getPlayers();
@@ -163,35 +162,11 @@ int Bot::getPlayerClass() const {
 	return playerClassVar == nullptr ? -1 : playerClassVar->getPlayerClass();
 }
 
-class FilterSelfAndEnemies: public CTraceFilterEntitiesOnly {
-public:
-	FilterSelfAndEnemies(edict_t* self) : self(self) {
-	}
-
-	virtual ~FilterSelfAndEnemies() {
-	}
-
-	bool ShouldHitEntity(IHandleEntity *pHandleEntity, int contentsMask) override {
-		if (pHandleEntity == self->GetIServerEntity()) {
-			return false;
-		}
-		int idx = engine->IndexOfEdict(entityFromEntityHandle(const_cast<const IHandleEntity*>(pHandleEntity)));
-		return (idx < 1 || idx > gpGlobals->maxClients)
-				|| !Player::getPlayer(idx)->isEnemy(*Player::getPlayer(self));
-	}
-
-private:
-	edict_t *self;
-};
-
-bool Bot::canShoot(trace_t& result, const Vector &vecAbsEnd, edict_t* target) const {
-	if (target == nullptr) {
-		return false;
-	}
+bool Bot::canShoot(trace_t& result, const Vector &vecAbsEnd) const {
 	result.fraction = 0.0f;
 	Vector start = getEyesPos();
 	FilterSelfAndEnemies filter(getEdict());
-	UTIL_TraceLine(start, vecAbsEnd, MASK_ALL, &filter, &result);
+	UTIL_TraceLine(start, vecAbsEnd, MASK_SHOT, &filter, &result);
 	return !result.DidHit();
 }
 
@@ -206,21 +181,19 @@ public:
 	}
 };
 
-
-bool Bot::canSee(const Player& player) const {
+bool Bot::canSee(const Vector& start, const Vector& end) {
 	trace_t result;
 	VisionFilter filter;
-	UTIL_TraceLine(getEyesPos(), player.getEyesPos(),
-			MASK_ALL, &filter, &result);
+	UTIL_TraceLine(start, end, MASK_ALL, &filter, &result);
 	return !result.DidHit();
 }
 
+bool Bot::canSee(const Player& player) const {
+	return canSee(getEyesPos(), player.getEyesPos());
+}
+
 bool Bot::canSee(edict_t* target) const {
-	trace_t result;
-	VisionFilter filter;
-	UTIL_TraceLine(getEyesPos(), target->GetCollideable()->GetCollisionOrigin(),
-			MASK_ALL, &filter, &result);
-	return !result.DidHit();
+	return canSee(getEyesPos(), target->GetCollideable()->GetCollisionOrigin());
 }
 
 Vector Bot::getFacing() const {
@@ -237,9 +210,9 @@ float Bot::getAimAccuracy() const {
 	return (viewTarget - getEyesPos()).Normalized().Dot(getFacing());
 }
 
-bool Bot::canShoot(const Vector &vecAbsEnd, edict_t* target) const {
+bool Bot::canShoot(const Vector &vecAbsEnd) const {
 	trace_t result;
-	return canShoot(result, vecAbsEnd, target);
+	return canShoot(result, vecAbsEnd);
 }
 
 void Bot::listen() {

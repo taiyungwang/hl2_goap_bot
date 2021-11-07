@@ -2,6 +2,7 @@
 
 #include "GoToAction.h"
 #include <nav_mesh/nav_pathfind.h>
+#include <set>
 
 class FindCoverAction: public GoToAction, public ISearchSurroundingAreasFunctor {
 public:
@@ -11,11 +12,7 @@ public:
 		return false;
 	}
 
-	bool execute() {
-		return getTarget() == nullptr || GoToAction::execute();
-	}
-
-	bool onPlanningFinished();
+	bool execute() override;
 
 	bool operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar );
 
@@ -26,7 +23,7 @@ public:
 private:
 	CNavArea* hideArea = nullptr, *currentArea = nullptr;
 
-	edict_t* getTarget() const;
+	std::set<CNavArea*> enemyAreas;
 
 	bool findTargetLoc();
 };

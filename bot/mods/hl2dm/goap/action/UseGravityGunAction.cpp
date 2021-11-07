@@ -20,7 +20,7 @@ bool UseGravityGunAction::execute() {
 	}
 	Bot* self = blackboard.getSelf();
 	float dist = self->getViewTarget().DistTo(self->getCurrentPosition());
-	if (dist > 130.0f || !self->canShoot(self->getViewTarget(), blocker)) {
+	if (dist > 130.0f) {
 		blackboard.setBlocker(nullptr);
 		return true;
 	}

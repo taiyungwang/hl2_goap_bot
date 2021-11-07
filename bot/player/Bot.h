@@ -74,10 +74,9 @@ public:
 		this->wantToListen = wantToListen;
 	}
 
-	bool canShoot(const Vector &vecAbsEnd, edict_t *target) const;
+	bool canShoot(const Vector &vecAbsEnd) const;
 
-	bool canShoot(CGameTrace &result, const Vector &vecAbsEnd,
-			edict_t *target) const;
+	bool canShoot(CGameTrace &result, const Vector &vecAbsEnd) const;
 
 	bool canSee(const Player& target) const;
 
@@ -107,6 +106,8 @@ public:
 
 private:
 	static PlayerClasses CLASSES;
+
+	static bool canSee(const Vector& start, const Vector& end);
 
 	VoiceMessageSender &voiceMessageSender;
 

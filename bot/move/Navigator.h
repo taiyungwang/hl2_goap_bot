@@ -7,6 +7,7 @@
 class Blackboard;
 class MoveStateContext;
 class CNavArea;
+class Player;
 struct edict_t;
 
 /**
@@ -14,11 +15,14 @@ struct edict_t;
  */
 class Navigator {
 public:
+	static CNavArea* getArea(const Player* player);
 
 	/**
 	 * Get the current area the entity is in.
 	 */
 	static CNavArea* getArea(edict_t* ent, int team);
+
+	static CNavArea* getArea(const Vector& pos, int team);
 
 	Navigator(Blackboard& blackboard);
 
@@ -71,10 +75,6 @@ private:
 	bool getPortalToTopArea(Vector& portal) const;
 
 	bool canMoveTo(Vector to, bool crouch) const;
-
-	CNavArea* getCurrentArea() const;
-
-	CNavArea* getGoalArea(const Vector& pos) const;
 
 	/**
 	 * Finds the start for a ladder to the next area.  Assumes that getPortalToNextArea()
