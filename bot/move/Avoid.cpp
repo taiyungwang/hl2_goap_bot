@@ -78,14 +78,16 @@ MoveState* Avoid::move(const Vector& pos) {
 			? nullptr : currBlocker->GetClassName();
 	int team = blackboard.getSelf()->getTeam();
 	edict_t* self = blackboard.getSelf()->getEdict();
+	if (blackboard.isOnLadder()) {
+		if (ctx.nextGoalIsLadderStart()) {
+			delete nextState;
+			nextState = nullptr;
+			return new MoveLadder(ctx);
+		}
+		return nextState;
+	}
 	if (ctx.isStuck()) {
 		ctx.setStuck(false);
-		if (blackboard.isOnLadder()) {
-			if (ctx.nextGoalIsLadderStart()) {
-				return new MoveLadder(ctx);
-			}
-			return nextState;
-		}
 		extern CGlobalVars *gpGlobals;
 		int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
 		if (currBlocker != nullptr) {
