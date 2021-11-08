@@ -15,6 +15,8 @@ public:
 private:
 	int framesToWait = 0;
 
+	int target = 0;
+
 	bool targetDestroyed() const;
 
 	edict_t* getTargetedEdict() const;
