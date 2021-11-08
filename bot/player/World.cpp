@@ -81,7 +81,7 @@ bool World::think(Blackboard& blackboard) {
 	updateState(WorldProp::IS_BLOCKED, blackboard.getBlocker() != nullptr);
 	// reset planner if this is first time we see enemy.
 	bool noEnemy = !enemySighted;
-	if (enemySighted && (enemy == nullptr || !self->canShoot(self->getViewTarget()))
+	if (enemySighted && enemy == nullptr
 			&& !states[states.Find(WorldProp::HEARD_AREA_CLEAR)]) {
 		updateState(WorldProp::HEARD_AREA_CLEAR, true);
 	}

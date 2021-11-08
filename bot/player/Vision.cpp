@@ -77,7 +77,7 @@ void Vision::updateVisiblity(Bot *self) {
 			continue;
 		}
 		Vector targetPos = target->getEyesPos();
-		if (targetedPlayer == 0) {
+		if (targetedPlayer == 0 && self->canShoot(targetPos)) {
 			self->setWantToListen(false);
 			self->setViewTarget(targetPos);
 			targetedPlayer = visible.player;
