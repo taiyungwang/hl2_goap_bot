@@ -66,8 +66,18 @@ void Vision::updateVisiblity(Bot *self) {
 	int lastTarget = targetedPlayer;
 	targetedPlayer = 0;
 	if (!visibleEnemies.empty() && enemies.empty()) {
-		self->getVoiceMessageSender().sendMessage(
-				std::make_shared<AreaClearVoiceMessage>(self->getEdict()));
+		bool areaClear = true;
+		for (auto i: visibleEnemies) {
+			auto player = Player::getPlayer(i);
+			if (player != nullptr && player->isInGame()) {
+				areaClear = false;
+				break;
+			}
+		}
+		if (areaClear) {
+			self->getVoiceMessageSender().sendMessage(
+					std::make_shared<AreaClearVoiceMessage>(self->getEdict()));
+		}
 	}
 	extern ConVar mybot_debug;
 	visibleEnemies.clear();
