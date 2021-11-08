@@ -8,9 +8,7 @@ public:
 
 	bool precondCheck();
 
-	virtual bool execute() override {
-		return --framesToWait > 0 ? false : AttackAction::execute();
-	}
+	bool execute() override;
 
 private:
 	int framesToWait = 0;
@@ -19,5 +17,5 @@ private:
 
 	bool targetDestroyed() const;
 
-	edict_t* getTargetedEdict();
+	edict_t* getTargetedEdict() const;
 };
