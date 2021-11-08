@@ -87,7 +87,6 @@ MoveState* Avoid::move(const Vector& pos) {
 		return nextState;
 	}
 	if (ctx.isStuck()) {
-		ctx.setStuck(false);
 		extern CGlobalVars *gpGlobals;
 		int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
 		if (currBlocker != nullptr) {
@@ -106,9 +105,9 @@ MoveState* Avoid::move(const Vector& pos) {
 				blackboard.setBlocker(currBlocker);
 			}
 		}
-		if (dynamic_cast<Stopped*>(nextState) != nullptr) {
-			// completely stuck.
-			ctx.setStuck(true);
+		if (dynamic_cast<Stopped*>(nextState) == nullptr) {
+			// try to get unstuck.
+			ctx.setStuck(false);
 		}
 		return nextState;
 	}

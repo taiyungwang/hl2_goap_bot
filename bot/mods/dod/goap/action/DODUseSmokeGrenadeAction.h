@@ -2,6 +2,8 @@
 
 #include <goap/action/UseSpecificWeaponAction.h>
 
+class Player;
+
 class DODUseSmokeGrenadeAction: public UseSpecificWeaponAction {
 public:
 	DODUseSmokeGrenadeAction(Blackboard& blackboard) :
@@ -9,12 +11,16 @@ public:
 		effects = {WorldProp::MULTIPLE_ENEMY_SIGHTED, false};
 	}
 
-	virtual bool precondCheck();
+	bool precondCheck();
 
 	virtual bool execute();
 
 protected:
 	Vector viewTarget;
 
+	const Player* target = nullptr;
+
 	virtual bool canUse(const char* weaponName) const;
+
+	virtual void chooseTarget();
 };

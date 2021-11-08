@@ -9,14 +9,6 @@
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
 
-bool DODUseFragGrenadeAction::precondCheck() {
-	bool success = DODUseRifleGrenadeAction::precondCheck();
-	if (success) {
-		primeDuration = 0;
-	}
-	return success;
-}
-
 bool DODUseFragGrenadeAction::execute() {
 	Bot* self = blackboard.getSelf();
 	if (self->getVision().getVisibleEnemies().size() < 2 || primeDuration++ >= 300) {

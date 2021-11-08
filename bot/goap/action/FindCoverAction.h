@@ -2,7 +2,7 @@
 
 #include "GoToAction.h"
 #include <nav_mesh/nav_pathfind.h>
-#include <set>
+#include <unordered_map>
 
 class FindCoverAction: public GoToAction, public ISearchSurroundingAreasFunctor {
 public:
@@ -12,7 +12,9 @@ public:
 		return false;
 	}
 
-	bool execute() override;
+	bool execute() override {
+		return GoToAction::execute() && !waitInCover();
+	}
 
 	bool operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar );
 
@@ -20,10 +22,21 @@ public:
 
 	void PostSearch( void );
 
+protected:
+	CNavArea* hideArea = nullptr, *startArea = nullptr;
+
+	float maxRange = INFINITY;
+
+	std::unordered_map<CNavArea*, edict_t*> areasToAvoid;
+
+	virtual void setAvoidAreas();
+
+	virtual void getAvoidPosition(Vector& pos, edict_t* avoid) const;
+
+	virtual bool waitInCover() const {
+		return false;
+	}
+
 private:
-	CNavArea* hideArea = nullptr, *currentArea = nullptr;
-
-	std::set<CNavArea*> enemyAreas;
-
 	bool findTargetLoc();
 };

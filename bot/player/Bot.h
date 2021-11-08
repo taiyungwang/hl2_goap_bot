@@ -24,6 +24,8 @@ public:
 		CLASSES = options;
 	}
 
+	static bool canSee(const Vector& start, const Vector& end);
+
 	Bot(edict_t *ent, const std::shared_ptr<Arsenal> &arsenal,
 			CommandHandler& commandHandler,
 			VoiceMessageSender &voiceMessageSender) :
@@ -106,8 +108,6 @@ public:
 
 private:
 	static PlayerClasses CLASSES;
-
-	static bool canSee(const Vector& start, const Vector& end);
 
 	VoiceMessageSender &voiceMessageSender;
 

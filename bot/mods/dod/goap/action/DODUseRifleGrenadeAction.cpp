@@ -7,13 +7,20 @@
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
 
-bool DODUseRifleGrenadeAction::precondCheck() {
-	if (!DODUseSmokeGrenadeAction::precondCheck()) {
-		return false;
-	}
+bool DODUseRifleGrenadeAction::execute() {
+	Weapon* weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
+	return weapon == nullptr || weapon->isClipEmpty()
+			|| DODUseSmokeGrenadeAction::execute();
+}
+
+bool DODUseRifleGrenadeAction::canUse(const char* weaponName) const {
+	return Q_strcmp(weaponName, "weapon_riflegren_us") == 0
+			|| Q_strcmp(weaponName, "weapon_riflegren_ger") == 0;
+}
+
+void DODUseRifleGrenadeAction::chooseTarget() {
 	Weapon *grenade = arsenal.getWeapon(weapIdx);
 	target = nullptr;
-	float minDist = grenade->getPrimary()->getRange()[0];
 	auto enemies = blackboard.getSelf()->getVision().getVisibleEnemies();
 	for(int i : enemies) {
 		const Player* enemy = Player::getPlayer(i);
@@ -34,21 +41,6 @@ bool DODUseRifleGrenadeAction::precondCheck() {
 			}
 			dist += targetPos.DistTo(enemyOther->getCurrentPosition());
 		}
-		if (dist < minDist) {
-			target = enemy;
-			minDist = dist;
-		}
+		target = enemy;
 	}
-	return target != nullptr;
-}
-
-bool DODUseRifleGrenadeAction::execute() {
-	Weapon* weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
-	return weapon == nullptr || weapon->isClipEmpty()
-			|| DODUseSmokeGrenadeAction::execute();
-}
-
-bool DODUseRifleGrenadeAction::canUse(const char* weaponName) const {
-	return Q_strcmp(weaponName, "weapon_riflegren_us") == 0
-			|| Q_strcmp(weaponName, "weapon_riflegren_ger") == 0;
 }
