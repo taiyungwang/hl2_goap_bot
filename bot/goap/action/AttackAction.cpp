@@ -128,6 +128,6 @@ bool AttackAction::targetDestroyed() const {
 					blackboard.getSelf()->getCurrentPosition()) > 130.0f;
 }
 
-edict_t* AttackAction::getTargetedEdict() const {
+edict_t* AttackAction::getTargetedEdict() {
 	return blackboard.getBlocker();
 }

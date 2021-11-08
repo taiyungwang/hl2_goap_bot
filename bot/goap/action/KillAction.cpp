@@ -6,7 +6,6 @@
 
 static ConVar mybotAttackDelay("mybot_attack_delay", "60");
 
-
 KillAction::KillAction(Blackboard &blackboard) :
 		AttackAction(blackboard) {
 	effects = { WorldProp::ENEMY_SIGHTED, false };
@@ -15,7 +14,7 @@ KillAction::KillAction(Blackboard &blackboard) :
 bool KillAction::precondCheck() {
 	framesToWait = mybotAttackDelay.GetInt();
 	adjustAim = true;
-	dur = 600;
+	dur = INFINITY;
 	target = blackboard.getSelf()->getVision().getTargetedPlayer();
 	return target > 0;
 }
@@ -25,9 +24,11 @@ bool KillAction::targetDestroyed() const {
 	return targetedPlayer == nullptr || !targetedPlayer->isInGame();
 }
 
-edict_t* KillAction::getTargetedEdict() const {
-	if (target != blackboard.getSelf()->getVision().getTargetedPlayer()) {
-		return nullptr;
+edict_t* KillAction::getTargetedEdict() {
+	int visionTarget = blackboard.getSelf()->getVision().getTargetedPlayer();
+	if (target != visionTarget) {
+		target = visionTarget;
+		framesToWait = mybotAttackDelay.GetInt();
 	}
 	const Player* player = Player::getPlayer(target);
 	return player == nullptr ? nullptr : player->getEdict();

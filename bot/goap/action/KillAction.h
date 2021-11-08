@@ -19,5 +19,5 @@ private:
 
 	bool targetDestroyed() const;
 
-	edict_t* getTargetedEdict() const;
+	edict_t* getTargetedEdict();
 };
