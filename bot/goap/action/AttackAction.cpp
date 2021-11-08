@@ -65,6 +65,9 @@ bool AttackAction::execute() {
 		}
 	}
 	edict_t* targetEnt = getTargetedEdict();
+	if (targetEnt == nullptr) {
+		return true;
+	}
 	if (weapFunc->isExplosive()) {
 		targetLoc = targetEnt->GetCollideable()->GetCollisionOrigin();
 	}
