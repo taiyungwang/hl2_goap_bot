@@ -10,4 +10,10 @@ public:
 	}
 };
 
+class NeedAmmo: public VoiceMessage {
+public:
+	NeedAmmo(edict_t *sender) :
+			VoiceMessage(sender) {
+	}
+};
 }

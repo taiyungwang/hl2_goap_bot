@@ -44,6 +44,7 @@ DODBotBuilder::DODBotBuilder(GameManager *objectives,
 	voiceMessageSender.addMessage<GrenadeVoiceMessage>("voice_grenade");
 	voiceMessageSender.addMessage<NeedBackupVoiceMessage>("voice_backup");
 	voiceMessageSender.addMessage<DODVoiceMessage::FireInTheHole>("voice_fireinhole");
+	voiceMessageSender.addMessage<DODVoiceMessage::NeedAmmo>("voice_needammo");
 }
 
 void DODBotBuilder::updatePlanner(GoalManager &planner,

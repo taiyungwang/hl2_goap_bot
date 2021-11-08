@@ -1,5 +1,6 @@
 #include "DODWorld.h"
 
+#include <mods/dod/voice/DODVoiceMessage.h>
 #include <event/EventInfo.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
@@ -51,6 +52,9 @@ bool DODWorld::update(Blackboard& blackboard) {
 	}
 	Bot *self = blackboard.getSelf();
 	int team = self->getTeam();
+	if (getState(WorldProp::OUT_OF_AMMO)) {
+		self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::NeedAmmo>(self->getEdict()));
+	}
 	for (auto i: blackboard.getSelf()->getVision().getVisibleEntities()) {
 		extern IVEngineServer *engine;
 		edict_t *entity = engine->PEntityOfEntIndex(i);
