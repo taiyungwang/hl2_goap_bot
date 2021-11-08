@@ -31,5 +31,5 @@ edict_t* KillAction::getTargetedEdict() {
 		framesToWait = mybotAttackDelay.GetInt();
 	}
 	const Player* player = Player::getPlayer(target);
-	return player == nullptr ? nullptr : player->getEdict();
+	return player == nullptr || !player->isInGame() ? nullptr : player->getEdict();
 }
