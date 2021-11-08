@@ -12,9 +12,7 @@ public:
 		return false;
 	}
 
-	bool execute() override {
-		return GoToAction::execute() && !waitInCover();
-	}
+	bool execute() override;
 
 	bool operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar );
 

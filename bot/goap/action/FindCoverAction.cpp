@@ -22,6 +22,12 @@ bool FindCoverAction::ShouldSearch(CNavArea *adjArea, CNavArea *currentArea,
 	return !adjArea->IsBlocked(team)
 			&& areasToAvoid.find(adjArea) == areasToAvoid.end();
 }
+bool FindCoverAction::execute() {
+	if (!GoToAction::execute()) {
+		return false;
+	}
+	return !waitInCover();
+}
 
 bool FindCoverAction::operator() (CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar) {
 	if (area == startArea) {
