@@ -22,7 +22,7 @@ extern IVDebugOverlay *debugoverlay;
 
 extern ConVar mybot_debug;
 
-static ConVar maxAreaTime("my_bot_max_area_time", "150");
+static ConVar maxAreaTime("my_bot_max_area_time", "180");
 
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
@@ -278,7 +278,7 @@ bool Navigator::canMoveTo(Vector goal, bool crouch) const {
 }
 
 bool Navigator::reachedGoal() const {
-	return path.empty() && moveCtx->getGoal() == finalGoal && moveCtx->reachedGoal(targetRadius);
+	return moveCtx->isAtTarget(finalGoal, targetRadius);
 }
 
 bool Navigator::setLadderStart() {
