@@ -27,5 +27,7 @@ private:
 
 	MoveState* nextState;
 
+	unsigned int stuckFrames = 0;
+
 	float trace(const Vector& pos, const Vector& goal) const;
 };

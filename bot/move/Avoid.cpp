@@ -12,6 +12,7 @@
 #include <nav_mesh/nav_entities.h>
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
+#include <util/BasePlayer.h>
 #include <utlmap.h>
 #include <eiface.h>
 #include <in_buttons.h>
@@ -23,6 +24,9 @@ extern IVEngineServer* engine;
 extern ConVar nav_slope_limit;
 
 const static float MIN_DIST = 0.00001f;
+
+static ConVar maxStuckFrames("mybot_max_stuck_frames", "3");
+static ConVar minStuckSpeed("mybot_min_stuck_speed", "2.0f");
 
 static edict_t* getEdict(const trace_t& result) {
 	if (result.m_pEnt == nullptr) {
@@ -85,6 +89,15 @@ MoveState* Avoid::move(const Vector& pos) {
 			return new MoveLadder(ctx);
 		}
 		return nextState;
+	}
+	float speed = BasePlayer(self).getVelocity().Length();
+	if (!(ctx.getType() & NAV_MESH_CROUCH) && speed < minStuckSpeed.GetFloat()) {
+		stuckFrames++;
+	} else {
+		stuckFrames = 0;
+	}
+	if (stuckFrames > maxStuckFrames.GetInt()) {
+		ctx.setStuck(true);
 	}
 	if (ctx.isStuck()) {
 		extern CGlobalVars *gpGlobals;
