@@ -193,22 +193,34 @@ bool Navigator::buildPath() {
 	return true;
 }
 
-bool Navigator::canGetNextArea(const Vector& loc) const {
+bool Navigator::canGetNextArea(const Vector& loc) {
 	Vector goal;
-	return !path.empty()
-			&& ((!moveCtx->hasGoal()
-					&& (path.top() == lastArea || path.top()->Contains(loc)
+	if (path.empty()) {
+		return false;
+	}
+	if (lastArea == nullptr
+			|| (!moveCtx->hasGoal()
+					&& moveCtx->getGoal() == path.top()->GetCenter()
+					&& (path.top() == lastArea || path.top()->Contains(loc)))
 							// close to next path.top()
-							|| (getPortalToTopArea(goal) && goal == moveCtx->getGoal())
-							|| moveCtx->getGoal() == path.top()->GetCenter()))
-					|| (canMoveTo(moveCtx->getGoal(), lastArea->GetAttributes() & NAV_MESH_CROUCH)
-							&& !(path.top()->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE | NAV_MESH_STAIRS))
-							&& (!moveCtx->nextGoalIsLadderStart() && !blackboard.isOnLadder())
-							// don't skip areas above and below ground height
-							&& fabs(lastArea->GetCenter().z - path.top()->GetCenter().z) <= StepHeight
-							&& fabs(loc.z - lastArea->GetCenter().z) <= StepHeight
-							&& canMoveTo(path.top()->GetCenter(),
-									lastArea->GetAttributes() & NAV_MESH_CROUCH)));
+							|| ((getPortalToTopArea(goal) && goal == moveCtx->getGoal()))) {
+		return true;
+	}
+	if (lastArea == nullptr
+			|| ((path.top()->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE | NAV_MESH_STAIRS))
+					|| moveCtx->nextGoalIsLadderStart() || blackboard.isOnLadder()
+					// don't skip areas above and below ground height
+					|| fabs(lastArea->GetCenter().z - path.top()->GetCenter().z) > StepHeight
+					|| fabs(loc.z - lastArea->GetCenter().z) > StepHeight)) {
+		return false;
+	}
+	CNavArea *area = path.top();
+	path.pop();
+	bool crouch = area->GetAttributes() & NAV_MESH_CROUCH;
+	bool canSkip = (path.empty() && canMoveTo(finalGoal, crouch))
+		|| (!path.empty() && canMoveTo(path.top()->GetCenter(), crouch));
+	path.push(area);
+	return canSkip;
 }
 
 void Navigator::setGoalForNextArea(const Vector& loc) {
@@ -261,7 +273,6 @@ CNavArea* Navigator::getArea(const Vector& pos, int team) {
 	}
 	return area;
 }
-
 
 CNavArea* Navigator::getArea(const Player* player) {
 	CNavArea* area = TheNavMesh->GetNavArea(player->getEdict(), 0);

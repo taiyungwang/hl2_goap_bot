@@ -66,7 +66,7 @@ private:
 
 	bool buildPath();
 
-	bool canGetNextArea(const Vector& loc) const;
+	bool canGetNextArea(const Vector& loc);
 
 	void setGoalForNextArea(const Vector& loc);
 
