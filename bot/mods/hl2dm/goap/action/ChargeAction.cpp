@@ -9,9 +9,6 @@
 #include <in_buttons.h>
 
 bool ChargeAction::precondCheck() {
-	if (!GoToConsumableEntityAction::precondCheck()) {
-		return false;
-	}
 	chargeTime = 0;
 	return true;
 }
@@ -49,6 +46,7 @@ bool ChargeAction::findTargetLoc() {
 	if (!GoToEntityAction::findTargetLoc()) {
 		return false;
 	}
+	targetRadius = 15.0f;
 	// override the trigger distance
 	return true;
 }
