@@ -27,8 +27,8 @@ int Weapon::getWeaponState() const {
 }
 
 bool Weapon::isDeployed() const {
-	return deployedCheck == nullptr || (!weap->IsFree()
-			&& deployedCheck->get<bool>(weap));
+	return deployedCheck != nullptr && !weap->IsFree()
+			&& deployedCheck->get<bool>(weap);
 }
 
 void Weapon::undeploy(Blackboard& blackboard) {
