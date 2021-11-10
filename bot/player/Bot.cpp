@@ -115,6 +115,7 @@ bool Bot::handle(EventInfo* event) {
 		}
 		resetPlanner = true;
 		blackboard->reset();
+		vision.reset();
 		world->reset();
 		return true;
 	}
@@ -181,19 +182,21 @@ public:
 	}
 };
 
-bool Bot::canSee(const Vector& start, const Vector& end) {
-	trace_t result;
+void Bot::canSee(trace_t& result, const Vector& start, const Vector& end) {
 	VisionFilter filter;
-	UTIL_TraceLine(start, end, MASK_ALL, &filter, &result);
-	return !result.DidHit();
+	UTIL_TraceLine(start, end, MASK_ALL, &filter, &result);;
 }
 
 bool Bot::canSee(const Player& player) const {
-	return canSee(getEyesPos(), player.getEyesPos());
+	trace_t result;
+	canSee(result, getEyesPos(), player.getEyesPos());
+	return !result.DidHit();
 }
 
 bool Bot::canSee(edict_t* target) const {
-	return canSee(getEyesPos(), target->GetCollideable()->GetCollisionOrigin());
+	trace_t result;
+	canSee(result, getEyesPos(), target->GetCollideable()->GetCollisionOrigin());
+	return !result.DidHit();
 }
 
 Vector Bot::getFacing() const {

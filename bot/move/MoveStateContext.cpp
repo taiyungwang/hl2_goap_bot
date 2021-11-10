@@ -120,7 +120,7 @@ const trace_t& MoveStateContext::trace(const Vector& start, const Vector& goal, 
 	}
 	mins.z += 5.0f;
 	extern ConVar mybot_debug;
-	UTIL_TraceHull((goal - start).Normalized() * HalfHumanWidth + start,
+	UTIL_TraceHull(heading.Normalized() * HalfHumanWidth + start,
 			goal, mins, maxs, MASK_PLAYERSOLID, filter, &traceResult, mybot_debug.GetBool());
 	return traceResult;
 }

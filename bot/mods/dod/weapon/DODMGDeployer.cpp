@@ -24,7 +24,7 @@ DODMGDeployer::~DODMGDeployer() {
 }
 
 bool DODMGDeployer::execute(Blackboard& blackboard) {
-	if (!started) {
+	if (!started && !weapon.isDeployed()) {
 		start(blackboard);
 		return false;
 	}
@@ -40,7 +40,7 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 			Buttons& buttons = blackboard.getButtons();
 			if (target != nullptr && target->isInGame()) {
 				trace_t result;
-				self->canShoot(result, self->getEyesPos());
+				Bot::canSee(result, self->getEyesPos(), target->getEyesPos());
 				extern ConVar nav_slope_limit;
 				if (result.DidHit()) {
 					if (result.endpos.DistTo(result.startpos) > HalfHumanWidth
@@ -71,6 +71,7 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 
 void DODMGDeployer::undeploy(Blackboard& blackboard) {
 	Deployer::undeploy(blackboard);
+	target = nullptr;
 	animationCounter = -1;
 }
 
@@ -102,18 +103,17 @@ void DODMGDeployer::start(Blackboard& blackboard) {
 		self->lookStraight();
 	}
 	Vector pos(self->getCurrentPosition()
-			+ (self->getViewTarget() - self->getCurrentPosition()).Normalized() * HalfHumanWidth);
+			+ (self->getViewTarget() - self->getCurrentPosition()).Normalized() * 2.0f * HalfHumanWidth);
 	pos.z += StepHeight;
 	trace_t result;
 	extern ConVar mybot_debug;
 	edict_t * ground = BasePlayer(self->getEdict()).getGroundEntity();
-	UTIL_TraceHull(pos, pos, Vector(0.0f, -HalfHumanWidth, 0.0f),
-					Vector(0.0f, HalfHumanWidth, 0.0f),
-									MASK_NPCSOLID_BRUSHONLY, FilterSelf(self->getEdict()->GetIServerEntity()),
+	UTIL_TraceHull(pos, pos, Vector(0.0f, 0.0f, 0.0f), Vector(0.0f, 0.0f, HumanHeight - StepHeight),
+					MASK_SOLID, FilterSelf(self->getEdict()->GetIServerEntity()),
 											&result, mybot_debug.GetBool());
 	proneRequired = !result.DidHit();
 	started = true;
 	blackboard.getButtons().tap(proneRequired ? IN_ALT1 : IN_ATTACK2);
-	animationCounter = proneRequired ? PRONE_ANIM_TIME : 5.0f;
+	animationCounter = proneRequired ? PRONE_ANIM_TIME : 5;
 }
 

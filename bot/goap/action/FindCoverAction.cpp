@@ -47,7 +47,9 @@ bool FindCoverAction::operator() (CNavArea *area, CNavArea *priorArea, float tra
 		}
 		Vector enemyEyes;
 		getAvoidPosition(enemyEyes, std::get<1>(avoid));
-		if (Bot::canSee(eyes, enemyEyes)) {
+		trace_t result;
+		Bot::canSee(result, eyes, enemyEyes);
+		if (!result.DidHit()) {
 			return true;
 		}
 	}

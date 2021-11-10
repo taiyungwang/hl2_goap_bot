@@ -15,6 +15,10 @@
 Vision::Vision() {
 	miniMapRange = INFINITY;
 }
+void Vision::reset() {
+	memoryDur = 0;
+	targetedPlayer = 0;
+}
 
 void Vision::updateVisiblity(Bot *self) {
 	Vector facing = self->getFacing().Normalized();
@@ -101,7 +105,7 @@ void Vision::updateVisiblity(Bot *self) {
 	}
 	if (targetedPlayer != 0) {
 		memoryDur = 60;
-	} else if (lastTarget != 0 && Player::getPlayer(lastTarget)->isInGame()) {
+	} else if (lastTarget != 0 && Player::getPlayer(lastTarget) != nullptr && Player::getPlayer(lastTarget)->isInGame()) {
 		memoryDur--;
 		if (memoryDur > 0) {
 			self->setWantToListen(false);

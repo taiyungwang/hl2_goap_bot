@@ -22,7 +22,7 @@ extern IVDebugOverlay *debugoverlay;
 
 extern ConVar mybot_debug;
 
-static ConVar maxAreaTime("my_bot_max_area_time", "180");
+static ConVar maxAreaTime("my_bot_max_area_time", "240");
 
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {

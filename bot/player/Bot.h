@@ -24,7 +24,7 @@ public:
 		CLASSES = options;
 	}
 
-	static bool canSee(const Vector& start, const Vector& end);
+	static void canSee(CGameTrace& result, const Vector& start, const Vector& end);
 
 	Bot(edict_t *ent, const std::shared_ptr<Arsenal> &arsenal,
 			CommandHandler& commandHandler,
@@ -78,8 +78,6 @@ public:
 
 	bool canShoot(const Vector &vecAbsEnd) const;
 
-	bool canShoot(CGameTrace &result, const Vector &vecAbsEnd) const;
-
 	bool canSee(const Player& target) const;
 
 	bool canSee(edict_t* target) const;
@@ -128,6 +126,8 @@ private:
 	Vector viewTarget;
 
 	bool hookEnabled = false, resetPlanner = false, wantToListen = true;
+
+	bool canShoot(CGameTrace &result, const Vector &vecAbsEnd) const;
 
 	void listen();
 };

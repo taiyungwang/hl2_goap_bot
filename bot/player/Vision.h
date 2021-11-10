@@ -12,8 +12,9 @@ class Vision {
 public:
 	Vision();
 
-	void updateVisiblity(Bot *self);
+	void reset();
 
+	void updateVisiblity(Bot *self);
 
 	const std::set<int>& getVisibleEnemies() const {
 		return visibleEnemies;

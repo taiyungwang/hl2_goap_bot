@@ -52,12 +52,15 @@ bool SnipeAction::execute() {
 	auto self = blackboard.getSelf();
 	self->setViewTarget(aim * 100.0f + blackboard.getSelf()->getCurrentPosition());
 	self->lookStraight();
-	Deployer* deployer = blackboard.getSelf()->getArsenal().getCurrWeapon()->getDeployer();
+	Weapon *weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
+	Deployer* deployer = weapon->getDeployer();
 	if (deployer != nullptr && self->getAimAccuracy() > 0.8f
 			&& !deployer->execute(blackboard)) {
 		return false;
 	}
-	blackboard.getButtons().hold(IN_DUCK);
+	if (deployer == nullptr || weapon->isDeployed()) {
+		blackboard.getButtons().hold(IN_DUCK);
+	}
 	return --duration <= 0;
 }
 
