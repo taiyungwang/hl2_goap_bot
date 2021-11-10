@@ -15,7 +15,7 @@ KillAction::KillAction(Blackboard &blackboard) :
 bool KillAction::precondCheck() {
 	framesToWait = mybotAttackDelay.GetInt();
 	adjustAim = true;
-	dur = std::numeric_limits<unsigned int>::max();
+	dur = UINT_MAX;
 	target = blackboard.getSelf()->getVision().getTargetedPlayer();
 	return target > 0;
 }
