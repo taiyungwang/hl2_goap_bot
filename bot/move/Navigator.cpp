@@ -22,7 +22,7 @@ extern IVDebugOverlay *debugoverlay;
 
 extern ConVar mybot_debug;
 
-static ConVar maxAreaTime("my_bot_max_area_time", "240");
+static ConVar maxAreaTime("my_bot_max_area_time", "280");
 
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
@@ -61,7 +61,7 @@ bool Navigator::step() {
 	if (area == nullptr) {
 		return true;
 	}
-	int attributes = path.empty() ? lastArea->GetAttributes() : path.top()->GetAttributes();
+	int attributes = area->GetAttributes();
 	if (canGetNextArea(loc)) {
 		setGoalForNextArea(loc);
 	} else if (!moveCtx->hasGoal() && !path.empty()) {
@@ -74,8 +74,7 @@ bool Navigator::step() {
 		path.top()->Draw();
 	}
 	// magic number from https://developer.valvesoftware.com/wiki/Dimensions#Horizontal_.28To_Equal_Height.29
-	if (((attributes & NAV_MESH_JUMP) ||
-			((attributes & NAV_MESH_CROUCH) && !(area->GetAttributes() & NAV_MESH_CROUCH)))
+	if (((attributes & NAV_MESH_JUMP) || (attributes & NAV_MESH_CROUCH))
 			&& moveCtx->getGoal().AsVector2D().DistTo(loc.AsVector2D()) > 136.0f) {
 		attributes = NAV_MESH_INVALID;
 	}
