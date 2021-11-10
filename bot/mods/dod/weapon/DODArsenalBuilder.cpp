@@ -4,6 +4,7 @@
 #include "DODAssaultRifleBuilder.h"
 #include "DODMGBuilder.h"
 #include <weapon/SimpleWeaponBuilder.h>
+#include <weapon/GrenadeBuilder.h>
 #include <weapon/GrenadeLauncherFunction.h>
 #include <weapon/DeployableWeaponBuilder.h>
 #include <weapon/PistolBuilder.h>
@@ -29,18 +30,6 @@ public:
 
 private:
 	float zMultiplier;
-};
-
-class GrenadeBuilder: public GrenadeLauncherBuilder {
-public:
-	GrenadeBuilder(float zMultiplier) : GrenadeLauncherBuilder(zMultiplier) {
-	}
-
-	std::shared_ptr<Weapon> build(edict_t *weap) const override {
-		auto weapon = GrenadeLauncherBuilder::build(weap);
-		weapon->getPrimary()->getRange()[1] = 600.0f;
-		return weapon;
-	}
 };
 
 class AntiTankBuilder: public DeployableWeaponBuilder<Reloader> {
@@ -77,7 +66,7 @@ DODArsenalBuilder::DODArsenalBuilder() {
 			0.8f, 100.0f, 1600.0f, "CDODSniperWeapon", "m_bZoomed", 1000.0f);
 	addPair<DODSMGBuilder>("weapon_thompson", "weapon_mp40");
 	addPair<PistolBuilder>("weapon_colt", "weapon_p38", 0.2f);
-	addPair<GrenadeBuilder>("weapon_smoke_us", "weapon_smoke_ger", 400.0f);
+	addPair<GrenadeBuilder>("weapon_smoke_us", "weapon_smoke_ger", 600.0f);
 	addPair<GrenadeBuilder>("weapon_frag_us", "weapon_frag_ger", 600.0f);
 	addPair<DODAssaultRifleBuilder>("weapon_bar", "weapon_mp44");
 	addPair<DeployableWeaponBuilder<Reloader>>("weapon_spring", "weapon_k98_scoped",

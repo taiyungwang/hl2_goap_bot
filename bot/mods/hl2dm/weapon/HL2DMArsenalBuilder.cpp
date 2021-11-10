@@ -24,7 +24,7 @@ HL2DMArsenalBuilder::HL2DMArsenalBuilder() {
 	weaponBuilders["weapon_shotgun"] = make_shared<SimpleWeaponBuilder<ShotgunFunction>>();
 	weaponBuilders["weapon_357"] = make_shared<MagnumBuilder>();
 	weaponBuilders["weapon_crossbow"] = make_shared<CrossbowBuilder>();
-	weaponBuilders["weapon_frag"] = make_shared<GrenadeBuilder>();
+	weaponBuilders["weapon_frag"] = make_shared<GrenadeBuilder>(600.0f);
 	weaponBuilders["weapon_rpg"] = make_shared<RPGBuilder>();
 	weaponBuilders["weapon_physcannon"] = make_shared<UtilityToolBuilder>(768.0f);
 }

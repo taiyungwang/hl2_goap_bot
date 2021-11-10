@@ -8,7 +8,9 @@
 #include <player/Bot.h>
 #include <voice/GrenadeVoiceMessage.h>
 #include <voice/VoiceMessageSender.h>
+#include <nav_mesh/nav.h>
 #include <util/EntityUtils.h>
+#include <util/BaseGrenade.h>
 
 void DODWorld::addStates() {
 	states.Insert(WorldProp::ALL_POINTS_CAPTURED, false);
@@ -58,14 +60,21 @@ bool DODWorld::update(Blackboard& blackboard) {
 	for (auto i: blackboard.getSelf()->getVision().getVisibleEntities()) {
 		extern IVEngineServer *engine;
 		edict_t *entity = engine->PEntityOfEntIndex(i);
-		if (entity != nullptr && !entity->IsFree()
-				&& ((team == 2 && (FClassnameIs(entity, "grenade_frag_ger")
-				|| FClassnameIs(entity, "grenade_riflegren_ger")))
-				|| (team == 3 && (FClassnameIs(entity, "grenade_frag_us")
-						|| FClassnameIs(entity, "grenade_riflegren_us"))))
-				&& self->getCurrentPosition().DistTo(entity->GetCollideable()->GetCollisionOrigin()) < 100.0f) {
+		if (entity == nullptr || entity->IsFree()) {
+			continue;
+		}
+		BaseGrenade grenade(entity);
+		if ((grenade.getThrower() == self->getEdict()
+				|| ((team == 2 && (FClassnameIs(entity, "grenade_frag_ger")
+						|| FClassnameIs(entity, "grenade_riflegren_ger")))
+						|| (team == 3 && (FClassnameIs(entity, "grenade_frag_us")
+								|| FClassnameIs(entity, "grenade_riflegren_us")))))
+				&& self->getCurrentPosition().DistTo(entity->GetCollideable()->GetCollisionOrigin())
+				< grenade.getDmgRadius() + HalfHumanWidth) {
 			updateState(WorldProp::EXPLOSIVE_NEAR, true);
-			self->getVoiceMessageSender().sendMessage(std::make_shared<GrenadeVoiceMessage>(self->getEdict()));
+			if (grenade.getThrower() != self->getEdict()) {
+				self->getVoiceMessageSender().sendMessage(std::make_shared<GrenadeVoiceMessage>(self->getEdict()));
+			}
 			break;
 		}
 	}

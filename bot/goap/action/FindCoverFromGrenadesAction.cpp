@@ -4,6 +4,7 @@
 #include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <player/FilterSelfAndEnemies.h>
+#include <util/BaseGrenade.h>
 #include <util/UtilTrace.h>
 #include <eiface.h>
 
@@ -11,14 +12,18 @@ FindCoverFromGrenadesAction::FindCoverFromGrenadesAction(Blackboard &blackboard)
 		FindCoverAction(blackboard) {
 	effects = { WorldProp::EXPLOSIVE_NEAR, false };
 	sprint = true;
-	maxRange = 500.0f;
 }
 
 void FindCoverFromGrenadesAction::setAvoidAreas() {
 	// TODO: this assumes that only relevant grenades are in the visible entities list.
+	maxRange = 0.0f;
 	for (auto i: blackboard.getSelf()->getVision().getVisibleEntities()) {
 		extern IVEngineServer *engine;
 		edict_t *entity = engine->PEntityOfEntIndex(i);
+		float range = BaseGrenade(entity).getDmgRadius() + HalfHumanWidth;
+		if (range > maxRange) {
+			maxRange = range;
+		}
 		if (entity == nullptr || entity->IsFree()) {
 			continue;
 		}
@@ -29,7 +34,7 @@ void FindCoverFromGrenadesAction::setAvoidAreas() {
 	}
 }
 
-void FindCoverFromGrenadesAction::getAvoidPosition(Vector& pos, edict_t *avoid) const{
+void FindCoverFromGrenadesAction::getAvoidPosition(Vector& pos, edict_t *avoid) const {
 	pos = avoid->GetCollideable()->GetCollisionOrigin();
 }
 

@@ -4,5 +4,12 @@
 
 class GrenadeBuilder: public WeaponBuilder {
 public:
-	std::shared_ptr<Weapon> build(edict_t* weap) const;
+	GrenadeBuilder(float zMultiplier) :
+			zMultiplier(zMultiplier) {
+	}
+
+	virtual std::shared_ptr<Weapon> build(edict_t *weap) const;
+
+protected:
+	const float zMultiplier;
 };
