@@ -54,7 +54,9 @@ bool DODWorld::update(Blackboard& blackboard) {
 	}
 	Bot *self = blackboard.getSelf();
 	int team = self->getTeam();
-	if (getState(WorldProp::OUT_OF_AMMO)) {
+	auto arsenal = blackboard.getSelf()->getArsenal();
+	int baseBombId = arsenal.getWeaponIdByName("weapon_basebomb");
+	if (getState(WorldProp::OUT_OF_AMMO) && baseBombId != arsenal.getCurrWeaponIdx()) {
 		self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::NeedAmmo>(self->getEdict()));
 	}
 	for (auto i: blackboard.getSelf()->getVision().getVisibleEntities()) {
@@ -78,7 +80,6 @@ bool DODWorld::update(Blackboard& blackboard) {
 			break;
 		}
 	}
-	updateState(WorldProp::HAS_BOMB,
-			blackboard.getSelf()->getArsenal().getWeaponIdByName("weapon_basebomb") != 0);
+	updateState(WorldProp::HAS_BOMB, baseBombId != 0);
 	return false;
 }
