@@ -2,6 +2,7 @@
 
 #include <weapon/GrenadeBuilder.h>
 #include <set>
+#include <string>
 
 class DODLiveGrenadeBuilder: public GrenadeBuilder {
 public:
