@@ -1,6 +1,7 @@
 #include "DODWorld.h"
 
 #include <mods/dod/voice/DODVoiceMessage.h>
+#include <mods/dod/weapon/DODLiveGrenadeBuilder.h>
 #include <event/EventInfo.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
@@ -17,6 +18,7 @@ void DODWorld::addStates() {
 	states.Insert(WorldProp::POINTS_DEFENDED, false);
 	states.Insert(WorldProp::HAS_BOMB, false);
 	states.Insert(WorldProp::BOMB_DEFUSED, false);
+	states.Insert(WorldProp::HAS_LIVE_GRENADE, false);
 }
 
 bool DODWorld::handle(EventInfo* event) {
@@ -55,8 +57,9 @@ bool DODWorld::update(Blackboard& blackboard) {
 	Bot *self = blackboard.getSelf();
 	int team = self->getTeam();
 	auto arsenal = blackboard.getSelf()->getArsenal();
-	int baseBombId = arsenal.getWeaponIdByName("weapon_basebomb");
-	if (getState(WorldProp::OUT_OF_AMMO) && baseBombId != arsenal.getCurrWeaponIdx()) {
+	int baseBombId = arsenal.getWeaponIdByName("weapon_basebomb"),
+			weapIdx = arsenal.getCurrWeaponIdx();
+	if (getState(WorldProp::OUT_OF_AMMO) && baseBombId != weapIdx) {
 		self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::NeedAmmo>(self->getEdict()));
 	}
 	for (auto i: blackboard.getSelf()->getVision().getVisibleEntities()) {
@@ -81,5 +84,12 @@ bool DODWorld::update(Blackboard& blackboard) {
 		}
 	}
 	updateState(WorldProp::HAS_BOMB, baseBombId != 0);
+	updateState(WorldProp::HAS_LIVE_GRENADE, false);
+	for (auto name: DODLiveGrenadeBuilder::NAMES) {
+		if (arsenal.getWeaponIdByName(name.c_str()) > 0) {
+			updateState(WorldProp::HAS_LIVE_GRENADE, true);
+			break;
+		}
+	}
 	return false;
 }

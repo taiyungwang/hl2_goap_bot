@@ -4,14 +4,18 @@
 #include "DODAssaultRifleBuilder.h"
 #include "DODMGBuilder.h"
 #include <weapon/SimpleWeaponBuilder.h>
-#include <weapon/GrenadeBuilder.h>
 #include <weapon/GrenadeLauncherFunction.h>
 #include <weapon/DeployableWeaponBuilder.h>
 #include <weapon/PistolBuilder.h>
 #include <weapon/MeleeWeaponBuilder.h>
 #include <weapon/UtilityToolBuilder.h>
+#include "DODLiveGrenadeBuilder.h"
 
 using namespace std;
+
+const std::set<std::string> DODLiveGrenadeBuilder::NAMES {
+		"weapon_frag_ger_live", "weapon_frag_us_live",
+		"weapon_riflegren_ger_live", "weapon_riflegren_us_live" };
 
 class GrenadeLauncherBuilder: public SimpleWeaponBuilder<GrenadeLauncherFunction> {
 public:
@@ -58,16 +62,17 @@ public:
 		return weapon;
 	}
 };
-DODArsenalBuilder::DODArsenalBuilder() {
 
+DODArsenalBuilder::DODArsenalBuilder() {
+	float grenadeZMultipler = 600.0f;
 	addPair<GrenadeLauncherBuilder>("weapon_riflegren_us", "weapon_riflegren_ger", 2.0f);
 	addPair<MeleeWeaponBuilder>("weapon_amerknife", "weapon_spade");
 	addPair<DeployableWeaponBuilder<Reloader>>("weapon_garand", "weapon_k98",
 			0.8f, 100.0f, 1600.0f, "CDODSniperWeapon", "m_bZoomed", 1000.0f);
 	addPair<DODSMGBuilder>("weapon_thompson", "weapon_mp40");
 	addPair<PistolBuilder>("weapon_colt", "weapon_p38", 0.2f);
-	addPair<GrenadeBuilder>("weapon_smoke_us", "weapon_smoke_ger", 600.0f);
-	addPair<GrenadeBuilder>("weapon_frag_us", "weapon_frag_ger", 600.0f);
+	addPair<GrenadeBuilder>("weapon_smoke_us", "weapon_smoke_ger", grenadeZMultipler);
+	addPair<GrenadeBuilder>("weapon_frag_us", "weapon_frag_ger", grenadeZMultipler);
 	addPair<DODAssaultRifleBuilder>("weapon_bar", "weapon_mp44");
 	addPair<DeployableWeaponBuilder<Reloader>>("weapon_spring", "weapon_k98_scoped",
 			0.8f, 500.0f, 3600.0f, "CDODSniperWeapon", "m_bZoomed");
@@ -76,6 +81,9 @@ DODArsenalBuilder::DODArsenalBuilder() {
 	weaponBuilders["weapon_m1carbine"] = make_shared<PistolBuilder>(0.4f);
 	weaponBuilders["weapon_c96"] = make_shared<C96Builder>();
 	weaponBuilders["weapon_basebomb"] = make_shared<UtilityToolBuilder>();
+	for (const auto grenade: DODLiveGrenadeBuilder::NAMES) {
+		weaponBuilders[grenade] = make_shared<DODLiveGrenadeBuilder>();
+	}
 }
 
 template<typename _Tp, typename... _Args>

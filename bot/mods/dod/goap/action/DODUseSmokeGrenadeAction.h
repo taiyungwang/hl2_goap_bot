@@ -1,26 +1,18 @@
 #pragma once
 
-#include <goap/action/UseSpecificWeaponAction.h>
+#include "DODThrowLiveGrenadeAction.h"
 
 class Player;
 
-class DODUseSmokeGrenadeAction: public UseSpecificWeaponAction {
+class DODUseSmokeGrenadeAction: public DODThrowLiveGrenadeAction {
 public:
 	DODUseSmokeGrenadeAction(Blackboard& blackboard) :
-			UseSpecificWeaponAction(blackboard) {
+		DODThrowLiveGrenadeAction(blackboard) {
 		effects = {WorldProp::MULTIPLE_ENEMY_SIGHTED, false};
 	}
 
-	bool precondCheck();
-
-	virtual bool execute();
+	bool precondCheck() override;
 
 protected:
-	Vector viewTarget;
-
-	const Player* target = nullptr;
-
-	virtual bool canUse(const char* weaponName) const;
-
-	virtual void chooseTarget();
+	virtual bool canUse(const char* weaponName) const override;
 };

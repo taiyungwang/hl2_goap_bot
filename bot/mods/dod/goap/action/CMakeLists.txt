@@ -1,3 +1,3 @@
 add_library(dod_goap_actions CapturePointAction.cpp DODUseFragGrenadeAction.cpp
- DODUseSmokeGrenadeAction.cpp DODUseRifleGrenadeAction.cpp
- DODBombTargetAction.cpp DODDefendPointAction.cpp DODDefuseBombAction.cpp) 
+ DODUseSmokeGrenadeAction.cpp DODUseRifleGrenadeAction.cpp DODThrowLiveGrenadeAction.cpp
+ DODBombTargetAction.cpp DODDefendPointAction.cpp DODDefuseBombAction.cpp DODPickUpGrenadeAction.cpp) 

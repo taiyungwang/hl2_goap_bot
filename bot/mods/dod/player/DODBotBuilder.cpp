@@ -4,6 +4,7 @@
 #include <mods/dod/goap/action/DODBombTargetAction.h>
 #include <mods/dod/goap/action/DODDefendPointAction.h>
 #include <mods/dod/goap/action/DODUseFragGrenadeAction.h>
+#include <mods/dod/goap/action/DODPickUpGrenadeAction.h>
 #include <mods/dod/voice/DODVoiceMessage.h>
 #include <mods/dod/util/DodPlayer.h>
 #include <event/EventHandler.h>
@@ -95,6 +96,8 @@ void DODBotBuilder::updatePlanner(GoalManager &planner,
 	// TODO: hacky way of overriding the default navigator
 	delete blackboard.getNavigator();
 	blackboard.setNavigator(new DODNavigator(blackboard));
+	planner.addAction<DODThrowLiveGrenadeAction>(0.97f);
+	planner.addAction<DODPickUpGrenadeAction>(0.96f);
 	planner.addAction<DODUseFragGrenadeAction>(0.92f);
 	planner.addAction<DODUseRifleGrenadeAction>(0.92f);
 	planner.addAction<DODUseSmokeGrenadeAction>(0.91f);

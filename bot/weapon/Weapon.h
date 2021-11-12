@@ -56,7 +56,7 @@ public:
 
 	void undeploy(Blackboard& blackboard);
 
-	const edict_t* getEdict() const {
+	edict_t* getEdict() const {
 		return weap;
 	}
 

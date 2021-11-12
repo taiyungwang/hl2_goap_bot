@@ -14,5 +14,7 @@ protected:
 	virtual bool canUse(const char* weaponName) const;
 
 private:
-	void chooseTarget() override;
+	const Player *chooseTarget() const override {
+		return ThrowGrenadeAction::chooseTarget();
+	}
 };

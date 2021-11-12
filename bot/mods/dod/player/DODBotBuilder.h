@@ -3,6 +3,7 @@
 #include <player/BotBuilder.h>
 #include <event/EventHandler.h>
 #include "DODObjectives.h"
+#include <set>
 
 class HL2MPPlayer;
 class HL2DMWorld;
@@ -15,6 +16,8 @@ public:
 	bool handle(EventInfo* event);
 
 private:
+	std::set<std::string> liveGrenades;
+
 	bool roundStarted = false;
 
 	void updatePlanner(GoalManager& planner, Blackboard& blackboard) const;
