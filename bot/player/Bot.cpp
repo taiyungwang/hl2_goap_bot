@@ -29,6 +29,9 @@ static ConVar mybot_rot_speed("mybot_rot_speed", "0.15", 0,
 
 ConVar mybot_mimic("mybot_mimic", "0");
 
+ConVar mybotAimVar("mybot_aim_variance", "3.0f", 0,
+		"range of randomness for a bot's aim");
+
 Bot::~Bot() {
 	delete blackboard;
 	delete world;
@@ -78,6 +81,10 @@ void Bot::think() {
 						NDEBUG_PERSIST_TILL_NEXT_SERVER);
 			}
 			VectorAngles(viewTarget - getEyesPos(), cmd.viewangles);
+			if (vision.getTargetedPlayer() > 0) {
+				cmd.viewangles.x += RandomFloat(-mybotAimVar.GetFloat(), mybotAimVar.GetFloat());
+				cmd.viewangles.y += RandomFloat(-mybotAimVar.GetFloat(), mybotAimVar.GetFloat());
+			}
 			rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle(),
 					mybot_rot_speed.GetFloat());
 			if (cmd.weaponselect != 0) {
