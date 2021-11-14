@@ -1,8 +1,9 @@
 #pragma once
 
 #include "CommandHandler.h"
-#include <map>
 #include <vector.h>
+#include <map>
+#include <string>
 
 class CNavArea;
 
