@@ -5,6 +5,7 @@
 #include <strtools.h>
 #include <utlqueue.h>
 #include <memory>
+#include <string>
 
 class Thinker;
 class GameManager;
