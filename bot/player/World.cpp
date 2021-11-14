@@ -60,7 +60,9 @@ bool World::think(Blackboard& blackboard) {
 					self->setViewTarget(player->second->getEyesPos());
 				}
 			} else {
-				self->setViewTarget(blocker->GetCollideable()->GetCollisionOrigin());
+				Vector target = blocker->GetCollideable()->GetCollisionOrigin();
+				target.z += blocker->GetCollideable()->OBBMaxs().z / 2.0f;
+				self->setViewTarget(target);
 			}
 			if (blackboard.getBlocker() != nullptr) {
 				inRange = weap->isInRange(pos.DistTo(self->getViewTarget()));
