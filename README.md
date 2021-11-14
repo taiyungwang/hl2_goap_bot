@@ -24,7 +24,6 @@ Where "game dir" is either "Day of Defeat Source" or "Half-Life 2 Deathmatch" an
 The bot can be built on Windows (Visual Studio 2012 or higher) and LINUX with [CMake](https://cmake.org/) and [Valve's Source SDK](alliedmodders/hl2sdk). The toplevel CMakeList.txt assumes that hl2sdk and valve_plugin_navmesh are in the same subdirectory as this repo.  It assumes that [CxxTest](https://cxxtest.com/) is installed via apt in LINUX, and in Windows it is installed in the root of drive that is specified (defaults to C:). It is also assumed that [Steam](https://store.steampowered.com/about/) is installed within the HOMEPATH for the LINUX build environment.  Please see the [Valve Source SDK Wiki on compiling](https://developer.valvesoftware.com/wiki/Source_SDK_2013) for all other platform specific dependencies.  
 
 ## TODO ##
-* Make the bots more player friendly.  Currently the bots are nearly 100% accurate with their aim.  
 * Add action for bots to drop ammo for allies
 * Add heuristics or bots to determine which items to pick up in HL2DM.
 * Add logic for bots to pick up a substitue weapon when current out of ammo for primary weapon.
