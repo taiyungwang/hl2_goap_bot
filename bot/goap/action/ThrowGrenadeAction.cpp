@@ -55,11 +55,8 @@ const Player* ThrowGrenadeAction::chooseTarget() const {
 		int inRange = 0;
 		for (int j : enemies) {
 			const Player *enemyOther = Player::getPlayer(j);
-			if (enemyOther == nullptr || enemyOther == enemy) {
-				continue;
-			}
-			float dist = targetPos.DistTo(enemyOther->getCurrentPosition());
-			if (dist > dmgRadius) {
+			if (enemyOther == nullptr || enemyOther == enemy
+					|| targetPos.DistTo(enemyOther->getCurrentPosition()) > dmgRadius) {
 				continue;
 			}
 			inRange++;

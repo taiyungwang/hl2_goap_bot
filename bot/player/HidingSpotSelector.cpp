@@ -1,64 +1,63 @@
 #include "HidingSpotSelector.h"
 
 #include <nav_mesh/nav_area.h>
+#include <filesystem.h>
+#include <eiface.h>
+#include <random>
 
-HidingSpotSelector::HidingSpotSelector() {
-	extern NavAreaVector TheNavAreas;
-	FOR_EACH_VEC(TheNavAreas, i) {
-		const auto& hideSpots = *TheNavAreas[i]->GetHidingSpots();
-		if (TheNavAreas[i]->IsBlocked(TEAM_ANY)) {
-			continue;
-		}
-		FOR_EACH_VEC(hideSpots, j) {
-			auto inserted = spots.Insert(hideSpots[j]->GetID());
-			spots[inserted].pos = hideSpots[j]->GetPosition();
-			for (int i = 0; i < 2; i++) {
-				if (TheNavAreas[i]->IsBlocked(i)) {
-					spots[inserted].score[i].inUse = true;
-				}
+extern IFileSystem *filesystem;
+
+extern CGlobalVars *gpGlobals;
+
+extern NavAreaVector TheNavAreas;
+
+static const char *ROOT_KEY = "HidingSpot Selector";
+static const char *TIME_STAMP_KEY = "navFileTimeStamp";
+static const char *SPOTS_KEY = "spots";
+static const char *FILE_PREFIX = "addons/mybot/";
+
+HidingSpotSelector::HidingSpotSelector(CommandHandler &commandHandler,
+		const std::string &modName) : Receiver(commandHandler) {
+	buildFromNavMesh();
+	KeyValues *file = new KeyValues(ROOT_KEY);
+	if (filesystem->IsDirectory((std::string(FILE_PREFIX) + modName).c_str(), "MOD")
+			&& file->LoadFromFile(filesystem, getHidingSpotFileName(modName).c_str(), "MOD")
+			&& file->GetInt(TIME_STAMP_KEY) == filesystem->GetFileTime(getNavFileName().c_str(), "MOD")) {
+		FOR_EACH_TRUE_SUBKEY(file->FindKey(SPOTS_KEY), i) {
+			auto &spot = spots[i->GetInt()];
+			FOR_EACH_TRUE_SUBKEY(i, j) {
+				auto &score = spot.score[std::stoi(j->GetName())];
+				score.success = j->GetFloat("success");
+				score.fail = j->GetFloat("fail");
 			}
 		}
 	}
+	file->deleteThis();
 }
 
-/**
- * Borrowed from https://jamesmccaffrey.wordpress.com/2017/11/01/more-on-sampling-from-the-beta-distribution-using-c/
- */
-float beta_sample(float a, float b) {
-	float alpha = a + b,
-			beta =
-			MIN(a, b) <= 1.0f ?
-					MAX(1.0f / a, 1.0f / b) :
-					sqrtf((alpha - 2.0f) / (2.0f * a * b - alpha)),
-			w = 0.0f,
-			gamma = a + 1.0f / beta;
-	for (;;) {
-		float u1 = RandomFloat(0, 1.0f),
-				u2 = RandomFloat(0, 1.0f),
-				v = beta * logf(u1 / (1.0f - u1));
-		w = a * exp(v);
-		if (alpha * logf(alpha / (b + w)) + (gamma * v) - 1.3862944
-				>= logf(u1 * u1 * u2)) {
-			break;
-		}
+bool HidingSpotSelector::receive(edict_t *sender, const CCommand &command) {
+	if (std::string("nav_save") == command.Arg(0)) {
+		buildFromNavMesh();
 	}
-	return w / (b + w);
+	return false;
 }
 
-int HidingSpotSelector::select(Vector& pos, int team) const {
+int HidingSpotSelector::select(Vector &pos, int team) const {
 	float max = 0.0f;
 	int selected = -1;
 	int scoreIdx = team > 1 ? team - 2 : 0;
-	FOR_EACH_HASHTABLE(spots, i) {
-		const auto& score = spots[i].score[scoreIdx];
+	static std::default_random_engine generator;
+	for (auto i : spots) {
+		const auto &score = std::get<1>(i).score[scoreIdx];
 		if (score.inUse && team > 1) {
 			continue;
 		}
-		float sample = beta_sample(score.success, score.fail);
-		if (sample > max) {
-			selected = spots.Key(i);
-			max = sample;
-			pos = spots[i].pos;
+		float x =  std::gamma_distribution<float>(score.success, 1.0f)(generator);
+		float betaSample = x / (x + std::gamma_distribution<float>(score.fail, 1.0f)(generator));
+		if (betaSample > max) {
+			selected = std::get<0>(i);
+			max = betaSample;
+			pos = std::get<1>(i).pos;
 		}
 	}
 	return selected;
@@ -66,12 +65,69 @@ int HidingSpotSelector::select(Vector& pos, int team) const {
 
 void HidingSpotSelector::setInUse(int spot, int team, bool inUse) {
 	if (team > 1) {
-		spots.GetPtr(spot)->score[team > 1 ? team - 2 : 0].inUse = inUse;
+		spots.at(static_cast<unsigned int>(spot)).score[team > 1 ? team - 2 : 0].inUse =
+				inUse;
 	}
 }
 
 void HidingSpotSelector::update(int spot, int team, bool success) {
-	auto& score = spots.GetPtr(spot)->score[team > 1 ? team - 2 : 0];
+	auto &score = spots[static_cast<unsigned int>(spot)].score[
+			team > 1 ? team - 2 : 0];
 	success ? score.success += 1.0f : score.fail += 1.0f;
 }
 
+void HidingSpotSelector::save(const std::string& modName) {
+	if (spots.empty()) {
+		return;
+	}
+	auto dirName = std::string(FILE_PREFIX) + modName;
+	if (!filesystem->IsDirectory(dirName.c_str(), "MOD")) {
+		filesystem->CreateDirHierarchy(dirName.c_str(), "DEFAULT_WRITE_PATH");
+	}
+	KeyValues *file = new KeyValues(ROOT_KEY);
+	file->SetInt(TIME_STAMP_KEY, filesystem->GetFileTime(getNavFileName().c_str(), "MOD"));
+	auto spotsKV = file->FindKey(SPOTS_KEY, true);
+	for (auto spot : spots) {
+		auto spotKV = new KeyValues(std::to_string(std::get<0>(spot)).c_str());
+		spotsKV->AddSubKey(spotKV);
+		for (int i = 0; i < 2; i++) {
+			auto scoreKv = new KeyValues(std::to_string(i).c_str());
+			auto &score = std::get<1>(spot).score;
+			spotKV->AddSubKey(scoreKv);
+			scoreKv->SetFloat("success", score[i].success);
+			scoreKv->SetFloat("fail", score[i].fail);
+		}
+	}
+	file->SaveToFile(filesystem, getHidingSpotFileName(modName).c_str(), "MOD");
+	file->deleteThis();
+}
+
+std::string HidingSpotSelector::getNavFileName() {
+	return std::string("maps/") + +gpGlobals->mapname.ToCStr() + ".nav";
+}
+
+std::string HidingSpotSelector::getHidingSpotFileName(const std::string& modName) {
+	return std::string(FILE_PREFIX) + modName
+			+ "/" + gpGlobals->mapname.ToCStr() + "_hiding_spot_scores.vdf";
+}
+
+void HidingSpotSelector::buildFromNavMesh() {
+	spots.clear();
+	FOR_EACH_VEC(TheNavAreas, i)
+	{
+		const auto &hideSpots = *TheNavAreas[i]->GetHidingSpots();
+		if (TheNavAreas[i]->IsBlocked(TEAM_ANY)) {
+			continue;
+		}
+		FOR_EACH_VEC(hideSpots, j)
+		{
+			auto &spot = spots[hideSpots[j]->GetID()] = Spot();
+			spot.pos = hideSpots[j]->GetPosition();
+			for (int k = 0; k < 2; k++) {
+				if (TheNavAreas[i]->IsBlocked(k)) {
+					spot.score[i].inUse = true;
+				}
+			}
+		}
+	}
+}

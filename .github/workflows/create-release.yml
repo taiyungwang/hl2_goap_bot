@@ -40,12 +40,14 @@ jobs:
         uses: ./hl2_goap_bot/.github/actions/build
         with:
           repo-path: hl2_goap_bot
+      - name: Create plugin binary directory
+      	run: mkdir ${{github.workspace}}/hl2_goap_bot/addons/mybot
       - name: Copy Artifact Linux
         if: matrix.os == 'ubuntu-20.04'
-        run: cp ${{github.workspace}}/build/hl2_goap_bot/my_bot.so ${{github.workspace}}/hl2_goap_bot/addons
+        run: cp ${{github.workspace}}/build/hl2_goap_bot/my_bot.so ${{github.workspace}}/hl2_goap_bot/addons/mybot
       - name: Copy Artifact Windows
         if: matrix.os == 'windows-2019'
-        run: cp ${{github.workspace}}/build/hl2_goap_bot/Release/my_bot.dll ${{github.workspace}}/hl2_goap_bot/addons
+        run: cp ${{github.workspace}}/build/hl2_goap_bot/Release/my_bot.dll ${{github.workspace}}/hl2_goap_bot/addons/mybot
       - name: Compress Release Assets
         working-directory: ${{github.workspace}}/hl2_goap_bot
         run: tar -acf ${{github.workspace}}/hl2_goap_bot.tgz addons

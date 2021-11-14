@@ -9,5 +9,4 @@ public:
 	}
 
 	void attack(Buttons& buttons, float distance) const;
-
 };

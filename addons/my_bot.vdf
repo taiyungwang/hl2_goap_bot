@@ -1,4 +1,4 @@
 Plugin
 {
-	file		"addons/my_bot"
+	file		"addons/mybot/my_bot"
 }

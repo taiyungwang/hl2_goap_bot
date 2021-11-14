@@ -11,6 +11,7 @@ class GameManager;
 class BotBuilder;
 class ArsenalBuilder;
 class VoiceCommand;
+class HidingSpotSelector;
 struct edict_t;
 
 /**
@@ -52,7 +53,8 @@ public:
 	}
 
 private:
-	bool enableHook = false;
+	bool enableHook = false, navMeshLoadAttempted = false;
+;
 
 	GameManager* gameManager = nullptr;
 
@@ -64,8 +66,10 @@ private:
 
 	std::shared_ptr<VoiceCommand> voiceCommand;
 
+	std::shared_ptr<HidingSpotSelector> hidingSpotSelector;
+
 	CUtlQueue<edict_t*> activationQ;
 
-	char modPath[256];
+	std::string modPath;
 };
 

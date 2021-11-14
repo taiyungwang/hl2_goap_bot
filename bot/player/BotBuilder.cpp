@@ -79,11 +79,6 @@ void BotBuilder::kickAllExcept(const CCommand &command) {
 	}
 }
 
-void BotBuilder::onNavMeshLoad() {
-	hidingSpotSelector = new HidingSpotSelector();
-	SnipeAction::setSpotSelector(hidingSpotSelector);
-}
-
 class SwitchToBestInRangeWeaponAction: public SwitchToBestLoadedWeaponAction {
 public:
 	SwitchToBestInRangeWeaponAction(Blackboard &blackboard) :

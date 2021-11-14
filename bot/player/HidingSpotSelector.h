@@ -1,7 +1,7 @@
 #pragma once
 
-#include <strtools.h>
-#include <utlhashtable.h>
+#include "CommandHandler.h"
+#include <map>
 #include <vector.h>
 
 class CNavArea;
@@ -9,10 +9,11 @@ class CNavArea;
 /**
 * Chooses a Hiding spot using Thompson sampling.
 **/
-class HidingSpotSelector {
+class HidingSpotSelector: public CommandHandler::Receiver {
 public:
+	HidingSpotSelector(CommandHandler& commandHandler, const std::string& modName);
 
-	HidingSpotSelector();
+	bool receive(edict_t *sender, const CCommand &command) override;
 
 	/**
 	 * @return -1 if no positions are available.
@@ -24,14 +25,20 @@ public:
 	void update(int spot, int team, bool success);
 
 	const Vector& getSpotPos(int idx) const {
-		return spots.GetPtr(idx)->pos;
+		return spots.at(static_cast<unsigned int>(idx)).pos;
 	}
 
 	const bool isInUse(int idx, int team) const {
-		return spots.GetPtr(idx)->score[team - 2].inUse;
+		return spots.at(static_cast<unsigned int>(idx)).score[team - 2].inUse;
 	}
 
+	void save(const std::string& modName);
+
 private:
+	static std::string getNavFileName();
+
+	static std::string getHidingSpotFileName(const std::string& modName);
+
 	struct Spot {
 		Vector pos;
 		struct Team {
@@ -41,5 +48,7 @@ private:
 		} score[2];
 	};
 
-	CUtlHashtable<unsigned int, Spot> spots;
+	std::map<unsigned int, Spot> spots;
+
+	void buildFromNavMesh();
 };

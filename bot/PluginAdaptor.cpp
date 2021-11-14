@@ -5,8 +5,10 @@
 #include "mods/hl2dm/weapon/HL2DMArsenalBuilder.h"
 #include "mods/dod/player/DODBotBuilder.h"
 #include "mods/dod/weapon/DODArsenalBuilder.h"
+#include "goap/action/SnipeAction.h"
 #include "player/Bot.h"
 #include "player/GameManager.h"
+#include "player/HidingSpotSelector.h"
 #include "player/VTableHook.h"
 #include <nav_mesh/nav_entities.h>
 #include <util/EntityClassManager.h>
@@ -20,7 +22,6 @@ ConVar r_visualizetraces("r_visualizetraces", "0", FCVAR_CHEAT);
 
 EntityClassManager *classManager = nullptr;
 CNavMesh* TheNavMesh = nullptr;
-bool navMeshLoadAttempted;
 
 ConVar mybot_debug("my_bot_debug", "0");
 ConVar mybot_var("mybot_var", "0.5");
@@ -38,13 +39,20 @@ PluginAdaptor::PluginAdaptor() {
 	TheNavMesh = new CNavMesh;
 	botBuilder = nullptr;
 	SetDefLessFunc(blockers);
-	engine->GetGameDir(modPath, 256);
+	char gameDir[MAX_PATH];
+	engine->GetGameDir(gameDir, MAX_PATH);
+	modPath = gameDir;
+	auto lastDelim = modPath.rfind('/');
+	if (lastDelim == modPath.npos) {
+		lastDelim = modPath.rfind('\\');
+	}
+	modPath = modPath.substr(lastDelim + 1);
 	// TODO: make mod checking more stringent.
-	if (Q_stristr(modPath, "hl2mp")) {
+	if (modPath == "hl2mp") {
 		arsenalBuilder = std::make_shared<HL2DMArsenalBuilder>();
 		botBuilder = new HL2DMBotBuilder(commandHandler, *arsenalBuilder.get());
 		TheNavMesh->addPlayerSpawnName("info_player_start");
-	} else if (Q_stristr(modPath, "dod")) {
+	} else if (modPath == "dod") {
 		gameManager = new DODObjectives();
 		arsenalBuilder = std::make_shared<DODArsenalBuilder>();
 		botBuilder = new DODBotBuilder(gameManager, commandHandler, *arsenalBuilder.get());
@@ -52,7 +60,7 @@ PluginAdaptor::PluginAdaptor() {
 		TheNavMesh->addPlayerSpawnName("info_player_axis");
 		TheNavMesh->addPlayerSpawnName("info_player_allies");
 	} else {
-		Msg("Mod not supported, %s.\n", modPath);
+		Msg("Mod not supported, %s.\n", modPath.c_str());
 	}
 }
 
@@ -80,7 +88,8 @@ void PluginAdaptor::gameFrame(bool simulating) {
 	}
 	if (!navMeshLoadAttempted) {
 		if (TheNavMesh->Load() == NAV_OK) {
-			botBuilder->onNavMeshLoad();
+			hidingSpotSelector = std::make_shared<HidingSpotSelector>(commandHandler, modPath);
+			SnipeAction::setSpotSelector(hidingSpotSelector.get());
 			Msg("Loaded Navigation mesh.\n");
 		}
 		navMeshLoadAttempted = true;
@@ -129,6 +138,10 @@ void PluginAdaptor::levelShutdown() {
 	if (gameManager != nullptr) {
 		gameManager->endRound();
 	}
+	if (hidingSpotSelector) {
+		hidingSpotSelector->save(modPath);
+	}
+	hidingSpotSelector = nullptr;
 }
 
 template

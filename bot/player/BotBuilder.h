@@ -18,7 +18,6 @@ struct edict_t;
 
 class BotBuilder: public ICommandCallback {
 public:
-
 	BotBuilder(GameManager* objectives, CommandHandler& commandHandler,
 			const ArsenalBuilder& arsenalBuilder);
 
@@ -26,12 +25,6 @@ public:
 
 	void CommandCallback(const CCommand &command) {
 		(this->**cmdCallbacks.GetPtr(command.Arg(0)))(command);
-	}
-
-	virtual void onNavMeshLoad();
-
-	HidingSpotSelector* getHidingSpotSelector() const {
-		return hidingSpotSelector;
 	}
 
 protected:
