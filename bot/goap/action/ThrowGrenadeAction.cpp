@@ -38,9 +38,10 @@ bool ThrowGrenadeAction::execute() {
 const Player* ThrowGrenadeAction::chooseTarget() const {
 	Weapon *grenade = arsenal.getWeapon(weapIdx);
 	const Player *target = nullptr;
-	auto enemies = blackboard.getSelf()->getVision().getVisibleEnemies();
+	auto &vision = blackboard.getSelf()->getVision();
+	auto enemies = vision.getVisibleEnemies();
 	float dmgRadius = BaseGrenade(grenade->getEdict()).getDmgRadius()
-			+ HalfHumanWidth, minTotalDist = INFINITY;
+			+ HalfHumanWidth;
 	int maxInRange = 0;
 	for (int i : enemies) {
 		const Player *enemy = Player::getPlayer(i);
@@ -61,7 +62,9 @@ const Player* ThrowGrenadeAction::chooseTarget() const {
 			}
 			inRange++;
 		}
-		if (inRange > maxInRange) {
+		if (inRange > maxInRange
+				// use grenade if no LOS to any enemies.
+				|| (target == nullptr && vision.getTargetedPlayer() == 0)) {
 			target = enemy;
 		}
 	}
