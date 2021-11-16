@@ -62,6 +62,9 @@ const bool MoveStateContext::hasGoal() const {
 
 bool MoveStateContext::isAtTarget(const Vector& target, float targetOffset) const {
 	Vector pos = blackboard.getSelf()->getCurrentPosition();
+	if (std::abs(target.z - pos.z) > JumpHeight) {
+		return false;
+	}
 	pos.z = target.z;
 	return pos.DistTo(target) < targetOffset + TARGET_OFFSET;
 }
