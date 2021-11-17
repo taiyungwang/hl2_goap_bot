@@ -36,20 +36,22 @@ Navigator::~Navigator() {
 void Navigator::start(const Vector& goal, float targetRadius, bool sprint) {
 	this->sprint = sprint;
 	finalGoal = goal;
-	lastArea = nullptr;
+	lastAreaId = -1;
 	areaTime = 0;
 	this->targetRadius = targetRadius;
 	moveCtx->stop();
 	if (!buildPath()) {
 		Msg("No path available.\n");
-	} else {
-		moveCtx->setGoal(path.top()->GetCenter());
 	}
+}
+
+CNavArea* Navigator::getLastArea() const {
+	return lastAreaId < 0 ? nullptr : TheNavMesh->GetNavAreaByID(lastAreaId);
 }
 
 bool Navigator::step() {
 	if (moveCtx->isStuck() || reachedGoal() || blackboard.getBlocker() != nullptr
-			|| (lastArea == nullptr && path.empty())) {
+			|| (lastAreaId < 0 && path.empty())) {
 		return true;
 	}
 	if (!checkCanMove()) {
@@ -61,17 +63,22 @@ bool Navigator::step() {
 	if (area == nullptr) {
 		return true;
 	}
+	CNavArea *topArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(path.top());
 	int attributes = area->GetAttributes();
 	if (canGetNextArea(loc)) {
 		setGoalForNextArea(loc);
-	} else if (!moveCtx->hasGoal() && !path.empty()) {
-		moveCtx->setGoal(path.top()->GetCenter());
+		if (!path.empty()) {
+			topArea = TheNavMesh->GetNavAreaByID(path.top());
+		}
+	} else if (!moveCtx->hasGoal() && topArea != nullptr) {
+		moveCtx->setGoal(topArea->GetCenter());
 	}
-	if (lastArea->IsBlocked(self->getTeam())) {
+	CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
+	if (lastArea == nullptr || lastArea->IsBlocked(self->getTeam())) {
 		return true;
 	}
-	if (mybot_debug.GetBool() && !path.empty()) {
-		path.top()->Draw();
+	if (mybot_debug.GetBool() && topArea != nullptr) {
+		topArea->Draw();
 	}
 	// magic number from https://developer.valvesoftware.com/wiki/Dimensions#Horizontal_.28To_Equal_Height.29
 	if (((attributes & NAV_MESH_JUMP) || (attributes & NAV_MESH_CROUCH))
@@ -117,11 +124,16 @@ bool Navigator::checkCanMove() {
 
 void Navigator::setDirToTop() {
 	dirToTop = NUM_DIRECTIONS;
-	if (lastArea == nullptr || path.empty()) {
+	if (lastAreaId < 0 || path.empty()) {
+		return;
+	}
+	CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId),
+			*topArea = TheNavMesh->GetNavAreaByID(path.top());
+	if (lastArea == nullptr || topArea == nullptr) {
 		return;
 	}
 	for (int i = 0; i < NUM_DIRECTIONS; i++) {
-		if (lastArea->IsConnected(path.top(), static_cast<NavDirType>(i))) {
+		if (lastArea->IsConnected(topArea, static_cast<NavDirType>(i))) {
 			dirToTop = i;
 			break;
 		}
@@ -146,7 +158,7 @@ private:
 };
 
 bool Navigator::buildPath() {
-	std::stack<CNavArea*> empty;
+	std::stack<int> empty;
 	path.swap(empty);
 	const Player* self = blackboard.getSelf();
 	CNavArea* goalArea = getArea(finalGoal, self->getTeam());
@@ -188,7 +200,7 @@ bool Navigator::buildPath() {
 	}
 	for (CNavArea* area = goalArea; area != nullptr;
 			area = area->GetParent()) {
-		path.push(area);
+		path.push(area->GetID());
 	}
 	return true;
 }
@@ -198,49 +210,62 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 	if (path.empty()) {
 		return false;
 	}
-	if (lastArea == nullptr
+	CNavArea *topArea = TheNavMesh->GetNavAreaByID(path.top());
+	if (topArea == nullptr) {
+		return false;
+	}
+	if (lastAreaId < 0
 			|| (!moveCtx->hasGoal()
-					&& moveCtx->getGoal() == path.top()->GetCenter()
-					&& (path.top() == lastArea || path.top()->Contains(loc)))
+					&& moveCtx->getGoal() == topArea->GetCenter()
+					&& (path.top() == lastAreaId || topArea->Contains(loc)))
 							// close to next path.top()
 							|| ((getPortalToTopArea(goal) && goal == moveCtx->getGoal()))) {
 		return true;
 	}
-	if (lastArea == nullptr
-			|| ((path.top()->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE | NAV_MESH_STAIRS))
+	CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
+	if (lastArea == nullptr || (topArea->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE | NAV_MESH_STAIRS))
 					|| moveCtx->nextGoalIsLadderStart() || blackboard.isOnLadder()
 					// don't skip areas above and below ground height
-					|| fabs(lastArea->GetCenter().z - path.top()->GetCenter().z) > StepHeight
-					|| fabs(loc.z - lastArea->GetCenter().z) > StepHeight)) {
+					|| fabs(lastArea->GetCenter().z - topArea->GetCenter().z) > StepHeight
+					|| fabs(loc.z - lastArea->GetCenter().z) > StepHeight) {
 		return false;
 	}
-	CNavArea *area = path.top();
+	int areaId = path.top();
 	path.pop();
-	bool crouch = area->GetAttributes() & NAV_MESH_CROUCH;
-	bool canSkip = (path.empty() && canMoveTo(finalGoal, crouch))
-		|| (!path.empty() && canMoveTo(path.top()->GetCenter(), crouch));
-	path.push(area);
+	CNavArea *nextArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(path.top());
+	bool canSkip = nextArea != nullptr && ((path.empty() && canMoveTo(finalGoal, false))
+		|| (!path.empty() && canMoveTo(nextArea->GetCenter(), false)));
+	path.push(areaId);
 	return canSkip;
 }
 
 void Navigator::setGoalForNextArea(const Vector& loc) {
 	Vector goal = finalGoal;
-	lastArea = path.top();
+	lastAreaId = path.top();
 	areaTime = 0;
 	path.pop();
+	CNavArea *pathTop = nullptr;
 	if (!path.empty() && !setLadderStart()) {
+		CNavArea *pathTop = TheNavMesh->GetNavAreaByID(path.top());
+		if (pathTop == nullptr) {
+			return;
+		}
+		CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
+		if (lastArea == nullptr) {
+			return;
+		}
 		setDirToTop();
-		goal = path.top()->GetCenter();
+		goal = pathTop->GetCenter();
 		bool crouching =
-				(path.empty() ? lastArea : path.top())->GetAttributes()
+				(path.empty() ? lastArea : pathTop)->GetAttributes()
 						& NAV_MESH_CROUCH;
 		if (!canMoveTo(goal, crouching)
-				|| fabs(lastArea->GetCenter().z - path.top()->GetCenter().z) > StepHeight) {
+				|| fabs(lastArea->GetCenter().z - pathTop->GetCenter().z) > StepHeight) {
 			if (!getPortalToTopArea(goal)) {
-				path.top()->GetClosestPointOnArea(loc, &goal);
+				pathTop->GetClosestPointOnArea(loc, &goal);
 			} else if (!canMoveTo(goal, crouching)) {
 				float halfWidth;
-				lastArea->ComputePortal(path.top(),
+				lastArea->ComputePortal(pathTop,
 						static_cast<NavDirType>(dirToTop), &goal, &halfWidth);
 				if (moveCtx->hasGoal() && !canMoveTo(goal, crouching)) {
 					// if we are still moving don't set goal if we're blocked.
@@ -295,20 +320,25 @@ bool Navigator::setLadderStart() {
 	if (path.empty()) {
 		return false;
 	}
+	CNavArea *pathTop = TheNavMesh->GetNavAreaByID(path.top()),
+			*lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
+	if (pathTop == nullptr || lastArea == nullptr) {
+		return false;
+	}
 	for (int i = 0; i < CNavLadder::NUM_LADDER_DIRECTIONS; i++) {
 		CNavLadder::LadderDirectionType dir = static_cast<CNavLadder::LadderDirectionType>(i);
 		const NavLadderConnectVector* laddersFrom = lastArea->GetLadders(dir);
 		FOR_EACH_VEC(*laddersFrom, i)
 		{
 			const CNavLadder* ladder = laddersFrom->Element(i).ladder;
-			if (ladder->IsConnected(path.top(), dir)) {
+			if (ladder->IsConnected(pathTop, dir)) {
 				const Vector* start = &ladder->m_top;
 				Vector end = ladder->m_bottom;
 				if (dir == CNavLadder::LADDER_UP) {
 					// normalize ladder height when climbing up.
 					start = &ladder->m_bottom;
 					// assume that the z of the next area can be stepped on.
-					path.top()->GetClosestPointOnArea(*start, &end);
+					pathTop->GetClosestPointOnArea(*start, &end);
 					end.x = ladder->m_top.x;
 					end.y = ladder->m_top.y;
 					// the top the ladder is guaranteed to be above human height
@@ -330,13 +360,18 @@ bool Navigator::setLadderStart() {
 	return false;
 }
 
-
 bool Navigator::getPortalToTopArea(Vector& portal) const {
-	if (dirToTop >= NUM_DIRECTIONS || lastArea == nullptr) {
+	if (dirToTop >= NUM_DIRECTIONS || lastAreaId < 0) {
 		return false;
 	}
 	float halfWidth;
-	path.top()->ComputePortal(lastArea, OppositeDirection(static_cast<NavDirType>(dirToTop)),
+	CNavArea *topArea = TheNavMesh->GetNavAreaByID(path.top()),
+			*lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
+	if (topArea == nullptr || lastArea == nullptr) {
+		return false;
+	}
+	topArea->ComputePortal(lastArea,
+			OppositeDirection(static_cast<NavDirType>(dirToTop)),
 			&portal, &halfWidth);
 	return true;
 }

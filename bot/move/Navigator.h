@@ -38,9 +38,7 @@ public:
 
 	void start(const Vector& goal, float targetRadius, bool sprint);
 
-	CNavArea* getLastArea() const {
-		return lastArea;
-	}
+	CNavArea* getLastArea() const;
 
 protected:
 	Blackboard& blackboard;
@@ -50,9 +48,9 @@ protected:
 private:
 	Vector finalGoal;
 
-	std::stack<CNavArea*> path;
+	std::stack<int> path;
 
-	CNavArea *lastArea = nullptr;
+	int lastAreaId = -1;
 
 	MoveStateContext* moveCtx;
 
