@@ -196,38 +196,42 @@ public:
 	 */
 	FilterList& add(edict_t* ignore) {
 		if (ignore != nullptr) {
-			this->ignore.push_back(ignore->GetIServerEntity());
+			this->ignore.insert(ignore->GetIServerEntity());
 		}
 		return *this;
 	}
 
 	bool ShouldHitEntity(IHandleEntity *pHandleEntity,
 			int contentsMask) override {
-		for (auto handle: ignore) {
-			if (pHandleEntity == handle) {
-				return false;
-			}
+		bool shouldHit = ignore.find(pHandleEntity) == ignore.end();
+		if (shouldHit) {
+			ignore.insert(pHandleEntity);
 		}
-		return true;
+		return shouldHit;
 	}
 
+	size_t getIgnoreSize() const {
+		return ignore.size();
+	}
 protected:
-	list<IHandleEntity*> ignore;
+	set<IHandleEntity*> ignore;
 };
 
 
 float Avoid::trace(const Vector& pos, const Vector& goal) const {
 	auto &blackboard = ctx.getBlackboard();
+	edict_t *self = blackboard.getSelf()->getEdict();
 	FilterList filter;
-	filter.add(blackboard.getSelf()->getEdict()).add(blackboard.getTarget());
+	filter.add(self).add(blackboard.getTarget()).add(BasePlayer(self).getGroundEntity());
 	trace_t tr;
-	for (;;) {
+	int ignoreSize = filter.getIgnoreSize();
+	do {
 		UTIL_TraceLine(pos, goal, MASK_PLAYERSOLID, &filter, &tr);
-		if (!tr.startsolid) {
+		if (ignoreSize == filter.getIgnoreSize()) {
 			break;
 		}
-		filter.add(getEdict(tr));
-	}
+		ignoreSize = filter.getIgnoreSize();
+	} while (tr.startsolid);
 	if (!tr.DidHit() || (tr.plane.normal.LengthSqr() > 0.0f
 			&& tr.plane.normal.z <= nav_slope_limit.GetFloat())) {
 		return goal.DistTo(pos);
