@@ -53,7 +53,7 @@ bool AttackAction::execute() {
 	}
 	edict_t* selfEnt = self->getEdict();
 	WeaponFunction* weapFunc = weapon->chooseWeaponFunc(selfEnt, dist);
-	if (!weapFunc->isMelee() && !weapFunc->isInRange(dist)) {
+	if (!weapFunc->isInRange(dist)) {
 		return true;
 	}
 	if (weapon->getDeployer() != nullptr && weapon->getMinDeployRange() < dist) {
