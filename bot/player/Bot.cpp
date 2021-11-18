@@ -27,10 +27,13 @@ PlayerClasses Bot::CLASSES = nullptr;
 static ConVar mybot_rot_speed("mybot_rot_speed", "0.15", 0,
 		"determines rotational acceleration rate in degrees");
 
-ConVar mybot_mimic("mybot_mimic", "0");
+static ConVar mybot_mimic("mybot_mimic", "0");
 
-ConVar mybotAimVar("mybot_aim_variance", "3.0f", 0,
+static ConVar mybotAimVar("mybot_aim_variance", "3.0f", 0,
 		"range of randomness for a bot's aim");
+
+static ConVar mybotDangerAmt("mybot_danger_amount", "3.0f", 0,
+		"Amount of 'danger' to add to an area when a bot is killed.");
 
 Bot::~Bot() {
 	delete blackboard;
@@ -118,7 +121,7 @@ bool Bot::handle(EventInfo* event) {
 	if (name == "player_spawn") {
 		CNavArea* area = blackboard->getNavigator()->getLastArea();
 		if (area != nullptr) {
-			area->IncreaseDanger(getTeam(), 1.0f);
+			area->IncreaseDanger(getTeam(), mybotDangerAmt.GetFloat());
 		}
 		resetPlanner = true;
 		blackboard->reset();
@@ -185,7 +188,9 @@ public:
 
 	bool ShouldHitEntity( IHandleEntity *pServerEntity, int contentsMask ) override
 	{
-		return FClassnameIs(entityFromEntityHandle(pServerEntity), "worldspawn");
+		std::string name(entityFromEntityHandle(pServerEntity)->GetClassName());
+		return name.find("func_team") == name.npos && name.find("prop") == name.npos
+				&& name.find("player") == name.npos;
 	}
 };
 
