@@ -107,7 +107,6 @@ void DODMGDeployer::start(Blackboard& blackboard) {
 	pos.z += StepHeight;
 	trace_t result;
 	extern ConVar mybot_debug;
-	edict_t * ground = BasePlayer(self->getEdict()).getGroundEntity();
 	UTIL_TraceHull(pos, pos, Vector(0.0f, 0.0f, 0.0f), Vector(0.0f, 0.0f, HumanHeight - StepHeight),
 					MASK_SOLID, FilterSelf(self->getEdict()->GetIServerEntity()),
 											&result, mybot_debug.GetBool());

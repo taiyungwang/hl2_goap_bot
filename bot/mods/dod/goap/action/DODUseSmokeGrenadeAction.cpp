@@ -4,10 +4,7 @@
 #include <player/Bot.h>
 
 bool DODUseSmokeGrenadeAction::precondCheck() {
-	auto self = blackboard.getSelf();
-	auto vision = self->getVision();
-	return !vision.getNearbyTeammates().empty()
-			&& vision.getVisibleEnemies().size() > 1
+	return !blackboard.getSelf()->getVision().getNearbyTeammates().empty()
 			&& ThrowGrenadeAction::precondCheck();
 }
 

@@ -8,10 +8,10 @@ class DODUseSmokeGrenadeAction: public DODThrowLiveGrenadeAction {
 public:
 	DODUseSmokeGrenadeAction(Blackboard& blackboard) :
 		DODThrowLiveGrenadeAction(blackboard) {
-		effects = {WorldProp::MULTIPLE_ENEMY_SIGHTED, false};
+		effects = {WorldProp::ENEMY_SIGHTED, false};
 	}
 
-	bool precondCheck() override;
+	virtual bool precondCheck() override;
 
 protected:
 	virtual bool canUse(const char* weaponName) const override;

@@ -15,6 +15,11 @@ bool DODUseRifleGrenadeAction::execute() {
 			|| ThrowGrenadeAction::execute();
 }
 
+bool DODUseRifleGrenadeAction::precondCheck() {
+	return DODUseSmokeGrenadeAction::precondCheck()
+			&& blackboard.getSelf()->getVision().getVisibleEnemies().size() > 1;
+}
+
 bool DODUseRifleGrenadeAction::canUse(const char* weaponName) const {
 	return Q_strcmp(weaponName, "weapon_riflegren_us") == 0
 			|| Q_strcmp(weaponName, "weapon_riflegren_ger") == 0;
