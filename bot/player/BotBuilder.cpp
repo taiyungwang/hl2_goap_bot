@@ -19,7 +19,7 @@
 
 extern IVEngineServer* engine;
 
-static ConVar snipeChance("mybot_snipe_chance", "0.4", 0, "Chance a bot will go snipe.  Valid values 0 - 1.0.");
+static ConVar snipeChance("mybot_snipe_chance", "0.2", 0, "Chance a bot will go snipe.  Valid values 0 - 1.0.");
 
 BotBuilder::BotBuilder(GameManager* objectives, CommandHandler& commandHandler,
 		const ArsenalBuilder& arsenalBuilder): objectives(objectives),
