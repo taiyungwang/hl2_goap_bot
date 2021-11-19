@@ -40,9 +40,6 @@ void Navigator::start(const Vector& goal, float targetRadius, bool sprint) {
 	areaTime = 0;
 	this->targetRadius = targetRadius;
 	moveCtx->stop();
-	if (!buildPath()) {
-		Msg("No path available.\n");
-	}
 }
 
 CNavArea* Navigator::getLastArea() const {
@@ -94,7 +91,8 @@ bool Navigator::step() {
 		moveCtx->setStuck(true);
 	}
 	float goalDist = moveCtx->getGoal().DistTo(loc);
-	if (moveCtx->hasGoal() && goalDist > 1000.0f) {
+	if (moveCtx->hasGoal() && goalDist > 1000.0f
+			&& !canMoveTo(moveCtx->getGoal(), attributes & NAV_MESH_CROUCH)) {
 		Warning("Goal is too far from current position: %f.\n", goalDist);
 		return true;
 	}

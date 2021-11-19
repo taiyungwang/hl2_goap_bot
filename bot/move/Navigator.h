@@ -40,6 +40,8 @@ public:
 
 	CNavArea* getLastArea() const;
 
+	bool buildPath();
+
 protected:
 	Blackboard& blackboard;
 
@@ -61,8 +63,6 @@ private:
 	bool sprint = false;
 
 	void setDirToTop();
-
-	bool buildPath();
 
 	bool canGetNextArea(const Vector& loc);
 

@@ -10,10 +10,14 @@ float GoToAction::getCost() {
 
 bool GoToAction::execute() {
 	canAbort = !blackboard.isOnLadder();
-	return blackboard.getNavigator()->step();
+	return !pathBuilt || blackboard.getNavigator()->step();
 }
 
 void GoToAction::init() {
+	pathBuilt = blackboard.getNavigator()->buildPath();
+	if (!pathBuilt) {
+		Msg("No path available.\n");
+	}
 	blackboard.getNavigator()->start(targetLoc, targetRadius, sprint);
 }
 

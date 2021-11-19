@@ -41,10 +41,10 @@ bool SnipeAction::findTargetLoc() {
 }
 
 bool SnipeAction::execute() {
-	if (!GoToAction::goalComplete() ) {
-		return GoToAction::execute();
+	if (!GoToAction::execute()) {
+		return false;
 	}
-	if (blackboard.isOnLadder()) {
+	if (!GoToAction::goalComplete() || blackboard.isOnLadder()) {
 		return true;
 	}
 	Vector aim;
@@ -76,6 +76,8 @@ bool SnipeAction::goalComplete() {
 		selector->update(selectorId, team, 
 			blackboard.getSelf()->getVision().getTargetedPlayer() != 0);
 		return true;
+	} else if (!pathBuilt) {
+		selector->update(selectorId, team, false);
 	}
 	return false;
 }

@@ -27,7 +27,7 @@ public:
 protected:
 	Vector targetLoc;
 
-	bool sprint = false;
+	bool sprint = false, pathBuilt = false;
 
 	float targetRadius = 0.0f;
 
