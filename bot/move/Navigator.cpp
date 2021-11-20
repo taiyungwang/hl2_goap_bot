@@ -60,12 +60,12 @@ bool Navigator::step() {
 	if (area == nullptr) {
 		return true;
 	}
-	CNavArea *topArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(path.top());
+	CNavArea *topArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
 	int attributes = area->GetAttributes();
 	if (canGetNextArea(loc)) {
 		setGoalForNextArea(loc);
 		if (!path.empty()) {
-			topArea = TheNavMesh->GetNavAreaByID(path.top());
+			topArea = TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
 		}
 	} else if (!moveCtx->hasGoal() && topArea != nullptr) {
 		moveCtx->setGoal(topArea->GetCenter());
@@ -120,43 +120,21 @@ bool Navigator::checkCanMove() {
 	return true;
 }
 
-void Navigator::setDirToTop() {
-	dirToTop = NUM_DIRECTIONS;
-	if (lastAreaId < 0 || path.empty()) {
-		return;
-	}
-	CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId),
-			*topArea = TheNavMesh->GetNavAreaByID(path.top());
-	if (lastArea == nullptr || topArea == nullptr) {
-		return;
-	}
-	for (int i = 0; i < NUM_DIRECTIONS; i++) {
-		if (lastArea->IsConnected(topArea, static_cast<NavDirType>(i))) {
-			dirToTop = i;
-			break;
-		}
-	}
-}
-
 class ShortestPathCostForTeam {
 public:
 	ShortestPathCostForTeam(int team) :
 			team(team) {
 	}
 	float operator() ( CNavArea *area, CNavArea *fromArea, const CNavLadder *ladder, const CFuncElevator *elevator, float length ) const {
-		float cost = ShortestPathCost()(area, fromArea, ladder, elevator,
-				length);
-		if (team > 0) {
-			cost += area->GetDanger(team);
-		}
-		return cost;
+		return ShortestPathCost()(area, fromArea, ladder, elevator,
+				length) + area->GetDanger(team);
 	}
 private:
 	int team;
 };
 
 bool Navigator::buildPath() {
-	std::stack<int> empty;
+	std::stack<std::pair<int, int>> empty;
 	path.swap(empty);
 	const Player* self = blackboard.getSelf();
 	CNavArea* goalArea = getArea(finalGoal, self->getTeam());
@@ -198,7 +176,7 @@ bool Navigator::buildPath() {
 	}
 	for (CNavArea* area = goalArea; area != nullptr;
 			area = area->GetParent()) {
-		path.push(area->GetID());
+		path.push(std::make_pair(area->GetID(), area->GetParentHow()));
 	}
 	return true;
 }
@@ -208,14 +186,14 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 	if (path.empty()) {
 		return false;
 	}
-	CNavArea *topArea = TheNavMesh->GetNavAreaByID(path.top());
+	CNavArea *topArea = TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
 	if (topArea == nullptr) {
 		return false;
 	}
 	if (lastAreaId < 0
 			|| (!moveCtx->hasGoal()
 					&& moveCtx->getGoal() == topArea->GetCenter()
-					&& (path.top() == lastAreaId || topArea->Contains(loc)))
+					&& (std::get<0>(path.top()) == lastAreaId || topArea->Contains(loc)))
 							// close to next path.top()
 							|| ((getPortalToTopArea(goal) && goal == moveCtx->getGoal()))) {
 		return true;
@@ -228,23 +206,24 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 					|| fabs(loc.z - lastArea->GetCenter().z) > StepHeight) {
 		return false;
 	}
-	int areaId = path.top();
+	auto top = path.top();
 	path.pop();
-	CNavArea *nextArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(path.top());
+	CNavArea *nextArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
 	bool canSkip = nextArea != nullptr && ((path.empty() && canMoveTo(finalGoal, false))
 		|| (!path.empty() && canMoveTo(nextArea->GetCenter(), false)));
-	path.push(areaId);
+	path.push(top);
 	return canSkip;
 }
 
 void Navigator::setGoalForNextArea(const Vector& loc) {
 	Vector goal = finalGoal;
-	lastAreaId = path.top();
+	lastAreaId = std::get<0>(path.top());
+	dirToTop = std::get<1>(path.top());
 	areaTime = 0;
 	path.pop();
 	CNavArea *pathTop = nullptr;
 	if (!path.empty() && !setLadderStart()) {
-		CNavArea *pathTop = TheNavMesh->GetNavAreaByID(path.top());
+		CNavArea *pathTop = TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
 		if (pathTop == nullptr) {
 			return;
 		}
@@ -252,7 +231,6 @@ void Navigator::setGoalForNextArea(const Vector& loc) {
 		if (lastArea == nullptr) {
 			return;
 		}
-		setDirToTop();
 		goal = pathTop->GetCenter();
 		bool crouching =
 				(path.empty() ? lastArea : pathTop)->GetAttributes()
@@ -315,44 +293,42 @@ bool Navigator::reachedGoal() const {
 }
 
 bool Navigator::setLadderStart() {
-	if (path.empty()) {
+	if (path.empty() || std::get<1>(path.top()) < 4 || std::get<1>(path.top()) > 5) {
 		return false;
 	}
-	CNavArea *pathTop = TheNavMesh->GetNavAreaByID(path.top()),
+	CNavArea *pathTop = TheNavMesh->GetNavAreaByID(std::get<0>(path.top())),
 			*lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
 	if (pathTop == nullptr || lastArea == nullptr) {
 		return false;
 	}
-	for (int i = 0; i < CNavLadder::NUM_LADDER_DIRECTIONS; i++) {
-		CNavLadder::LadderDirectionType dir = static_cast<CNavLadder::LadderDirectionType>(i);
-		const NavLadderConnectVector* laddersFrom = lastArea->GetLadders(dir);
-		FOR_EACH_VEC(*laddersFrom, i)
-		{
-			const CNavLadder* ladder = laddersFrom->Element(i).ladder;
-			if (ladder->IsConnected(pathTop, dir)) {
-				const Vector* start = &ladder->m_top;
-				Vector end = ladder->m_bottom;
-				if (dir == CNavLadder::LADDER_UP) {
-					// normalize ladder height when climbing up.
-					start = &ladder->m_bottom;
-					// assume that the z of the next area can be stepped on.
-					pathTop->GetClosestPointOnArea(*start, &end);
-					end.x = ladder->m_top.x;
-					end.y = ladder->m_top.y;
-					// the top the ladder is guaranteed to be above human height
-					end.z += 3.0f * HumanHeight;
-				}
-				float delta = end.z - blackboard.getSelf()->getCurrentPosition().z;
-				if (delta == 0.0f || (delta < 0.0f && delta >= -StepHeight)
-						|| (delta > 0.0f && delta <= HumanHeight + MoveLadder::TARGET_OFFSET)) {
-					// bot already got off the ladder
-					return false;
-				}
-				moveCtx->setGoal(*start);
-				moveCtx->setLadderEnd(end);
-				moveCtx->setLadderDir(dir);
-				return true;
+	CNavLadder::LadderDirectionType dir = static_cast<CNavLadder::LadderDirectionType>(std::get<1>(path.top()) - 4);
+	const NavLadderConnectVector* laddersFrom = lastArea->GetLadders(dir);
+	FOR_EACH_VEC(*laddersFrom, i)
+	{
+		const CNavLadder* ladder = laddersFrom->Element(i).ladder;
+		if (ladder->IsConnected(pathTop, dir)) {
+			const Vector* start = &ladder->m_top;
+			Vector end = ladder->m_bottom;
+			if (dir == CNavLadder::LADDER_UP) {
+				// normalize ladder height when climbing up.
+				start = &ladder->m_bottom;
+				// assume that the z of the next area can be stepped on.
+				pathTop->GetClosestPointOnArea(*start, &end);
+				end.x = ladder->m_top.x;
+				end.y = ladder->m_top.y;
+				// the top the ladder is guaranteed to be above human height
+				end.z += 3.0f * HumanHeight;
 			}
+			float delta = end.z - blackboard.getSelf()->getCurrentPosition().z;
+			if (delta == 0.0f || (delta < 0.0f && delta >= -StepHeight)
+					|| (delta > 0.0f && delta <= HumanHeight + MoveLadder::TARGET_OFFSET)) {
+				// bot already got off the ladder
+				return false;
+			}
+			moveCtx->setGoal(*start);
+			moveCtx->setLadderEnd(end);
+			moveCtx->setLadderDir(dir);
+			return true;
 		}
 	}
 	return false;
@@ -363,7 +339,7 @@ bool Navigator::getPortalToTopArea(Vector& portal) const {
 		return false;
 	}
 	float halfWidth;
-	CNavArea *topArea = TheNavMesh->GetNavAreaByID(path.top()),
+	CNavArea *topArea = TheNavMesh->GetNavAreaByID(std::get<0>(path.top())),
 			*lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
 	if (topArea == nullptr || lastArea == nullptr) {
 		return false;

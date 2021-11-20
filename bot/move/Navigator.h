@@ -50,7 +50,7 @@ protected:
 private:
 	Vector finalGoal;
 
-	std::stack<int> path;
+	std::stack<std::pair<int, int>> path;
 
 	int lastAreaId = -1;
 
@@ -58,11 +58,9 @@ private:
 
 	float targetRadius = 0.0f;
 
-	int areaTime = 0, dirToTop = 4;
+	int areaTime = 0, dirToTop = 9;
 
 	bool sprint = false;
-
-	void setDirToTop();
 
 	bool canGetNextArea(const Vector& loc);
 
