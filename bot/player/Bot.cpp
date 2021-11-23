@@ -80,7 +80,7 @@ void Bot::think() {
 			if (mybot_debug.GetBool()) {
 				extern IVDebugOverlay *debugoverlay;
 				debugoverlay->AddLineOverlay(getEyesPos(), viewTarget, 0,
-						255, 0, true,
+						255, vision.getTargetedPlayer() > 0 ? 255 : 0, true,
 						NDEBUG_PERSIST_TILL_NEXT_SERVER);
 			}
 			VectorAngles(viewTarget - getEyesPos(), cmd.viewangles);

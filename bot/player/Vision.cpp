@@ -95,8 +95,7 @@ void Vision::updateVisiblity(Bot *self) {
 			self->setWantToListen(false);
 			self->setViewTarget(targetPos);
 			targetedPlayer = visible.player;
-		}
-		if (mybot_debug.GetBool()) {
+		} else if (mybot_debug.GetBool()) {
 			extern IVDebugOverlay *debugoverlay;
 			debugoverlay->AddLineOverlay(selfEyes, targetPos, 255, 255, 0, true,
 			NDEBUG_PERSIST_TILL_NEXT_SERVER);
