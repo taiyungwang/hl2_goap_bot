@@ -8,7 +8,7 @@
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <nav_mesh/nav_mesh.h>
-#include <nav_mesh/nav_pathfind.h>
+#include <nav_mesh/nav_area.h>
 #include <util/UtilTrace.h>
 #include <util/BasePlayer.h>
 #include <eiface.h>
@@ -17,10 +17,6 @@
 #include <in_buttons.h>
 
 extern CNavMesh* TheNavMesh;
-
-extern IVDebugOverlay *debugoverlay;
-
-extern ConVar mybot_debug;
 
 static ConVar maxAreaTime("my_bot_max_area_time", "280");
 
@@ -33,7 +29,7 @@ Navigator::~Navigator() {
 	delete moveCtx;
 }
 
-void Navigator::start(const Vector& goal, float targetRadius, bool sprint) {
+void Navigator::start(const Vector &goal, float targetRadius, bool sprint) {
 	this->sprint = sprint;
 	finalGoal = goal;
 	lastAreaId = -1;
@@ -74,6 +70,7 @@ bool Navigator::step() {
 	if (lastArea == nullptr || lastArea->IsBlocked(self->getTeam())) {
 		return true;
 	}
+	extern ConVar mybot_debug;
 	if (mybot_debug.GetBool() && topArea != nullptr) {
 		topArea->Draw();
 	}
@@ -104,6 +101,7 @@ bool Navigator::step() {
 	}
 	moveCtx->move(attributes);
 	if (mybot_debug.GetBool()) {
+		extern IVDebugOverlay *debugoverlay;
 		debugoverlay->AddLineOverlay(loc,
 				moveCtx->getGoal(), 0, 255, 255, true,
 				NDEBUG_PERSIST_TILL_NEXT_SERVER);
@@ -120,67 +118,6 @@ bool Navigator::checkCanMove() {
 	return true;
 }
 
-class ShortestPathCostForTeam {
-public:
-	ShortestPathCostForTeam(int team) :
-			team(team) {
-	}
-	float operator() ( CNavArea *area, CNavArea *fromArea, const CNavLadder *ladder, const CFuncElevator *elevator, float length ) const {
-		return ShortestPathCost()(area, fromArea, ladder, elevator,
-				length) + area->GetDanger(team);
-	}
-private:
-	int team;
-};
-
-bool Navigator::buildPath() {
-	std::stack<std::pair<int, int>> empty;
-	path.swap(empty);
-	const Player* self = blackboard.getSelf();
-	CNavArea* goalArea = getArea(finalGoal, self->getTeam());
-	if (goalArea == nullptr) {
-		if (mybot_debug.GetBool()) {
-			debugoverlay->AddLineOverlay(self->getEyesPos(),
-					finalGoal, 255, 0, 0, true,
-					NDEBUG_PERSIST_TILL_NEXT_SERVER);
-		}
-		Warning("Unable to find area for goal.\n");
-		return false;
-	}
-	CNavArea* buildPathStartArea = getArea(self);
-	if (buildPathStartArea == nullptr) {
-		Warning("Unable to get startArea.\n");
-		return false;
-	}
-	CNavArea* closest = nullptr;
-	if (!NavAreaBuildPath(buildPathStartArea, goalArea, &finalGoal,
-			ShortestPathCostForTeam(self->getTeam()), &closest, 0.0f, self->getTeam())) {
-		Warning("Unable to get to goal area, %d.\n", goalArea->GetID());
-		if (closest == nullptr) {
-			return false;
-		}
-		Warning("Closest area is %d.\n",  closest->GetID());
-		if (mybot_debug.GetBool() && path.size() > 0) {
-			debugoverlay->AddLineOverlay(closest->GetCenter(),
-					goalArea->GetCenter(), 255, 0, 0, true,
-					NDEBUG_PERSIST_TILL_NEXT_SERVER);
-		}
-		Vector loc;
-		closest->GetClosestPointOnArea(finalGoal, &loc);
-		if (moveCtx->trace(loc, (finalGoal - loc).Normalized() * (finalGoal.DistTo(loc) - targetRadius) + loc,
-				closest->GetAttributes() & NAV_MESH_CROUCH).DidHit()) {
-			Warning("Final goal is not reachable from closest area.\n");
-			return false;
-		}
-		goalArea = closest;
-	}
-	for (CNavArea* area = goalArea; area != nullptr;
-			area = area->GetParent()) {
-		path.push(std::make_pair(area->GetID(), area->GetParentHow()));
-	}
-	return true;
-}
-
 bool Navigator::canGetNextArea(const Vector& loc) {
 	Vector goal;
 	if (path.empty()) {
@@ -191,6 +128,7 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 		return false;
 	}
 	if (lastAreaId < 0
+			|| (blackboard.isOnLadder() && moveCtx->nextGoalIsLadderStart())
 			|| (!moveCtx->hasGoal()
 					&& moveCtx->getGoal() == topArea->GetCenter()
 					&& (std::get<0>(path.top()) == lastAreaId || topArea->Contains(loc)))
@@ -280,12 +218,16 @@ CNavArea* Navigator::getArea(const Player* player) {
 	return area == nullptr ? getArea(player->getCurrentPosition(), player->getTeam()) : area;
 }
 
-bool Navigator::canMoveTo(Vector goal, bool crouch) const {
-	const Vector& loc = blackboard.getSelf()->getCurrentPosition();
-	if (path.size() == 1) {
+bool Navigator::canMoveTo(const Vector& loc, Vector goal, float targetRadius, bool crouch) const {
+	if (targetRadius > 0.0f) {
 		goal = (goal - loc).Normalized() * (goal.DistTo(loc) - targetRadius) + loc;
 	}
-	return !moveCtx->trace(goal, crouch).DidHit();
+	return !moveCtx->trace(loc, goal, crouch).DidHit();
+}
+
+bool Navigator::canMoveTo(Vector goal, bool crouch) const {
+	return canMoveTo(blackboard.getSelf()->getCurrentPosition(),
+			goal, path.size() > 1 ? 0.0f : targetRadius, crouch);
 }
 
 bool Navigator::reachedGoal() const {

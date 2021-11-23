@@ -12,6 +12,8 @@ struct edict_t;
 class GoToAction: public Action {
 public:
 
+	bool onPlanningFinished() override;
+
 	virtual bool execute();
 
 	virtual void init();
@@ -27,7 +29,7 @@ public:
 protected:
 	Vector targetLoc;
 
-	bool sprint = false, pathBuilt = false;
+	bool sprint = false;
 
 	float targetRadius = 0.0f;
 

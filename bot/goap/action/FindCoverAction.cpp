@@ -5,23 +5,15 @@
 #include <player/Bot.h>
 #include <player/Vision.h>
 #include <move/Navigator.h>
+#include <nav_mesh/nav_area.h>
 
 FindCoverAction::FindCoverAction(Blackboard& blackboard) :
-		GoToAction(blackboard) {
+		GoToAction(blackboard), NavMeshPathBuilder(blackboard.getSelf()->getTeam()) {
 	effects = {WorldProp::MULTIPLE_ENEMY_SIGHTED, false};
 	precond.Insert(WorldProp::OUT_OF_AMMO, false);
 	sprint = true;
 }
 
-bool FindCoverAction::ShouldSearch(CNavArea *adjArea, CNavArea *currentArea,
-		float travelDistanceSoFar) {
-	int team = blackboard.getSelf()->getTeam();
-	if (team == 0) {
-		team = TEAM_ANY;
-	}
-	return !adjArea->IsBlocked(team)
-			&& areasToAvoid.find(adjArea) == areasToAvoid.end();
-}
 bool FindCoverAction::execute() {
 	if (!GoToAction::execute()) {
 		return false;
@@ -29,10 +21,7 @@ bool FindCoverAction::execute() {
 	return !waitInCover();
 }
 
-bool FindCoverAction::operator() (CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar) {
-	if (area == startArea) {
-		return true;
-	}
+bool FindCoverAction::foundGoal(CNavArea *area) {
 	Vector eyes(area->GetCenter());
 	eyes.z += HumanEyeHeight;
 	Bot* self = blackboard.getSelf();
@@ -43,18 +32,18 @@ bool FindCoverAction::operator() (CNavArea *area, CNavArea *priorArea, float tra
 			continue;
 		}
 		if (area->IsPotentiallyVisible(std::get<0>(avoid))) {
-			return true;
+			return false;
 		}
 		Vector enemyEyes;
 		getAvoidPosition(enemyEyes, std::get<1>(avoid));
 		trace_t result;
 		Bot::canSee(result, eyes, enemyEyes);
 		if (!result.DidHit()) {
-			return true;
+			return false;
 		}
 	}
-	this->hideArea = area;
-	return false;
+	targetLoc = area->GetCenter();
+	return true;
 }
 
 void FindCoverAction::setAvoidAreas() {
@@ -62,7 +51,7 @@ void FindCoverAction::setAvoidAreas() {
 		const Player* player = Player::getPlayer(i);
 		CNavArea* area = Navigator::getArea(player);
 		if (area != nullptr) {
-			areasToAvoid[area] = player->getEdict();;
+			areasToAvoid[area] = player->getEdict();
 		}
 	}
 }
@@ -72,24 +61,41 @@ void FindCoverAction::getAvoidPosition(Vector& pos, edict_t *avoid) const {
 }
 
 bool FindCoverAction::findTargetLoc() {
-	this->hideArea = nullptr;
 	areasToAvoid.clear();
 	setAvoidAreas();
 	if (areasToAvoid.empty()) {
 		return false;
 	}
-	startArea = Navigator::getArea(blackboard.getSelf());
-	if (startArea == nullptr) {
+	CNavArea* buildPathStartArea = Navigator::getArea(blackboard.getSelf());
+	if (buildPathStartArea == nullptr) {
+		Warning("Unable to get startArea.\n");
 		return false;
 	}
-	SearchSurroundingAreas(startArea, *this);
-	return hideArea != nullptr;
-}
-
-void FindCoverAction::PostSearch(void) {
-	if (hideArea != nullptr) {
-		targetLoc = hideArea->GetCenter();
+	NavMeshPathBuilder::Path path;
+	build(path, buildPathStartArea);
+	if (path.empty()) {
+		return false;
 	}
+	blackboard.getNavigator()->getPath().swap(path);
+	return true;
 }
 
+float FindCoverAction::getHeuristicCost(CNavArea *area) const {
+	float cost = 0.0f;
+	Vector eyes(area->GetCenter());
+	for (auto avoid: areasToAvoid) {
+		Vector enemyEyes;
+		getAvoidPosition(enemyEyes, std::get<1>(avoid));
+		trace_t result;
+		Bot::canSee(result, eyes, enemyEyes);
+		if (result.DidHit()) {
+			continue;
+		}
+		cost -= area->GetCenter().DistTo(std::get<1>(avoid)->GetCollideable()->GetCollisionOrigin());
+	}
+	for (auto i: blackboard.getSelf()->getVision().getNearbyTeammates()) {
+		cost += area->GetCenter().DistTo(Player::getPlayer(i)->getCurrentPosition());
+	}
+	return cost;
+}
 

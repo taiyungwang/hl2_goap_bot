@@ -72,7 +72,6 @@ void Player::think() {
 								&& !currWeap->getSecondary()->isSilent()))) {
 			noiseRange = 1000.0f;
 		}
-
 	}
 }
 

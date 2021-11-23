@@ -15,6 +15,8 @@ struct edict_t;
  */
 class Navigator {
 public:
+	using Path = std::stack<std::pair<int, int>>;
+
 	static CNavArea* getArea(const Player* player);
 
 	/**
@@ -36,11 +38,15 @@ public:
 
 	bool reachedGoal() const;
 
-	void start(const Vector& goal, float targetRadius, bool sprint);
+	void start(const Vector& finalGoal, float targetRadius, bool sprint);
 
 	CNavArea* getLastArea() const;
 
-	bool buildPath();
+	Path &getPath() {
+		return path;
+	}
+
+	bool canMoveTo(const Vector& start, Vector to, float targetRadius, bool crouch) const;
 
 protected:
 	Blackboard& blackboard;
@@ -50,9 +56,9 @@ protected:
 private:
 	Vector finalGoal;
 
-	std::stack<std::pair<int, int>> path;
+	Path path;
 
-	int lastAreaId = -1;
+	int lastAreaId = -1, goalAreaId = -1;
 
 	MoveStateContext* moveCtx;
 

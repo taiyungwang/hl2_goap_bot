@@ -38,7 +38,6 @@ void GoToEntityAction::setTargetLocAndRadius(edict_t* target) {
 	if (min.LengthSqr() > 0.0f || max.LengthSqr() > 0.0f) {
 		// look for trigger zone
 		targetLoc = (min + max) / 2.0f;
-		targetLoc.z = min.z;
 		targetRadius = MIN(targetLoc.x - min.x, targetLoc.y - min.y);
 	}
 	targetLoc.z = UTIL_FindGround(targetLoc).z;

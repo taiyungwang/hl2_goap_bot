@@ -114,7 +114,9 @@ bool AttackAction::goalComplete() {
 
 
 void AttackAction::abort() {
-	Weapon* weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
+	auto self = blackboard.getSelf();
+	self->setAiming(false);
+	Weapon* weapon = self->getArsenal().getCurrWeapon();
 	if (weapon != nullptr) {
 		weapon->undeploy(blackboard);
 	}

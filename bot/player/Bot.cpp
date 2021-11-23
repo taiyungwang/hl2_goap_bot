@@ -84,7 +84,7 @@ void Bot::think() {
 						NDEBUG_PERSIST_TILL_NEXT_SERVER);
 			}
 			VectorAngles(viewTarget - getEyesPos(), cmd.viewangles);
-			if (vision.getTargetedPlayer() > 0) {
+			if (aiming && vision.getTargetedPlayer() > 0) {
 				cmd.viewangles.x += RandomFloat(-mybotAimVar.GetFloat(), mybotAimVar.GetFloat());
 				cmd.viewangles.y += RandomFloat(-mybotAimVar.GetFloat(), mybotAimVar.GetFloat());
 			}
@@ -171,6 +171,27 @@ CBotCmd* Bot::getCmd() const {
 
 int Bot::getPlayerClass() const {
 	return playerClassVar == nullptr ? -1 : playerClassVar->getPlayerClass();
+}
+
+void Bot::traceMove(CGameTrace &traceResult, const Vector &start,
+		const Vector &goal, bool crouch, const ITraceFilter &filter) const {
+	Vector mins = getEdict()->GetCollideable()->OBBMins(),
+			maxs = getEdict()->GetCollideable()->OBBMaxs(),
+			heading(goal - start);
+	if (fabs(heading.x) > fabs(heading.y)) {
+		mins.x = maxs.x = 0.0f;
+	} else {
+		mins.y = maxs.y = 0.0f;
+	}
+	if (crouch) {
+		// magic number from https://developer.valvesoftware.com/wiki/Dimensions#Map_Grid_Units:_quick_reference
+		// for some reason the OBBMaxs returns 60
+		maxs.z -= 24.0f;
+	}
+	mins.z += 5.0f;
+	extern ConVar mybot_debug;
+	UTIL_TraceHull(heading.Normalized() * HalfHumanWidth + start,
+			goal, mins, maxs, MASK_PLAYERSOLID, filter, &traceResult, mybot_debug.GetBool());
 }
 
 bool Bot::canShoot(trace_t& result, const Vector &vecAbsEnd) const {

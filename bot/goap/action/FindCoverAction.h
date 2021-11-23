@@ -1,12 +1,17 @@
 #pragma once
 
 #include "GoToAction.h"
-#include <nav_mesh/nav_pathfind.h>
+
+#include <move/NavMeshPathBuilder.h>
 #include <unordered_map>
 
-class FindCoverAction: public GoToAction, public ISearchSurroundingAreasFunctor {
+class FindCoverAction: public GoToAction, private NavMeshPathBuilder {
 public:
 	FindCoverAction(Blackboard& blackboard);
+
+	bool onPlanningFinished() {
+		return true;
+	}
 
 	bool isInterruptable() const {
 		return false;
@@ -14,15 +19,7 @@ public:
 
 	bool execute() override;
 
-	bool operator() ( CNavArea *area, CNavArea *priorArea, float travelDistanceSoFar );
-
-	bool ShouldSearch( CNavArea *adjArea, CNavArea *currentArea, float travelDistanceSoFar );
-
-	void PostSearch( void );
-
 protected:
-	CNavArea* hideArea = nullptr, *startArea = nullptr;
-
 	float maxRange = INFINITY;
 
 	std::unordered_map<CNavArea*, edict_t*> areasToAvoid;
@@ -36,5 +33,9 @@ protected:
 	}
 
 private:
-	bool findTargetLoc();
+	bool findTargetLoc() override;
+
+	float getHeuristicCost(CNavArea *area) const override;
+
+	bool foundGoal(CNavArea *area) override;
 };

@@ -14,6 +14,7 @@ class World;
 class CBotCmd;
 class CGameTrace;
 class VoiceMessageSender;
+class ITraceFilter;
 
 typedef const char *(*PlayerClasses)[2][6];
 
@@ -104,6 +105,13 @@ public:
 		return viewTarget;
 	}
 
+	void traceMove(CGameTrace &traceResult, const Vector &start,
+			const Vector &goal, bool crouch, const ITraceFilter &filter) const;
+
+	void setAiming(bool aiming) {
+		this->aiming = aiming;
+	}
+
 private:
 	static PlayerClasses CLASSES;
 
@@ -125,7 +133,7 @@ private:
 
 	Vector viewTarget;
 
-	bool hookEnabled = false, resetPlanner = false, wantToListen = true;
+	bool hookEnabled = false, resetPlanner = false, wantToListen = true, aiming = false;
 
 	bool canShoot(CGameTrace &result, const Vector &vecAbsEnd) const;
 

@@ -36,8 +36,9 @@ void MoveStateContext::move(int type) {
 		state = newState;
 	}
 	// do look
-	Vector look = ladderDir != CNavLadder::NUM_LADDER_DIRECTIONS ? ladderEnd: getGoal();
-	if (ladderDir != CNavLadder::LADDER_DOWN) {
+	bool onLadder = blackboard.isOnLadder() || ladderDir != CNavLadder::NUM_LADDER_DIRECTIONS;
+	Vector look = onLadder ? ladderEnd: goal;
+	if (!onLadder) {
 		look.z += blackboard.getSelf()->getEyesPos().DistTo(pos);
 	}
 	if (blackboard.getBlocker() != nullptr) {
@@ -50,8 +51,7 @@ void MoveStateContext::move(int type) {
 		} else {
 			blackboard.setBlocker(nullptr);
 		}
-	} else if (blackboard.getSelf()->getVision().getTargetedPlayer() == 0
-			|| nextGoalIsLadderStart() || blackboard.isOnLadder()) {
+	} else if (blackboard.getSelf()->getVision().getTargetedPlayer() == 0 || onLadder) {
 		self->setViewTarget(look);
 	}
 }
@@ -107,23 +107,6 @@ const trace_t& MoveStateContext::trace(const Vector& goal, bool crouch) {
 
 const trace_t& MoveStateContext::trace(const Vector& start, const Vector& goal, bool crouch,
 		const ITraceFilter& filter) {
-	edict_t* edict = blackboard.getSelf()->getEdict();
-	Vector mins = edict->GetCollideable()->OBBMins(),
-			maxs = edict->GetCollideable()->OBBMaxs(),
-			heading(goal - start);
-	if (fabs(heading.x) > fabs(heading.y)) {
-		mins.x = maxs.x = 0.0f;
-	} else {
-		mins.y = maxs.y = 0.0f;
-	}
-	if (crouch) {
-		// magic number from https://developer.valvesoftware.com/wiki/Dimensions#Map_Grid_Units:_quick_reference
-		// for some reason the OBBMaxs returns 60
-		maxs.z -= 24.0f;
-	}
-	mins.z += 5.0f;
-	extern ConVar mybot_debug;
-	UTIL_TraceHull(heading.Normalized() * HalfHumanWidth + start,
-			goal, mins, maxs, MASK_PLAYERSOLID, filter, &traceResult, mybot_debug.GetBool());
+	blackboard.getSelf()->traceMove(traceResult, start, goal, crouch, filter);
 	return traceResult;
 }

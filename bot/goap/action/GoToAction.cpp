@@ -1,23 +1,47 @@
 #include "GoToAction.h"
 
 #include <move/Navigator.h>
+#include <move/NavMeshPathBuilderWithGoal.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
+#include <nav_mesh/nav_area.h>
+#include <ivdebugoverlay.h>
 
 float GoToAction::getCost() {
 	return findTargetLoc() ? targetLoc.DistTo(blackboard.getSelf()->getCurrentPosition()) : INFINITY;
 }
 
+bool GoToAction::onPlanningFinished() {
+	auto self = blackboard.getSelf();
+	CNavArea* buildPathStartArea = Navigator::getArea(self);
+	if (buildPathStartArea == nullptr) {
+		Warning("Unable to get startArea.\n");
+		return false;
+	}
+	Navigator::Path path;
+	NavMeshPathBuilderWithGoal(*self, targetLoc, targetRadius).build(path,
+			buildPathStartArea);
+	if (!path.empty()) {
+		blackboard.getNavigator()->getPath().swap(path);
+		return true;
+	}
+	extern ConVar mybot_debug;
+	if (mybot_debug.GetBool()) {
+		Msg("Unable to build a path to goal.\n");
+		extern IVDebugOverlay *debugoverlay;
+		debugoverlay->AddLineOverlay(self->getCurrentPosition(),
+				targetLoc, 255, 0, 0, true,
+				NDEBUG_PERSIST_TILL_NEXT_SERVER);
+	}
+	return false;
+}
+
 bool GoToAction::execute() {
 	canAbort = !blackboard.isOnLadder();
-	return !pathBuilt || blackboard.getNavigator()->step();
+	return blackboard.getNavigator()->step();
 }
 
 void GoToAction::init() {
-	pathBuilt = blackboard.getNavigator()->buildPath();
-	if (!pathBuilt) {
-		Msg("No path available.\n");
-	}
 	blackboard.getNavigator()->start(targetLoc, targetRadius, sprint);
 }
 

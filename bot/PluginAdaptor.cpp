@@ -157,6 +157,7 @@ void PluginAdaptor::handEvent(T* event) {
 }
 
 bool PluginAdaptor::handle(EventInfo* event) {
+	// TODO: this doesn't really work.
 	if (Q_strcmp("nav_generate", event->getName()) == 0) {
 		blockers.PurgeAndDeleteElements();
 		return true;

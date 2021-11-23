@@ -76,8 +76,6 @@ bool SnipeAction::goalComplete() {
 		selector->update(selectorId, team, 
 			blackboard.getSelf()->getVision().getTargetedPlayer() != 0);
 		return true;
-	} else if (!pathBuilt) {
-		selector->update(selectorId, team, false);
 	}
 	return false;
 }

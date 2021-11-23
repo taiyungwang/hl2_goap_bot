@@ -17,7 +17,11 @@ bool KillAction::precondCheck() {
 	adjustAim = true;
 	dur = UINT_MAX;
 	target = blackboard.getSelf()->getVision().getTargetedPlayer();
-	return target > 0;
+	if (target > 0) {
+		blackboard.getSelf()->setAiming(true);
+		return true;
+	}
+	return false;
 }
 
 bool KillAction::execute()  {
