@@ -49,6 +49,8 @@ private:
 		} score[2];
 	};
 
+	int navFileTimeStamp;
+
 	std::map<unsigned int, Spot> spots;
 
 	void buildFromNavMesh();

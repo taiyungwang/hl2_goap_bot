@@ -20,9 +20,10 @@ HidingSpotSelector::HidingSpotSelector(CommandHandler &commandHandler,
 		const std::string &modName) : Receiver(commandHandler) {
 	buildFromNavMesh();
 	KeyValues *file = new KeyValues(ROOT_KEY);
+	navFileTimeStamp = filesystem->GetFileTime(getNavFileName().c_str(), "MOD");
 	if (filesystem->IsDirectory((std::string(FILE_PREFIX) + modName).c_str(), "MOD")
 			&& file->LoadFromFile(filesystem, getHidingSpotFileName(modName).c_str(), "MOD")
-			&& file->GetInt(TIME_STAMP_KEY) == filesystem->GetFileTime(getNavFileName().c_str(), "MOD")) {
+			&& file->GetInt(TIME_STAMP_KEY) == navFileTimeStamp) {
 		FOR_EACH_TRUE_SUBKEY(file->FindKey(SPOTS_KEY), i) {
 			auto &spot = spots[i->GetInt()];
 			FOR_EACH_TRUE_SUBKEY(i, j) {
@@ -83,6 +84,10 @@ void HidingSpotSelector::save(const std::string& modName) {
 	auto dirName = std::string(FILE_PREFIX) + modName;
 	if (!filesystem->IsDirectory(dirName.c_str(), "MOD")) {
 		filesystem->CreateDirHierarchy(dirName.c_str(), "DEFAULT_WRITE_PATH");
+	}
+	if (filesystem->GetFileTime(getNavFileName().c_str(), "MOD") != navFileTimeStamp) {
+		// file was edited, so current score is invalid.
+		buildFromNavMesh();
 	}
 	KeyValues *file = new KeyValues(ROOT_KEY);
 	file->SetInt(TIME_STAMP_KEY, filesystem->GetFileTime(getNavFileName().c_str(), "MOD"));
