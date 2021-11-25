@@ -2,21 +2,18 @@
 
 #include "NavMeshPathBuilder.h"
 
-class Bot;
-
 class NavMeshPathBuilderWithGoal: public NavMeshPathBuilder {
 public:
-	NavMeshPathBuilderWithGoal(Bot& self,
-			const Vector &goal, float targetRadius);
+	NavMeshPathBuilderWithGoal(int team, CNavArea *goal) :
+			NavMeshPathBuilder(team), goal(goal) {
+	}
 
 private:
-	float targetRadius;
-
-	const Vector &goal;
-
-	Bot& self;
+	CNavArea *goal;
 
 	float getHeuristicCost(CNavArea *area) const override;
 
-	bool foundGoal(CNavArea *area) override;
+	bool foundGoal(CNavArea *area) override {
+		return area == goal;
+	}
 };

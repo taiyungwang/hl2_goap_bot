@@ -19,15 +19,27 @@ bool GoToAction::onPlanningFinished() {
 		return false;
 	}
 	Navigator::Path path;
-	NavMeshPathBuilderWithGoal(*self, targetLoc, targetRadius).build(path,
+	int team = self->getTeam();
+	extern ConVar mybot_debug;
+	CNavArea *goal = Navigator::getArea(targetLoc, team);
+	if (goal == nullptr) {
+		if (mybot_debug.GetBool()) {
+			Msg("Unable to find area for goal.\n");
+			extern IVDebugOverlay *debugoverlay;
+			debugoverlay->AddLineOverlay(self->getCurrentPosition(),
+					targetLoc, 255, 0, 0, true,
+					NDEBUG_PERSIST_TILL_NEXT_SERVER);
+		}
+		return false;
+	}
+	NavMeshPathBuilderWithGoal(team, goal).build(path,
 			buildPathStartArea);
 	if (!path.empty()) {
 		blackboard.getNavigator()->getPath().swap(path);
 		return true;
 	}
-	extern ConVar mybot_debug;
 	if (mybot_debug.GetBool()) {
-		Msg("Unable to build a path to goal.\n");
+		Msg("Unable to find a path for goal.\n");
 		extern IVDebugOverlay *debugoverlay;
 		debugoverlay->AddLineOverlay(self->getCurrentPosition(),
 				targetLoc, 255, 0, 0, true,

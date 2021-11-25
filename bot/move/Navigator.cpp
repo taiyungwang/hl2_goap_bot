@@ -18,7 +18,7 @@
 
 extern CNavMesh* TheNavMesh;
 
-static ConVar maxAreaTime("my_bot_max_area_time", "280");
+static ConVar maxAreaTime("my_bot_max_area_time", "360");
 
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
@@ -67,7 +67,7 @@ bool Navigator::step() {
 		moveCtx->setGoal(topArea->GetCenter());
 	}
 	CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
-	if (lastArea == nullptr || lastArea->IsBlocked(self->getTeam())) {
+	if ((topArea == nullptr && !path.empty()) || lastArea == nullptr || lastArea->IsBlocked(self->getTeam())) {
 		return true;
 	}
 	extern ConVar mybot_debug;
