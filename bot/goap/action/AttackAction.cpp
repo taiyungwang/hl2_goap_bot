@@ -87,13 +87,14 @@ bool AttackAction::execute() {
 	if (crouch) {
 		buttons.hold(IN_DUCK);
 	} else if (weapFunc->isMelee()) {
-		moveCtx->setGoal(
-				(targetLoc - self->getCurrentPosition()).Normalized()
-						* (dist - 25.0f) + self->getCurrentPosition());
+		moveCtx->setGoal(targetLoc);
 		CNavArea* area = Navigator::getArea(selfEnt, self->getTeam());
 		moveCtx->traceMove(crouch);
 		moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
-		buttons.hold(IN_SPEED);
+		// can't sprint and attack
+		if (!moveCtx->getTraceResult().startsolid) {
+			buttons.hold(IN_SPEED);
+		}
 	}
 	if (mybot_debug.GetBool()) {
 		extern IVDebugOverlay *debugoverlay;
