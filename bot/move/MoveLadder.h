@@ -15,5 +15,8 @@ public:
 
 private:
 	float remainingDist;
+
+	int stuckFrames = 0;
+
 	bool startedClimbing = false;
 };

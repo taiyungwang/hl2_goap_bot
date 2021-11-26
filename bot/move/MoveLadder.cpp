@@ -16,33 +16,49 @@ MoveLadder::MoveLadder(MoveStateContext& ctx) :
 }
 
 MoveState* MoveLadder::move(const Vector& currPos) {
+	auto &bb = ctx.getBlackboard();
+	auto self = bb.getSelf();
 	float prevDist = remainingDist;
-	CNavLadder::LadderDirectionType dir = ctx.getLadderDir();
-	Buttons& buttons = ctx.getBlackboard().getButtons();
-	bool onLadder = ctx.getBlackboard().isOnLadder();
-	if (onLadder && !startedClimbing) {
-		startedClimbing = true;
-		ctx.getBlackboard().getSelf()->setViewTarget(ctx.getLadderEnd());
+	if (bb.isOnLadder()) {
+		remainingDist = std::abs(currPos.z - ctx.getLadderEnd().z);
+		if (prevDist < 0.0f) {
+			prevDist = remainingDist;
+		}
 	}
-	if (startedClimbing) {
-		remainingDist = ctx.getLadderEnd().DistTo(currPos);
-		if (prevDist >= 0.0f && prevDist - remainingDist <= 0.0f) {
-			// we didn't move this frame.
-			if (onLadder) {
+	bool climbingUp = ctx.getLadderDir() == CNavLadder::LADDER_UP,
+			moved = prevDist - remainingDist > 0.0f,
+			atEnd = (climbingUp && ctx.getLadderEnd().z < currPos.z)
+			|| (!climbingUp && currPos.z - ctx.getLadderEnd().z <= StepHeight);
+	Vector lookAt = ctx.getLadderEnd();
+	if (climbingUp) {
+		lookAt.z += 3.0f * HumanHeight;
+	}
+	self->setViewTarget(lookAt);
+	Buttons& buttons = bb.getButtons();
+	if (bb.isOnLadder()) {
+		if (!moved) {
+			if (startedClimbing && (atEnd || remainingDist < TARGET_OFFSET)) {
 				buttons.tap(IN_USE);
+				if (stuckFrames++ > 40) {
+					ctx.setLadderDir(CNavLadder::NUM_LADDER_DIRECTIONS);
+					return new Stopped(ctx);
+				}
 			}
+		} else {
+			startedClimbing = true;
+			stuckFrames = 0;
+		}
+		if (self->getAimAccuracy() >= 0.9f) {
+			buttons.hold(IN_FORWARD);
+		}
+	} else {
+		if (startedClimbing && !moved && atEnd) {
 			ctx.setLadderDir(CNavLadder::NUM_LADDER_DIRECTIONS);
-			if (remainingDist > (dir == CNavLadder::LADDER_UP ? 3.0f * HumanHeight : StepHeight)
-					+ TARGET_OFFSET) {
-				ctx.setStuck(true);
-			}
 			return new Stopped(ctx);
 		}
-	} else if (!ctx.getBlackboard().isOnLadder()) {
+		startedClimbing = false;
+		self->lookStraight();
 		buttons.tap(IN_USE);
-	}
-	if (ctx.getBlackboard().getSelf()->getAimAccuracy() >= 0.9f) {
-		buttons.hold(IN_FORWARD);
 		moveStraight(ctx.getLadderEnd());
 	}
 	return nullptr;

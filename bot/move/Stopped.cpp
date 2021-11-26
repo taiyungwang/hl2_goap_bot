@@ -10,11 +10,11 @@
 #include <in_buttons.h>
 
 MoveState* Stopped::move(const Vector& currPos) {
-	if (!ctx.reachedGoal()) {
-		return new Avoid(ctx, new Jump(ctx));
-	}
 	if (ctx.nextGoalIsLadderStart()) {
 		return new MoveLadder(ctx);
+	}
+	if (!ctx.reachedGoal()) {
+		return new Avoid(ctx, new Jump(ctx));
 	}
 	if (ctx.getBlackboard().isOnLadder()) {
 		float delta = ctx.getLadderEnd().z - currPos.z;

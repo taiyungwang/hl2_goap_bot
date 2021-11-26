@@ -37,10 +37,8 @@ void MoveStateContext::move(int type) {
 	}
 	// do look
 	bool onLadder = blackboard.isOnLadder() || ladderDir != CNavLadder::NUM_LADDER_DIRECTIONS;
-	Vector look = onLadder ? ladderEnd: goal;
-	if (!onLadder) {
-		look.z += blackboard.getSelf()->getEyesPos().DistTo(pos);
-	}
+	Vector look = goal;
+	look.z += blackboard.getSelf()->getEyesPos().DistTo(pos);
 	if (blackboard.getBlocker() != nullptr) {
 		Vector mins, maxs, blocker;
 		blackboard.getBlocker()->GetCollideable()->WorldSpaceTriggerBounds(&mins, &maxs);
@@ -51,7 +49,7 @@ void MoveStateContext::move(int type) {
 		} else {
 			blackboard.setBlocker(nullptr);
 		}
-	} else if (blackboard.getSelf()->getVision().getTargetedPlayer() == 0 || onLadder) {
+	} else if (blackboard.getSelf()->getVision().getTargetedPlayer() == 0 && !onLadder) {
 		self->setViewTarget(look);
 	}
 }

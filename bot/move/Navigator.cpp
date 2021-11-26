@@ -18,7 +18,7 @@
 
 extern CNavMesh* TheNavMesh;
 
-static ConVar maxAreaTime("my_bot_max_area_time", "360");
+static ConVar maxAreaTime("my_bot_max_area_time", "400");
 
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
@@ -124,11 +124,11 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 		return false;
 	}
 	CNavArea *topArea = TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
-	if (topArea == nullptr) {
+	if (topArea == nullptr || moveCtx->nextGoalIsLadderStart()) {
 		return false;
 	}
 	if (lastAreaId < 0
-			|| (blackboard.isOnLadder() && moveCtx->nextGoalIsLadderStart())
+			|| (moveCtx->nextGoalIsLadderStart() && blackboard.isOnLadder())
 			|| (!moveCtx->hasGoal()
 					&& moveCtx->getGoal() == topArea->GetCenter()
 					&& (std::get<0>(path.top()) == lastAreaId || topArea->Contains(loc)))
@@ -138,7 +138,7 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 	}
 	CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
 	if (lastArea == nullptr || (topArea->GetAttributes() & (NAV_MESH_CROUCH | NAV_MESH_JUMP | NAV_MESH_PRECISE | NAV_MESH_STAIRS))
-					|| moveCtx->nextGoalIsLadderStart() || blackboard.isOnLadder()
+					|| moveCtx->nextGoalIsLadderStart()
 					// don't skip areas above and below ground height
 					|| fabs(lastArea->GetCenter().z - topArea->GetCenter().z) > StepHeight
 					|| fabs(loc.z - lastArea->GetCenter().z) > StepHeight) {
@@ -148,7 +148,9 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 	path.pop();
 	CNavArea *nextArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
 	bool canSkip = nextArea != nullptr && ((path.empty() && canMoveTo(finalGoal, false))
-		|| (!path.empty() && canMoveTo(nextArea->GetCenter(), false)));
+		|| (!path.empty() && canMoveTo(nextArea->GetCenter(), false))
+		// already on ladder and the next area is reached via ladder
+		|| (blackboard.isOnLadder() && std::get<1>(path.top()) >= 4 && std::get<1>(path.top()) <= 5));
 	path.push(top);
 	return canSkip;
 }
@@ -258,8 +260,6 @@ bool Navigator::setLadderStart() {
 				pathTop->GetClosestPointOnArea(*start, &end);
 				end.x = ladder->m_top.x;
 				end.y = ladder->m_top.y;
-				// the top the ladder is guaranteed to be above human height
-				end.z += 3.0f * HumanHeight;
 			}
 			float delta = end.z - blackboard.getSelf()->getCurrentPosition().z;
 			if (delta == 0.0f || (delta < 0.0f && delta >= -StepHeight)
