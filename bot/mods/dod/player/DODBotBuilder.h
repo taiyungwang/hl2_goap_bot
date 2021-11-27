@@ -26,5 +26,5 @@ private:
 
 	void modHandleCommand(const CCommand &command, Bot* bot) const;
 
-	Bot *modBuild(Bot *) override;
+	Bot *modBuild(Bot *bot, Blackboard& blackboard) override;
 };

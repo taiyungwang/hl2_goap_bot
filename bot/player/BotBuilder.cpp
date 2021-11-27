@@ -91,7 +91,7 @@ Bot* BotBuilder::build(edict_t* ent) {
 	Bot* bot = new Bot(ent, arsenalBuilder.build(), commandHandler,
 			voiceMessageSender);
 	Blackboard *blackboard = new Blackboard(bot, buildEntity(ent));
-	blackboard->setNavigator(new Navigator(*blackboard));
+	bot->setNavigator(std::make_shared<Navigator>(*blackboard));
 	bot->setBlackboard(blackboard);
 	World* world = buildWorld();
 	world->reset();
@@ -109,7 +109,7 @@ Bot* BotBuilder::build(edict_t* ent) {
 	planner->addAction<SwitchToBestInRangeWeaponAction>(0.0f);
 	updatePlanner(*planner, *blackboard);
 	bot->setPlanner(planner);
-	return modBuild(bot);
+	return modBuild(bot, *blackboard);
 }
 
 BasePlayer* BotBuilder::buildEntity(edict_t* ent) const {

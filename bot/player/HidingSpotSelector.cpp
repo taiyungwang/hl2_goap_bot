@@ -1,9 +1,13 @@
 #include "HidingSpotSelector.h"
 
+#include "Bot.h"
+#include <move/Navigator.h>
+#include <event/EventInfo.h>
 #include <nav_mesh/nav_area.h>
 #include <filesystem.h>
 #include <eiface.h>
 #include <random>
+#include <initializer_list>
 
 extern IFileSystem *filesystem;
 
@@ -16,13 +20,12 @@ static const char *TIME_STAMP_KEY = "navFileTimeStamp";
 static const char *SPOTS_KEY = "spots";
 static const char *FILE_PREFIX = "addons/mybot/";
 
-HidingSpotSelector::HidingSpotSelector(CommandHandler &commandHandler,
-		const std::string &modName) : Receiver(commandHandler) {
+HidingSpotSelector::HidingSpotSelector(CommandHandler &commandHandler) : Receiver(commandHandler) {
 	buildFromNavMesh();
 	KeyValues *file = new KeyValues(ROOT_KEY);
 	navFileTimeStamp = filesystem->GetFileTime(getNavFileName().c_str(), "MOD");
-	if (filesystem->IsDirectory((std::string(FILE_PREFIX) + modName).c_str(), "MOD")
-			&& file->LoadFromFile(filesystem, getHidingSpotFileName(modName).c_str(), "MOD")
+	if (filesystem->IsDirectory((std::string(FILE_PREFIX)).c_str(), "MOD")
+			&& file->LoadFromFile(filesystem, getHidingSpotFileName().c_str(), "MOD")
 			&& file->GetInt(TIME_STAMP_KEY) == navFileTimeStamp) {
 		FOR_EACH_TRUE_SUBKEY(file->FindKey(SPOTS_KEY), i) {
 			auto &spot = spots[i->GetInt()];
@@ -39,6 +42,22 @@ HidingSpotSelector::HidingSpotSelector(CommandHandler &commandHandler,
 bool HidingSpotSelector::receive(edict_t *sender, const CCommand &command) {
 	if (std::string("nav_save") == command.Arg(0)) {
 		buildFromNavMesh();
+	}
+	return false;
+}
+
+bool HidingSpotSelector::handle(EventInfo* eventInfo) {
+	if (std::string("player_death") == eventInfo->getName()) {
+		for (auto bot: { std::make_pair(dynamic_cast<Bot*>(Player::getPlayer(eventInfo->getInt("attacker"))), true),
+			std::make_pair(dynamic_cast<Bot*>(Player::getPlayer(eventInfo->getInt("userid"))), false) }) {
+			if (std::get<0>(bot) == nullptr) {
+				continue;
+			}
+			int spot = getClosestSpot(std::get<0>(bot));
+			if (spot >= 0) {
+				update(spot, std::get<0>(bot)->getTeam(), std::get<1>(bot));
+			}
+		}
 	}
 	return false;
 }
@@ -74,14 +93,14 @@ void HidingSpotSelector::setInUse(int spot, int team, bool inUse) {
 void HidingSpotSelector::update(int spot, int team, bool success) {
 	auto &score = spots[static_cast<unsigned int>(spot)].score[
 			team > 1 ? team - 2 : 0];
-	success ? score.success += 1.0f : score.fail += 1.0f;
+	(success ? score.success : score.fail) += 1.0f;
 }
 
-void HidingSpotSelector::save(const std::string& modName) {
+void HidingSpotSelector::save() {
 	if (spots.empty()) {
 		return;
 	}
-	auto dirName = std::string(FILE_PREFIX) + modName;
+	auto dirName = std::string(FILE_PREFIX);
 	if (!filesystem->IsDirectory(dirName.c_str(), "MOD")) {
 		filesystem->CreateDirHierarchy(dirName.c_str(), "DEFAULT_WRITE_PATH");
 	}
@@ -103,7 +122,7 @@ void HidingSpotSelector::save(const std::string& modName) {
 			scoreKv->SetFloat("fail", score[i].fail);
 		}
 	}
-	file->SaveToFile(filesystem, getHidingSpotFileName(modName).c_str(), "MOD");
+	file->SaveToFile(filesystem, getHidingSpotFileName().c_str(), "MOD");
 	file->deleteThis();
 }
 
@@ -111,9 +130,9 @@ std::string HidingSpotSelector::getNavFileName() {
 	return std::string("maps/") + +gpGlobals->mapname.ToCStr() + ".nav";
 }
 
-std::string HidingSpotSelector::getHidingSpotFileName(const std::string& modName) {
-	return std::string(FILE_PREFIX) + modName
-			+ "/" + gpGlobals->mapname.ToCStr() + "_hiding_spot_scores.vdf";
+std::string HidingSpotSelector::getHidingSpotFileName() {
+	return std::string(FILE_PREFIX)
+			+ gpGlobals->mapname.ToCStr() + "_hiding_spot_scores.vdf";
 }
 
 void HidingSpotSelector::buildFromNavMesh() {
@@ -135,4 +154,24 @@ void HidingSpotSelector::buildFromNavMesh() {
 			}
 		}
 	}
+}
+
+int HidingSpotSelector::getClosestSpot(Bot *bot) const {
+	int spot = -1;
+	if (bot == nullptr) {
+		return spot;
+	}
+	CNavArea* area = bot->getArea();
+	if (area != nullptr) {
+		auto spots = area->GetHidingSpots();
+		float closest = INFINITY;
+		FOR_EACH_VEC(*spots, i) {
+			float dist = (*spots)[i]->GetPosition().DistTo(bot->getCurrentPosition());
+			if (dist < closest) {
+				spot = (*spots)[i]->GetID();
+				closest = dist;
+			}
+		}
+	}
+	return spot;
 }

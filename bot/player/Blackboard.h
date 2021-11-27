@@ -43,14 +43,6 @@ public:
 		return cmd;
 	}
 
-	Navigator* getNavigator() {
-		return navigator;
-	}
-
-	void setNavigator(Navigator* navigator) {
-		this->navigator = navigator;
-	}
-
 	edict_t* getTarget() const {
 		return target;
 	}
@@ -63,8 +55,6 @@ private:
 	Bot* self;
 
 	CBotCmd cmd;
-
-	Navigator* navigator;
 
 	edict_t* blocker = nullptr,
 		* target = nullptr;

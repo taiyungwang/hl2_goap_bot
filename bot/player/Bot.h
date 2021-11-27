@@ -10,6 +10,7 @@ class GoalManager;
 class Action;
 class BasePlayer;
 class Goal;
+class Navigator;
 class World;
 class CBotCmd;
 class CGameTrace;
@@ -112,6 +113,14 @@ public:
 		this->aiming = aiming;
 	}
 
+	void setNavigator(const std::shared_ptr<Navigator>& navigator) {
+		this->navigator = navigator;
+	}
+
+	std::shared_ptr<Navigator> getNavigator() {
+		return navigator;
+	}
+
 private:
 	static PlayerClasses CLASSES;
 
@@ -122,6 +131,8 @@ private:
 	BasePlayer *playerClassVar = nullptr;
 
 	Blackboard *blackboard = nullptr;
+
+	std::shared_ptr<Navigator> navigator;
 
 	int desiredClassId = -1;
 

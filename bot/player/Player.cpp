@@ -1,9 +1,12 @@
 #include "Player.h"
 
+#include <move/Navigator.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
 #include <event/EventInfo.h>
+#include <nav_mesh/nav_mesh.h>
+#include <nav_mesh/nav_area.h>
 #include <util/BasePlayer.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
@@ -59,6 +62,11 @@ void Player::think() {
 		inGame = false;
 	}
 	if (inGame) {
+		extern CNavMesh* TheNavMesh;
+		area = TheNavMesh->GetNavArea(ent, 0);
+		if (area == nullptr) {
+			area = Navigator::getArea(getCurrentPosition(), getTeam());
+		}
 		noiseRange = 0.0f;
 		arsenal->update(ent);
 		if (BasePlayer(ent).getVelocity().Length() > 150.0f) {

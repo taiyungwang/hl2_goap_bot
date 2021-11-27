@@ -14,6 +14,7 @@
 class IPlayerInfo;
 class Vector;
 class Arsenal;
+class CNavArea;
 class QAngle;
 struct edict_t;
 
@@ -85,12 +86,17 @@ public:
 		return inGame;
 	}
 
+	CNavArea *getArea() const {
+		return area;
+	}
 protected:
 	static std::unordered_map<int, Player*> players;
 
 	std::shared_ptr<Arsenal> arsenal;
 
 	bool inGame = false;
+
+	CNavArea *area = nullptr;
 
 private:
 	IPlayerInfo* info;

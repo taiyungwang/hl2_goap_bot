@@ -1,20 +1,24 @@
 #pragma once
 
 #include "CommandHandler.h"
+#include <event/EventHandler.h>
 #include <vector.h>
 #include <map>
 #include <string>
 
+class Bot;
 class CNavArea;
 
 /**
 * Chooses a Hiding spot using Thompson sampling.
 **/
-class HidingSpotSelector: public CommandHandler::Receiver {
+class HidingSpotSelector: public CommandHandler::Receiver, public EventHandler {
 public:
-	HidingSpotSelector(CommandHandler& commandHandler, const std::string& modName);
+	HidingSpotSelector(CommandHandler& commandHandler);
 
 	bool receive(edict_t *sender, const CCommand &command) override;
+
+	bool handle(EventInfo* event) override;
 
 	/**
 	 * @return -1 if no positions are available.
@@ -33,12 +37,12 @@ public:
 		return spots.at(static_cast<unsigned int>(idx)).score[team - 2].inUse;
 	}
 
-	void save(const std::string& modName);
+	void save();
 
 private:
 	static std::string getNavFileName();
 
-	static std::string getHidingSpotFileName(const std::string& modName);
+	static std::string getHidingSpotFileName();
 
 	struct Spot {
 		Vector pos;
@@ -54,4 +58,6 @@ private:
 	std::map<unsigned int, Spot> spots;
 
 	void buildFromNavMesh();
+
+	int getClosestSpot(Bot *bot) const;
 };

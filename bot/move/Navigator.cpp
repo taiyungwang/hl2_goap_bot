@@ -38,10 +38,6 @@ void Navigator::start(const Vector &goal, float targetRadius, bool sprint) {
 	moveCtx->stop();
 }
 
-CNavArea* Navigator::getLastArea() const {
-	return lastAreaId < 0 ? nullptr : TheNavMesh->GetNavAreaByID(lastAreaId);
-}
-
 bool Navigator::step() {
 	if (moveCtx->isStuck() || reachedGoal() || blackboard.getBlocker() != nullptr
 			|| (lastAreaId < 0 && path.empty())) {
@@ -66,7 +62,13 @@ bool Navigator::step() {
 	if (lastArea == nullptr) {
 		return true;
 	}
-	if ((topArea == nullptr && !path.empty()) || lastArea == nullptr || lastArea->IsBlocked(self->getTeam())) {
+	if ((topArea == nullptr && !path.empty()) || lastArea == nullptr
+			|| lastArea->IsBlocked(self->getTeam())
+			// bot fell off due to bad pathing.
+			|| (!moveCtx->nextGoalIsLadderStart() && !blackboard.isOnLadder()
+					&& moveCtx->getGoal().z - loc.z > JumpCrouchHeight
+					&& moveCtx->getGoal().AsVector2D().DistTo(loc.AsVector2D())
+							< HalfHumanWidth)) {
 		return true;
 	}
 	extern ConVar mybot_debug;
@@ -155,16 +157,15 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 		// make sure we are not skipping area that will cause us to walk off of a cliff.
 		nextArea->GetClosestPointOnArea(loc, &goal);
 		trace_t traceResult;
-		goal -= loc;
-		float dist = goal.Length();
-		goal.NormalizeInPlace();
-		static const float RADIUS = GenerationStepSize / 2.0f;
-		for (; dist > RADIUS; dist -= GenerationStepSize) {
+		Vector dir = loc - goal;
+		float totalDist = dir.Length();
+		dir.NormalizeInPlace();
+		float step = 8.0f;
+		for (float dist = 0.0f; dist < totalDist; dist += step) {
 			extern ConVar mybot_debug;
-			Vector pos = goal * dist + loc;
-			UTIL_TraceHull(pos, pos,
-					Vector(-RADIUS, -RADIUS, -JumpHeight),
-					Vector(RADIUS, RADIUS, 0.0f), MASK_PLAYERSOLID, CTraceFilterHitAll(),
+			UTIL_TraceHull(goal + dir * dist, goal + dir * (dist + step),
+					Vector(0.0f, 0.0f, -JumpCrouchHeight),
+					Vector(0.0f, 0.0f, 0.0f), MASK_PLAYERSOLID, CTraceFilterHitAll(),
 					&traceResult, mybot_debug.GetBool());
 			if (!traceResult.DidHit()) {
 				return false;
@@ -180,7 +181,6 @@ void Navigator::setGoalForNextArea(const Vector& loc) {
 	dirToTop = std::get<1>(path.top());
 	areaTime = 0;
 	path.pop();
-	CNavArea *pathTop = nullptr;
 	if (!path.empty() && !setLadderStart()) {
 		CNavArea *pathTop = TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
 		if (pathTop == nullptr) {
@@ -190,22 +190,17 @@ void Navigator::setGoalForNextArea(const Vector& loc) {
 		if (lastArea == nullptr) {
 			return;
 		}
-		goal = pathTop->GetCenter();
-		bool crouching =
-				(path.empty() ? lastArea : pathTop)->GetAttributes()
-						& NAV_MESH_CROUCH;
-		if (!canMoveTo(goal, crouching)
-				|| fabs(lastArea->GetCenter().z - pathTop->GetCenter().z) > StepHeight) {
-			if (!getPortalToTopArea(goal)) {
-				pathTop->GetClosestPointOnArea(loc, &goal);
-			} else if (!canMoveTo(goal, crouching)) {
-				float halfWidth;
-				lastArea->ComputePortal(pathTop,
-						static_cast<NavDirType>(dirToTop), &goal, &halfWidth);
-				if (moveCtx->hasGoal() && !canMoveTo(goal, crouching)) {
-					// if we are still moving don't set goal if we're blocked.
-					return;
-				}
+		bool crouching = (path.empty() ? lastArea : pathTop)->GetAttributes()
+				& NAV_MESH_CROUCH;
+		if (!getPortalToTopArea(goal)) {
+			pathTop->GetClosestPointOnArea(loc, &goal);
+		} else if (!canMoveTo(goal, crouching)) {
+			float halfWidth;
+			lastArea->ComputePortal(pathTop,
+					static_cast<NavDirType>(dirToTop), &goal, &halfWidth);
+			if (moveCtx->hasGoal() && !canMoveTo(goal, crouching)) {
+				// if we are still moving don't set goal if we're blocked.
+				return;
 			}
 		}
 	}
@@ -232,11 +227,6 @@ CNavArea* Navigator::getArea(const Vector& pos, int team) {
 		area = nullptr;
 	}
 	return area;
-}
-
-CNavArea* Navigator::getArea(const Player* player) {
-	CNavArea* area = TheNavMesh->GetNavArea(player->getEdict(), 0);
-	return area == nullptr ? getArea(player->getCurrentPosition(), player->getTeam()) : area;
 }
 
 bool Navigator::canMoveTo(const Vector& loc, Vector goal, float targetRadius, bool crouch) const {

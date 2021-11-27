@@ -13,11 +13,6 @@ float GoToAction::getCost() {
 
 bool GoToAction::onPlanningFinished() {
 	auto self = blackboard.getSelf();
-	CNavArea* buildPathStartArea = Navigator::getArea(self);
-	if (buildPathStartArea == nullptr) {
-		Warning("Unable to get startArea.\n");
-		return false;
-	}
 	Navigator::Path path;
 	int team = self->getTeam();
 	extern ConVar mybot_debug;
@@ -33,9 +28,9 @@ bool GoToAction::onPlanningFinished() {
 		return false;
 	}
 	NavMeshPathBuilderWithGoal(team, goal).build(path,
-			buildPathStartArea);
+			self->getArea());
 	if (!path.empty()) {
-		blackboard.getNavigator()->getPath().swap(path);
+		blackboard.getSelf()->getNavigator()->getPath().swap(path);
 		return true;
 	}
 	if (mybot_debug.GetBool()) {
@@ -50,15 +45,15 @@ bool GoToAction::onPlanningFinished() {
 
 bool GoToAction::execute() {
 	canAbort = !blackboard.isOnLadder();
-	return blackboard.getNavigator()->step();
+	return blackboard.getSelf()->getNavigator()->step();
 }
 
 void GoToAction::init() {
-	blackboard.getNavigator()->start(targetLoc, targetRadius, sprint);
+	blackboard.getSelf()->getNavigator()->start(targetLoc, targetRadius, sprint);
 }
 
 bool GoToAction::goalComplete() {
-	return blackboard.getNavigator()->reachedGoal();
+	return blackboard.getSelf()->getNavigator()->reachedGoal();
 }
 
 /**

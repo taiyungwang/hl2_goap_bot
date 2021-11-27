@@ -5,7 +5,6 @@
 #include <strtools.h>
 #include <utlqueue.h>
 #include <memory>
-#include <string>
 
 class Thinker;
 class GameManager;
@@ -55,7 +54,6 @@ public:
 
 private:
 	bool enableHook = false, navMeshLoadAttempted = false;
-;
 
 	GameManager* gameManager = nullptr;
 
@@ -70,7 +68,5 @@ private:
 	std::shared_ptr<HidingSpotSelector> hidingSpotSelector;
 
 	CUtlQueue<edict_t*> activationQ;
-
-	std::string modPath;
 };
 

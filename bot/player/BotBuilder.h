@@ -44,7 +44,7 @@ protected:
 	virtual void modHandleCommand(const CCommand &command, Bot* bot) const {
 	}
 
-	virtual Bot* modBuild(Bot *bot) {
+	virtual Bot* modBuild(Bot *bot, Blackboard& blackboard) {
 		return bot;
 	}
 

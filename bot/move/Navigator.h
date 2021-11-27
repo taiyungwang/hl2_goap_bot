@@ -17,8 +17,6 @@ class Navigator {
 public:
 	using Path = std::stack<std::pair<int, int>>;
 
-	static CNavArea* getArea(const Player* player);
-
 	/**
 	 * Get the current area the entity is in.
 	 */
@@ -40,8 +38,6 @@ public:
 
 	void start(const Vector& finalGoal, float targetRadius, bool sprint);
 
-	CNavArea* getLastArea() const;
-
 	Path &getPath() {
 		return path;
 	}
@@ -58,7 +54,7 @@ private:
 
 	Path path;
 
-	int lastAreaId = -1, goalAreaId = -1;
+	int lastAreaId = -1;
 
 	MoveStateContext* moveCtx;
 

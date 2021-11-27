@@ -17,9 +17,6 @@ void Blackboard::reset() {
 
 Blackboard::~Blackboard() {
 	delete entInstance;
-	if (navigator != nullptr) {
-		delete navigator;
-	}
 	reset();
 }
 

@@ -49,7 +49,7 @@ bool FindCoverAction::foundGoal(CNavArea *area) {
 void FindCoverAction::setAvoidAreas() {
 	for (auto i: blackboard.getSelf()->getVision().getVisibleEnemies()) {
 		const Player* player = Player::getPlayer(i);
-		CNavArea* area = Navigator::getArea(player);
+		CNavArea* area = player->getArea();
 		if (area != nullptr) {
 			areasToAvoid[area] = player->getEdict();
 		}
@@ -66,17 +66,13 @@ bool FindCoverAction::findTargetLoc() {
 	if (areasToAvoid.empty()) {
 		return false;
 	}
-	CNavArea* buildPathStartArea = Navigator::getArea(blackboard.getSelf());
-	if (buildPathStartArea == nullptr) {
-		Warning("Unable to get startArea.\n");
-		return false;
-	}
+	auto self = blackboard.getSelf();
 	NavMeshPathBuilder::Path path;
-	build(path, buildPathStartArea);
+	build(path, self->getArea());
 	if (path.empty()) {
 		return false;
 	}
-	blackboard.getNavigator()->getPath().swap(path);
+	self->getNavigator()->getPath().swap(path);
 	return true;
 }
 

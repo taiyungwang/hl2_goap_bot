@@ -41,7 +41,7 @@ PluginAdaptor::PluginAdaptor() {
 	SetDefLessFunc(blockers);
 	char gameDir[MAX_PATH];
 	engine->GetGameDir(gameDir, MAX_PATH);
-	modPath = gameDir;
+	std::string modPath(gameDir);
 	auto lastDelim = modPath.rfind('/');
 	if (lastDelim == modPath.npos) {
 		lastDelim = modPath.rfind('\\');
@@ -88,7 +88,7 @@ void PluginAdaptor::gameFrame(bool simulating) {
 	}
 	if (!navMeshLoadAttempted) {
 		if (TheNavMesh->Load() == NAV_OK) {
-			hidingSpotSelector = std::make_shared<HidingSpotSelector>(commandHandler, modPath);
+			hidingSpotSelector = std::make_shared<HidingSpotSelector>(commandHandler);
 			SnipeAction::setSpotSelector(hidingSpotSelector.get());
 			Msg("Loaded Navigation mesh.\n");
 		}
@@ -139,7 +139,7 @@ void PluginAdaptor::levelShutdown() {
 		gameManager->endRound();
 	}
 	if (hidingSpotSelector) {
-		hidingSpotSelector->save(modPath);
+		hidingSpotSelector->save();
 	}
 	hidingSpotSelector = nullptr;
 }

@@ -69,33 +69,6 @@ void DODBotBuilder::updatePlanner(GoalManager &planner,
 			effects = { WorldProp::HAS_BOMB, true };
 		}
 	};
-	class DODNavigator: public Navigator {
-	public:
-		DODNavigator(Blackboard &blackboard) :
-				Navigator(blackboard) {
-		}
-
-	private:
-		bool unproned = false;
-
-		bool checkCanMove() {
-			if (!Navigator::checkCanMove()) {
-				return false;
-			}
-			if (DodPlayer(blackboard.getSelf()->getEdict()).isProne()) {
-				if (!unproned) {
-					blackboard.getButtons().tap(IN_ALT1);
-					unproned = true;
-				}
-				return true;
-			}
-			unproned = false;
-			return true;
-		}
-	};
-	// TODO: hacky way of overriding the default navigator
-	delete blackboard.getNavigator();
-	blackboard.setNavigator(new DODNavigator(blackboard));
 	planner.addAction<DODThrowLiveGrenadeAction>(0.97f);
 	planner.addAction<DODPickUpGrenadeAction>(0.96f);
 	planner.addAction<DODUseFragGrenadeAction>(0.92f);
@@ -138,7 +111,33 @@ void DODBotBuilder::modHandleCommand(const CCommand &command, Bot* bot) const {
 	bot->setHookEnabled(true);
 }
 
-Bot *DODBotBuilder::modBuild(Bot * bot) {
+class DODNavigator: public Navigator {
+public:
+	DODNavigator(Blackboard &blackboard) :
+			Navigator(blackboard) {
+	}
+
+private:
+	bool unproned = false;
+
+	bool checkCanMove() {
+		if (!Navigator::checkCanMove()) {
+			return false;
+		}
+		if (DodPlayer(blackboard.getSelf()->getEdict()).isProne()) {
+			if (!unproned) {
+				blackboard.getButtons().tap(IN_ALT1);
+				unproned = true;
+			}
+			return true;
+		}
+		unproned = false;
+		return true;
+	}
+};
+
+Bot *DODBotBuilder::modBuild(Bot *bot, Blackboard& blackboard) {
+	bot->setNavigator(std::make_shared<DODNavigator>(blackboard));
 	bot->getVision().setMiniMapRange(500.0f);
 	bot->getVision().addClassName("grenade_frag_ger");
 	bot->getVision().addClassName("grenade_frag_us");

@@ -119,17 +119,17 @@ bool Bot::handle(EventInfo* event) {
 		return false;
 	}
 	if (name == "player_spawn") {
-		CNavArea* area = blackboard->getNavigator()->getLastArea();
-		if (area != nullptr) {
-			area->IncreaseDanger(getTeam(), mybotDangerAmt.GetFloat());
-		}
 		resetPlanner = true;
 		blackboard->reset();
 		vision.reset();
 		world->reset();
+		area = nullptr;
 		return true;
 	}
 	if (name == "player_death") {
+		if (area != nullptr) {
+			area->IncreaseDanger(getTeam(), mybotDangerAmt.GetFloat());
+		}
 		planner->resetPlanning(true);
 		return false;
 	}
