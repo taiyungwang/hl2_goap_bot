@@ -52,12 +52,7 @@ bool Navigator::step() {
 	}
 	const Player* self = blackboard.getSelf();
 	Vector loc = self->getCurrentPosition();
-	CNavArea* area = getArea(self);
-	if (area == nullptr) {
-		return true;
-	}
 	CNavArea *topArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
-	int attributes = area->GetAttributes();
 	if (canGetNextArea(loc)) {
 		setGoalForNextArea(loc);
 		if (!path.empty()) {
@@ -67,6 +62,10 @@ bool Navigator::step() {
 		moveCtx->setGoal(topArea->GetCenter());
 	}
 	CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
+	int attributes = lastArea->GetAttributes();
+	if (lastArea == nullptr) {
+		return true;
+	}
 	if ((topArea == nullptr && !path.empty()) || lastArea == nullptr || lastArea->IsBlocked(self->getTeam())) {
 		return true;
 	}
@@ -152,6 +151,26 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 		// already on ladder and the next area is reached via ladder
 		|| (blackboard.isOnLadder() && std::get<1>(path.top()) >= 4 && std::get<1>(path.top()) <= 5));
 	path.push(top);
+	if (canSkip && !blackboard.isOnLadder()) {
+		// make sure we are not skipping area that will cause us to walk off of a cliff.
+		nextArea->GetClosestPointOnArea(loc, &goal);
+		trace_t traceResult;
+		goal -= loc;
+		float dist = goal.Length();
+		goal.NormalizeInPlace();
+		static const float RADIUS = GenerationStepSize / 2.0f;
+		for (; dist > RADIUS; dist -= GenerationStepSize) {
+			extern ConVar mybot_debug;
+			Vector pos = goal * dist + loc;
+			UTIL_TraceHull(pos, pos,
+					Vector(-RADIUS, -RADIUS, -JumpHeight),
+					Vector(RADIUS, RADIUS, 0.0f), MASK_PLAYERSOLID, CTraceFilterHitAll(),
+					&traceResult, mybot_debug.GetBool());
+			if (!traceResult.DidHit()) {
+				return false;
+			}
+		}
+	}
 	return canSkip;
 }
 
