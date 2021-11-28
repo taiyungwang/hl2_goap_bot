@@ -51,7 +51,7 @@ private:
 void HL2DMBotBuilder::updatePlanner(GoalManager& planner,
 		Blackboard& blackboard) const {
 	planner.addAction<ThrowFragGrenadeAction>(0.92f);
-	planner.addAction<UseGravityGunAction>(0.7f);
+	planner.addAction<UseGravityGunAction>(0.71f);
 	planner.addAction<ChargeHealthAction>(0.53f);
 	planner.addAction<GetHealthKitAction>(0.52f);
 	planner.addAction<ChargeArmorAction>(0.51f);
