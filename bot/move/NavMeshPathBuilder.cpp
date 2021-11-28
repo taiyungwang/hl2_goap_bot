@@ -4,6 +4,9 @@
 #include <initializer_list>
 
 void NavMeshPathBuilder::build(Path& path, CNavArea *start) {
+	if (start == nullptr) {
+		return;
+	}
 	CNavArea::ClearSearchLists();
 	CNavArea::MakeNewMarker();
 	start->SetTotalCost(getHeuristicCost(start));
