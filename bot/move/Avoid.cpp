@@ -77,6 +77,12 @@ MoveState* Avoid::move(const Vector& pos) {
 	bool crouching = ctx.getType() & NAV_MESH_CROUCH;
 	Vector goal = ctx.getGoal();
 	const trace_t& result = ctx.trace(goal, crouching);
+	// if we are stepping off a cliff, and the goal is right at the base of the cliff
+	float dist = goal.AsVector2D().DistTo(pos.AsVector2D());
+	if (pos.z - goal.z > StepHeight
+			&&  dist < HalfHumanWidth) {
+		goal += (goal - pos).Normalized() * (HalfHumanWidth + dist);
+	}
 	edict_t* currBlocker = getEdict(result);
 	const char* currBlockerName = currBlocker == nullptr || currBlocker->IsFree()
 			? nullptr : currBlocker->GetClassName();
