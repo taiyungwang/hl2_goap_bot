@@ -48,7 +48,7 @@ bool AttackAction::execute() {
 	Vector targetLoc = self->getViewTarget();
 	float dist = targetLoc.DistTo(self->getCurrentPosition());
 	Weapon* weapon = self->getArsenal().getCurrWeapon();
-	if (weapon == nullptr || dur-- < 1 || targetDestroyed() || weapon->isClipEmpty()) {
+	if (weapon == nullptr || dur-- < 1 || weapon->isClipEmpty()) {
 		return true;
 	}
 	edict_t* selfEnt = self->getEdict();
@@ -65,7 +65,7 @@ bool AttackAction::execute() {
 		}
 	}
 	edict_t* targetEnt = getTargetedEdict();
-	if (targetEnt == nullptr) {
+	if (targetEnt == nullptr || targetDestroyed()) {
 		return true;
 	}
 	if (weapFunc->isExplosive()) {
