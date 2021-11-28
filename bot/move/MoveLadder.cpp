@@ -39,16 +39,16 @@ MoveState* MoveLadder::move(const Vector& currPos) {
 		if (!moved) {
 			if (startedClimbing && (atEnd || remainingDist < TARGET_OFFSET)) {
 				buttons.tap(IN_USE);
-				if (stuckFrames++ > 40) {
-					ctx.setLadderDir(CNavLadder::NUM_LADDER_DIRECTIONS);
-					return new Stopped(ctx);
-				}
+			}
+			if (stuckFrames++ > 40) {
+				ctx.setLadderDir(CNavLadder::NUM_LADDER_DIRECTIONS);
+				return new Stopped(ctx);
 			}
 		} else {
-			startedClimbing = true;
 			stuckFrames = 0;
 		}
 		if (self->getAimAccuracy() >= 0.9f) {
+			startedClimbing = true;
 			buttons.hold(IN_FORWARD);
 		}
 	} else {
