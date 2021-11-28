@@ -18,7 +18,7 @@
 
 extern CNavMesh* TheNavMesh;
 
-static ConVar maxAreaTime("my_bot_max_area_time", "400");
+static ConVar maxAreaTime("my_bot_max_area_time", "40");
 
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
@@ -84,7 +84,16 @@ bool Navigator::step() {
 	if ((attributes & NAV_MESH_CROUCH) || moveCtx->nextGoalIsLadderStart()) {
 		maxTime *= 1.5f;
 	}
-	if (areaTime++ > maxTime) {
+	float speed = BasePlayer(self->getEdict()).getVelocity().Length();
+	if (!blackboard.isOnLadder() &&
+			(((attributes & NAV_MESH_CROUCH) && speed < 63.0f)
+			|| ((attributes & NAV_MESH_WALK) && speed < 150.0f)
+			|| speed < 190.0f)) {
+		areaTime++;
+	} else {
+		areaTime = 0;
+	}
+	if (areaTime > maxTime) {
 		areaTime = 0;
 		moveCtx->setStuck(true);
 	}
@@ -149,7 +158,7 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 	path.pop();
 	CNavArea *nextArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
 	bool canSkip = nextArea != nullptr && ((path.empty() && canMoveTo(finalGoal, false))
-		|| (!path.empty() && canMoveTo(nextArea->GetCenter(), false))
+		|| (!path.empty() && getPortalToTopArea(goal) && canMoveTo(goal, false))
 		// already on ladder and the next area is reached via ladder
 		|| (blackboard.isOnLadder() && std::get<1>(path.top()) >= 4 && std::get<1>(path.top()) <= 5));
 	path.push(top);
