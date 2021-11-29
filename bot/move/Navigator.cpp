@@ -18,7 +18,7 @@
 
 extern CNavMesh* TheNavMesh;
 
-static ConVar maxAreaTime("my_bot_max_area_time", "40");
+static ConVar maxAreaTime("my_bot_max_area_time", "80");
 
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
