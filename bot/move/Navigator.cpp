@@ -164,7 +164,6 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 	path.push(top);
 	if (canSkip && !blackboard.isOnLadder()) {
 		// make sure we are not skipping area that will cause us to walk off of a cliff.
-		nextArea->GetClosestPointOnArea(loc, &goal);
 		trace_t traceResult;
 		Vector dir = loc - goal;
 		float totalDist = dir.Length();
@@ -173,7 +172,7 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 		for (float dist = 0.0f; dist < totalDist; dist += step) {
 			extern ConVar mybot_debug;
 			UTIL_TraceHull(goal + dir * dist, goal + dir * (dist + step),
-					Vector(0.0f, 0.0f, -JumpCrouchHeight),
+					Vector(0.0f, 0.0f, -StepHeight),
 					Vector(0.0f, 0.0f, 0.0f), MASK_PLAYERSOLID, CTraceFilterHitAll(),
 					&traceResult, mybot_debug.GetBool());
 			if (!traceResult.DidHit()) {
@@ -187,7 +186,6 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 void Navigator::setGoalForNextArea(const Vector& loc) {
 	Vector goal = finalGoal;
 	lastAreaId = std::get<0>(path.top());
-	dirToTop = std::get<1>(path.top());
 	areaTime = 0;
 	path.pop();
 	if (!path.empty() && !setLadderStart()) {
@@ -206,7 +204,8 @@ void Navigator::setGoalForNextArea(const Vector& loc) {
 		} else if (!canMoveTo(goal, crouching)) {
 			float halfWidth;
 			lastArea->ComputePortal(pathTop,
-					static_cast<NavDirType>(dirToTop), &goal, &halfWidth);
+					static_cast<NavDirType>(std::get<1>(path.top())),
+					&goal, &halfWidth);
 			if (moveCtx->hasGoal() && !canMoveTo(goal, crouching)) {
 				// if we are still moving don't set goal if we're blocked.
 				return;
@@ -295,6 +294,7 @@ bool Navigator::setLadderStart() {
 }
 
 bool Navigator::getPortalToTopArea(Vector& portal) const {
+	int dirToTop = std::get<1>(path.top());
 	if (dirToTop >= NUM_DIRECTIONS || lastAreaId < 0) {
 		return false;
 	}

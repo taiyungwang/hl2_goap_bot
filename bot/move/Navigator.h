@@ -54,13 +54,11 @@ private:
 
 	Path path;
 
-	int lastAreaId = -1;
+	int lastAreaId = -1, areaTime = 0;
 
 	MoveStateContext* moveCtx;
 
 	float targetRadius = 0.0f;
-
-	int areaTime = 0, dirToTop = 9;
 
 	bool sprint = false;
 
