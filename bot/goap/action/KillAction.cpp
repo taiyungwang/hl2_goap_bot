@@ -2,6 +2,7 @@
 
 #include <player/Blackboard.h>
 #include <player/Bot.h>
+#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <limits>
 
@@ -25,12 +26,17 @@ bool KillAction::precondCheck() {
 }
 
 bool KillAction::execute()  {
-	int visionTarget = blackboard.getSelf()->getVision().getTargetedPlayer();
+	auto self = blackboard.getSelf();
+	int visionTarget = self->getVision().getTargetedPlayer();
 	if (target != visionTarget) {
 		target = visionTarget;
 		framesToWait = mybotAttackDelay.GetInt();
 	}
-	return --framesToWait <= 0 && AttackAction::execute();
+	Weapon *weapon = self->getArsenal().getCurrWeapon();
+	return ((weapon != nullptr && weapon->getDeployer() != nullptr && weapon->getMinDeployRange()
+			< self->getViewTarget().DistTo(self->getCurrentPosition())
+			&& !weapon->isDeployed())
+			|| --framesToWait <= 0) && AttackAction::execute();
 }
 
 bool KillAction::targetDestroyed() const {

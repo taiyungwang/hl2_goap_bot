@@ -1,29 +1,50 @@
 #pragma once
 
 #include <weapon/Deployer.h>
+#include <vector.h>
+#include <memory>
 
-class MoveStateContext;
-class Player;
+class DODMGDeployerState;
 
 class DODMGDeployer: public Deployer {
 public:
 	DODMGDeployer(const Weapon& weapon): Deployer(weapon) {
 	}
 
-	~DODMGDeployer();
-
 	bool execute(Blackboard& blackboard);
 
 	void undeploy(Blackboard& blackboard);
 
+	const Weapon &getWeapon() const {
+		return weapon;
+	}
+
+	void setState(std::shared_ptr<DODMGDeployerState> state) {
+		this->state = state;
+	}
+
+	void setViewTarget(const Vector& viewTarget) {
+		this->viewTarget = viewTarget;
+	}
+
+	const Vector& getViewTarget() const {
+		return viewTarget;
+	}
+
+	void setTarget(int target) {
+		this->target = target;
+	}
+
+	int getTarget() const {
+		return target;
+	}
+
 private:
-	bool proneRequired = true, started = false;
+	bool started = false;
 
-	MoveStateContext* moveCtx = nullptr;
+	std::shared_ptr<DODMGDeployerState> state;
 
-	const Player* target = nullptr;
+	int target = 0;
 
-	int animationCounter = -1;
-
-	void start(Blackboard& blackboard);
+	Vector viewTarget;
 };
