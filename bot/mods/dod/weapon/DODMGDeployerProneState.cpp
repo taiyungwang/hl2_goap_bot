@@ -25,13 +25,16 @@ void DODMGDeployerProneState::deploy(Blackboard& blackboard) {
 	}
 	trace_t result;
 	Bot::canSee(result, self->getEyesPos(), context->getViewTarget());
-	if (!result.DidHit()) {
+	auto target = Player::getPlayer(context->getTarget());
+	if (!result.DidHit()
+			// if there are no enemies just deploy to end the deploy cycle.
+			|| (self->getVision().getVisibleEnemies().empty()
+			&& (target == nullptr || !target->isInGame()))) {
 		if (buttons.tap(IN_ATTACK2)) {
 			context->setState(std::make_shared<DODMGDeployerDeployState>(context));
 		}
 		return;
 	}
-	auto target = Player::getPlayer(context->getTarget());
 	if (self->getVision().getVisibleEnemies().empty()
 			&& (target == nullptr || !target->isInGame())) {
 		context->setState(std::shared_ptr<DODMGDeployerState>(nullptr));
