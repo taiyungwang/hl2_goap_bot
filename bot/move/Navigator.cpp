@@ -18,6 +18,8 @@
 
 extern CNavMesh* TheNavMesh;
 
+extern ConVar mybot_debug;
+
 static ConVar maxAreaTime("my_bot_max_area_time", "80");
 
 Navigator::Navigator(Blackboard& blackboard) :
@@ -71,7 +73,6 @@ bool Navigator::step() {
 							< HalfHumanWidth)) {
 		return true;
 	}
-	extern ConVar mybot_debug;
 	if (mybot_debug.GetBool() && topArea != nullptr) {
 		topArea->Draw();
 	}
@@ -154,32 +155,35 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 					|| fabs(loc.z - lastArea->GetCenter().z) > StepHeight) {
 		return false;
 	}
+	int previousLast = lastAreaId;
+	lastAreaId = std::get<0>(path.top());
 	auto top = path.top();
 	path.pop();
-	CNavArea *nextArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
-	bool canSkip = nextArea != nullptr && ((path.empty() && canMoveTo(finalGoal, false))
+	topArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
+	bool canSkip = topArea != nullptr && ((path.empty() && canMoveTo(finalGoal, false))
 		|| (!path.empty() && getPortalToTopArea(goal) && canMoveTo(goal, false))
 		// already on ladder and the next area is reached via ladder
 		|| (blackboard.isOnLadder() && std::get<1>(path.top()) >= 4 && std::get<1>(path.top()) <= 5));
-	path.push(top);
-	if (canSkip && !blackboard.isOnLadder()) {
+	if (!blackboard.isOnLadder()) {
 		// make sure we are not skipping area that will cause us to walk off of a cliff.
-		trace_t traceResult;
 		Vector dir = loc - goal;
+		if (path.empty()) {
+			goal = finalGoal;
+		}
 		float totalDist = dir.Length();
 		dir.NormalizeInPlace();
-		float step = 8.0f;
-		for (float dist = 0.0f; dist < totalDist; dist += step) {
-			extern ConVar mybot_debug;
-			UTIL_TraceHull(goal + dir * dist, goal + dir * (dist + step),
+		static const float STEP = 8.0f;
+		for (float dist = 0.0f; canSkip && dist < totalDist; dist += STEP) {
+			trace_t traceResult;
+			UTIL_TraceHull(goal + dir * dist, goal + dir * (dist + STEP),
 					Vector(0.0f, 0.0f, -StepHeight),
 					Vector(0.0f, 0.0f, 0.0f), MASK_PLAYERSOLID, CTraceFilterHitAll(),
 					&traceResult, mybot_debug.GetBool());
-			if (!traceResult.DidHit()) {
-				return false;
-			}
+			canSkip = traceResult.DidHit();
 		}
 	}
+	lastAreaId = previousLast;
+	path.push(top);
 	return canSkip;
 }
 
@@ -197,11 +201,13 @@ void Navigator::setGoalForNextArea(const Vector& loc) {
 		if (lastArea == nullptr) {
 			return;
 		}
+		goal = pathTop->GetCenter();
 		bool crouching = (path.empty() ? lastArea : pathTop)->GetAttributes()
 				& NAV_MESH_CROUCH;
-		if (!getPortalToTopArea(goal)) {
+		if (!canMoveTo(goal, crouching) && !getPortalToTopArea(goal)) {
 			pathTop->GetClosestPointOnArea(loc, &goal);
-		} else if (!canMoveTo(goal, crouching)) {
+		}
+		if (!canMoveTo(goal, crouching)) {
 			float halfWidth;
 			lastArea->ComputePortal(pathTop,
 					static_cast<NavDirType>(std::get<1>(path.top())),
