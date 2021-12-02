@@ -1,11 +1,12 @@
 #pragma once
 
-#include "DODMGDeployerDeployState.h"
+#include "DODMGDeployerProneState.h"
 
-class DODMGDeployerStandState: public DODMGDeployerDeployState {
+class DODMGDeployerStandState: public DODMGDeployerProneState {
 public:
-	DODMGDeployerStandState(DODMGDeployer *context): DODMGDeployerDeployState(context) {
+	DODMGDeployerStandState(DODMGDeployer *context) :
+			DODMGDeployerProneState(context) {
 	}
 
-	void deploy(Blackboard& blackboard) override;
+	void deploy(Blackboard &blackboard) override;
 };

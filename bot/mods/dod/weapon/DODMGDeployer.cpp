@@ -17,6 +17,5 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 
 void DODMGDeployer::undeploy(Blackboard& blackboard) {
 	Deployer::undeploy(blackboard);
-	target = 0;
 }
 

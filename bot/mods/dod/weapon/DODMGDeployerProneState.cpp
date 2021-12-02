@@ -1,6 +1,5 @@
 #include "DODMGDeployerProneState.h"
 #include "DODMGDeployer.h"
-#include "DODMGDeployerDeployState.h"
 #include "DODMGDeployerStandState.h"
 #include <mods/dod/util/DodPlayer.h>
 #include <move/Navigator.h>
@@ -8,49 +7,58 @@
 #include <player/Bot.h>
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
+#include <weapon/Weapon.h>
 #include <nav_mesh/nav.h>
 #include <nav_mesh/nav_area.h>
 #include <in_buttons.h>
 
+const int DODMGDeployerProneState::PRONE_TIMEOUT = 120,
+		DODMGDeployerProneState::DEPLOY_TIMEOUT = PRONE_TIMEOUT + 5;
+
 void DODMGDeployerProneState::deploy(Blackboard& blackboard) {
 	auto self = blackboard.getSelf();
 	edict_t* selfEnt = self->getEdict();
-	auto &buttons = blackboard.getButtons();
 	if (!DodPlayer(selfEnt).isProne()) {
-		if (frames++ >= 120) {
-			buttons.tap(IN_ALT1);
-			frames = 0;
+		if (wait++ == 0) {
+			viewTarget = self->getViewTarget();
+			targetIdx = self->getVision().getTargetedPlayer();
+			blackboard.getButtons().hold(IN_ALT1);
+		} else if (wait ++ >= PRONE_TIMEOUT) {
+			context->setState(std::shared_ptr<DODMGDeployerState>(nullptr));
+			return;
 		}
+	}
+	auto target = Player::getPlayer(targetIdx);
+	if (target == nullptr) {
+		if (context->getWeapon().isDeployed()) {
+			if (wait++ >= DEPLOY_TIMEOUT) {
+				context->setState(std::shared_ptr<DODMGDeployerState>(nullptr));
+			}
+			return;
+		}
+		blackboard.getButtons().tap(IN_ATTACK2);
 		return;
 	}
 	trace_t result;
-	Bot::canSee(result, self->getEyesPos(), context->getViewTarget());
-	auto target = Player::getPlayer(context->getTarget());
-	if (!result.DidHit()
-			// if there are no enemies just deploy to end the deploy cycle.
-			|| (self->getVision().getVisibleEnemies().empty()
-			&& (target == nullptr || !target->isInGame()))) {
-		if (buttons.tap(IN_ATTACK2)) {
-			context->setState(std::make_shared<DODMGDeployerDeployState>(context));
-		}
-		return;
-	}
-	if (self->getVision().getVisibleEnemies().empty()
-			&& (target == nullptr || !target->isInGame())) {
-		context->setState(std::shared_ptr<DODMGDeployerState>(nullptr));
-		return;
-	}
-	extern ConVar nav_slope_limit;
+	Bot::canSee(result, self->getEyesPos(), viewTarget);
 	if (!moveCtx) {
 		moveCtx = std::make_shared<MoveStateContext>(blackboard);
 	}
-	const trace_t &tr = moveCtx->trace(context->getViewTarget(), false);
-	if (!tr.startsolid && (tr.endpos.DistTo(result.startpos) > HalfHumanWidth * 2.0f
-			|| (result.plane.normal.LengthSqr() > 0 && result.plane.normal.z <= nav_slope_limit.GetFloat()))) {
-		moveCtx->setGoal(context->getViewTarget());
-		CNavArea* area = Navigator::getArea(selfEnt, self->getTeam());
-		moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
-	} else if (buttons.tap(IN_ALT1)) {
+	moveCtx->setGoal(viewTarget);
+	CNavArea* area = Navigator::getArea(selfEnt, self->getTeam());
+	moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
+	if (wait++ >= DEPLOY_TIMEOUT
+			&& (result.startsolid
+					|| (result.endpos.DistTo(result.startpos) < HalfHumanWidth))) {
 		context->setState(std::make_shared<DODMGDeployerStandState>(context));
+	} else if (!result.DidHit()
+			// if there are no enemies just deploy to end the deploy cycle.
+			|| (self->getVision().getVisibleEnemies().empty()
+			&& !target->isInGame())) {
+		if (context->getWeapon().isDeployed() && wait++ >= DEPLOY_TIMEOUT) {
+			context->setState(std::shared_ptr<DODMGDeployerState>(nullptr));
+			return;
+		}
+		blackboard.getButtons().tap(IN_ATTACK2);
 	}
 }

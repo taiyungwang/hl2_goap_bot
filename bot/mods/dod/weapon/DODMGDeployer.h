@@ -23,28 +23,8 @@ public:
 		this->state = state;
 	}
 
-	void setViewTarget(const Vector& viewTarget) {
-		this->viewTarget = viewTarget;
-	}
-
-	const Vector& getViewTarget() const {
-		return viewTarget;
-	}
-
-	void setTarget(int target) {
-		this->target = target;
-	}
-
-	int getTarget() const {
-		return target;
-	}
-
 private:
 	bool started = false;
 
 	std::shared_ptr<DODMGDeployerState> state;
-
-	int target = 0;
-
-	Vector viewTarget;
 };

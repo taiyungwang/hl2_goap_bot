@@ -7,4 +7,7 @@ public:
 	}
 
 	void deploy(Blackboard& blackboard) override;
+
+protected:
+	int wait = 0;
 };
