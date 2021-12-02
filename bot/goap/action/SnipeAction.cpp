@@ -15,6 +15,7 @@ HidingSpotSelector* SnipeAction::selector = nullptr;
 
 SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 	effects = {WorldProp::ENEMY_SIGHTED, true};
+	precond.Insert(WorldProp::USING_BEST_WEAP, true);
 	targetRadius = 16.0f;
 	facing.x = facing.z = facing.y = 0.0f;
 }
