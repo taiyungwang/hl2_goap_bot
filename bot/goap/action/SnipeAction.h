@@ -29,7 +29,7 @@ protected:
 
 	QAngle facing;
 
-	virtual void calculateFacing();
+	float calculateFacing();
 
 	virtual bool findTargetLoc();
 };

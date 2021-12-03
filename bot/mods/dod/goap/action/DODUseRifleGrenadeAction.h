@@ -8,8 +8,6 @@ public:
 			DODUseSmokeGrenadeAction(blackboard) {
 	}
 
-	virtual bool precondCheck() override;
-
 	virtual bool execute() override;
 
 protected:

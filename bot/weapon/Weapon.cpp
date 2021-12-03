@@ -12,7 +12,7 @@ Weapon::Weapon(edict_t* ent) :
 		weap(ent), weaponName(ent->GetNetworkable()->GetClassName()) {
 	function[0] = function[1] = nullptr;
 	grenade = underWater = false;
-	minDeployRange = INFINITY;
+	minDeployRange = 0.0f;
 }
 
 void Weapon::setWeaponFunc(int i, const std::shared_ptr<WeaponFunction>& func) {

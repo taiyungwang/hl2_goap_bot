@@ -21,13 +21,15 @@ SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 }
 
 bool SnipeAction::onPlanningFinished() {
-	int team = blackboard.getSelf()->getTeam();
-	if (!GoToAction::onPlanningFinished()) {
+	auto self = blackboard.getSelf();
+	int team = self->getTeam();
+	duration = 300;
+	if (!GoToAction::onPlanningFinished()
+			|| self->getArsenal().getCurrWeapon()->getMinDeployRange()
+			> calculateFacing()) {
 		selector->update(selectorId, team, false);
 		return false;
 	}
-	calculateFacing();
-	duration = 300;
 	return true;
 }
 
@@ -96,7 +98,7 @@ void SnipeAction::abort() {
 	}
 }
 
-void SnipeAction::calculateFacing() {
+float SnipeAction::calculateFacing() {
 	Vector pos = targetLoc;
 	pos.z += HumanCrouchHeight;
 	float furthest = 0.0f;
@@ -119,4 +121,5 @@ void SnipeAction::calculateFacing() {
 			facing.y = currFacing;
 		}
 	}
+	return furthest;
 }
