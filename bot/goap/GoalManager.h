@@ -33,7 +33,7 @@ public:
 	 * Exepected values are 0.0 and 1.0 inclusive.
 	 */
 	template<typename T>
-	T* addAction(float priority, float chanceToExec = 1.0f) {
+	T* addAction(float priority) {
 		T* action = new T(blackboard);
 		addAction(action);
 		if (priority <= 0.0f) {
@@ -42,7 +42,7 @@ public:
 		goals.AddToTail();
 		goals.Tail().action = actions.Count() - 1;
 		goals.Tail().priority = priority;
-		goals.Tail().chanceToExec = chanceToExec;
+		goals.Tail();
 		return action;
 	}
 
@@ -70,7 +70,7 @@ private:
 	CUtlVector<Action*> actions;
 
 	struct Goal {
-		float priority, chanceToExec;
+		float priority;
 		int action;
 	};
 

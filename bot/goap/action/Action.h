@@ -72,6 +72,11 @@ public:
 	 */
 	virtual void abort() {
 	}
+
+	float getChanceToExec() const {
+		return chanceToExec;
+	}
+
 protected:
 	Blackboard& blackboard;
 
@@ -79,4 +84,5 @@ protected:
 
 	GoalState effects;
 
+	float chanceToExec = 1.0f;
 };

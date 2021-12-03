@@ -103,7 +103,7 @@ Bot* BotBuilder::build(edict_t* ent) {
 	planner->addAction<KillAction>(0.84f);
 	planner->addAction<SwitchWeaponAction>(0.82f);
 	planner->addAction<FindCoverAction>(0.81f);
-	planner->addAction<SnipeAction>(0.7f, 0.7f);
+	planner->addAction<SnipeAction>(0.7f);
 	planner->addAction<SwitchToDesiredWeaponAction>(0.0f);
 	planner->addAction<SwitchToBestLoadedWeaponAction>(0.0f);
 	planner->addAction<SwitchToBestInRangeWeaponAction>(0.0f);

@@ -7,10 +7,7 @@ class DODObjective;
 
 class DODDefendPointAction: public SnipeAction {
 public:
-	DODDefendPointAction(Blackboard& blackboard) :
-		SnipeAction(blackboard) {
-		effects = {WorldProp::POINTS_DEFENDED, true};
-	}
+	DODDefendPointAction(Blackboard& blackboard);
 
 	void setObjectives(const DODObjectives* objectives) {
 		this->objectives = objectives;

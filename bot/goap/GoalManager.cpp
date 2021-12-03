@@ -91,8 +91,9 @@ void GoalManager::getNextGoal() {
 	for (; currentGoal < goals.Count(); currentGoal++) {
 		auto& goal = goals[currentGoal];
 		auto& effect = actions[goal.action]->getEffects();
+		float chanceToExec = actions[goal.action]->getChanceToExec();
 		if (effect.m_value != worldState[worldState.Find(effect.m_key)]
-			&& (goal.chanceToExec == 1.0f || goal.chanceToExec > RandomFloat(0, 1.0f))) {
+			&& (chanceToExec >= 1.0f || chanceToExec > RandomFloat(0, 1.0f))) {
 			break;
 		}
 	}

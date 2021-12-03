@@ -8,8 +8,18 @@
 #include <util/EntityUtils.h>
 #include <in_buttons.h>
 
+
+static ConVar dodDefendChance("mybot_dod_defend_chance", "0.2");
+
+DODDefendPointAction::DODDefendPointAction(Blackboard &blackboard) :
+		SnipeAction(blackboard) {
+	effects = { WorldProp::POINTS_DEFENDED, true };
+	chanceToExec = dodDefendChance.GetFloat();
+}
+
 bool DODDefendPointAction::execute() {
-	return objectives->roundStarted() && isTargetValid() && SnipeAction::execute();
+	return objectives->roundStarted() && isTargetValid()
+			&& SnipeAction::execute();
 }
 
 bool DODDefendPointAction::findTargetLoc() {
@@ -42,7 +52,8 @@ bool DODDefendPointAction::findTargetLoc() {
 					selectorId = -1;
 					continue;
 				}
-				selector->setInUse(selectorId, blackboard.getSelf()->getTeam(), true);
+				selector->setInUse(selectorId, blackboard.getSelf()->getTeam(),
+						true);
 				return true;
 			}
 		}
@@ -52,6 +63,12 @@ bool DODDefendPointAction::findTargetLoc() {
 
 bool DODDefendPointAction::isTargetValid() const {
 	bool ours = target->getOwner() == blackboard.getSelf()->getTeam();
-	return (ours && (!objectives->isDetonation() || (target->hasBombs() && target->hasBombTargetInState(DODObjective::BombState::AVAILABLE))))
-			|| (!ours && target->hasBombTargetInState(DODObjective::BombState::ACTIVE));
+	return (ours
+			&& (!objectives->isDetonation()
+					|| (target->hasBombs()
+							&& target->hasBombTargetInState(
+									DODObjective::BombState::AVAILABLE))))
+			|| (!ours
+					&& target->hasBombTargetInState(
+							DODObjective::BombState::ACTIVE));
 }
