@@ -13,8 +13,6 @@
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
 #include <util/BaseEntity.h>
-#include <convar.h>
-#include <ivdebugoverlay.h>
 #include <in_buttons.h>
 #include <edict.h>
 
@@ -83,25 +81,17 @@ bool AttackAction::execute() {
 	Buttons& buttons = blackboard.getButtons();
 	self->setWantToListen(false);
 	self->setViewTarget(targetLoc);
-	extern ConVar mybot_debug;
 	if (crouch) {
 		buttons.hold(IN_DUCK);
 	} else if (weapFunc->isMelee()) {
-		moveCtx->setGoal(targetLoc);
-		CNavArea* area = Navigator::getArea(selfEnt, self->getTeam());
-		moveCtx->traceMove(crouch);
-		moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
-		// can't sprint and attack
-		if (!moveCtx->getTraceResult().startsolid) {
+		const auto& tr = moveCtx->getTraceResult();
+		if (!tr.DidHit() || (!tr.startsolid
+				&& tr.startpos.DistTo(tr.endpos) > HalfHumanWidth)) {
+			moveCtx->setGoal(targetLoc);
+			CNavArea* area = Navigator::getArea(selfEnt, self->getTeam());
+			moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
 			buttons.hold(IN_SPEED);
 		}
-	}
-	if (mybot_debug.GetBool()) {
-		extern IVDebugOverlay *debugoverlay;
-		debugoverlay->AddLineOverlay(eyes, targetLoc, 255, 0, 255, true,
-		NDEBUG_PERSIST_TILL_NEXT_SERVER);
-		debugoverlay->AddLineOverlay(eyes, eyes + self->getFacing() * dist, 0, 255, 0, true,
-		NDEBUG_PERSIST_TILL_NEXT_SERVER);
 	}
 	weapFunc->attack(buttons, dist);
 	return false;
