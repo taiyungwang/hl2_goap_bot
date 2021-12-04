@@ -47,11 +47,13 @@ void DODMGDeployerProneState::deploy(Blackboard& blackboard) {
 	moveCtx->setGoal(viewTarget);
 	CNavArea* area = Navigator::getArea(selfEnt, self->getTeam());
 	moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
+	const auto& tr = moveCtx->getTraceResult();
 	if (wait++ >= DEPLOY_TIMEOUT
-			&& (result.startsolid
-					|| (result.endpos.DistTo(result.startpos) < HalfHumanWidth))) {
+			&& (tr.startsolid
+					|| (tr.endpos.DistTo(tr.startpos) < HalfHumanWidth))) {
 		context->setState(std::make_shared<DODMGDeployerStandState>(context));
-	} else if (!result.DidHit()
+	} else if (self->getVision().getTargetedPlayer() > 0
+			|| !result.DidHit()
 			// if there are no enemies just deploy to end the deploy cycle.
 			|| (self->getVision().getVisibleEnemies().empty()
 			&& !target->isInGame())) {
