@@ -89,6 +89,9 @@ public:
 	CNavArea *getArea() const {
 		return area;
 	}
+
+	int getClosestHidingSpot() const;
+
 protected:
 	static std::unordered_map<int, Player*> players;
 

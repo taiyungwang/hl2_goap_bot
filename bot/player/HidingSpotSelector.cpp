@@ -48,14 +48,14 @@ bool HidingSpotSelector::receive(edict_t *sender, const CCommand &command) {
 
 bool HidingSpotSelector::handle(EventInfo* eventInfo) {
 	if (std::string("player_death") == eventInfo->getName()) {
-		for (auto bot: { std::make_pair(dynamic_cast<Bot*>(Player::getPlayer(eventInfo->getInt("attacker"))), true),
-			std::make_pair(dynamic_cast<Bot*>(Player::getPlayer(eventInfo->getInt("userid"))), false) }) {
-			if (std::get<0>(bot) == nullptr) {
+		for (auto player: { std::make_pair(Player::getPlayer(eventInfo->getInt("attacker")), true),
+			std::make_pair(Player::getPlayer(eventInfo->getInt("userid")), false) }) {
+			if (std::get<0>(player) == nullptr) {
 				continue;
 			}
-			int spot = getClosestSpot(std::get<0>(bot));
+			int spot = std::get<0>(player)->getClosestHidingSpot();
 			if (spot >= 0) {
-				update(spot, std::get<0>(bot)->getTeam(), std::get<1>(bot));
+				update(spot, std::get<0>(player)->getTeam(), std::get<1>(player));
 			}
 		}
 	}
@@ -156,22 +156,3 @@ void HidingSpotSelector::buildFromNavMesh() {
 	}
 }
 
-int HidingSpotSelector::getClosestSpot(Bot *bot) const {
-	int spot = -1;
-	if (bot == nullptr) {
-		return spot;
-	}
-	CNavArea* area = bot->getArea();
-	if (area != nullptr) {
-		auto spots = area->GetHidingSpots();
-		float closest = INFINITY;
-		FOR_EACH_VEC(*spots, i) {
-			float dist = (*spots)[i]->GetPosition().DistTo(bot->getCurrentPosition());
-			if (dist < closest) {
-				spot = (*spots)[i]->GetID();
-				closest = dist;
-			}
-		}
-	}
-	return spot;
-}

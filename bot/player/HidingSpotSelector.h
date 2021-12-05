@@ -58,6 +58,4 @@ private:
 	std::map<unsigned int, Spot> spots;
 
 	void buildFromNavMesh();
-
-	int getClosestSpot(Bot *bot) const;
 };

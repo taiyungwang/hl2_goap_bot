@@ -124,6 +124,23 @@ bool Player::handle(EventInfo* event) {
 	return false;
 }
 
+int Player::getClosestHidingSpot() const {
+	int spot = -1;
+	if (area != nullptr) {
+		auto spots = area->GetHidingSpots();
+		float closest = INFINITY;
+		FOR_EACH_VEC(*spots, i) {
+			float dist = (*spots)[i]->GetPosition().DistTo(getCurrentPosition());
+			if (dist < closest) {
+				spot = (*spots)[i]->GetID();
+				closest = dist;
+			}
+		}
+	}
+	return spot;
+}
+
+
 QAngle Player::getFacingAngle() const {
 	return info->GetLastUserCommand().viewangles;
 }
