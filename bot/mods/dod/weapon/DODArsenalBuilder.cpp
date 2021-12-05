@@ -19,21 +19,21 @@ const std::set<std::string> DODLiveGrenadeBuilder::NAMES {
 
 class GrenadeLauncherBuilder: public SimpleWeaponBuilder<GrenadeLauncherFunction> {
 public:
-	GrenadeLauncherBuilder(float zMultiplier) :
-			zMultiplier(zMultiplier) {
+	GrenadeLauncherBuilder(float velocity) :
+		velocity(velocity) {
 	}
 
 	virtual std::shared_ptr<Weapon> build(edict_t *weap) const override {
 		auto weapon = SimpleWeaponBuilder<GrenadeLauncherFunction>::build(weap);
 		weapon->setGrenade(true);
-		dynamic_cast<GrenadeLauncherFunction*>(weapon->getPrimary())->setZMultiplier(
-				zMultiplier);
+		dynamic_cast<GrenadeLauncherFunction*>(weapon->getPrimary())->setInitialVelocity(
+				velocity);
 		weapon->getPrimary()->getRange()[1] = 2500.0f;
 		return weapon;
 	}
 
 private:
-	float zMultiplier;
+	float velocity;
 };
 
 class AntiTankBuilder: public DeployableWeaponBuilder<Reloader> {
@@ -64,15 +64,14 @@ public:
 };
 
 DODArsenalBuilder::DODArsenalBuilder() {
-	float grenadeZMultipler = 600.0f;
-	addPair<GrenadeLauncherBuilder>("weapon_riflegren_us", "weapon_riflegren_ger", 2.0f);
+	addPair<GrenadeLauncherBuilder>("weapon_riflegren_us", "weapon_riflegren_ger", 2000.0f);
 	addPair<MeleeWeaponBuilder>("weapon_amerknife", "weapon_spade");
 	addPair<DeployableWeaponBuilder<Reloader>>("weapon_garand", "weapon_k98",
 			0.8f, 100.0f, 1600.0f, "CDODSniperWeapon", "m_bZoomed", 1000.0f);
 	addPair<DODSMGBuilder>("weapon_thompson", "weapon_mp40");
 	addPair<PistolBuilder>("weapon_colt", "weapon_p38", 0.2f);
-	addPair<GrenadeBuilder>("weapon_smoke_us", "weapon_smoke_ger", grenadeZMultipler);
-	addPair<GrenadeBuilder>("weapon_frag_us", "weapon_frag_ger", grenadeZMultipler);
+	addPair<GrenadeBuilder>("weapon_smoke_us", "weapon_smoke_ger");
+	addPair<GrenadeBuilder>("weapon_frag_us", "weapon_frag_ger");
 	addPair<DODAssaultRifleBuilder>("weapon_bar", "weapon_mp44");
 	addPair<DeployableWeaponBuilder<Reloader>>("weapon_spring", "weapon_k98_scoped",
 			0.8f, 500.0f, 3600.0f, "CDODSniperWeapon", "m_bZoomed");

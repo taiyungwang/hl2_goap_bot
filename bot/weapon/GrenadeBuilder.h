@@ -4,13 +4,12 @@
 
 class GrenadeBuilder: public WeaponBuilder {
 public:
-	// TODO: Initial speed value taken from DOD, so may not apply for all mods.
-	GrenadeBuilder(float zMultiplier, float initialSpeed = 500.0f) :
-			zMultiplier(zMultiplier), initialSpeed(initialSpeed) {
+	GrenadeBuilder(float initialSpeed = 1000.0f) :
+			initialSpeed(initialSpeed) {
 	}
 
 	virtual std::shared_ptr<Weapon> build(edict_t *weap) const;
 
 protected:
-	const float zMultiplier, initialSpeed;
+	const float initialSpeed;
 };

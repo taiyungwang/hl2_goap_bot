@@ -1,7 +1,9 @@
 #include "GrenadeLauncherFunction.h"
 
 #include <player/Buttons.h>
+#include <nav_mesh/nav.h>
 #include <vector.h>
+#include <convar.h>
 #include <in_buttons.h>
 
 GrenadeLauncherFunction::GrenadeLauncherFunction() :
@@ -13,10 +15,12 @@ GrenadeLauncherFunction::GrenadeLauncherFunction() :
 
 Vector GrenadeLauncherFunction::getAim(const Vector& target,
 		const Vector& eye) const {
-	Vector aim = target;
-	aim.z += zMultiplier * (target.DistTo(eye) - range[0])
-			/ (range[1] - range[0]);
-	return aim;
+	extern ICvar* cVars;
+	float dist = target.AsVector2D().DistTo(eye.AsVector2D());
+	return Vector(target.x, target.y,
+			dist > range[1] ? dist
+					: (target.z + dist / range[1] * cVars->FindVar("sv_gravity")->GetFloat())
+					  - eye.z + target.z + HumanEyeHeight);
 }
 
 void GrenadeLauncherFunction::attack(Buttons& buttons, float distance) const {

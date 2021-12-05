@@ -7,6 +7,10 @@
 
 class SMGGrenadeLauncher: public GrenadeLauncherFunction {
 public:
+	SMGGrenadeLauncher() {
+		initialVelocity = 1500.0f;
+	}
+
 	void attack(Buttons& buttons, float distance) const {
 		buttons.hold(IN_ATTACK2);
 	}

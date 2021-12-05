@@ -18,11 +18,11 @@ public:
 
 	Weapon(edict_t* ent);
 
-	void setPrimary(const std::shared_ptr<WeaponFunction>& func) {
+	void setPrimary(std::shared_ptr<WeaponFunction> func) {
 		setWeaponFunc(0, func);
 	}
 
-	void setSecondary(const std::shared_ptr<WeaponFunction>& func) {
+	void setSecondary(std::shared_ptr<WeaponFunction> func) {
 		setWeaponFunc(1, func);
 	}
 

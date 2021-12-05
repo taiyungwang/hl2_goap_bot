@@ -8,12 +8,12 @@ public:
 
 	Vector getAim(const Vector& target, const Vector& eye) const;
 
-	void setZMultiplier(float zMultiplier) {
-		this->zMultiplier = zMultiplier;
+	void setInitialVelocity(float initialVelocity) {
+		this->initialVelocity = initialVelocity;
 	}
 
 	virtual void attack(Buttons& buttons, float distance) const;
 
 protected:
-	float zMultiplier = 100.0f, initialVelocity;
+	float initialVelocity = 500.0f;
 };
