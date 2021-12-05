@@ -28,7 +28,7 @@ public:
 		weapon->setGrenade(true);
 		dynamic_cast<GrenadeLauncherFunction*>(weapon->getPrimary())->setZMultiplier(
 				zMultiplier);
-		weapon->getPrimary()->getRange()[1] = 1200.0f;
+		weapon->getPrimary()->getRange()[1] = 2500.0f;
 		return weapon;
 	}
 

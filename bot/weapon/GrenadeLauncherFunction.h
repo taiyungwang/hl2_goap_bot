@@ -15,5 +15,5 @@ public:
 	virtual void attack(Buttons& buttons, float distance) const;
 
 protected:
-	float zMultiplier = 100.0f;
+	float zMultiplier = 100.0f, initialVelocity;
 };

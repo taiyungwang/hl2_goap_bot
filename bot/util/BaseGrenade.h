@@ -14,4 +14,8 @@ public:
 	edict_t* getThrower() {
 		return getEntity("m_hThrower");
 	}
+
+	Vector getVelocity() {
+		return get<Vector>("m_vecVelocity");
+	}
 };

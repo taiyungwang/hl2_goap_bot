@@ -5,7 +5,6 @@
 #include <weapon/Arsenal.h>
 #include <weapon/WeaponFunction.h>
 #include <weapon/Weapon.h>
-#include <util/BaseGrenade.h>
 #include <nav_mesh/nav.h>
 #include <in_buttons.h>
 
@@ -40,8 +39,6 @@ const Player* ThrowGrenadeAction::chooseTarget() const {
 	const Player *target = nullptr;
 	auto &vision = blackboard.getSelf()->getVision();
 	auto enemies = vision.getVisibleEnemies();
-	float dmgRadius = BaseGrenade(grenade->getEdict()).getDmgRadius()
-			+ HalfHumanWidth;
 	int maxInRange = 0;
 	for (int i : enemies) {
 		const Player *enemy = Player::getPlayer(i);
@@ -57,7 +54,9 @@ const Player* ThrowGrenadeAction::chooseTarget() const {
 		for (int j : enemies) {
 			const Player *enemyOther = Player::getPlayer(j);
 			if (enemyOther == nullptr || enemyOther == enemy
-					|| targetPos.DistTo(enemyOther->getCurrentPosition()) > dmgRadius) {
+					|| targetPos.DistTo(enemyOther->getCurrentPosition())
+					// TODO: dod range, maybe not appropriate for all mods
+					> 400.0f) {
 				continue;
 			}
 			inRange++;
