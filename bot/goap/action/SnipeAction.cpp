@@ -37,11 +37,10 @@ bool SnipeAction::onPlanningFinished() {
 }
 
 bool SnipeAction::findTargetLoc() {
-	auto self = blackboard.getSelf();
-	int team = self->getTeam();
+	int team = blackboard.getSelf()->getTeam();
 	selectorId = selector->select(targetLoc, team);
 	if (selectorId >= 0) {
-		selector->setInUse(selectorId, blackboard.getSelf()->getTeam(), true);
+		selector->setInUse(selectorId, team, true);
 	}
 	return selectorId >= 0;
 }

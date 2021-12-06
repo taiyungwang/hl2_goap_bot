@@ -141,10 +141,9 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 	if (lastAreaId < 0
 			|| (moveCtx->nextGoalIsLadderStart() && blackboard.isOnLadder())
 			|| (!moveCtx->hasGoal()
-					&& moveCtx->getGoal() == topArea->GetCenter()
-					&& (std::get<0>(path.top()) == lastAreaId || topArea->Contains(loc)))
+					&& (moveCtx->getGoal() == topArea->GetCenter()
 							// close to next path.top()
-							|| ((getPortalToTopArea(goal) && goal == moveCtx->getGoal()))) {
+							|| (getPortalToTopArea(goal) && goal == moveCtx->getGoal())))) {
 		return true;
 	}
 	CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
