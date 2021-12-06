@@ -20,6 +20,4 @@ private:
 	std::shared_ptr<MoveStateContext> moveCtx;
 
 	int targetIdx = 0;
-
-	Vector viewTarget;
 };
