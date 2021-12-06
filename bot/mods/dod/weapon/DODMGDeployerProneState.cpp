@@ -31,14 +31,11 @@ void DODMGDeployerProneState::deploy(Blackboard& blackboard) {
 		// if there are no enemies just deploy to end the deploy cycle.
 			|| (self->getVision().getVisibleEnemies().empty()
 					&& !target->isInGame())) {
-		if (context->getWeapon().isDeployed()) {
-			if (wait >= DEPLOY_TIMEOUT) {
-				context->setState(std::shared_ptr<DODMGDeployerState>(nullptr));
-			}
-		} else {
+		if (wait++ >= DEPLOY_TIMEOUT) {
+			context->setState(std::shared_ptr<DODMGDeployerState>(nullptr));
+		} else if (!context->getWeapon().isDeployed()) {
 			blackboard.getButtons().tap(IN_ATTACK2);
 		}
-		wait++;
 		return;
 	}
 	trace_t result;
