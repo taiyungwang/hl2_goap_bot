@@ -13,10 +13,6 @@ public:
 		return true;
 	}
 
-	bool isInterruptable() const {
-		return false;
-	}
-
 	bool execute() override;
 
 protected:
