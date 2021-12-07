@@ -30,6 +30,7 @@ void GoalManager::resetPlanning(bool force) {
 		if (state == State::ACTION && !plan.IsEmpty()) {
 			actions[plan.Head()]->abort();
 		}
+		plan.RemoveAll();
 		reset();
 	}
 }

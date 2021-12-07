@@ -62,6 +62,14 @@ bool DODWorld::update(Blackboard& blackboard) {
 	if (getState(WorldProp::OUT_OF_AMMO) && baseBombId != weapIdx) {
 		self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::NeedAmmo>(self->getEdict()));
 	}
+	updateState(WorldProp::HAS_BOMB, baseBombId != 0);
+	updateState(WorldProp::HAS_LIVE_GRENADE, false);
+	for (auto name: DODLiveGrenadeBuilder::NAMES) {
+		if (arsenal.getWeaponIdByName(name.c_str()) > 0) {
+			updateState(WorldProp::HAS_LIVE_GRENADE, true);
+			return true;
+		}
+	}
 	for (auto i: blackboard.getSelf()->getVision().getVisibleEntities()) {
 		extern IVEngineServer *engine;
 		edict_t *entity = engine->PEntityOfEntIndex(i);
@@ -80,15 +88,7 @@ bool DODWorld::update(Blackboard& blackboard) {
 			if (grenade.getThrower() != self->getEdict()) {
 				self->getVoiceMessageSender().sendMessage(std::make_shared<GrenadeVoiceMessage>(self->getEdict()));
 			}
-			break;
-		}
-	}
-	updateState(WorldProp::HAS_BOMB, baseBombId != 0);
-	updateState(WorldProp::HAS_LIVE_GRENADE, false);
-	for (auto name: DODLiveGrenadeBuilder::NAMES) {
-		if (arsenal.getWeaponIdByName(name.c_str()) > 0) {
-			updateState(WorldProp::HAS_LIVE_GRENADE, true);
-			break;
+			return true;
 		}
 	}
 	return false;
