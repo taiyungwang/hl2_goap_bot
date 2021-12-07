@@ -63,7 +63,7 @@ bool SnipeAction::execute() {
 			&& !deployer->execute(blackboard)) {
 		return false;
 	}
-	if (deployer == nullptr || weapon->isDeployed()) {
+	if (crouch && (deployer == nullptr || weapon->isDeployed())) {
 		blackboard.getButtons().hold(IN_DUCK);
 	}
 	return --duration <= 0;
@@ -102,25 +102,28 @@ void SnipeAction::abort() {
 
 float SnipeAction::calculateFacing() {
 	Vector pos = targetLoc;
-	pos.z += HumanCrouchHeight;
+	pos.z += HumanEyeHeight;
 	float furthest = 0.0f;
 	for (float currFacing = -180.0f; currFacing < 180.0f; currFacing += 20.0f) {
 		QAngle angle(0.0f, currFacing, 0.0f);
 		Vector aim;
 		AngleVectors(angle, &aim);
 		trace_t result;
-		UTIL_TraceLine(pos, pos + aim * 2000.0f,
-				CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_PLAYERCLIP,
-				NULL, COLLISION_GROUP_NONE, &result);
+		static const float MAX_DIST = 3000.0f;
+		Vector target = pos + aim * MAX_DIST;
+		blackboard.getSelf()->canSee(result, pos, target);
 		if (!result.DidHit() && !result.startsolid) {
-			furthest = 4000000.0f;
+			furthest = MAX_DIST;
 			facing.y = currFacing;
 			break;
 		}
-		float dist = result.endpos.DistToSqr(pos);
+		float dist = result.endpos.DistTo(pos);
 		if (dist > furthest) {
+			pos.z += HumanCrouchHeight - HumanEyeHeight;
+			blackboard.getSelf()->canSee(result, pos, target);
 			furthest = dist;
 			facing.y = currFacing;
+			crouch = !result.DidHit() || result.endpos.DistTo(pos) >= dist;
 		}
 	}
 	return furthest;

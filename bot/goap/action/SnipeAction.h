@@ -23,6 +23,8 @@ public:
 protected:
 	static HidingSpotSelector* selector;
 
+	bool crouch = true;
+
 	int duration = 0;
 
 	int selectorId = -1;
