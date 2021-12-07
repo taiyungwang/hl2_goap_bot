@@ -1,7 +1,6 @@
 #pragma once
 
 #include "DODMGDeployerStartState.h"
-#include <vector.h>
 #include <memory>
 
 class MoveStateContext;
@@ -12,9 +11,6 @@ public:
 	}
 
 	void deploy(Blackboard& blackboard) override;
-
-protected:
-	static const int PRONE_TIMEOUT, DEPLOY_TIMEOUT;
 
 private:
 	std::shared_ptr<MoveStateContext> moveCtx;

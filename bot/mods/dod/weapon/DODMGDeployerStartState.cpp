@@ -6,6 +6,9 @@
 #include <weapon/Weapon.h>
 #include <in_buttons.h>
 
+const int DODMGDeployerStartState::PRONE_TIMEOUT = 164,
+DODMGDeployerStartState::DEPLOY_TIMEOUT = PRONE_TIMEOUT + 5;
+
 void DODMGDeployerStartState::deploy(Blackboard& blackboard) {
 	if (context->getWeapon().isDeployed()) {
 		context->setState(std::shared_ptr<DODMGDeployerState>(nullptr));
