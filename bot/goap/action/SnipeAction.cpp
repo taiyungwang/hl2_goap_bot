@@ -59,11 +59,15 @@ bool SnipeAction::execute() {
 	self->lookStraight();
 	Weapon *weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
 	Deployer* deployer = weapon->getDeployer();
-	if (deployer != nullptr && self->getAimAccuracy() > 0.8f
-			&& !deployer->execute(blackboard)) {
-		return false;
+	if (deployer != nullptr && self->getAimAccuracy() > 0.8f) {
+		if (!deployer->execute(blackboard)) {
+			return false;
+		}
+		if (!weapon->isDeployed()) {
+			return true;
+		}
 	}
-	if (crouch && (deployer == nullptr || weapon->isDeployed())) {
+	if (crouch) {
 		blackboard.getButtons().hold(IN_DUCK);
 	}
 	return --duration <= 0;
