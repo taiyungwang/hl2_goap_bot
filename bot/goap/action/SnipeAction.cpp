@@ -10,6 +10,7 @@
 #include <nav_mesh/nav_mesh.h>
 #include <util/UtilTrace.h>
 #include <in_buttons.h>
+#include <worldsize.h>
 
 HidingSpotSelector* SnipeAction::selector = nullptr;
 
@@ -113,11 +114,10 @@ float SnipeAction::calculateFacing() {
 		Vector aim;
 		AngleVectors(angle, &aim);
 		trace_t result;
-		static const float MAX_DIST = 3000.0f;
-		Vector target = pos + aim * MAX_DIST;
+		Vector target = pos + aim * MAX_COORD_FLOAT;
 		blackboard.getSelf()->canSee(result, pos, target);
 		if (!result.DidHit() && !result.startsolid) {
-			furthest = MAX_DIST;
+			furthest = MAX_COORD_FLOAT;
 			facing.y = currFacing;
 			break;
 		}
