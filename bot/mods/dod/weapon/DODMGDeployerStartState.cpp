@@ -6,7 +6,7 @@
 #include <weapon/Weapon.h>
 #include <in_buttons.h>
 
-const int DODMGDeployerStartState::PRONE_TIMEOUT = 164,
+const int DODMGDeployerStartState::PRONE_TIMEOUT = 83,
 DODMGDeployerStartState::DEPLOY_TIMEOUT = PRONE_TIMEOUT + 5;
 
 void DODMGDeployerStartState::deploy(Blackboard& blackboard) {

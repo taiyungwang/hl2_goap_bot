@@ -17,7 +17,7 @@ void DODMGDeployerProneState::deploy(Blackboard& blackboard) {
 		if (wait++ == 0) {
 			targetIdx = self->getVision().getTargetedPlayer();
 			blackboard.getButtons().hold(IN_ALT1);
-		} else if (wait++ >= PRONE_TIMEOUT) {
+		} else if (wait >= PRONE_TIMEOUT) {
 			context->setState(std::shared_ptr<DODMGDeployerState>(nullptr));
 		}
 		return;

@@ -21,7 +21,5 @@ void DODMGDeployerStandState::deploy(Blackboard& blackboard) {
 		context->setState(std::shared_ptr<DODMGDeployerState>(nullptr));
 		return;
 	}
-	if (wait >= 163) {
-		blackboard.getButtons().hold(IN_ATTACK2);
-	}
+	blackboard.getButtons().hold(IN_ATTACK2);
 }
