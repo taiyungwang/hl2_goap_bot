@@ -13,7 +13,6 @@
 #include <nav_mesh/nav_entities.h>
 #include <util/EntityClassManager.h>
 #include <util/EntityUtils.h>
-#include <util/BaseEntity.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
 

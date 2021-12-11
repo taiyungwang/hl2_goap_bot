@@ -13,7 +13,6 @@ extern IFileSystem *filesystem;
 
 extern CGlobalVars *gpGlobals;
 
-extern NavAreaVector TheNavAreas;
 
 static const char *ROOT_KEY = "HidingSpot Selector";
 static const char *TIME_STAMP_KEY = "navFileTimeStamp";
@@ -40,6 +39,7 @@ HidingSpotSelector::HidingSpotSelector(CommandHandler &commandHandler) : Receive
 }
 
 bool HidingSpotSelector::receive(edict_t *sender, const CCommand &command) {
+	// TODO: this doens't work, remove?
 	if (std::string("nav_save") == command.Arg(0)) {
 		buildFromNavMesh();
 	}
@@ -137,6 +137,7 @@ std::string HidingSpotSelector::getHidingSpotFileName() {
 
 void HidingSpotSelector::buildFromNavMesh() {
 	spots.clear();
+	extern NavAreaVector TheNavAreas;
 	FOR_EACH_VEC(TheNavAreas, i)
 	{
 		const auto &hideSpots = *TheNavAreas[i]->GetHidingSpots();
@@ -147,11 +148,6 @@ void HidingSpotSelector::buildFromNavMesh() {
 		{
 			auto &spot = spots[hideSpots[j]->GetID()] = Spot();
 			spot.pos = hideSpots[j]->GetPosition();
-			for (int k = 0; k < 2; k++) {
-				if (TheNavAreas[i]->IsBlocked(k)) {
-					spot.score[i].inUse = true;
-				}
-			}
 		}
 	}
 }
