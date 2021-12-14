@@ -136,6 +136,7 @@ bool Bot::handle(EventInfo* event) {
 	if (name == "player_hurt") {
 		int attacker = event->getInt("attacker");
 		if (event->getInt("attacker") == getUserId()) {
+			planner->resetPlanning(false);
 			return false;
 		}
 		world->updateState(WorldProp::HURT, true);
@@ -179,9 +180,9 @@ void Bot::traceMove(CGameTrace &traceResult, const Vector &start,
 			maxs = getEdict()->GetCollideable()->OBBMaxs(),
 			heading(goal - start);
 	if (fabs(heading.x) > fabs(heading.y)) {
-		mins.x = maxs.x = 0.0f;
+		(heading.x < 0.0f ? maxs.x : mins.x) = 0.0f;
 	} else {
-		mins.y = maxs.y = 0.0f;
+		(heading.y < 0.0f ? maxs.y : mins.y) = 0.0f;
 	}
 	if (crouch) {
 		// magic number from https://developer.valvesoftware.com/wiki/Dimensions#Map_Grid_Units:_quick_reference
