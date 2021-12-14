@@ -1,19 +1,24 @@
 #pragma once
 
 #include "GoToEntityAction.h"
+#include <utllinkedlist.h>
 
 /**
  * Action to get an item that is consumed.
  */
 class GoToConsumableEntityAction: public GoToEntityAction {
 public:
-	GoToConsumableEntityAction(Blackboard& blackboard, const char* itemName) :
-			GoToEntityAction(blackboard, itemName) {
-	}
+	GoToConsumableEntityAction(Blackboard& blackboard, const char* itemName);
 
 	virtual bool execute();
 
 protected:
+	/**
+	 * All instances of the specified entity class available
+	 * for this map.
+	 */
+	CUtlLinkedList<edict_t*> items;
+
 	/**
 	 * All items that are used.
 	 */
@@ -32,4 +37,12 @@ protected:
 	virtual bool isDepleted();
 
 	virtual void selectItem();
+
+	/**
+	 * Choose the item to go to.  Expected item
+	 * to be set.
+	 *
+	 * @param active List of active items to be selected.
+	 */
+	virtual void selectFromActive(CUtlLinkedList<edict_t*>& active);
 };

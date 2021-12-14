@@ -62,11 +62,16 @@ void DODBotBuilder::updatePlanner(GoalManager &planner,
 		}
 
 	};
-	class DODGetBombAction: public GoToEntityAction {
+	class DODGetBombAction: public GoToConsumableEntityAction {
 	public:
 		DODGetBombAction(Blackboard &blackboard) :
-				GoToEntityAction(blackboard, "dod_bomb_dispenser") {
+			GoToConsumableEntityAction(blackboard, "dod_bomb_dispenser") {
 			effects = { WorldProp::HAS_BOMB, true };
+			allItemsVisible = true;
+		}
+	private:
+		bool isAvailable(edict_t* ent) override {
+			return true;
 		}
 	};
 	planner.addAction<DODThrowLiveGrenadeAction>(0.97f);

@@ -1,7 +1,15 @@
 #include "GoToConsumableEntityAction.h"
-
+#include <player/Bot.h>
 #include <player/Blackboard.h>
+#include <util/EntityUtils.h>
 #include <edict.h>
+
+GoToConsumableEntityAction::GoToConsumableEntityAction(Blackboard &blackboard,
+		const char *itemName) :
+		GoToEntityAction(blackboard) {
+	findEntWithMatchingName(itemName, items);
+
+}
 
 bool GoToConsumableEntityAction::execute() {
 	if (!GoToEntityAction::execute()) {
@@ -39,4 +47,9 @@ void GoToConsumableEntityAction::selectItem() {
 
 bool GoToConsumableEntityAction::isDepleted() {
 	return !isAvailable(item);
+}
+
+void GoToConsumableEntityAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
+	item = findNearestEntity(active,
+			blackboard.getSelf()->getCurrentPosition());
 }

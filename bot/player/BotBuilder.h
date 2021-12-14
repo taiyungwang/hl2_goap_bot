@@ -27,6 +27,8 @@ public:
 		(this->**cmdCallbacks.GetPtr(command.Arg(0)))(command);
 	}
 
+	virtual void onFrame() {}
+
 protected:
 	GameManager* objectives;
 

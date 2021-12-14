@@ -2,14 +2,8 @@
 
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <util/EntityUtils.h>
 #include <util/UtilTrace.h>
 #include <edict.h>
-
-GoToEntityAction::GoToEntityAction(Blackboard& blackboard, const char* itemName) :
-GoToAction(blackboard) {
-	findEntWithMatchingName(itemName, items);
-}
 
 void GoToEntityAction::init() {
 	GoToAction::init();
@@ -25,11 +19,6 @@ bool GoToEntityAction::findTargetLoc() {
 	return true;
 }
 
-void GoToEntityAction::selectItem() {
-	item = nullptr;
-	selectFromActive(items);
-}
-
 void GoToEntityAction::setTargetLocAndRadius(edict_t* target) {
 	auto collide = target->GetCollideable();
 	targetLoc = collide->GetCollisionOrigin();
@@ -43,8 +32,4 @@ void GoToEntityAction::setTargetLocAndRadius(edict_t* target) {
 	targetLoc.z = UTIL_FindGround(targetLoc).z;
 }
 
-void GoToEntityAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
-	item = findNearestEntity(active,
-			blackboard.getSelf()->getCurrentPosition());
-}
 

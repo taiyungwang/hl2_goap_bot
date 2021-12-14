@@ -76,6 +76,11 @@ public:
 		return *arsenal.get();
 	}
 
+	const Arsenal& getArsenal() const {
+		return *arsenal.get();
+	}
+
+
 	virtual bool handle(EventInfo* event);
 
 	float getNoiseRange() const {

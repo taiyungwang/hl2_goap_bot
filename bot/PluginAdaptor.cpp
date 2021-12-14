@@ -104,7 +104,7 @@ void PluginAdaptor::gameFrame(bool simulating) {
 			hookPlayerRunCommand(ent);
 		}
 	}
-	if (TheNavMesh != nullptr) {
+	if (navMeshLoadAttempted && TheNavMesh != nullptr) {
 		CUtlLinkedList<unsigned short> toRemove;
 		FOR_EACH_MAP_FAST(blockers, i) {
 			edict_t* blocker = blockers[i]->getEntity();
@@ -120,6 +120,7 @@ void PluginAdaptor::gameFrame(bool simulating) {
 			blockers.RemoveAt(toRemove[i]);
 		}
 		TheNavMesh->Update();
+		botBuilder->onFrame();
 	}
 	for (auto player: Player::getPlayers()) {
 		player.second->think();

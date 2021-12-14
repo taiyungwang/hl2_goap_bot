@@ -6,6 +6,7 @@
 
 void HL2DMWorld::addStates() {
 	states.Insert(WorldProp::ARMOR_FULL, false);
+	states.Insert(WorldProp::NEED_ITEM, true);
 }
 
 bool HL2DMWorld::update(Blackboard& blackboard) {

@@ -25,6 +25,7 @@ enum class WorldProp {
 	HAS_LIVE_GRENADE,
 	// HL2DM
 	ARMOR_FULL,
+	NEED_ITEM,
 	PROP_COUNT
 };
 
