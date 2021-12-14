@@ -30,7 +30,6 @@ void GoalManager::resetPlanning(bool force) {
 		if (state == State::ACTION && !plan.IsEmpty()) {
 			actions[plan.Head()]->abort();
 		}
-		plan.RemoveAll();
 		reset();
 	}
 }
@@ -64,10 +63,10 @@ void GoalManager::execute() {
 		Action* action = actions[plan.Head()];
 		if (action->execute()) {
 			plan.RemoveAtHead();
-			if (!action->goalComplete()) {
-				reset();
-			} else if (!plan.IsEmpty()) {
+			if (action->goalComplete() && !plan.IsEmpty()) {
 				actions[plan.Head()]->init();
+			} else {
+				reset();
 			}
 		}
 		break;
