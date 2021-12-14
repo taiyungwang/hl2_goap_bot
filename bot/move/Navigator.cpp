@@ -56,14 +56,25 @@ bool Navigator::step() {
 		if (!path.empty()) {
 			topArea = TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
 		}
-	} else if (!moveCtx->hasGoal() && topArea != nullptr) {
-		moveCtx->setGoal(topArea->GetCenter());
+	} else if (!moveCtx->hasGoal()) {
+		CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
+		if (lastArea == nullptr) {
+			return true;
+		}
+		if (topArea != nullptr) {
+			moveCtx->setGoal(topArea->GetCenter());
+		} else {
+			moveCtx->setGoal(moveCtx->getGoal() == lastArea->GetCenter()
+					|| canMoveTo(finalGoal,
+							lastArea->GetAttributes() & NAV_MESH_CROUCH)
+							? finalGoal : lastArea->GetCenter());
+		}
 	}
 	CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
-	int attributes = lastArea->GetAttributes();
 	if (lastArea == nullptr) {
 		return true;
 	}
+	int attributes = lastArea->GetAttributes();
 	if ((topArea == nullptr && !path.empty()) || lastArea == nullptr
 			|| lastArea->IsBlocked(self->getTeam())
 			// bot fell off due to bad pathing.
@@ -191,13 +202,13 @@ void Navigator::setGoalForNextArea(const Vector& loc) {
 	lastAreaId = std::get<0>(path.top());
 	areaTime = 0;
 	path.pop();
+	CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
+	if (lastArea == nullptr) {
+		return;
+	}
 	if (!path.empty() && !setLadderStart()) {
 		CNavArea *pathTop = TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
 		if (pathTop == nullptr) {
-			return;
-		}
-		CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
-		if (lastArea == nullptr) {
 			return;
 		}
 		goal = pathTop->GetCenter();
@@ -216,6 +227,10 @@ void Navigator::setGoalForNextArea(const Vector& loc) {
 				return;
 			}
 		}
+	}
+	if (moveCtx->getGoal() != lastArea->GetCenter()
+			&& !canMoveTo(goal, lastArea->GetAttributes() & NAV_MESH_CROUCH)) {
+		goal = lastArea->GetCenter();
 	}
 	if (!moveCtx->nextGoalIsLadderStart()) {
 		moveCtx->setGoal(goal);
