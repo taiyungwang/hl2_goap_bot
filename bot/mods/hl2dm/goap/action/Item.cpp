@@ -2,6 +2,7 @@
 #include <util/BaseCombatWeapon.h>
 #include <util/EntityClassManager.h>
 #include <edict.h>
+#include <string>
 
 bool Item::isAvailable() const {
 	return !BaseEntity(ent).isDestroyedOrUsed()
