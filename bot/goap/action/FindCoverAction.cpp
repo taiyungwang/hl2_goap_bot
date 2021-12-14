@@ -10,7 +10,6 @@
 FindCoverAction::FindCoverAction(Blackboard& blackboard) :
 		GoToAction(blackboard), NavMeshPathBuilder(blackboard.getSelf()->getTeam()) {
 	effects = {WorldProp::MULTIPLE_ENEMY_SIGHTED, false};
-	precond.Insert(WorldProp::OUT_OF_AMMO, false);
 	sprint = true;
 }
 
