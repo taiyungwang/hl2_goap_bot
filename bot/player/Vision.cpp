@@ -103,11 +103,10 @@ void Vision::updateVisiblity(Bot *self) {
 		visibleEnemies.insert(visible.player);
 	}
 	if (targetedPlayer != 0) {
-		memoryDur = 30;
+		memoryDur = 5;
 	} else if (!visibleEnemies.empty() && lastTarget != 0
 			&& Player::getPlayer(lastTarget) != nullptr && Player::getPlayer(lastTarget)->isInGame()) {
-		memoryDur--;
-		if (memoryDur > 0) {
+		if (memoryDur-- > 0) {
 			self->setWantToListen(false);
 			targetedPlayer = lastTarget;
 		}

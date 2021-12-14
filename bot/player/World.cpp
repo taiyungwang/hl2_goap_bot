@@ -37,11 +37,14 @@ bool World::think(Blackboard& blackboard) {
 	updateState(WorldProp::USING_BEST_WEAP,
 			arsenal.getBestWeaponIdx() == arsenal.getCurrWeaponIdx());
 	edict_t* blocker = blackboard.getBlocker();
-	if (blocker != nullptr && BaseEntity(blocker).isDestroyedOrUsed()) {
+	if (blocker != nullptr && (BaseEntity(blocker).isDestroyedOrUsed()
+			|| (self->getFacing().Dot(blocker->GetCollideable()->GetCollisionOrigin()
+					- self->getCurrentPosition()) > 0.0f
+					&& !self->canSee(blocker)))) {
 		blocker = nullptr;
 		blackboard.setBlocker(nullptr);
 	}
-	bool inRange = true;
+	bool inRange = false;
 	const Weapon* weap = arsenal.getCurrWeapon();
 	const Player* enemy = Player::getPlayer(self->getVision().getTargetedPlayer());
 	if (weap != nullptr) {
@@ -68,14 +71,9 @@ bool World::think(Blackboard& blackboard) {
 				inRange = weap->isInRange(pos.DistTo(self->getViewTarget()));
 			}
 		}
-	}
-	updateState(WorldProp::WEAPON_IN_RANGE, inRange);
-	Weapon* currWeap = arsenal.getCurrWeapon();
-	if (currWeap != nullptr) {
-		updateState(WorldProp::WEAPON_LOADED,
-				!currWeap->isClipEmpty());
-		updateState(WorldProp::OUT_OF_AMMO,
-				currWeap->isOutOfAmmo(self->getEdict()));
+		updateState(WorldProp::WEAPON_IN_RANGE, inRange);
+		updateState(WorldProp::WEAPON_LOADED, !weap->isClipEmpty());
+		updateState(WorldProp::OUT_OF_AMMO, weap->isOutOfAmmo(self->getEdict()));
 	}
 	updateState(WorldProp::HEALTH_FULL, self->getHealth() >= self->getMaxHealth());
 	bool hurt = states[states.Find(WorldProp::HURT)];
