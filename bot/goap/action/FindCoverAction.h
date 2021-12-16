@@ -34,4 +34,7 @@ private:
 	float getHeuristicCost(CNavArea *area) const override;
 
 	bool foundGoal(CNavArea *area) override;
+
+	bool shouldSearch(CNavArea *area) const override;
+
 };

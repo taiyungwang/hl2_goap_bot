@@ -94,3 +94,7 @@ float FindCoverAction::getHeuristicCost(CNavArea *area) const {
 	return cost;
 }
 
+bool FindCoverAction::shouldSearch(CNavArea *area) const {
+	return NavMeshPathBuilder::shouldSearch(area)
+			&& areasToAvoid.find(area) == areasToAvoid.end();
+}
