@@ -23,4 +23,6 @@ protected:
 	void setTargetLocAndRadius(edict_t* target);
 
 	virtual bool findTargetLoc();
+
+	void useItem();
 };

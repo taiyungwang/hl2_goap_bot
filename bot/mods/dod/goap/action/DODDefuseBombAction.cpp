@@ -38,11 +38,7 @@ bool DODDefuseBombAction::execute() {
 	interruptable = false;
 	Bot *self = blackboard.getSelf();
 	self->getVoiceMessageSender().sendMessage(std::make_shared<NeedBackupVoiceMessage>(self->getEdict()));
-	blackboard.getButtons().hold(IN_USE);
-	Vector itemPos = UTIL_FindGround(
-				item->GetCollideable()->GetCollisionOrigin());
-	itemPos.z += HumanEyeHeight - 15.0f;
-	self->setViewTarget(itemPos);
+	useItem();
 	return false;
 }
 

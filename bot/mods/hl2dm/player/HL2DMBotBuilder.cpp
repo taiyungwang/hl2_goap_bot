@@ -1,8 +1,6 @@
 #include "HL2DMBotBuilder.h"
 
 #include "HL2DMWorld.h"
-#include <mods/hl2dm/goap/action/ChargeArmorAction.h>
-#include <mods/hl2dm/goap/action/GetBatteryAction.h>
 #include <mods/hl2dm/goap/action/UseGravityGunAction.h>
 #include <mods/hl2dm/goap/action/GetClosestNeededItemAction.h>
 #include <mods/hl2dm/goap/action/Item.h>
@@ -16,28 +14,31 @@
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
 
-/**
- * Defines the action for using a suit charger
- */
-class ChargeHealthAction: public ChargeAction {
+class HealthChargerBuilder: public ChargerBuilder {
 public:
-	ChargeHealthAction(Blackboard& blackboard) :
-			ChargeAction("item_healthcharger", blackboard) {
-		effects = {WorldProp::HEALTH_FULL, true};
-	}
-
-private:
-	bool isFinished() const {
-		return blackboard.getSelf()->getHealth()
-				>= blackboard.getSelf()->getMaxHealth();
+	bool need(const Bot& bot) const override {
+		return bot.getHealth() < 100;
 	}
 };
 
-class GetHealthKitAction: public GetItemAction {
+class HealthKitBuilder: public ItemBuilder {
 public:
-	GetHealthKitAction(Blackboard& blackboard) :
-			GetItemAction("item_healthkit", blackboard) {
-		effects = {WorldProp::HEALTH_FULL, true};
+	bool need(const Bot& bot) const override {
+		return bot.getHealth() < 100;
+	}
+};
+
+class BatteryBuilder: public ItemBuilder {
+public:
+	bool need(const Bot& bot) const override {
+		return bot.getArmor() < 100;
+	}
+};
+
+class SuitChargerBuilder: public ChargerBuilder {
+public:
+	bool need(const Bot& bot) const override {
+		return bot.getArmor() < 100;
 	}
 };
 
@@ -90,7 +91,6 @@ private:
 	const int MAX_AMMO;
 };
 
-
 #define DECL_AMMO_BUILDER_CLASS(weaponClass, weaponName, ammo) \
 class ItemAmmo##weaponClass##Builder: public ItemAmmoBuilder {\
 public:\
@@ -132,6 +132,11 @@ public:
 
 HL2DMBotBuilder::HL2DMBotBuilder(CommandHandler& commandHandler, const ArsenalBuilder &arsenalBuilder) :
 		BotBuilder(nullptr, commandHandler, arsenalBuilder) {
+	itemMap.addItemBuilder<HealthKitBuilder>("item_healthkit");
+	itemMap.addItemBuilder<HealthKitBuilder>("item_healthvial");
+	itemMap.addItemBuilder<HealthChargerBuilder>("item_healthcharger");
+	itemMap.addItemBuilder<BatteryBuilder>("item_battery");
+	itemMap.addItemBuilder<SuitChargerBuilder>("item_suitcharger");
 	itemMap.addItemBuilder<ItemAmmoPistolBuilder>("item_ammo_pistol");
 	itemMap.addItemBuilder<ItemAmmoPistolBuilder>("item_ammo_pistol_large");
 	itemMap.addItemBuilder<ItemPistolBuilder>("weapon_pistol");
@@ -143,8 +148,7 @@ HL2DMBotBuilder::HL2DMBotBuilder(CommandHandler& commandHandler, const ArsenalBu
 	itemMap.addItemBuilder<ItemAmmoSMGBuilder>("item_ammo_smg1_large");
 	itemMap.addItemBuilder<ItemAmmoSmgGrenadeBuilder>("item_ammo_smg1_grenade");
 	itemMap.addItemBuilder<ItemShotgunBuilder>("weapon_shotgun");
-	itemMap.addItemBuilder<ItemAmmoShotgunBuilder>("item_ammo_shotgun");
-	itemMap.addItemBuilder<ItemAmmoShotgunBuilder>("item_ammo_shotgun_large");
+	itemMap.addItemBuilder<ItemAmmoShotgunBuilder>("item_box_buckshot");
 	itemMap.addItemBuilder<ItemCrossbowBuilder>("weapon_crossbow");
 	itemMap.addItemBuilder<ItemAmmoCrossbowBuilder>("item_ammo_crossbow");
 	itemMap.addItemBuilder<ItemAmmoCrossbowBuilder>("item_ammo_crossbow_large");
@@ -154,7 +158,6 @@ HL2DMBotBuilder::HL2DMBotBuilder(CommandHandler& commandHandler, const ArsenalBu
 	itemMap.addItemBuilder<ItemRPGBuilder>("weapon_rpg");
 	itemMap.addItemBuilder<ItemAmmoMagnumBuilder>("item_rpg_round");
 	itemMap.addItemBuilder<ItemAmmoGrenadeBuilder>("weapon_frag");
-
 }
 
 void HL2DMBotBuilder::updatePlanner(GoalManager& planner,
@@ -163,10 +166,6 @@ void HL2DMBotBuilder::updatePlanner(GoalManager& planner,
 	GetClosestNeededItemAction::setItemMap(&itemMap);
 	planner.addAction<GetClosestNeededItemAction>(0.54f);
 	planner.addAction<UseGravityGunAction>(0.71f);
-	planner.addAction<ChargeHealthAction>(0.53f);
-	planner.addAction<GetHealthKitAction>(0.52f);
-	planner.addAction<ChargeArmorAction>(0.51f);
-	planner.addAction<GetBatteryAction>(0.5f);
 }
 
 BasePlayer* HL2DMBotBuilder::buildEntity(edict_t* ent) const {

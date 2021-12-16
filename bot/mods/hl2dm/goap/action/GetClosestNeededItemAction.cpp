@@ -26,10 +26,7 @@ bool GetClosestNeededItemAction::execute() {
 			|| (self->getHealth() > 99 && self->getArmor() > 99)) {
 		return true;
 	}
-	Vector itemPos = UTIL_FindGround(item->GetCollideable()->GetCollisionOrigin());
-	itemPos.z += HumanHeight - 10.0f;
-	blackboard.getButtons().hold(IN_USE);
-	self->setViewTarget(itemPos);
+	useItem();
 	return false;
 }
 

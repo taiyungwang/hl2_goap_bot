@@ -45,7 +45,14 @@ public:
 
 	virtual bool need(const Bot &bot) const = 0;
 
-	std::shared_ptr<Item> build(edict_t *ent) const {
+	virtual std::shared_ptr<Item> build(edict_t *ent) const {
 		return std::make_shared<Item>(ent);
+	}
+};
+
+class ChargerBuilder: public ItemBuilder {
+public:
+	std::shared_ptr<Item> build(edict_t *ent) const override {
+		return std::make_shared<Charger>(ent);
 	}
 };

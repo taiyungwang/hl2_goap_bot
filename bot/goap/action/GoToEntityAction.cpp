@@ -2,8 +2,10 @@
 
 #include <player/Blackboard.h>
 #include <player/Bot.h>
+#include <nav_mesh/nav.h>
 #include <util/UtilTrace.h>
 #include <edict.h>
+#include <in_buttons.h>
 
 void GoToEntityAction::init() {
 	GoToAction::init();
@@ -32,4 +34,10 @@ void GoToEntityAction::setTargetLocAndRadius(edict_t* target) {
 	targetLoc.z = UTIL_FindGround(targetLoc).z;
 }
 
-
+void GoToEntityAction::useItem() {
+	blackboard.getButtons().hold(IN_USE);
+	Vector itemPos = UTIL_FindGround(
+				item->GetCollideable()->GetCollisionOrigin());
+	itemPos.z += HumanEyeHeight - 10.0f;
+	blackboard.getSelf()->setViewTarget(itemPos);
+}

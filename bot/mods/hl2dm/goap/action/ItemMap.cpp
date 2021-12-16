@@ -3,6 +3,7 @@
 #include <player/Bot.h>
 #include <move/Navigator.h>
 #include <nav_mesh/nav_area.h>
+#include <util/UtilTrace.h>
 #include <eiface.h>
 
 void ItemMap::buildMap() {
@@ -18,7 +19,7 @@ void ItemMap::buildMap() {
 		if (itr == builders.end()) {
 			continue;
 		}
-		CNavArea *area = Navigator::getArea(ent, 0);
+		CNavArea *area = Navigator::getArea(UTIL_FindGround(ent->GetCollideable()->GetCollisionOrigin()), 0);
 		if (area == nullptr) {
 			Warning("Unable to find item, %s, in nav mesh.\n", ent->GetClassName());
 			continue;

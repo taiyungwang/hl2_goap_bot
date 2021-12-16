@@ -1,12 +1,10 @@
 #pragma once
 
+#include "Item.h"
 #include <unordered_map>
 #include <list>
-#include <memory>
 
 class Bot;
-class Item;
-class ItemBuilder;
 class Vector;
 class CNavArea;
 struct edict_t;

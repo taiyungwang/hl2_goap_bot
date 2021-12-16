@@ -13,5 +13,5 @@ bool Item::isAvailable() const {
 bool Charger::isAvailable() const {
 	extern EntityClassManager *classManager;
 	return classManager->getClass("CBaseAnimating")->getEntityVar("m_flCycle")
-			.get<float>(ent) == 1.0f;
+			.get<float>(ent) < 1.0f;
 }
