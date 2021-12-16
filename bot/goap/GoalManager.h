@@ -80,5 +80,5 @@ private:
 
 	void addAction(Action* action);
 
-	void getNextGoal();
+	bool getNextGoal();
 };

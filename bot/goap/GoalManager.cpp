@@ -6,7 +6,6 @@
 #include <eiface.h>
 #include <vstdlib/random.h>
 
-
 GoalManager::GoalManager(const WorldState& worldState, Blackboard& blackboard) :
 		worldState(worldState), blackboard(blackboard) {
 	planBuilder = new Planner(worldState);
@@ -37,20 +36,21 @@ void GoalManager::resetPlanning(bool force) {
 void GoalManager::execute() {
 	switch (state) {
 	case State::PLANNING: {
-		bool finished = false;
 		extern IVEngineServer* engine;
-		// timebox to 1/60 second
-		float timeLimit = 0.0167f + engine->Time();
-		while (!finished && engine->Time() <= timeLimit) {
-			finished = planBuilder->searchStep();
-		}
-		if (finished) {
-			planBuilder->getPath(plan);
-			if (plan.IsEmpty()) {
-				getNextGoal();
-			} else {
-				state = State::ACTION;
-				actions[plan.Head()]->init();
+		plan.RemoveAll();
+		while (plan.IsEmpty() && getNextGoal()) {
+			// timebox to 1/60 second
+			float timeLimit = 0.0167f + engine->Time();
+			bool finished = false;
+			while (!finished && engine->Time() <= timeLimit) {
+				finished = planBuilder->searchStep();
+			}
+			if (finished) {
+				planBuilder->getPath(plan);
+				if (!plan.IsEmpty()) {
+					state = State::ACTION;
+					actions[plan.Head()]->init();
+				}
 			}
 		}
 		break;
@@ -78,7 +78,7 @@ void GoalManager::execute() {
 			}
 			return g2->priority < g1->priority ? -1: 1;
 		});
-		getNextGoal();
+		state = State::PLANNING;
 	}
 }
 
@@ -87,7 +87,7 @@ void GoalManager::reset() {
 	currentGoal = 0;
 }
 
-void GoalManager::getNextGoal() {
+bool GoalManager::getNextGoal() {
 	for (; currentGoal < goals.Count(); currentGoal++) {
 		auto& goal = goals[currentGoal];
 		auto& effect = actions[goal.action]->getEffects();
@@ -99,11 +99,10 @@ void GoalManager::getNextGoal() {
 	}
 	if (currentGoal >= goals.Count()) {
 		reset();
-		return;
+		return false;
 	}
-	planBuilder->startSearch(
-			actions[goals[currentGoal++].action]->getEffects());
-	state = State::PLANNING;
+	planBuilder->startSearch(actions[goals[currentGoal++].action]->getEffects());
+	return true;
 }
 
 void GoalManager::addAction(Action* action) {

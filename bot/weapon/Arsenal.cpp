@@ -22,7 +22,7 @@ int Arsenal::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) c
 	} else if (blackboard.getBlocker() != nullptr) {
 		target = blackboard.getBlocker();
 	}
-	float targetDist = target == nullptr ? -1.0f:
+	float targetDist = target == nullptr || target->IsFree() ? -1.0f:
 			target->GetCollideable()->GetCollisionOrigin().DistTo(
 					blackboard.getSelf()->getCurrentPosition());
 	visit([&best, targetDist, &blackboard=blackboard,

@@ -54,11 +54,6 @@ void Bot::think() {
 			extern IServerPluginHelpers* helpers;
 			helpers->ClientCommand(getEdict(), (*CLASSES)[getTeam() - 2][desiredClassId]);
 		} else {
-			if ((resetPlanner || world->think(*blackboard))
-					&& !blackboard->isOnLadder()) {
-				planner->resetPlanning(false);
-				resetPlanner = false;
-			}
 			vision.updateVisiblity(this);
 			wantToListen = true;
 			cmd.Reset();
@@ -69,10 +64,10 @@ void Bot::think() {
 			if (best != 0) {
 				arsenal->setBestWeaponIdx(best);
 			}
-			int currentWeapon = arsenal->getCurrWeaponIdx();
-			if (currentWeapon > 0
-					&& arsenal->getWeapon(currentWeapon)->isOutOfAmmo(getEdict())) {
-				world->updateState(WorldProp::USING_BEST_WEAP, false);
+			if ((resetPlanner || world->think(*blackboard))
+					&& !blackboard->isOnLadder()) {
+				planner->resetPlanning(false);
+				resetPlanner = false;
 			}
 			planner->execute();
 			listen();
@@ -136,7 +131,6 @@ bool Bot::handle(EventInfo* event) {
 	if (name == "player_hurt") {
 		int attacker = event->getInt("attacker");
 		if (event->getInt("attacker") == getUserId()) {
-			planner->resetPlanning(false);
 			return false;
 		}
 		world->updateState(WorldProp::HURT, true);

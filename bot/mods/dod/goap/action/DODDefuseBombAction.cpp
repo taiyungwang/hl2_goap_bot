@@ -21,12 +21,12 @@ bool DODDefuseBombAction::findTargetLoc() {
 		return false;
 	}
 	targetRadius = 30.0f;
+	interruptable = true;
 	return true;
 }
 
 bool DODDefuseBombAction::execute() {
 	if (isDepleted()) {
-		interruptable = true;
 		return true;
 	}
 	if (!GoToEntityAction::execute()) {
