@@ -10,6 +10,8 @@
 FindCoverAction::FindCoverAction(Blackboard& blackboard) :
 		GoToAction(blackboard), NavMeshPathBuilder(blackboard.getSelf()->getTeam()) {
 	effects = {WorldProp::MULTIPLE_ENEMY_SIGHTED, false};
+	// this is needed so that hl2dm bots aren't trying to find cover when their weapon is out of ammo.
+	precond.Insert(WorldProp::OUT_OF_AMMO, false);
 	sprint = true;
 }
 
