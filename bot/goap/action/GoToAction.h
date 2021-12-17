@@ -16,6 +16,8 @@ public:
 
 	virtual bool execute();
 
+	virtual bool precondCheck() override = 0;
+
 	virtual void init();
 
 	virtual float getCost();
@@ -35,8 +37,6 @@ protected:
 
 	GoToAction(Blackboard& blackboard): Action(blackboard) {
 	}
-
-	virtual bool findTargetLoc() = 0;
 
 	/**
 	 * Randomly choose a target based on its relative distance.

@@ -12,7 +12,7 @@ void GoToEntityAction::init() {
 	blackboard.setTarget(item);
 }
 
-bool GoToEntityAction::findTargetLoc() {
+bool GoToEntityAction::precondCheck() {
 	selectItem();
 	if (item == nullptr) {
 		return false;

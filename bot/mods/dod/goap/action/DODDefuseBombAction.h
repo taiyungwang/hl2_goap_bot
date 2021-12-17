@@ -6,6 +6,8 @@ class DODDefuseBombAction : public CapturePointAction {
 public:
 	DODDefuseBombAction(Blackboard& blackboard);
 
+	bool precondCheck() override;
+
 	virtual bool execute();
 
 	virtual bool isInterruptable() const {
@@ -24,8 +26,5 @@ protected:
 	virtual bool isTeammateActing(edict_t* teammate) const;
 
 private:
-
-	bool findTargetLoc();
-
 	bool isAvailable(edict_t* ent);
 };

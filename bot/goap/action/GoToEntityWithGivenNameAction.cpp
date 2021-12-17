@@ -1,17 +1,17 @@
-#include "GoToConsumableEntityAction.h"
+#include "GoToEntityWithGivenNameAction.h"
 #include <player/Bot.h>
 #include <player/Blackboard.h>
 #include <util/EntityUtils.h>
 #include <edict.h>
 
-GoToConsumableEntityAction::GoToConsumableEntityAction(Blackboard &blackboard,
+GoToEntityWithGivenNameAction::GoToEntityWithGivenNameAction(Blackboard &blackboard,
 		const char *itemName) :
 		GoToEntityAction(blackboard) {
 	findEntWithMatchingName(itemName, items);
 
 }
 
-bool GoToConsumableEntityAction::execute() {
+bool GoToEntityWithGivenNameAction::execute() {
 	if (!GoToEntityAction::execute()) {
 		return false;
 	}
@@ -23,7 +23,7 @@ bool GoToConsumableEntityAction::execute() {
 	return true;
 }
 
-void GoToConsumableEntityAction::selectItem() {
+void GoToEntityWithGivenNameAction::selectItem() {
 	CUtlLinkedList<edict_t*> active;
 	FOR_EACH_LL(items, i)
 	{
@@ -45,11 +45,11 @@ void GoToConsumableEntityAction::selectItem() {
 	selectFromActive(active);
 }
 
-bool GoToConsumableEntityAction::isDepleted() {
+bool GoToEntityWithGivenNameAction::isDepleted() {
 	return !isAvailable(item);
 }
 
-void GoToConsumableEntityAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
+void GoToEntityWithGivenNameAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
 	item = findNearestEntity(active,
 			blackboard.getSelf()->getCurrentPosition());
 }

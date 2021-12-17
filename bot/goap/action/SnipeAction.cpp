@@ -37,7 +37,7 @@ bool SnipeAction::onPlanningFinished() {
 	return true;
 }
 
-bool SnipeAction::findTargetLoc() {
+bool SnipeAction::precondCheck() {
 	int team = blackboard.getSelf()->getTeam();
 	selectorId = selector->select(targetLoc, team);
 	if (selectorId >= 0) {

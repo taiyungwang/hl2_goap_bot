@@ -13,6 +13,8 @@ public:
 		this->objectives = objectives;
 	}
 
+	bool precondCheck() override;
+
 	bool execute();
 
 private:
@@ -21,8 +23,6 @@ private:
 	const DODObjective* target = nullptr;
 
 	Vector guardTarget;
-
-	bool findTargetLoc();
 
 	bool isTargetValid() const;
 };

@@ -16,8 +16,8 @@ DODDefuseBombAction::DODDefuseBombAction(Blackboard& blackboard) :
 	effects = {WorldProp::BOMB_DEFUSED, true};
 }
 
-bool DODDefuseBombAction::findTargetLoc() {
-	if (!CapturePointAction::findTargetLoc()) {
+bool DODDefuseBombAction::precondCheck() {
+	if (!CapturePointAction::precondCheck()) {
 		return false;
 	}
 	targetRadius = 30.0f;

@@ -11,14 +11,14 @@
 #include <in_buttons.h>
 
 CapturePointAction::CapturePointAction(Blackboard& blackboard) :
-		GoToConsumableEntityAction(blackboard, "dod_control_point") {
-	allItemsVisible = true;
+		GoToEntityWithGivenNameAction(blackboard, "dod_control_point") {
 	precond.Insert(WorldProp::ROUND_STARTED, true);
 	effects = {WorldProp::ALL_POINTS_CAPTURED, true};
+	allItemsVisible = true;
 }
 
 bool CapturePointAction::execute() {
-	if (!GoToConsumableEntityAction::execute()) {
+	if (!GoToEntityWithGivenNameAction::execute()) {
 		return false;
 	}
 	if (!GoToAction::goalComplete() || isDepleted()) {
@@ -34,7 +34,7 @@ bool CapturePointAction::isAvailable(edict_t* ent) {
 	return obj != nullptr && isAvailable(*obj);
 }
 
-bool CapturePointAction::findTargetLoc() {
+bool CapturePointAction::precondCheck() {
 	if (!objectives->roundStarted()) {
 		return false;
 	}
@@ -50,4 +50,3 @@ bool CapturePointAction::isAvailable(const DODObjective& obj) {
 	return !objectives->isDetonation()
 			&& obj.getOwner() != blackboard.getSelf()->getTeam();
 }
-

@@ -8,7 +8,7 @@
 #include <ivdebugoverlay.h>
 
 float GoToAction::getCost() {
-	return findTargetLoc() ? targetLoc.DistTo(blackboard.getSelf()->getCurrentPosition()) : INFINITY;
+	return targetLoc.DistTo(blackboard.getSelf()->getCurrentPosition());
 }
 
 bool GoToAction::onPlanningFinished() {

@@ -6,9 +6,9 @@
 /**
  * Action to get an item that is consumed.
  */
-class GoToConsumableEntityAction: public GoToEntityAction {
+class GoToEntityWithGivenNameAction: public GoToEntityAction {
 public:
-	GoToConsumableEntityAction(Blackboard& blackboard, const char* itemName);
+	GoToEntityWithGivenNameAction(Blackboard& blackboard, const char* itemName);
 
 	virtual bool execute();
 

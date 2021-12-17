@@ -9,6 +9,8 @@ class FindCoverAction: public GoToAction, private NavMeshPathBuilder {
 public:
 	FindCoverAction(Blackboard& blackboard);
 
+	bool precondCheck() override;
+
 	bool onPlanningFinished() {
 		return true;
 	}
@@ -29,8 +31,6 @@ protected:
 	}
 
 private:
-	bool findTargetLoc() override;
-
 	float getHeuristicCost(CNavArea *area) const override;
 
 	bool foundGoal(CNavArea *area) override;

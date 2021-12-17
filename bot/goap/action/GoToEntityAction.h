@@ -10,6 +10,8 @@ struct edict_t;
  */
 class GoToEntityAction: public GoToAction {
 public:
+	virtual bool precondCheck() override;
+
 	void init();
 
 protected:
@@ -21,8 +23,6 @@ protected:
 	virtual void selectItem() = 0;
 
 	void setTargetLocAndRadius(edict_t* target);
-
-	virtual bool findTargetLoc();
 
 	void useItem();
 };

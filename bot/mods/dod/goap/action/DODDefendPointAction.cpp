@@ -22,7 +22,7 @@ bool DODDefendPointAction::execute() {
 			&& SnipeAction::execute();
 }
 
-bool DODDefendPointAction::findTargetLoc() {
+bool DODDefendPointAction::precondCheck() {
 	if (!objectives->roundStarted()) {
 		return false;
 	}

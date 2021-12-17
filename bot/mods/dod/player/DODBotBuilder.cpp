@@ -62,10 +62,10 @@ void DODBotBuilder::updatePlanner(GoalManager &planner,
 		}
 
 	};
-	class DODGetBombAction: public GoToConsumableEntityAction {
+	class DODGetBombAction: public GoToEntityWithGivenNameAction {
 	public:
 		DODGetBombAction(Blackboard &blackboard) :
-			GoToConsumableEntityAction(blackboard, "dod_bomb_dispenser") {
+			GoToEntityWithGivenNameAction(blackboard, "dod_bomb_dispenser") {
 			effects = { WorldProp::HAS_BOMB, true };
 			allItemsVisible = true;
 		}

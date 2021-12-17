@@ -12,6 +12,8 @@ public:
 
 	SnipeAction(Blackboard& blackboard);
 
+	virtual bool precondCheck() override;
+
 	bool onPlanningFinished();
 
 	bool execute();
@@ -32,6 +34,4 @@ protected:
 	QAngle facing;
 
 	float calculateFacing();
-
-	virtual bool findTargetLoc();
 };

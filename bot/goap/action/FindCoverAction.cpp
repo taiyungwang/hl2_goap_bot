@@ -61,7 +61,7 @@ void FindCoverAction::getAvoidPosition(Vector& pos, edict_t *avoid) const {
 	pos = Player::getPlayer(avoid)->getEyesPos();
 }
 
-bool FindCoverAction::findTargetLoc() {
+bool FindCoverAction::precondCheck() {
 	areasToAvoid.clear();
 	setAvoidAreas();
 	if (areasToAvoid.empty()) {

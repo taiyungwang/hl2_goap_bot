@@ -13,7 +13,6 @@ extern IFileSystem *filesystem;
 
 extern CGlobalVars *gpGlobals;
 
-
 static const char *ROOT_KEY = "HidingSpot Selector";
 static const char *TIME_STAMP_KEY = "navFileTimeStamp";
 static const char *SPOTS_KEY = "spots";

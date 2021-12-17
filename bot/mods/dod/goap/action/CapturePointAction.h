@@ -1,14 +1,16 @@
 #pragma once
 
-#include <goap/action/GoToConsumableEntityAction.h>
+#include <goap/action/GoToEntityWithGivenNameAction.h>
 #include <utlvector.h>
 
 class DODObjectives;
 class DODObjective;
 
-class CapturePointAction: public GoToConsumableEntityAction {
+class CapturePointAction: public GoToEntityWithGivenNameAction {
 public:
 	CapturePointAction(Blackboard& blackboard);
+
+	virtual bool precondCheck() override;
 
 	virtual bool execute();
 
@@ -20,8 +22,6 @@ protected:
 	virtual bool isAvailable(const DODObjective& obj);
 
 	virtual bool isAvailable(edict_t* ent);
-
-	virtual bool findTargetLoc();
 
 	void selectFromActive(CUtlLinkedList<edict_t*>& active) {
 		item = randomChoice(active);
