@@ -10,7 +10,7 @@
 
 FindCoverFromGrenadesAction::FindCoverFromGrenadesAction(Blackboard &blackboard) :
 		FindCoverAction(blackboard) {
-	precond.RemoveAll();
+	precond.clear();
 	effects = { WorldProp::EXPLOSIVE_NEAR, false };
 }
 

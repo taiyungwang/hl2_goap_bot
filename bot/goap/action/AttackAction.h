@@ -1,10 +1,8 @@
 #pragma once
 
 #include "Action.h"
-#include <utllinkedlist.h>
 
 class MoveStateContext;
-class WeaponFunction;
 struct edict_t;
 
 class AttackAction: public Action {
@@ -36,8 +34,6 @@ protected:
 	virtual bool targetDestroyed() const;
 
 private:
-	CUtlLinkedList<CUtlString> objectNames;
-
 	MoveStateContext* moveCtx;
 };
 

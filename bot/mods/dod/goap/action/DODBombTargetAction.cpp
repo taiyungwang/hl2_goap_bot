@@ -9,7 +9,7 @@
 DODBombTargetAction::DODBombTargetAction(Blackboard &blackboard) :
 		DODDefuseBombAction(blackboard) {
 	effects = { WorldProp::ALL_POINTS_CAPTURED, true };
-	precond.Insert(WorldProp::HAS_BOMB, true);
+	precond[WorldProp::HAS_BOMB] = true;
 }
 
 bool DODBombTargetAction::isAvailable(const DODObjective &obj) {

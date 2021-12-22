@@ -12,8 +12,8 @@
 ReloadWeaponAction::ReloadWeaponAction(Blackboard& blackboard) :
 		Action(blackboard) {
 	effects = {WorldProp::WEAPON_LOADED, true};
-	precond.Insert(WorldProp::OUT_OF_AMMO, false);
-	precond.Insert(WorldProp::ENEMY_SIGHTED, false);
+	precond[WorldProp::OUT_OF_AMMO] = false;
+	precond[WorldProp::ENEMY_SIGHTED] = false;
 }
 
 bool ReloadWeaponAction::precondCheck() {

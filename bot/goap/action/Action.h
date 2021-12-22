@@ -12,7 +12,6 @@ public:
 
 	Action(Blackboard& blackboard) :
 		blackboard(blackboard) {
-		SetDefLessFunc(precond);
 	}
 
 	virtual ~Action() {

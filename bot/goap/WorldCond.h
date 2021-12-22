@@ -1,7 +1,7 @@
 #pragma once
 
-#include <utlmap.h>
-#include <utlcommon.h>
+#include <unordered_map>
+#include <tuple>
 
 enum class WorldProp {
 	ENEMY_SIGHTED,
@@ -24,14 +24,25 @@ enum class WorldProp {
 	BOMB_DEFUSED,
 	HAS_LIVE_GRENADE,
 	// HL2DM
-	ARMOR_FULL,
 	NEED_ITEM,
 	PROP_COUNT
 };
 
-typedef CUtlKeyValuePair<WorldProp, bool> GoalState;
+using GoalState = std::tuple<WorldProp, bool>;
 
+struct EnumClassHash {
+	template<typename T>
+	std::size_t operator()(T t) const {
+		return static_cast<std::size_t>(t);
+	}
+};
+
+template<typename Key>
+using HashType = typename std::conditional<std::is_enum<Key>::value, EnumClassHash, std::hash<Key>>::type;
+
+template <typename Key, typename T>
+using MyUnorderedMap = std::unordered_map<Key, T, HashType<Key>>;
 /**
  * Map of world property types to their sates.
  */
-typedef CUtlMap<WorldProp, bool> WorldState;
+using WorldState = MyUnorderedMap<WorldProp, bool>;

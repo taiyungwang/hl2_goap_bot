@@ -9,6 +9,8 @@ public:
 
 	void tearDown();
 
+	void testMap();
+
 	void testSwitchToLoadedWeaponThenAttack();
 
 	void testFindFindCoverReload();

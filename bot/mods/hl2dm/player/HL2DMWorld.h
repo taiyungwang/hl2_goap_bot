@@ -9,7 +9,9 @@ public:
 	}
 
 private:
-	void addStates();
+	void addStates() override;
 
-	bool update(Blackboard& blackboard);
+	bool update(Blackboard &blackboard) override {
+		return false;
+	}
 };

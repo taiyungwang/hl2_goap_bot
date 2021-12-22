@@ -6,7 +6,7 @@
 
 UseSpecificWeaponAction::UseSpecificWeaponAction(Blackboard& blackboard) :
 		WeaponAction(blackboard) {
-	precond.Insert(WorldProp::USING_DESIRED_WEAPON, true);
+	precond[WorldProp::USING_DESIRED_WEAPON] = true;
 }
 
 bool UseSpecificWeaponAction::precondCheck() {

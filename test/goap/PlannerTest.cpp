@@ -3,10 +3,9 @@
 #include <goap/WorldCond.h>
 #include <goap/action/Action.h>
 #include <goap/Planner.h>
-#include <utlqueue.h>
 
-CUtlQueue<int> plan;
-CUtlMap<WorldProp, bool> worldState;
+std::queue<int> plan;
+WorldState worldState;
 Planner planner(worldState);
 
 class Blackboard {
@@ -41,8 +40,8 @@ class ReloadWeaponAction: public TestAction {
 public:
 	ReloadWeaponAction() :
 			TestAction( { WorldProp::WEAPON_LOADED, true }) {
-		precond.Insert(WorldProp::OUT_OF_AMMO, false);
-		precond.Insert(WorldProp::ENEMY_SIGHTED, false);
+		precond[WorldProp::OUT_OF_AMMO] = false;
+		precond[WorldProp::ENEMY_SIGHTED] = false;
 	}
 
 } reload;
@@ -52,7 +51,7 @@ class FindCoverAction: public TestAction {
 public:
 	FindCoverAction() :
 			TestAction( { WorldProp::ENEMY_SIGHTED, false }) {
-		precond.Insert(WorldProp::OUT_OF_AMMO, false);
+		precond[WorldProp::OUT_OF_AMMO] = false;
 	}
 
 	float getCost() {
@@ -73,8 +72,8 @@ class KillAction: public TestAction {
 public:
 	KillAction() :
 			TestAction( { WorldProp::ENEMY_SIGHTED, false }) {
-		precond.Insert(WorldProp::WEAPON_IN_RANGE, true);
-		precond.Insert(WorldProp::WEAPON_LOADED, true);
+		precond[WorldProp::WEAPON_IN_RANGE] = true;
+		precond[WorldProp::WEAPON_LOADED] = true;
 	}
 } killEnemy;
 
@@ -87,32 +86,49 @@ void test(WorldProp prop, bool cond) {
 }
 
 void PlannerTest::setUp() {
-	SetDefLessFunc(worldState);
-	worldState.Insert(WorldProp::USING_BEST_WEAP, false);
-	worldState.Insert(WorldProp::OUT_OF_AMMO, false);
-	worldState.Insert(WorldProp::WEAPON_LOADED, false);
-	worldState.Insert(WorldProp::WEAPON_IN_RANGE, true);
-	worldState.Insert(WorldProp::MULTIPLE_ENEMY_SIGHTED, false);
-	worldState.Insert(WorldProp::ENEMY_SIGHTED, true);
+	worldState[WorldProp::USING_BEST_WEAP] = false;
+	worldState[WorldProp::OUT_OF_AMMO] = false;
+	worldState[WorldProp::WEAPON_LOADED] = false;
+	worldState[WorldProp::WEAPON_IN_RANGE] = true;
+	worldState[WorldProp::MULTIPLE_ENEMY_SIGHTED] = false;
+	worldState[WorldProp::ENEMY_SIGHTED] = true;
 }
 
 void PlannerTest::tearDown() {
-	plan.RemoveAll();
-	worldState.RemoveAll();
+	plan = std::queue<int>();
+	worldState.clear();
+}
+
+void PlannerTest::testMap() {
+	MyUnorderedMap<WorldProp, int> testMap;
+	testMap[WorldProp::USING_BEST_WEAP] = 0;
+	testMap[WorldProp::ENEMY_SIGHTED] = 1;
+	testMap[WorldProp::MULTIPLE_ENEMY_SIGHTED] = 2;
+	TS_ASSERT_EQUALS(0, testMap[WorldProp::USING_BEST_WEAP]);
+	TS_ASSERT_EQUALS(2, testMap[WorldProp::MULTIPLE_ENEMY_SIGHTED]);
+	TS_ASSERT_EQUALS(1, testMap[WorldProp::ENEMY_SIGHTED]);
+	auto testMap2 = testMap;
+	for (auto i: testMap) {
+		TS_ASSERT_EQUALS(i.second, testMap2.at(i.first))
+	}
 }
 
 void PlannerTest::testSwitchToLoadedWeaponThenAttack() {
 	test(WorldProp::ENEMY_SIGHTED, false);
-	TS_ASSERT_EQUALS(2, plan.Count());
-	TS_ASSERT_EQUALS(2, plan.RemoveAtHead());
-	TS_ASSERT_EQUALS(3, plan.RemoveAtHead());
+	TS_ASSERT_EQUALS(2, plan.size());
+	TS_ASSERT_EQUALS(2, plan.front());
+	plan.pop();
+	TS_ASSERT_EQUALS(3, plan.front());
+	plan.pop();
 }
 
 void PlannerTest::testFindFindCoverReload() {
 	switchToLoadedWeap.setProcPrecond(false);
 	test(WorldProp::WEAPON_LOADED, true);
-	TS_ASSERT_EQUALS(2, plan.Count());
-	TS_ASSERT_EQUALS(1, plan.RemoveAtHead());
-	TS_ASSERT_EQUALS(0, plan.RemoveAtHead());
+	TS_ASSERT_EQUALS(2, plan.size());
+	TS_ASSERT_EQUALS(1, plan.front());
+	plan.pop();
+	TS_ASSERT_EQUALS(0, plan.front());
+	plan.pop();
 	switchToLoadedWeap.setProcPrecond(true);
 }

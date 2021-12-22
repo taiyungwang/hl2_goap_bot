@@ -1,6 +1,7 @@
 #pragma once
 
 #include <goap/action/UseSpecificWeaponAction.h>
+#include <vector.h>
 
 class Player;
 

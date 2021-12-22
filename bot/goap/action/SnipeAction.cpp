@@ -18,7 +18,7 @@ ConVar snipeChance("mybot_snipe_chance", "0.5");
 
 SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 	effects = {WorldProp::ENEMY_SIGHTED, true};
-	precond.Insert(WorldProp::USING_BEST_WEAP, true);
+	precond[WorldProp::USING_BEST_WEAP] = true;
 	targetRadius = 16.0f;
 	facing.x = facing.z = facing.y = 0.0f;
 	chanceToExec = snipeChance.GetFloat();

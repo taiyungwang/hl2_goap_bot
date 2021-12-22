@@ -20,8 +20,8 @@ AttackAction::AttackAction(Blackboard& blackboard) :
 		Action(blackboard) {
 	moveCtx = new MoveStateContext(blackboard);
 	effects = {WorldProp::IS_BLOCKED, false};
-	precond.Insert(WorldProp::WEAPON_IN_RANGE, true);
-	precond.Insert(WorldProp::WEAPON_LOADED, true);
+	precond[WorldProp::WEAPON_IN_RANGE] = true;
+	precond[WorldProp::WEAPON_LOADED] = true;
 }
 
 AttackAction::~AttackAction() {

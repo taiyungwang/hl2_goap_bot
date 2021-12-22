@@ -12,7 +12,7 @@
 
 CapturePointAction::CapturePointAction(Blackboard& blackboard) :
 		GoToEntityWithGivenNameAction(blackboard, "dod_control_point") {
-	precond.Insert(WorldProp::ROUND_STARTED, true);
+	precond[WorldProp::ROUND_STARTED] = true;
 	effects = {WorldProp::ALL_POINTS_CAPTURED, true};
 	allItemsVisible = true;
 }

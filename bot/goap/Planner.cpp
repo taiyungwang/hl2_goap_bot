@@ -3,80 +3,47 @@
 #include <util/SimpleException.h>
 #include <utlstring.h>
 
-template<typename T, typename U>
-bool operator==(const CUtlMap<T, U> &m1, const CUtlMap<T, U> &m2) {
-	if (&m1 == &m2) {
-		return true;
-	}
-	if (m1.Count() < m2.Count()) {
-		return false;
-	}
-	FOR_EACH_MAP_FAST(m1, i)
-	{
-		const auto &m2Idx = m2.Find(m1.Key(i));
-		if (!m2.IsValidIndex(m2Idx) || m1[i] != m2[m2Idx]) {
-			return false;
-		}
-	}
-	return true;
-}
-
-Planner::Planner(const WorldState &worldState) :
-		worldState(worldState) {
-	efxToActions.SetLessFunc(
-			[](const GoalState &g1, const GoalState &g2) {
-				return (g1.m_key == g2.m_key && g1.m_value < g2.m_value)
-						|| g1.m_key < g2.m_key;
-			});
-	openSet.SetLessFunc([](Node *const&n1, Node *const&n2) {
-		return n1->fScore > n2->fScore;
-	});
-	createNode();
-}
-
 void Planner::addAction(Action *action) {
-	int i = actions.Count();
-	actions.AddToTail(action);
+	int i = actions.size();
+	actions.push_back(action);
 	const GoalState &currCond = actions[i]->getEffects();
-	auto j = efxToActions.Find(currCond);
-	if (!efxToActions.IsValidIndex(j)) {
-		j = efxToActions.Insert(currCond, CCopyableUtlVector<int>());
+	if (efxToActions.find(currCond) == efxToActions.end()) {
+		efxToActions[currCond] = std::vector<int>();
 	}
-	efxToActions[j].AddToTail(i);
+	efxToActions[currCond].push_back(i);
 	createNode();
 }
 
 void Planner::startSearch(const GoalState &goal) {
-	openSet.RemoveAll();
+	openSet = std::priority_queue<Node*>();
 	start = nullptr;
-	FOR_EACH_VEC(nodes, i)
-	{
-		nodes[i].isOpen = nodes[i].isClosed = false;
-		nodes[i].parent = -1;
-		nodes[i].fScore = nodes[i].gScore = INFINITY;
-		nodes[i].currState.RemoveAll();
-		nodes[i].goalState.RemoveAll();
+	for (auto& node: nodes) {
+		node.isOpen = node.isClosed = false;
+		node.parent = -1;
+		node.fScore = node.gScore = INFINITY;
+		node.currState.clear();
+		node.goalState.clear();
 	}
-	Node &node = nodes.Tail();
-	node.goalState.Insert(goal.m_key, goal.m_value);
-	node.currState.Insert(goal.m_key, worldState[worldState.Find(goal.m_key)]);
+	Node &node = nodes.back();
+	auto prop = std::get<0>(goal);
+	node.goalState[prop] = std::get<1>(goal);
+	node.currState[prop] = worldState.at(prop);
 	node.isOpen = true;
-	openSet.Insert(&node);
+	openSet.push(&node);
 	node.gScore = 0.0f;
 	node.fScore = getHeuristicCost(node);
 }
 
 bool Planner::searchStep() {
-	Node &current = *(openSet.ElementAtHead());
-	openSet.RemoveAtHead();
+	Node &current = *(openSet.top());
+	openSet.pop();
 	GoalState goal;
 	bool foundGoal = false;
-	FOR_EACH_MAP_FAST(current.goalState, i)
+	for(auto i: current.goalState)
 	{
-		goal.m_key = current.goalState.Key(i);
-		goal.m_value = current.goalState[i];
-		if (goal.m_value
-				!= current.currState[current.currState.Find(goal.m_key)]) {
+		std::get<0>(goal) = std::get<0>(i);
+		std::get<1>(goal) = std::get<1>(i);
+		if (std::get<1>(goal) != current.currState.at(std::get<0>(goal))) {
 			foundGoal = true;
 			break;
 		}
@@ -87,15 +54,13 @@ bool Planner::searchStep() {
 		start = &current;
 		return true;
 	}
-	const auto &efxIdx = efxToActions.Find(goal);
-	if (!efxToActions.IsValidIndex(efxIdx)) {
+	if (efxToActions.end() == efxToActions.find(goal)) {
 		// no actions can satisfy this precondition.
-		return openSet.Count() == 0;
+		return openSet.empty();
 	}
-	auto &neighbors = efxToActions[efxIdx];
-	FOR_EACH_VEC(neighbors, i)
+	for (int i: efxToActions.at(goal))
 	{
-		Node &neighbor = nodes[neighbors[i]];
+		Node &neighbor = nodes[i];
 		if (neighbor.isClosed) {
 			continue;
 		}
@@ -105,27 +70,21 @@ bool Planner::searchStep() {
 			continue;
 		}
 		float tentativeGScore = current.gScore + action->getCost();
-		copy(neighbor.currState, current.currState);
-		copy(neighbor.goalState, current.goalState);
-		WorldState &currState = neighbor.currState;
-		currState[currState.Find(goal.m_key)] = goal.m_value;
-		const WorldState &precond = action->getPrecond();
-		WorldState &goalState = neighbor.goalState;
-		bool goalStateConflict = false;
-		FOR_EACH_MAP_FAST(precond, j)
+		neighbor.currState = current.currState;
+		neighbor.goalState = current.goalState;
+		WorldProp goalProp = std::get<0>(goal);
+		neighbor.currState[goalProp] = std::get<1>(goal);
+		WorldState &neighborGoal = neighbor.goalState;
+		for (auto j: action->getPrecond())
 		{
-			WorldProp prop = precond.Key(j);
-			auto k = goalState.Find(prop);
-			if (!goalState.IsValidIndex(k)) {
-				goalState.Insert(prop, precond[j]);
-				currState.Insert(prop, worldState[worldState.Find(prop)]);
-			} else {
-				if (precond[j] != goalState[k]) {
-					throw SimpleException(CUtlString("Goal state conflict for prop, ")
-									+ static_cast<int>(prop));
-				}
-				currState[k] = worldState[worldState.Find(prop)];
+			WorldProp precondProp = std::get<0>(j);
+			if (neighborGoal.find(precondProp) == neighborGoal.end()) {
+				neighborGoal[precondProp] = std::get<1>(j);
+			} else if (std::get<1>(j) != neighborGoal.at(precondProp)) {
+				throw SimpleException(CUtlString("Goal state conflict for prop, ")
+						+ static_cast<int>(precondProp));
 			}
+			neighbor.currState[precondProp] = worldState.at(precondProp);
 		}
 		if (tentativeGScore >= neighbor.gScore) {
 			continue;
@@ -136,56 +95,43 @@ bool Planner::searchStep() {
 		if (!neighbor.isOpen) {
 			// found new node
 			neighbor.isOpen = true;
-			openSet.Insert(&neighbor);
+			openSet.push(&neighbor);
 		}
 	}
-	return openSet.Count() == 0;
+	return openSet.size() == 0;
 }
 
-void Planner::getPath(CUtlQueue<int> &path) const {
-	path.RemoveAll();
+void Planner::getPath(std::queue<int> &path) const {
+	std::queue<int> plan;
+	path = plan;
 	if (start == nullptr) {
 		return;
 	}
-	for (int i = start->id; i != nodes.Count() - 1; i = nodes[i].parent) {
+	for (int i = start->id; i != nodes.size() - 1; i = nodes[i].parent) {
 		if (!actions[nodes[i].id]->onPlanningFinished()) {
-			path.RemoveAll();
+			path = std::queue<int>();
 			return;
 		}
-		path.Insert(nodes[i].id);
-	}
-}
-
-void Planner::copy(WorldState &left, const WorldState &right) {
-	if (&left == &right) {
-		return;
-	}
-	left.RemoveAll();
-	FOR_EACH_MAP_FAST(right, i)
-	{
-		left.Insert(right.Key(i), right[i]);
+		path.push(nodes[i].id);
 	}
 }
 
 void Planner::createNode() {
-	nodes.AddToTail();
-	SetDefLessFunc(nodes.Tail().goalState);
-	SetDefLessFunc(nodes.Tail().currState);
-	nodes.Tail().id = nodes.Count() - 1;
+	nodes.emplace_back();
+	nodes.back().id = nodes.size() - 1;
 }
 
 float Planner::getHeuristicCost(const Node &node) const {
 	float cost = 0.0f;
 	const auto &goals = node.goalState;
-	FOR_EACH_MAP_FAST(goals, i)
+	for(auto i: goals)
 	{
-		WorldProp prop = goals.Key(i);
 		const auto &currState = node.currState;
-		const auto &j = currState.Find(prop);
-		if (!currState.IsValidIndex(j)) {
+		WorldProp prop = std::get<0>(i);
+		if (currState.find(prop) == currState.end()) {
 			throw new SimpleException("Unable to find current state.");
 		}
-		if (goals[i] != currState[j]) {
+		if (std::get<1>(i) != currState.at(prop)) {
 			cost += 1.0f;
 		}
 	}

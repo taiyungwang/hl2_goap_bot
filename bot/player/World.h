@@ -8,7 +8,6 @@ class World {
 public:
 
 	World(bool roundStarted = true): roundStarted(roundStarted) {
-		SetDefLessFunc(states);
 	}
 
 	virtual ~World() {
@@ -17,13 +16,13 @@ public:
 	void reset();
 
 	bool getState(WorldProp prop) const {
-		return states[states.Find(prop)];
+		return states.at(prop);
 	}
 
 	bool think(Blackboard& blackboard);
 
 	void updateState(WorldProp name, bool cond) {
-		states[states.Find(name)] = cond;
+		states[name] = cond;
 	}
 
 	WorldState& getStates() {

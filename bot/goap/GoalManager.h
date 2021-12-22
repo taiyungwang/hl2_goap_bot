@@ -2,7 +2,7 @@
 
 #include "WorldCond.h"
 #include <utlvector.h>
-#include <utlqueue.h>
+#include <queue>
 
 class Action;
 class Planner;
@@ -61,7 +61,7 @@ private:
 
 	Planner* planBuilder;
 
-	CUtlQueue<int> plan;
+	std::queue<int> plan;
 
 	Blackboard& blackboard;
 

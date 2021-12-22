@@ -1,11 +1,9 @@
 #pragma once
 
 #include "WorldCond.h"
-#include <utlmap.h>
-#include <utlpriorityqueue.h>
-#include <utlvector.h>
-#include <utlstack.h>
-#include <utlqueue.h>
+#include <unordered_map>
+#include <queue>
+#include <vector>
 
 class Action;
 
@@ -20,7 +18,10 @@ public:
 	 * @param actions List of available actions.
 	 * @param The current world state.
 	 */
-	Planner(const WorldState& worldState);
+	Planner(const WorldState &worldState) :
+			worldState(worldState) {
+		createNode();
+	}
 
 	void addAction(Action* action);
 
@@ -39,7 +40,7 @@ public:
 	/**
 	 * Gets the path of the search result.
 	 */
-	void getPath(CUtlQueue<int>& path) const;
+	void getPath(std::queue<int>& path) const;
 
 private:
 	struct Node {
@@ -47,22 +48,31 @@ private:
 		int id, parent;
 		WorldState goalState, currState;
 		float gScore, fScore;
+
+		bool operator<(const Node &other) const {
+			return fScore > other.fScore;
+		}
 	};
 
-	static void copy(WorldState& left, const WorldState& right);
-
-	CUtlVector<Action*> actions;
+	std::vector<Action*> actions;
 
 	const WorldState& worldState;
+
+	struct GoalStateHash: public std::unary_function<GoalState, std::size_t> {
+		std::size_t operator()(const GoalState &k) const {
+			return static_cast<std::size_t>(std::get<0>(k))
+					^ static_cast<std::size_t>(std::get<1>(k));
+		}
+	};
 
 	/**
 	 * Map of effects to actions that satisfy the effect.
 	 */
-	CUtlMap<GoalState, CCopyableUtlVector<int>> efxToActions;
+	std::unordered_map<GoalState, std::vector<int>, GoalStateHash> efxToActions;
 
-	CUtlVector<Node> nodes;
+	std::vector<Node> nodes;
 
-	CUtlPriorityQueue<Node*> openSet;
+	std::priority_queue<Node*> openSet;
 
 	const Node* start = nullptr;
 

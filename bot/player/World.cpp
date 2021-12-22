@@ -9,25 +9,25 @@
 #include <eiface.h>
 
 void World::reset() {
-	states.RemoveAll();
-	states.Insert(WorldProp::USING_DESIRED_WEAPON, false);
-	states.Insert(WorldProp::ENEMY_SIGHTED, false);
-	states.Insert(WorldProp::MULTIPLE_ENEMY_SIGHTED, false);
-	states.Insert(WorldProp::HURT, false);
-	states.Insert(WorldProp::HEALTH_FULL, true);
-	states.Insert(WorldProp::IS_BLOCKED, false);
-	states.Insert(WorldProp::USING_BEST_WEAP, false);
-	states.Insert(WorldProp::WEAPON_LOADED, true);
-	states.Insert(WorldProp::OUT_OF_AMMO, false);
-	states.Insert(WorldProp::WEAPON_IN_RANGE, false);
-	states.Insert(WorldProp::ROUND_STARTED, roundStarted);
-	states.Insert(WorldProp::HEARD_AREA_CLEAR, false);
-	states.Insert(WorldProp::EXPLOSIVE_NEAR, false);
+	states.clear();
+	states[WorldProp::USING_DESIRED_WEAPON] = false;
+	states[WorldProp::ENEMY_SIGHTED] = false;
+	states[WorldProp::MULTIPLE_ENEMY_SIGHTED] = false;
+	states[WorldProp::HURT] = false ;
+	states[WorldProp::HEALTH_FULL] = true ;
+	states[WorldProp::IS_BLOCKED] = false;
+	states[WorldProp::USING_BEST_WEAP] = false;
+	states[WorldProp::WEAPON_LOADED] = true;
+	states[WorldProp::OUT_OF_AMMO] = false;
+	states[WorldProp::WEAPON_IN_RANGE] = false;
+	states[WorldProp::ROUND_STARTED] = roundStarted;
+	states[WorldProp::HEARD_AREA_CLEAR] = false;
+	states[WorldProp::EXPLOSIVE_NEAR] = false;
 	addStates();
 }
 
 bool World::think(Blackboard& blackboard) {
-	bool& enemySighted = states[states.Find(WorldProp::ENEMY_SIGHTED)];
+	bool& enemySighted = states[WorldProp::ENEMY_SIGHTED];
 	updateState(WorldProp::HEARD_AREA_CLEAR, false);
 	updateState(WorldProp::EXPLOSIVE_NEAR, false);
 	Bot* self = blackboard.getSelf();
@@ -76,13 +76,13 @@ bool World::think(Blackboard& blackboard) {
 		updateState(WorldProp::OUT_OF_AMMO, weap->isOutOfAmmo(self->getEdict()));
 	}
 	updateState(WorldProp::HEALTH_FULL, self->getHealth() >= self->getMaxHealth());
-	bool hurt = states[states.Find(WorldProp::HURT)];
+	bool hurt = states[WorldProp::HURT];
 	updateState(WorldProp::HURT, false);
 	updateState(WorldProp::IS_BLOCKED, blackboard.getBlocker() != nullptr);
 	// reset planner if this is first time we see enemy.
 	bool noEnemy = !enemySighted;
 	if (enemySighted && enemy == nullptr
-			&& !states[states.Find(WorldProp::HEARD_AREA_CLEAR)]) {
+			&& !states[WorldProp::HEARD_AREA_CLEAR]) {
 		updateState(WorldProp::HEARD_AREA_CLEAR, true);
 	}
 	enemySighted = enemy != nullptr;

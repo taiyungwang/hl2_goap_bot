@@ -14,11 +14,11 @@
 #include <util/BaseGrenade.h>
 
 void DODWorld::addStates() {
-	states.Insert(WorldProp::ALL_POINTS_CAPTURED, false);
-	states.Insert(WorldProp::POINTS_DEFENDED, false);
-	states.Insert(WorldProp::HAS_BOMB, false);
-	states.Insert(WorldProp::BOMB_DEFUSED, false);
-	states.Insert(WorldProp::HAS_LIVE_GRENADE, false);
+	states[WorldProp::ALL_POINTS_CAPTURED] = false;
+	states[WorldProp::POINTS_DEFENDED] = false;
+	states[WorldProp::HAS_BOMB] = false;
+	states[WorldProp::BOMB_DEFUSED] = false;
+	states[WorldProp::HAS_LIVE_GRENADE] = false;
 }
 
 bool DODWorld::handle(EventInfo* event) {

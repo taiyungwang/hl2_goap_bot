@@ -24,10 +24,10 @@ GoalManager::~GoalManager() {
 }
 
 void GoalManager::resetPlanning(bool force) {
-	if (force || state != State::ACTION || plan.IsEmpty()
-			|| actions[plan.Head()]->isInterruptable()) {
-		if (state == State::ACTION && !plan.IsEmpty()) {
-			actions[plan.Head()]->abort();
+	if (force || state != State::ACTION || plan.empty()
+			|| actions[plan.front()]->isInterruptable()) {
+		if (state == State::ACTION && !plan.empty()) {
+			actions[plan.front()]->abort();
 		}
 		reset();
 	}
@@ -37,8 +37,8 @@ void GoalManager::execute() {
 	switch (state) {
 	case State::PLANNING: {
 		extern IVEngineServer* engine;
-		plan.RemoveAll();
-		while (plan.IsEmpty() && getNextGoal()) {
+		plan = std::queue<int>();
+		while (plan.empty() && getNextGoal()) {
 			// timebox to 1/60 second
 			float timeLimit = 0.0167f + engine->Time();
 			bool finished = false;
@@ -47,24 +47,24 @@ void GoalManager::execute() {
 			}
 			if (finished) {
 				planBuilder->getPath(plan);
-				if (!plan.IsEmpty()) {
+				if (!plan.empty()) {
 					state = State::ACTION;
-					actions[plan.Head()]->init();
+					actions[plan.front()]->init();
 				}
 			}
 		}
 		break;
 	}
 	case State::ACTION: {
-		if (plan.IsEmpty()) {
+		if (plan.empty()) {
 			reset();
 			break;
 		}
-		Action* action = actions[plan.Head()];
+		Action* action = actions[plan.front()];
 		if (action->execute()) {
-			plan.RemoveAtHead();
-			if (action->goalComplete() && !plan.IsEmpty()) {
-				actions[plan.Head()]->init();
+			plan.pop();
+			if (action->goalComplete() && !plan.empty()) {
+				actions[plan.front()]->init();
 			} else {
 				reset();
 			}
@@ -92,7 +92,7 @@ bool GoalManager::getNextGoal() {
 		auto& goal = goals[currentGoal];
 		auto& effect = actions[goal.action]->getEffects();
 		float chanceToExec = actions[goal.action]->getChanceToExec();
-		if (effect.m_value != worldState[worldState.Find(effect.m_key)]
+		if (std::get<1>(effect) != worldState.at(std::get<0>(effect))
 			&& (chanceToExec >= 1.0f || chanceToExec > RandomFloat(0, 1.0f))) {
 			break;
 		}
