@@ -14,94 +14,85 @@ void Planner::addAction(Action *action) {
 	createNode();
 }
 
-void Planner::startSearch(const GoalState &goal) {
-	openSet = std::priority_queue<Node*>();
-	start = nullptr;
-	for (auto& node: nodes) {
-		node.isOpen = node.isClosed = false;
-		node.parent = -1;
-		node.fScore = node.gScore = INFINITY;
-		node.currState.clear();
-		node.goalState.clear();
-	}
-	Node &node = nodes.back();
-	auto prop = std::get<0>(goal);
-	node.goalState[prop] = std::get<1>(goal);
+bool Planner::findPlan(const GoalState &finalGoal) {
+	initSearch();
+	Node& node = nodes.back();
+	auto prop = std::get<0>(finalGoal);
+	node.goalState[prop] = std::get<1>(finalGoal);
 	node.currState[prop] = worldState.at(prop);
 	node.isOpen = true;
 	openSet.push(&node);
 	node.gScore = 0.0f;
 	node.fScore = getHeuristicCost(node);
-}
-
-bool Planner::searchStep() {
-	Node &current = *(openSet.top());
-	openSet.pop();
-	GoalState goal;
-	bool foundGoal = false;
-	for(auto i: current.goalState)
-	{
-		std::get<0>(goal) = std::get<0>(i);
-		std::get<1>(goal) = std::get<1>(i);
-		if (std::get<1>(goal) != current.currState.at(std::get<0>(goal))) {
-			foundGoal = true;
-			break;
-		}
-	}
-	current.isClosed = true;
-	current.isOpen = false;
-	if (!foundGoal) { // no goals need to be satisfied
-		start = &current;
-		return true;
-	}
-	if (efxToActions.end() == efxToActions.find(goal)) {
-		// no actions can satisfy this precondition.
-		return openSet.empty();
-	}
-	for (int i: efxToActions.at(goal))
-	{
-		Node &neighbor = nodes[i];
-		if (neighbor.isClosed) {
-			continue;
-		}
-		Action *action = actions[neighbor.id];
-		if (!action->precondCheck()) {
-			neighbor.isClosed = true;
-			continue;
-		}
-		float tentativeGScore = current.gScore + action->getCost();
-		neighbor.currState = current.currState;
-		neighbor.goalState = current.goalState;
-		WorldProp goalProp = std::get<0>(goal);
-		neighbor.currState[goalProp] = std::get<1>(goal);
-		WorldState &neighborGoal = neighbor.goalState;
-		for (auto j: action->getPrecond())
+	while (!openSet.empty()) {
+		GoalState goal;
+		Node *current = openSet.top();
+		bool foundGoal = false;
+		for(auto i: current->goalState)
 		{
-			WorldProp precondProp = std::get<0>(j);
-			if (neighborGoal.find(precondProp) == neighborGoal.end()) {
-				neighborGoal[precondProp] = std::get<1>(j);
-			} else if (std::get<1>(j) != neighborGoal.at(precondProp)) {
-				throw SimpleException(CUtlString("Goal state conflict for prop, ")
-						+ static_cast<int>(precondProp));
+			std::get<0>(goal) = std::get<0>(i);
+			std::get<1>(goal) = std::get<1>(i);
+			if (std::get<1>(goal) != current->currState.at(std::get<0>(goal))) {
+				foundGoal = true;
+				break;
 			}
-			neighbor.currState[precondProp] = worldState.at(precondProp);
 		}
-		if (tentativeGScore >= neighbor.gScore) {
+		if (!foundGoal) { // no goals need to be satisfied
+			start = current;
+			return true;
+		}
+		current->isClosed = true;
+		current->isOpen = false;
+		openSet.pop();
+		if (efxToActions.end() == efxToActions.find(goal)) {
+			// no actions can satisfy this precondition.
 			continue;
 		}
-		neighbor.parent = current.id;
-		neighbor.gScore = tentativeGScore;
-		neighbor.fScore = neighbor.gScore + getHeuristicCost(neighbor);
-		if (!neighbor.isOpen) {
-			// found new node
-			neighbor.isOpen = true;
-			openSet.push(&neighbor);
+		for (int i: efxToActions.at(goal))
+		{
+			Node &neighbor = nodes[i];
+			if (neighbor.isClosed) {
+				continue;
+			}
+			Action *action = actions[neighbor.id];
+			if (!action->precondCheck()) {
+				neighbor.isClosed = true;
+				continue;
+			}
+			float tentativeGScore = current->gScore + action->getCost();
+			neighbor.currState = current->currState;
+			neighbor.goalState = current->goalState;
+			WorldProp goalProp = std::get<0>(goal);
+			neighbor.currState[goalProp] = std::get<1>(goal);
+			WorldState &neighborGoal = neighbor.goalState;
+			for (auto j: action->getPrecond())
+			{
+				WorldProp precondProp = std::get<0>(j);
+				if (neighborGoal.find(precondProp) == neighborGoal.end()) {
+					neighborGoal[precondProp] = std::get<1>(j);
+				} else if (std::get<1>(j) != neighborGoal.at(precondProp)) {
+					throw SimpleException(CUtlString("Goal state conflict for prop, ")
+							+ static_cast<int>(precondProp));
+				}
+				neighbor.currState[precondProp] = worldState.at(precondProp);
+			}
+			if (tentativeGScore >= neighbor.gScore) {
+				continue;
+			}
+			neighbor.parent = current->id;
+			neighbor.gScore = tentativeGScore;
+			neighbor.fScore = neighbor.gScore + getHeuristicCost(neighbor);
+			if (!neighbor.isOpen) {
+				// found new node
+				neighbor.isOpen = true;
+				openSet.push(&neighbor);
+			}
 		}
 	}
-	return openSet.size() == 0;
+	return false;
 }
 
-void Planner::getPath(std::queue<int> &path) const {
+void Planner::buildPlan(std::queue<int> &path) const {
 	std::queue<int> plan;
 	path = plan;
 	if (start == nullptr) {
@@ -113,6 +104,18 @@ void Planner::getPath(std::queue<int> &path) const {
 			return;
 		}
 		path.push(nodes[i].id);
+	}
+}
+
+void Planner::initSearch() {
+	openSet = std::priority_queue<Node*>();
+	start = nullptr;
+	for (auto& node: nodes) {
+		node.isOpen = node.isClosed = false;
+		node.parent = -1;
+		node.fScore = node.gScore = INFINITY;
+		node.currState.clear();
+		node.goalState.clear();
 	}
 }
 

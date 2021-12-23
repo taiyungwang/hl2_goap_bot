@@ -79,10 +79,9 @@ public:
 
 void test(WorldProp prop, bool cond) {
 	GoalState goal = { prop, cond };
-	planner.startSearch(goal);
-	while (!planner.searchStep())
-		;
-	planner.getPath(plan);
+	if (planner.findPlan(goal)) {
+		planner.buildPlan(plan);
+	}
 }
 
 void PlannerTest::setUp() {

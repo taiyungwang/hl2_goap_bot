@@ -26,21 +26,15 @@ public:
 	void addAction(Action* action);
 
 	/**
-	 * Resets and initializes a new search.
+	 * Finds a plan
+	 * @return True if a plan is found
 	 */
-	void startSearch(const GoalState& goal);
+	bool findPlan(const GoalState& goal);
 
 	/**
-	 * Executes one iteration of the search for a given node.
-	 *
-	 * @return True if search is done.
+	 * Builds the plan of the search result.
 	 */
-	bool searchStep();
-
-	/**
-	 * Gets the path of the search result.
-	 */
-	void getPath(std::queue<int>& path) const;
+	void buildPlan(std::queue<int>& path) const;
 
 private:
 	struct Node {
@@ -75,6 +69,8 @@ private:
 	std::priority_queue<Node*> openSet;
 
 	const Node* start = nullptr;
+
+	void initSearch();
 
 	void createNode();
 

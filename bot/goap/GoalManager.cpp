@@ -3,7 +3,6 @@
 #include "Planner.h"
 #include "action/Action.h"
 #include <player/Player.h>
-#include <eiface.h>
 #include <vstdlib/random.h>
 
 GoalManager::GoalManager(const WorldState& worldState, Blackboard& blackboard) :
@@ -36,17 +35,11 @@ void GoalManager::resetPlanning(bool force) {
 void GoalManager::execute() {
 	switch (state) {
 	case State::PLANNING: {
-		extern IVEngineServer* engine;
 		plan = std::queue<int>();
 		while (plan.empty() && getNextGoal()) {
 			// timebox to 1/60 second
-			float timeLimit = 0.0167f + engine->Time();
-			bool finished = false;
-			while (!finished && engine->Time() <= timeLimit) {
-				finished = planBuilder->searchStep();
-			}
-			if (finished) {
-				planBuilder->getPath(plan);
+			if (planBuilder->findPlan(actions[goals[currentGoal++].action]->getEffects())) {
+				planBuilder->buildPlan(plan);
 				if (!plan.empty()) {
 					state = State::ACTION;
 					actions[plan.front()]->init();
@@ -101,7 +94,6 @@ bool GoalManager::getNextGoal() {
 		reset();
 		return false;
 	}
-	planBuilder->startSearch(actions[goals[currentGoal++].action]->getEffects());
 	return true;
 }
 
