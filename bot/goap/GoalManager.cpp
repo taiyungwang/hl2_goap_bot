@@ -14,90 +14,64 @@ GoalManager::~GoalManager() {
 	if (planBuilder != nullptr) {
 		delete planBuilder;
 	}
-	FOR_EACH_VEC(actions, i)
+	for(auto action: actions)
 	{
-		delete actions[i];
+		delete action;
 	}
-	actions.RemoveAll();
-	goals.RemoveAll();
+	actions.clear();
+	goals.clear();
 }
 
 void GoalManager::resetPlanning(bool force) {
-	if (force || state != State::ACTION || plan.empty()
-			|| actions[plan.front()]->isInterruptable()) {
-		if (state == State::ACTION && !plan.empty()) {
-			actions[plan.front()]->abort();
-		}
+	if (!plan.empty() && (force || actions[plan.front()]->isInterruptable())) {
+		actions[plan.front()]->abort();
 		reset();
 	}
 }
 
 void GoalManager::execute() {
-	switch (state) {
-	case State::PLANNING: {
-		plan = std::queue<int>();
-		while (plan.empty() && getNextGoal()) {
-			// timebox to 1/60 second
-			if (planBuilder->findPlan(actions[goals[currentGoal++].action]->getEffects())) {
-				planBuilder->buildPlan(plan);
-				if (!plan.empty()) {
-					state = State::ACTION;
-					actions[plan.front()]->init();
-				}
+	while (plan.empty() && getNextGoal()) {
+		if (planBuilder->findPlan(actions[goals[currentGoal++].action]->getEffects())) {
+			planBuilder->buildPlan(plan);
+			if (!plan.empty()) {
+				actions[plan.front()]->init();
 			}
 		}
-		break;
 	}
-	case State::ACTION: {
-		if (plan.empty()) {
+	if (!plan.empty() && actions[plan.front()]->execute()) {
+		if (!actions[plan.front()]->goalComplete()) {
 			reset();
-			break;
-		}
-		Action* action = actions[plan.front()];
-		if (action->execute()) {
+		} else {
 			plan.pop();
-			if (action->goalComplete() && !plan.empty()) {
+			if (!plan.empty()) {
 				actions[plan.front()]->init();
 			} else {
 				reset();
 			}
 		}
-		break;
 	}
-	default: // REPLAN
-		goals.Sort([] (const Goal* g1, const Goal* g2) {
-			if (g2->priority == g1->priority) {
-				return 0;
-			}
-			return g2->priority < g1->priority ? -1: 1;
-		});
-		state = State::PLANNING;
-	}
-}
-
-void GoalManager::reset() {
-	state = State::REPLAN;
-	currentGoal = 0;
 }
 
 bool GoalManager::getNextGoal() {
-	for (; currentGoal < goals.Count(); currentGoal++) {
+	for (; currentGoal < goals.size(); currentGoal++) {
 		auto& goal = goals[currentGoal];
 		auto& effect = actions[goal.action]->getEffects();
 		float chanceToExec = actions[goal.action]->getChanceToExec();
 		if (std::get<1>(effect) != worldState.at(std::get<0>(effect))
 			&& (chanceToExec >= 1.0f || chanceToExec > RandomFloat(0, 1.0f))) {
-			break;
+			return true;
 		}
 	}
-	if (currentGoal >= goals.Count()) {
-		reset();
-		return false;
-	}
-	return true;
+	reset();
+	return false;
+}
+
+void GoalManager::reset() {
+	plan = std::queue<int>();
+	currentGoal = 0;
 }
 
 void GoalManager::addAction(Action* action) {
-	actions.AddToTail(action);
+	actions.push_back(action);
 	planBuilder->addAction(action);
 }

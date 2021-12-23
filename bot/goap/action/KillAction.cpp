@@ -32,8 +32,11 @@ bool KillAction::execute()  {
 		target = visionTarget;
 		framesToWait = mybotAttackDelay.GetInt();
 	}
+	const Player *player = Player::getPlayer(target);
 	Weapon *weapon = self->getArsenal().getCurrWeapon();
 	return ((weapon != nullptr && weapon->getDeployer() != nullptr
+			&& player != nullptr && weapon->getMinDeployRange()
+			< player->getCurrentPosition().DistTo(self->getCurrentPosition())
 			&& !weapon->isDeployed())
 			|| --framesToWait <= 0) && AttackAction::execute();
 }

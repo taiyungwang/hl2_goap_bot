@@ -1,7 +1,6 @@
 #pragma once
 
 #include "WorldCond.h"
-#include <utlvector.h>
 #include <queue>
 
 class Action;
@@ -39,10 +38,9 @@ public:
 		if (priority <= 0.0f) {
 			return action;
 		}
-		goals.AddToTail();
-		goals.Tail().action = actions.Count() - 1;
-		goals.Tail().priority = priority;
-		goals.Tail();
+		goals.emplace_back();
+		goals.back().action = actions.size() - 1;
+		goals.back().priority = priority;
 		return action;
 	}
 
@@ -53,12 +51,6 @@ public:
 	void execute();
 
 private:
-	void reset();
-
-	enum class State {
-		ACTION, PLANNING, REPLAN
-	} state = State::REPLAN;
-
 	Planner* planBuilder;
 
 	std::queue<int> plan;
@@ -67,16 +59,18 @@ private:
 
 	const WorldState& worldState;
 
-	CUtlVector<Action*> actions;
+	std::vector<Action*> actions;
 
 	struct Goal {
 		float priority;
 		int action;
 	};
 
-	CUtlVector<Goal> goals;
+	std::vector<Goal> goals;
 
 	int currentGoal = 0;
+
+	void reset();
 
 	void addAction(Action* action);
 
