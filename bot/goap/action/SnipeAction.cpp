@@ -18,7 +18,6 @@ ConVar snipeChance("mybot_snipe_chance", "0.5");
 
 SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 	effects = {WorldProp::ENEMY_SIGHTED, true};
-	precond[WorldProp::USING_BEST_WEAP] = true;
 	targetRadius = 16.0f;
 	facing.x = facing.z = facing.y = 0.0f;
 	chanceToExec = snipeChance.GetFloat();
@@ -28,9 +27,10 @@ bool SnipeAction::onPlanningFinished() {
 	auto self = blackboard.getSelf();
 	int team = self->getTeam();
 	duration = 300;
+	const Weapon *weapon = self->getArsenal().getCurrWeapon();
 	if (!GoToAction::onPlanningFinished()
-			|| self->getArsenal().getCurrWeapon()->getMinDeployRange()
-			> calculateFacing()) {
+			|| (weapon != nullptr && weapon->getMinDeployRange()
+			> calculateFacing())) {
 		selector->update(selectorId, team, false);
 		return false;
 	}

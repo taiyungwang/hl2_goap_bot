@@ -57,13 +57,6 @@ void Bot::think() {
 			vision.updateVisiblity(this);
 			wantToListen = true;
 			cmd.Reset();
-			int best = arsenal->getBestWeapon(*blackboard,
-					[] (const Weapon*, Blackboard&, float) {
-				return false;
-			});
-			if (best != 0) {
-				arsenal->setBestWeaponIdx(best);
-			}
 			if ((resetPlanner || world->think(*blackboard))
 					&& !blackboard->isOnLadder()) {
 				planner->resetPlanning(false);

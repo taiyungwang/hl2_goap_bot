@@ -66,16 +66,8 @@ public:
 		this->desiredWeapIdx = desiredWeapon;
 	}
 
-	int getBestWeaponIdx() const {
-		return bestWeapIdx;
-	}
-
-	void setBestWeaponIdx(int bestWeapon) {
-		this->bestWeapIdx = bestWeapon;
-	}
-
 private:
-	int currWeapIdx, bestWeapIdx, desiredWeapIdx = 0;
+	int currWeapIdx, desiredWeapIdx = 0;
 
 	std::unordered_map<int, std::shared_ptr<Weapon>> weapons;
 

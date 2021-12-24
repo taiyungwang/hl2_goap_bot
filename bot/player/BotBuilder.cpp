@@ -99,9 +99,9 @@ Bot* BotBuilder::build(edict_t* ent) {
 	bot->setWorld(world);
 	GoalManager *planner = new GoalManager(world->getStates(), *blackboard);
 	planner->addAction<FindCoverFromGrenadesAction>(0.95f);
-	planner->addAction<ReloadWeaponAction>(0.85f);
-	planner->addAction<KillAction>(0.84f);
-	planner->addAction<SwitchWeaponAction>(0.82f);
+	planner->addAction<ReloadWeaponAction>(0.86f);
+	planner->addAction<KillAction>(0.85f);
+	planner->addAction<SwitchWeaponAction>(0.83f);
 	planner->addAction<FindCoverAction>(0.81f);
 	planner->addAction<SnipeAction>(0.7f);
 	planner->addAction<SwitchToDesiredWeaponAction>(0.0f);

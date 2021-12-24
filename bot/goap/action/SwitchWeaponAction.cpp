@@ -5,19 +5,21 @@
 #include <player/Blackboard.h>
 
 SwitchWeaponAction::SwitchWeaponAction(Blackboard& blackboard) :
-		WeaponAction(blackboard) {
+	SwitchToDesiredWeaponAction(blackboard) {
 	effects = {WorldProp::USING_BEST_WEAP, true};
 }
 
 bool SwitchWeaponAction::precondCheck() {
-	return !blackboard.isOnLadder() && arsenal.getBestWeaponIdx() != 0
-			&& arsenal.getCurrWeaponIdx() != arsenal.getBestWeaponIdx();
-}
-
-bool SwitchWeaponAction::execute() {
-	if (arsenal.getBestWeaponIdx() == arsenal.getCurrWeaponIdx()) {
+	if (!SwitchToDesiredWeaponAction::precondCheck()) {
+		return false;
+	}
+	int best = arsenal.getBestWeapon(blackboard,
+			[] (const Weapon*, Blackboard&, float) {
+		return false;
+	});
+	if (best > 0 && best != arsenal.getCurrWeaponIdx()) {
+		arsenal.setDesiredWeaponIdx(best);
 		return true;
 	}
-	blackboard.getCmd().weaponselect = arsenal.getBestWeaponIdx();
 	return false;
 }

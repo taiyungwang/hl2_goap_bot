@@ -34,8 +34,6 @@ bool World::think(Blackboard& blackboard) {
 	updateState(WorldProp::MULTIPLE_ENEMY_SIGHTED,
 			self->getVision().getVisibleEnemies().size() > 1);
 	Arsenal& arsenal = blackboard.getSelf()->getArsenal();
-	updateState(WorldProp::USING_BEST_WEAP,
-			arsenal.getBestWeaponIdx() == arsenal.getCurrWeaponIdx());
 	edict_t* blocker = blackboard.getBlocker();
 	if (blocker != nullptr && (BaseEntity(blocker).isDestroyedOrUsed()
 			|| (self->getFacing().Dot(blocker->GetCollideable()->GetCollisionOrigin()

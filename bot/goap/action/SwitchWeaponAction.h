@@ -1,15 +1,13 @@
 #pragma once
 
-#include "WeaponAction.h"
+#include "SwitchToDesiredWeaponAction.h"
 
 /**
  * Switches to the best weapon ignoring clip status.
  */
-class SwitchWeaponAction: public WeaponAction {
+class SwitchWeaponAction: public SwitchToDesiredWeaponAction {
 public:
 	SwitchWeaponAction(Blackboard& blackboard);
 
 	bool precondCheck();
-
-	bool execute();
 };

@@ -60,8 +60,8 @@ void DODBotBuilder::updatePlanner(GoalManager &planner,
 		bool isBreakable(edict_t *object) const {
 			return Q_stristr(object->GetClassName(), "physics") != nullptr;
 		}
-
 	};
+
 	class DODGetBombAction: public GoToEntityWithGivenNameAction {
 	public:
 		DODGetBombAction(Blackboard &blackboard) :
@@ -78,8 +78,8 @@ void DODBotBuilder::updatePlanner(GoalManager &planner,
 	planner.addAction<DODPickUpGrenadeAction>(0.96f);
 	planner.addAction<DODUseFragGrenadeAction>(0.92f);
 	planner.addAction<DODUseRifleGrenadeAction>(0.92f);
-	planner.addAction<DODUseSmokeGrenadeAction>(0.83f);
-	planner.addAction<DODDestroyObjectAction>(0.71f);
+	planner.addAction<DODUseSmokeGrenadeAction>(0.84f);
+	planner.addAction<DODDestroyObjectAction>(0.82f);
 	planner.addAction<DODDefuseBombAction>(0.64f)->setObjectives(dynamic_cast<DODObjectives*>(objectives));
 	planner.addAction<DODDefendPointAction>(0.63f)->setObjectives(
 			dynamic_cast<DODObjectives*>(objectives));
