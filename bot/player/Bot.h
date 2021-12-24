@@ -144,7 +144,7 @@ private:
 
 	Vector viewTarget;
 
-	bool hookEnabled = false, resetPlanner = false, wantToListen = true, aiming = false;
+	bool hookEnabled = false, wantToListen = true, aiming = false;
 
 	bool canShoot(CGameTrace &result, const Vector &vecAbsEnd) const;
 

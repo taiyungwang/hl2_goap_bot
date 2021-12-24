@@ -34,13 +34,7 @@ public:
 	template<typename T>
 	T* addAction(float priority) {
 		T* action = new T(blackboard);
-		addAction(action);
-		if (priority <= 0.0f) {
-			return action;
-		}
-		goals.emplace_back();
-		goals.back().action = actions.size() - 1;
-		goals.back().priority = priority;
+		addAction(priority, action);
 		return action;
 	}
 
@@ -72,7 +66,7 @@ private:
 
 	void reset();
 
-	void addAction(Action* action);
+	void addAction(float priority, Action* action);
 
 	bool getNextGoal();
 };

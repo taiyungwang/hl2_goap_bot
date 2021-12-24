@@ -4,6 +4,7 @@
 #include "action/Action.h"
 #include <player/Player.h>
 #include <vstdlib/random.h>
+#include <algorithm>
 
 GoalManager::GoalManager(const WorldState& worldState, Blackboard& blackboard) :
 		worldState(worldState), blackboard(blackboard) {
@@ -23,10 +24,13 @@ GoalManager::~GoalManager() {
 }
 
 void GoalManager::resetPlanning(bool force) {
-	if (!plan.empty() && (force || actions[plan.front()]->isInterruptable())) {
-		actions[plan.front()]->abort();
-		reset();
+	if (!force && !plan.empty() && !actions[plan.front()]->isInterruptable()) {
+		return;
 	}
+	if (!plan.empty()) {
+		actions[plan.front()]->abort();
+	}
+	reset();
 }
 
 void GoalManager::execute() {
@@ -71,7 +75,17 @@ void GoalManager::reset() {
 	currentGoal = 0;
 }
 
-void GoalManager::addAction(Action* action) {
+void GoalManager::addAction(float priority, Action* action) {
 	actions.push_back(action);
 	planBuilder->addAction(action);
+	if (priority <= 0.0f) {
+		return;
+	}
+	goals.emplace_back();
+	goals.back().action = actions.size() - 1;
+	goals.back().priority = priority;
+	std::sort(goals.begin(), goals.end(),
+			[](const Goal &g1, const Goal &g2) -> bool {
+				return g1.priority > g2.priority;
+			});
 }

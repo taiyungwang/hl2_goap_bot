@@ -57,10 +57,8 @@ void Bot::think() {
 			vision.updateVisiblity(this);
 			wantToListen = true;
 			cmd.Reset();
-			if ((resetPlanner || world->think(*blackboard))
-					&& !blackboard->isOnLadder()) {
+			if (world->think(*blackboard) && !blackboard->isOnLadder()) {
 				planner->resetPlanning(false);
-				resetPlanner = false;
 			}
 			planner->execute();
 			listen();
@@ -107,18 +105,17 @@ bool Bot::handle(EventInfo* event) {
 		return false;
 	}
 	if (name == "player_spawn") {
-		resetPlanner = true;
 		blackboard->reset();
 		vision.reset();
 		world->reset();
 		area = nullptr;
+		planner->resetPlanning(true);
 		return true;
 	}
 	if (name == "player_death") {
 		if (area != nullptr) {
 			area->IncreaseDanger(getTeam(), mybotDangerAmt.GetFloat());
 		}
-		planner->resetPlanning(true);
 		return false;
 	}
 	if (name == "player_hurt") {
