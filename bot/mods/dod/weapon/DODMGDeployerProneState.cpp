@@ -44,7 +44,8 @@ void DODMGDeployerProneState::deploy(Blackboard& blackboard) {
 		moveCtx->traceMove(false);
 	}
 	const auto& tr = moveCtx->getTraceResult();
-	if (tr.startsolid || tr.endpos.DistTo(tr.startpos) < HalfHumanWidth) {
+	if ((tr.startsolid || tr.endpos.DistTo(tr.startpos) < HalfHumanWidth)
+			&& (result.startsolid || result.endpos.DistTo(result.startpos) < 2.0f * HalfHumanWidth)) {
 		context->setState(std::make_shared<DODMGDeployerStandState>(context));
 	} else {
 		moveCtx->move(NAV_MESH_INVALID);
