@@ -1,6 +1,14 @@
 #pragma once
 
-#include <voice/VoiceMessage.h>
+#include <voice/AreaClearVoiceMessage.h>
+
+
+#define DECL_ENEMY_AHEAD_VOICE_MSG_CLASS(name)\
+class name: public AreaClearVoiceMessage {\
+public:\
+	name(edict_t* self): AreaClearVoiceMessage(self) {\
+	}\
+}
 
 namespace DODVoiceMessage {
 class FireInTheHole: public VoiceMessage {
@@ -16,4 +24,11 @@ public:
 			VoiceMessage(sender) {
 	}
 };
+
+DECL_ENEMY_AHEAD_VOICE_MSG_CLASS(SniperAheadVoiceMessage);
+
+DECL_ENEMY_AHEAD_VOICE_MSG_CLASS(MGAheadVoiceMessage);
+
+DECL_ENEMY_AHEAD_VOICE_MSG_CLASS(RocketAheadVoiceMessage);
+
 }

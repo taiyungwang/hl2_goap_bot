@@ -91,5 +91,24 @@ bool DODWorld::update(Blackboard& blackboard) {
 			return true;
 		}
 	}
+	for (int i : self->getVision().getVisibleEnemies()) {
+		const Player *enemy = Player::getPlayer(i);
+		if (enemy == nullptr) {
+			continue;
+		}
+		std::string weap(enemy->getWeaponName());
+		if (weap == "weapon_30cal" || weap == "weapon_mg42") {
+			self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::MGAheadVoiceMessage>(self->getEdict()));
+			break;
+		}
+		if (weap == "weapon_spring" || weap == "weapon_k98_scoped") {
+			self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::SniperAheadVoiceMessage>(self->getEdict()));
+			break;
+		}
+		if (weap == "weapon_bazooka" || weap == "weapon_pschreck") {
+			self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::RocketAheadVoiceMessage>(self->getEdict()));
+			break;
+		}
+	}
 	return false;
 }

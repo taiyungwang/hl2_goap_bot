@@ -46,6 +46,9 @@ DODBotBuilder::DODBotBuilder(GameManager *objectives,
 	voiceMessageSender.addMessage<NeedBackupVoiceMessage>("voice_backup");
 	voiceMessageSender.addMessage<DODVoiceMessage::FireInTheHole>("voice_fireinhole");
 	voiceMessageSender.addMessage<DODVoiceMessage::NeedAmmo>("voice_needammo");
+	voiceMessageSender.addMessage<DODVoiceMessage::MGAheadVoiceMessage>("voice_mgahead");
+	voiceMessageSender.addMessage<DODVoiceMessage::SniperAheadVoiceMessage>("voice_sniper");
+	voiceMessageSender.addMessage<DODVoiceMessage::RocketAheadVoiceMessage>("voice_bazookaspotted");
 }
 
 void DODBotBuilder::updatePlanner(GoalManager &planner,
