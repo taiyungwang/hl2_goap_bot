@@ -56,12 +56,11 @@ float Weapon::getDamage(edict_t* player, float dist) const {
 }
 
 bool Weapon::isInRange(float distance) const {
-	return (deployer == nullptr || minDeployRange < distance)
-			&& ((function[0]->getRange()[0] < distance
+	return (function[0]->getRange()[0] < distance
 					&& function[0]->getRange()[1] > distance)
-			|| (function[1] != nullptr
+			|| (function[1]
 					&& function[1]->getRange()[0] < distance
-					&& function[1]->getRange()[1] > distance));
+					&& function[1]->getRange()[1] > distance);
 }
 
 WeaponFunction* Weapon::chooseWeaponFunc(edict_t* self, float dist) const {

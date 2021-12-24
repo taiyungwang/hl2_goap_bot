@@ -17,8 +17,11 @@ static bool ignore(const Weapon* weap, Blackboard& blackboard, float dist) {
 }
 
 bool SwitchToBestLoadedWeaponAction::precondCheck() {
+	if (!SwitchToDesiredWeaponAction::precondCheck()) {
+		return false;
+	}
 	int best = arsenal.getBestWeapon(blackboard, ignore);
-	if (!SwitchToDesiredWeaponAction::precondCheck() || best == 0) {
+	if (best == 0 || best == arsenal.getCurrWeaponIdx()) {
 		return false;
 	}
 	arsenal.setDesiredWeaponIdx(best);
