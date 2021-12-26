@@ -25,6 +25,5 @@ The bot can be built on Windows (Visual Studio 2012 or higher) and LINUX with [C
 
 ## TODO ##
 * Add action for bots to drop ammo for allies
-* Add heuristics or bots to determine which items to pick up in HL2DM.
 * Add logic for bots to pick up a substitue weapon when current out of ammo for primary weapon.
 * Refactor aiming behavior defined in the GOAP Action classes into an aiming subsystem.
