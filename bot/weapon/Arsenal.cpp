@@ -15,7 +15,8 @@
 
 int Arsenal::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) const {
 	int best = 0;
-	auto* targetedPlayer = Player::getPlayer(blackboard.getSelf()->getVision().getTargetedPlayer());
+	Bot *self = blackboard.getSelf();
+	auto* targetedPlayer = Player::getPlayer(self->getVision().getTargetedPlayer());
 	edict_t* target = nullptr;
 	if (targetedPlayer != nullptr) {
 		target = targetedPlayer->getEdict();
@@ -23,20 +24,19 @@ int Arsenal::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) c
 		target = blackboard.getBlocker();
 	}
 	float targetDist = target == nullptr || target->IsFree() ? -1.0f:
-			target->GetCollideable()->GetCollisionOrigin().DistTo(
-					blackboard.getSelf()->getCurrentPosition());
+			self->getViewTarget().DistTo(self->getEyesPos());
 	visit([&best, targetDist, &blackboard=blackboard,
 		   ignore, this](int i, const Weapon* weapon) mutable
 			-> bool {
-		edict_t* self = blackboard.getSelf()->getEdict();
-		bool underWater = BasePlayer(self).isUnderWater();
+		edict_t* selfEdict = blackboard.getSelf()->getEdict();
+		bool underWater = BasePlayer(selfEdict).isUnderWater();
 		if ((!weapon->isUnderWater() && underWater)
 				|| (targetDist < 0.0f && weapon->getPrimary()->isMelee() && !underWater)
 				// TODO: assumes primary and secondary weapons have similar ranges.
-				|| weapon->isGrenade() || weapon->isOutOfAmmo(self)
+				|| weapon->isGrenade() || weapon->isOutOfAmmo(selfEdict)
 				|| ignore(weapon, blackboard, targetDist)
-				|| (best > 0 && weapon->getDamage(self, targetDist)
-								<= weapons.at(best)->getDamage(self, targetDist))) {
+				|| (best > 0 && weapon->getDamage(selfEdict, targetDist)
+								<= weapons.at(best)->getDamage(selfEdict, targetDist))) {
 			return false;
 		}
 		best = i;

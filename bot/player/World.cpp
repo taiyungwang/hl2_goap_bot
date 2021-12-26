@@ -46,10 +46,9 @@ bool World::think(Blackboard& blackboard) {
 	const Weapon* weap = arsenal.getCurrWeapon();
 	const Player* enemy = Player::getPlayer(self->getVision().getTargetedPlayer());
 	if (weap != nullptr) {
-		const Vector& pos = self->getCurrentPosition();
+		const Vector& pos = self->getEyesPos();
 		if (enemy != nullptr) {
-			float dist = enemy->getCurrentPosition().DistTo(pos);
-			inRange = weap->isInRange(dist);
+			inRange = weap->isInRange(enemy->getEyesPos().DistTo(pos));
 		} else if (blocker != nullptr) {
 			extern IVEngineServer* engine;
 			auto& players = Player::getPlayers();
@@ -67,8 +66,7 @@ bool World::think(Blackboard& blackboard) {
 				self->setViewTarget(target);
 			}
 			if (blackboard.getBlocker() != nullptr) {
-				float dist = pos.DistTo(self->getViewTarget());
-				inRange = weap->isInRange(dist);
+				inRange = weap->isInRange(pos.DistTo(self->getViewTarget()));
 			}
 		}
 		updateState(WorldProp::WEAPON_IN_RANGE, inRange);
