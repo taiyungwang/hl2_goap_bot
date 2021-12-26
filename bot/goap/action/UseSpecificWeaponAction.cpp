@@ -1,6 +1,7 @@
 #include "UseSpecificWeaponAction.h"
 
 #include <player/Blackboard.h>
+#include <player/Bot.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 
@@ -15,7 +16,8 @@ bool UseSpecificWeaponAction::precondCheck() {
 		extern IVEngineServer* engine;
 		edict_t* ent = engine->PEntityOfEntIndex(i);
 		if (ent != nullptr && !ent->IsFree()
-				&& this->canUse(ent->GetClassName())) {
+				&& this->canUse(ent->GetClassName())
+				&& !arsenal.getWeapon(i)->isOutOfAmmo(blackboard.getSelf()->getEdict())) {
 			weapIdx = i;
 			arsenal.setDesiredWeaponIdx(weapIdx);
 			return true;
