@@ -19,6 +19,7 @@ void DODWorld::addStates() {
 	states[WorldProp::HAS_BOMB] = false;
 	states[WorldProp::BOMB_DEFUSED] = false;
 	states[WorldProp::HAS_LIVE_GRENADE] = false;
+	states[WorldProp::HEARD_NEED_AMMO] = true;
 }
 
 bool DODWorld::handle(EventInfo* event) {
@@ -59,7 +60,8 @@ bool DODWorld::update(Blackboard& blackboard) {
 	auto arsenal = blackboard.getSelf()->getArsenal();
 	int baseBombId = arsenal.getWeaponIdByName("weapon_basebomb"),
 			weapIdx = arsenal.getCurrWeaponIdx();
-	if (getState(WorldProp::OUT_OF_AMMO) && baseBombId != weapIdx) {
+	if (getState(WorldProp::OUT_OF_AMMO) && baseBombId != weapIdx
+			&& !arsenal.getWeapon(weapIdx)->isGrenade()) {
 		self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::NeedAmmo>(self->getEdict()));
 	}
 	updateState(WorldProp::HAS_BOMB, baseBombId != 0);

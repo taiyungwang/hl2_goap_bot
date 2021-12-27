@@ -57,7 +57,9 @@ void Bot::think() {
 			vision.updateVisiblity(this);
 			wantToListen = true;
 			cmd.Reset();
-			if (world->think(*blackboard) && !blackboard->isOnLadder()) {
+			if ((world->think(*blackboard) || resetPlanner)
+					&& !blackboard->isOnLadder()) {
+				resetPlanner = false;
 				planner->resetPlanning(false);
 			}
 			planner->execute();

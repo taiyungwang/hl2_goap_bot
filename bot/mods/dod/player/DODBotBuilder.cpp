@@ -5,6 +5,7 @@
 #include <mods/dod/goap/action/DODDefendPointAction.h>
 #include <mods/dod/goap/action/DODUseFragGrenadeAction.h>
 #include <mods/dod/goap/action/DODPickUpGrenadeAction.h>
+#include <mods/dod/goap/action/GiveAmmoAction.h>
 #include <mods/dod/voice/DODVoiceMessage.h>
 #include <mods/dod/util/DodPlayer.h>
 #include <event/EventHandler.h>
@@ -13,6 +14,7 @@
 #include <player/Bot.h>
 #include <player/Blackboard.h>
 #include <voice/AreaClearVoiceMessage.h>
+#include <voice/AffirmativeVoiceMessage.h>
 #include <voice/GrenadeVoiceMessage.h>
 #include <move/Navigator.h>
 #include <util/EntityClassManager.h>
@@ -44,6 +46,7 @@ DODBotBuilder::DODBotBuilder(GameManager *objectives,
 	voiceMessageSender.addMessage<AreaClearVoiceMessage>("voice_areaclear");
 	voiceMessageSender.addMessage<GrenadeVoiceMessage>("voice_grenade");
 	voiceMessageSender.addMessage<NeedBackupVoiceMessage>("voice_backup");
+	voiceMessageSender.addMessage<AffirmativeVoiceMessage>("voice_yessir");
 	voiceMessageSender.addMessage<DODVoiceMessage::FireInTheHole>("voice_fireinhole");
 	voiceMessageSender.addMessage<DODVoiceMessage::NeedAmmo>("voice_needammo");
 	voiceMessageSender.addMessage<DODVoiceMessage::MGAheadVoiceMessage>("voice_mgahead");
@@ -79,6 +82,7 @@ void DODBotBuilder::updatePlanner(GoalManager &planner,
 	};
 	planner.addAction<DODThrowLiveGrenadeAction>(0.97f);
 	planner.addAction<DODPickUpGrenadeAction>(0.96f);
+	planner.addAction<GiveAmmoAction>(0.95f, commandHandler);
 	planner.addAction<DODUseFragGrenadeAction>(0.92f);
 	planner.addAction<DODUseRifleGrenadeAction>(0.92f);
 	planner.addAction<DODUseSmokeGrenadeAction>(0.84f);

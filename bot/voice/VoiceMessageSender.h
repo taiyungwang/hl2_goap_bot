@@ -28,7 +28,7 @@ public:
 	template<typename T>
 	bool isMessage(const char* message) const {
 		return messages.find(typeid(T)) != messages.end()
-				&& messages.at(typeid(T)).c_str() == message;
+				&& messages.at(typeid(T)) == message;
 	}
 
 private:

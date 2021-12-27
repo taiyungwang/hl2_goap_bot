@@ -36,6 +36,8 @@ protected:
 
 	VoiceMessageSender voiceMessageSender;
 
+	CommandHandler& commandHandler;
+
 	virtual void updatePlanner(GoalManager& planner,
 			Blackboard& blackboard) const = 0;
 
@@ -60,8 +62,6 @@ private:
 	CUtlHashtable<const char*, CmdFuncPtr> cmdCallbacks;
 
 	CUtlLinkedList<ConCommand*> commands;
-
-	CommandHandler& commandHandler;
 
 	Bot* build(edict_t* ent);
 

@@ -121,6 +121,10 @@ public:
 		return navigator;
 	}
 
+	void setResetPlanner(bool reset) {
+		resetPlanner = reset;
+	}
+
 private:
 	static PlayerClasses CLASSES;
 
@@ -144,7 +148,7 @@ private:
 
 	Vector viewTarget;
 
-	bool hookEnabled = false, wantToListen = true, aiming = false;
+	bool hookEnabled = false, wantToListen = true, aiming = false, resetPlanner = false;
 
 	bool canShoot(CGameTrace &result, const Vector &vecAbsEnd) const;
 

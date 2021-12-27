@@ -31,9 +31,9 @@ public:
 	 * @param chanceToExec probability this action will be executed if conditions are met.
 	 * Exepected values are 0.0 and 1.0 inclusive.
 	 */
-	template<typename T>
-	T* addAction(float priority) {
-		T* action = new T(blackboard);
+	template<typename T, typename... Args>
+	T* addAction(float priority, Args&&... args) {
+		T* action = new T(blackboard, args...);
 		addAction(priority, action);
 		return action;
 	}
