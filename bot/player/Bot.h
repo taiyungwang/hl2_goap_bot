@@ -80,7 +80,11 @@ public:
 
 	bool canShoot(const Vector &vecAbsEnd) const;
 
-	bool canSee(const Player& target) const;
+	bool canSee(const Vector &vecAbsEnd) const;
+
+	bool canSee(const Player& target) const {
+		return canSee(target.getEyesPos());
+	}
 
 	bool canSee(edict_t* target) const;
 

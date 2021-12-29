@@ -15,13 +15,6 @@ FindCoverAction::FindCoverAction(Blackboard& blackboard) :
 	sprint = true;
 }
 
-bool FindCoverAction::execute() {
-	if (!GoToAction::execute()) {
-		return false;
-	}
-	return !waitInCover();
-}
-
 bool FindCoverAction::foundGoal(CNavArea *area) {
 	Vector eyes(area->GetCenter());
 	eyes.z += HumanEyeHeight;

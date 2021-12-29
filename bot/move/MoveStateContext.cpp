@@ -3,11 +3,7 @@
 #include "Stopped.h"
 #include <player/Bot.h>
 #include <player/Blackboard.h>
-#include <player/Button.h>
-#include <util/BasePlayer.h>
 #include <util/UtilTrace.h>
-#include <util/EntityUtils.h>
-#include <edict.h>
 
 const float MoveStateContext::TARGET_OFFSET = 8.0f;
 
@@ -34,23 +30,6 @@ void MoveStateContext::move(int type) {
 	if (newState != nullptr) {
 		delete state;
 		state = newState;
-	}
-	// do look
-	bool onLadder = blackboard.isOnLadder() || ladderDir != CNavLadder::NUM_LADDER_DIRECTIONS;
-	Vector look = goal;
-	look.z += blackboard.getSelf()->getEyesPos().DistTo(pos);
-	if (blackboard.getBlocker() != nullptr) {
-		Vector mins, maxs, blocker;
-		blackboard.getBlocker()->GetCollideable()->WorldSpaceTriggerBounds(&mins, &maxs);
-		blocker = (maxs + mins) / 2.0f;
-		if (blocker.DistTo(pos) < 130.0f) {
-			self->setWantToListen(false);
-			self->setViewTarget(blocker);
-		} else {
-			blackboard.setBlocker(nullptr);
-		}
-	} else if (blackboard.getSelf()->getVision().getTargetedPlayer() == 0 && !onLadder) {
-		self->setViewTarget(look);
 	}
 }
 

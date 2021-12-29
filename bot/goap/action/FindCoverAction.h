@@ -15,7 +15,9 @@ public:
 		return true;
 	}
 
-	bool execute() override;
+	bool execute() override {
+		return GoToAction::execute() && !waitInCover();
+	}
 
 protected:
 	float maxRange = INFINITY;

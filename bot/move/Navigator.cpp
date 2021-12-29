@@ -22,6 +22,8 @@ extern ConVar mybot_debug;
 
 static ConVar maxAreaTime("my_bot_max_area_time", "80");
 
+static const float MIN_LOOK_DIST = 50.0f;
+
 Navigator::Navigator(Blackboard& blackboard) :
 		blackboard(blackboard) {
 	moveCtx = new MoveStateContext(blackboard);
@@ -48,13 +50,13 @@ bool Navigator::step() {
 	if (!checkCanMove()) {
 		return false;
 	}
-	const Player* self = blackboard.getSelf();
+	Bot* self = blackboard.getSelf();
 	Vector loc = self->getCurrentPosition();
-	CNavArea *topArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
+	CNavArea *topArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.back()));
 	if (canGetNextArea(loc)) {
 		setGoalForNextArea(loc);
 		if (!path.empty()) {
-			topArea = TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
+			topArea = TheNavMesh->GetNavAreaByID(std::get<0>(path.back()));
 		}
 	} else if (!moveCtx->hasGoal()) {
 		CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
@@ -128,6 +130,19 @@ bool Navigator::step() {
 				moveCtx->getGoal(), 0, 255, 255, true,
 				NDEBUG_PERSIST_TILL_NEXT_SERVER);
 	}
+	// do look
+	if (sprint || (blackboard.getBlocker() == nullptr
+			&& blackboard.getSelf()->getVision().getTargetedPlayer() == 0
+			&& !blackboard.isOnLadder()
+			&& moveCtx->getLadderDir() == CNavLadder::NUM_LADDER_DIRECTIONS)) {
+		Vector look = moveCtx->getGoal();
+		look.z += HumanEyeHeight;
+		if (look.DistTo(blackboard.getSelf()->getEyesPos()) > MIN_LOOK_DIST) {
+			self->setViewTarget(look);
+		} else {
+			lookAtFurthestVisibleArea();
+		}
+	}
 	return false;
 }
 
@@ -145,7 +160,7 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 	if (path.empty()) {
 		return false;
 	}
-	CNavArea *topArea = TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
+	CNavArea *topArea = TheNavMesh->GetNavAreaByID(std::get<0>(path.back()));
 	if (topArea == nullptr || moveCtx->nextGoalIsLadderStart()) {
 		return false;
 	}
@@ -166,14 +181,14 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 		return false;
 	}
 	int previousLast = lastAreaId;
-	lastAreaId = std::get<0>(path.top());
-	auto top = path.top();
-	path.pop();
-	topArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
+	lastAreaId = std::get<0>(path.back());
+	auto top = path.back();
+	path.pop_back();
+	topArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.back()));
 	bool canSkip = topArea != nullptr && ((path.empty() && canMoveTo(finalGoal, false))
 		|| (!path.empty() && getPortalToTopArea(goal) && canMoveTo(goal, false))
 		// already on ladder and the next area is reached via ladder
-		|| (blackboard.isOnLadder() && std::get<1>(path.top()) >= 4 && std::get<1>(path.top()) <= 5));
+		|| (blackboard.isOnLadder() && std::get<1>(path.back()) >= 4 && std::get<1>(path.back()) <= 5));
 	if (!blackboard.isOnLadder()) {
 		// make sure we are not skipping area that will cause us to walk off of a cliff.
 		Vector dir = loc - goal;
@@ -193,21 +208,21 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 		}
 	}
 	lastAreaId = previousLast;
-	path.push(top);
+	path.push_back(top);
 	return canSkip;
 }
 
 void Navigator::setGoalForNextArea(const Vector& loc) {
 	Vector goal = finalGoal;
-	lastAreaId = std::get<0>(path.top());
+	lastAreaId = std::get<0>(path.back());
 	areaTime = 0;
-	path.pop();
+	path.pop_back();
 	CNavArea *lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
 	if (lastArea == nullptr) {
 		return;
 	}
 	if (!path.empty() && !setLadderStart()) {
-		CNavArea *pathTop = TheNavMesh->GetNavAreaByID(std::get<0>(path.top()));
+		CNavArea *pathTop = TheNavMesh->GetNavAreaByID(std::get<0>(path.back()));
 		if (pathTop == nullptr) {
 			return;
 		}
@@ -220,7 +235,7 @@ void Navigator::setGoalForNextArea(const Vector& loc) {
 		if (!canMoveTo(goal, crouching)) {
 			float halfWidth;
 			lastArea->ComputePortal(pathTop,
-					static_cast<NavDirType>(std::get<1>(path.top())),
+					static_cast<NavDirType>(std::get<1>(path.back())),
 					&goal, &halfWidth);
 			if (moveCtx->hasGoal() && !canMoveTo(goal, crouching)) {
 				// if we are still moving don't set goal if we're blocked.
@@ -274,15 +289,16 @@ bool Navigator::reachedGoal() const {
 }
 
 bool Navigator::setLadderStart() {
-	if (path.empty() || std::get<1>(path.top()) < 4 || std::get<1>(path.top()) > 5) {
+	if (path.empty() || std::get<1>(path.back()) < GO_LADDER_UP
+			|| std::get<1>(path.back()) > GO_LADDER_DOWN) {
 		return false;
 	}
-	CNavArea *pathTop = TheNavMesh->GetNavAreaByID(std::get<0>(path.top())),
+	CNavArea *pathTop = TheNavMesh->GetNavAreaByID(std::get<0>(path.back())),
 			*lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
 	if (pathTop == nullptr || lastArea == nullptr) {
 		return false;
 	}
-	CNavLadder::LadderDirectionType dir = static_cast<CNavLadder::LadderDirectionType>(std::get<1>(path.top()) - 4);
+	CNavLadder::LadderDirectionType dir = static_cast<CNavLadder::LadderDirectionType>(std::get<1>(path.back()) - 4);
 	const NavLadderConnectVector* laddersFrom = lastArea->GetLadders(dir);
 	FOR_EACH_VEC(*laddersFrom, i)
 	{
@@ -313,13 +329,38 @@ bool Navigator::setLadderStart() {
 	return false;
 }
 
+void Navigator::lookAtFurthestVisibleArea() {
+	if (path.size() == 1) {
+		blackboard.getSelf()->setViewTarget(finalGoal);
+		return;
+	}
+	CNavArea *furthest = nullptr;
+	Bot *self = blackboard.getSelf();
+	for (auto itr = path.rbegin(); itr != path.rend(); itr++) {
+		furthest = TheNavMesh->GetNavAreaByID(std::get<0>(*itr));
+		if (furthest == nullptr) {
+			return;
+		}
+		if (furthest->Contains(self->getCurrentPosition())) {
+			continue;
+		}
+		Vector look = furthest->GetCenter();
+		look.z += HumanEyeHeight;
+		self->setViewTarget(look);
+		if (!self->canSee(look)) {
+			break;
+		}
+	}
+}
+
+
 bool Navigator::getPortalToTopArea(Vector& portal) const {
-	int dirToTop = std::get<1>(path.top());
+	int dirToTop = std::get<1>(path.back());
 	if (dirToTop >= NUM_DIRECTIONS || lastAreaId < 0) {
 		return false;
 	}
 	float halfWidth;
-	CNavArea *topArea = TheNavMesh->GetNavAreaByID(std::get<0>(path.top())),
+	CNavArea *topArea = TheNavMesh->GetNavAreaByID(std::get<0>(path.back())),
 			*lastArea = TheNavMesh->GetNavAreaByID(lastAreaId);
 	if (topArea == nullptr || lastArea == nullptr) {
 		return false;

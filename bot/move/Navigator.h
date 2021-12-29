@@ -2,7 +2,7 @@
 
 #include <utlvector.h>
 #include <shareddefs.h>
-#include <stack>
+#include <vector>
 
 class Blackboard;
 class MoveStateContext;
@@ -15,7 +15,7 @@ struct edict_t;
  */
 class Navigator {
 public:
-	using Path = std::stack<std::pair<int, int>>;
+	using Path = std::vector<std::pair<int, int>>;
 
 	/**
 	 * Get the current area the entity is in.
@@ -79,4 +79,6 @@ private:
 	 * was called to see if the two areas does not require traversing a ladder.
 	 */
 	bool setLadderStart();
+
+	void lookAtFurthestVisibleArea();
 };

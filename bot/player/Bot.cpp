@@ -207,16 +207,15 @@ void Bot::canSee(trace_t& result, const Vector& start, const Vector& end) {
 	UTIL_TraceLine(start, end, MASK_ALL, &filter, &result);;
 }
 
-bool Bot::canSee(const Player& player) const {
+bool Bot::canSee(const Vector &vecAbsEnd) const {
 	trace_t result;
-	canSee(result, getEyesPos(), player.getEyesPos());
+	VisionFilter filter;
+	canSee(result, getEyesPos(), vecAbsEnd);
 	return !result.DidHit();
 }
 
 bool Bot::canSee(edict_t* target) const {
-	trace_t result;
-	canSee(result, getEyesPos(), target->GetCollideable()->GetCollisionOrigin());
-	return !result.DidHit();
+	return canSee(target->GetCollideable()->GetCollisionOrigin());
 }
 
 Vector Bot::getFacing() const {

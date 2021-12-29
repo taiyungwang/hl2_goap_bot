@@ -1,12 +1,12 @@
 #pragma once
 
 #include <nav_mesh/nav.h>
-#include <stack>
+#include <vector>
 #include <utility>
 
 class NavMeshPathBuilder {
 public:
-	using Path = std::stack<std::pair<int, int>>;
+	using Path = std::vector<std::pair<int, int>>;
 
 	NavMeshPathBuilder(int team) :
 			team(team) {

@@ -17,7 +17,7 @@ void NavMeshPathBuilder::build(Path& path, CNavArea *start) {
 		CNavArea *area = CNavArea::PopOpenList();
 		if (foundGoal(area)) {
 			for (; area != nullptr; area = area->GetParent()) {
-				path.push(std::make_pair(area->GetID(), area->GetParentHow()));
+				path.push_back(std::make_pair(area->GetID(), area->GetParentHow()));
 			}
 			return;
 		}
