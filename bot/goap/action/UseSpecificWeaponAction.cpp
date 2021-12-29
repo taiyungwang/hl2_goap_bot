@@ -16,8 +16,7 @@ bool UseSpecificWeaponAction::precondCheck() {
 		extern IVEngineServer* engine;
 		edict_t* ent = engine->PEntityOfEntIndex(i);
 		if (ent != nullptr && !ent->IsFree()
-				&& this->canUse(ent->GetClassName())
-				&& !arsenal.getWeapon(i)->isOutOfAmmo(blackboard.getSelf()->getEdict())) {
+				&& this->canUse(i)) {
 			weapIdx = i;
 			arsenal.setDesiredWeaponIdx(weapIdx);
 			return true;
@@ -25,4 +24,8 @@ bool UseSpecificWeaponAction::precondCheck() {
 		return false;
 	});
 	return weapIdx > 0;
+}
+
+bool UseSpecificWeaponAction::canUse(int i) const {
+	return !arsenal.getWeapon(i)->isOutOfAmmo(blackboard.getSelf()->getEdict());
 }

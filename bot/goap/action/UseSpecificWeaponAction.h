@@ -11,5 +11,5 @@ public:
 protected:
 	int weapIdx = 0;
 
-	virtual bool canUse(const char* weaponName) const = 0;
+	virtual bool canUse(int weapIdx) const;
 };

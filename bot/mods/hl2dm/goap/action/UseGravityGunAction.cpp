@@ -29,6 +29,7 @@ bool UseGravityGunAction::execute() {
 	return false;
 }
 
-bool UseGravityGunAction::canUse(const char* weaponName) const {
-	return Q_strcmp(weaponName, "weapon_physcannon") == 0;
+bool UseGravityGunAction::canUse(int weapIdx) const {
+	extern IVEngineServer* engine;
+	return Q_strcmp(engine->PEntityOfEntIndex(weapIdx)->GetClassName(), "weapon_physcannon") == 0;
 }

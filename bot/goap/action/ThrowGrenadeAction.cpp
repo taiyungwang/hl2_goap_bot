@@ -69,3 +69,9 @@ const Player* ThrowGrenadeAction::chooseTarget() const {
 	}
 	return target;
 }
+
+bool ThrowGrenadeAction::canUse(int weapIndx) const {
+	extern IVEngineServer* engine;
+	return UseSpecificWeaponAction::canUse(weapIndx)
+			&& canUse(engine->PEntityOfEntIndex(weapIdx)->GetClassName());
+}

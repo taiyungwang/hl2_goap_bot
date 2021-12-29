@@ -20,4 +20,9 @@ protected:
 	Vector target;
 
 	virtual const Player *chooseTarget() const;
+
+	virtual bool canUse(const char *weapName) const = 0;
+
+private:
+	bool canUse(int weapIndx) const override;
 };

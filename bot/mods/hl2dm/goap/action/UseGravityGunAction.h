@@ -13,5 +13,5 @@ public:
 	bool execute();
 
 protected:
-	virtual bool canUse(const char* weaponName) const;
+	virtual bool canUse(int weaponIdx) const;
 };
