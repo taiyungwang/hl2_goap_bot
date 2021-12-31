@@ -330,8 +330,10 @@ bool Navigator::setLadderStart() {
 }
 
 void Navigator::lookAtFurthestVisibleArea() {
+	Vector look = finalGoal;
+	look.z += HumanEyeHeight;
 	if (path.size() == 1) {
-		blackboard.getSelf()->setViewTarget(finalGoal);
+		blackboard.getSelf()->setViewTarget(look);
 		return;
 	}
 	CNavArea *furthest = nullptr;
@@ -344,7 +346,7 @@ void Navigator::lookAtFurthestVisibleArea() {
 		if (furthest->Contains(self->getCurrentPosition())) {
 			continue;
 		}
-		Vector look = furthest->GetCenter();
+		look = furthest->GetCenter();
 		look.z += HumanEyeHeight;
 		self->setViewTarget(look);
 		if (!self->canSee(look)) {
