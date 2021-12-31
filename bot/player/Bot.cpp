@@ -24,12 +24,12 @@
 
 PlayerClasses Bot::CLASSES = nullptr;
 
-static ConVar mybot_rot_speed("mybot_rot_speed", "0.15", 0,
+static ConVar mybot_rot_speed("mybot_rot_speed", "0.3", 0,
 		"determines rotational acceleration rate in degrees");
 
 static ConVar mybot_mimic("mybot_mimic", "0");
 
-static ConVar mybotAimVar("mybot_aim_variance", "3.0f", 0,
+static ConVar mybotAimVar("mybot_aim_variance", "1.0f", 0,
 		"range of randomness for a bot's aim");
 
 static ConVar mybotDangerAmt("mybot_danger_amount", "3.0f", 0,
