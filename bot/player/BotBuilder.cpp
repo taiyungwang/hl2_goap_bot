@@ -43,7 +43,7 @@ BotBuilder::~BotBuilder() {
 void BotBuilder::addBot(const CCommand &command) {
 	static int botCount = 0;
 	extern IBotManager *botmanager;
-	int team = rand() % 2 + 2;
+	int team = teamPlay ? Player::teamWithLessPlayers() : 0;
 	botCount %= 32;
 	if (command.ArgC() > 2) {
 		team = (atoi(command.Arg(2)) - 1) % 2 + 2;

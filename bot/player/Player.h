@@ -24,6 +24,8 @@ public:
 		return players;
 	}
 
+	static int teamWithLessPlayers();
+
 	static Player* getPlayer(edict_t* ent);
 
 	static Player* getPlayer(int idx) {
