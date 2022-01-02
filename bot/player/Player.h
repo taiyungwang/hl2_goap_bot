@@ -20,11 +20,13 @@ struct edict_t;
 
 class Player: public EventHandler {
 public:
+	using TeamCount = std::tuple<int, int>;
+
 	static std::unordered_map<int, Player*>& getPlayers() {
 		return players;
 	}
 
-	static int teamWithLessPlayers();
+	static TeamCount getTeamCount();
 
 	static Player* getPlayer(edict_t* ent);
 

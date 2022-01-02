@@ -20,16 +20,16 @@ Player* Player::getPlayer(edict_t* ent) {
 	return getPlayer(engine->IndexOfEdict(ent));
 }
 
-int Player::teamWithLessPlayers() {
+Player::TeamCount Player::getTeamCount() {
 	int count[] = {0, 0};
 	for (auto pair: players) {
 		int team = pair.second->getTeam();
-		if (team < 2) {
+		if (team == 1) {
 			continue;
 		}
 		count[team % 2]++;
 	}
-	return count[1] > count[0] ? 2 : 3;
+	return std::make_tuple(count[0], count[1]);
 }
 
 Player::Player(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal) :

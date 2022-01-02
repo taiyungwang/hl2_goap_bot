@@ -25,6 +25,8 @@ CNavMesh* TheNavMesh = nullptr;
 ConVar mybot_debug("my_bot_debug", "0");
 ConVar mybot_var("mybot_var", "0.5");
 
+ConVar minPlayers("mybot_max_players", "-1");
+
 CUtlMap<int, NavEntity*> blockers;
 
 extern IPlayerInfoManager *playerinfomanager;
@@ -121,9 +123,44 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		}
 		TheNavMesh->Update();
 		botBuilder->onFrame();
+
 	}
 	for (auto player: Player::getPlayers()) {
 		player.second->think();
+	}
+	if (minPlayers.GetInt() < 0) {
+		return;
+	}
+	auto count = Player::getTeamCount();
+	int botsToAdd = MIN(minPlayers.GetInt(), gpGlobals->maxClients - 1) - std::get<0>(count) - std::get<1>(count);
+	if (botsToAdd > 0) {
+		for (int i = 0; i < botsToAdd; i++) {
+			const char *args[] = { "mybot_add_bot" };
+			botBuilder->CommandCallback(CCommand(1, args));
+		}
+	} else if (botsToAdd < 0) {
+		for (auto player : Player::getPlayers()) {
+			Bot *bot = dynamic_cast<Bot*>(player.second);
+			if (bot != nullptr) {
+				int team = bot->getTeam();
+				if (team < 2) {
+					continue;
+				}
+				bool team3Less = std::get<1>(count) < std::get<0>(count);
+				if ((team == 2 && team3Less) || (team == 3 && !team3Less)) {
+					engine->ServerCommand((std::string("kickid ") + std::to_string(player.second->getUserId())
+							+ "\n").c_str());
+					if (team == 2) {
+						std::get<0>(count)--;
+					} else {
+						std::get<1>(count)--;
+					}
+				}
+			}
+			if (std::get<0>(count) + std::get<1>(count) == minPlayers.GetInt()) {
+				break;
+			}
+		}
 	}
 }
 

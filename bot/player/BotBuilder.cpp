@@ -25,7 +25,6 @@ BotBuilder::BotBuilder(GameManager* objectives, CommandHandler& commandHandler,
 				arsenalBuilder(arsenalBuilder) {
 	addCommand("mybot_add_bot", "Add a bot to the server", &BotBuilder::addBot);
 	addCommand("mybot_add_all_bots", "Fill server with bots", &BotBuilder::addAllBots);
-	addCommand("mybot_kick_all_bots", "Kicks all bots", &BotBuilder::kickAllBots);
 	addCommand("mybot_kick_all_bots_except", "Kicks all bots except bot with given name",
 			&BotBuilder::kickAllExcept);
 	extern ICvar* cVars;
@@ -43,7 +42,11 @@ BotBuilder::~BotBuilder() {
 void BotBuilder::addBot(const CCommand &command) {
 	static int botCount = 0;
 	extern IBotManager *botmanager;
-	int team = teamPlay ? Player::teamWithLessPlayers() : 0;
+	int team = 0;
+	if (teamPlay) {
+		auto count = Player::getTeamCount();
+		team = std::get<0>(count) > std::get<1>(count) ? 3 : 2;
+	}
 	botCount %= 32;
 	if (command.ArgC() > 2) {
 		team = (atoi(command.Arg(2)) - 1) % 2 + 2;
@@ -62,14 +65,6 @@ void BotBuilder::addBot(const CCommand &command) {
 	modHandleCommand(command, build(pEdict));
 }
 
-void BotBuilder::kickAllBots(const CCommand &command) {
-	for (auto player : Player::getPlayers()) {
-		if (dynamic_cast<Bot*>(player.second) != nullptr) {
-			engine->ServerCommand((CUtlString("kickid ") + player.second->getUserId() + "\n").Get());
-		}
-	}
-}
-
 void BotBuilder::kickAllExcept(const CCommand &command) {
 	for (auto player : Player::getPlayers()) {
 		if (dynamic_cast<Bot*>(player.second) != nullptr
@@ -77,6 +72,8 @@ void BotBuilder::kickAllExcept(const CCommand &command) {
 			engine->ServerCommand((CUtlString("kickid ") + player.second->getUserId() + "\n").Get());
 		}
 	}
+	extern ConVar minPlayers;
+	minPlayers.SetValue(1);
 }
 
 class SwitchToBestInRangeWeaponAction: public SwitchToBestLoadedWeaponAction {
