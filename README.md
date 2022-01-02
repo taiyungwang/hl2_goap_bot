@@ -24,7 +24,7 @@ Where "game dir" is either "Day of Defeat Source" or "Half-Life 2 Deathmatch" an
     * execute ```nav_dont_hide```.
     * execute ```nav_analyze```.
 * To add a bot:  ```mybot_add_bot [name] [team] [class]``` Team and class are the numbers as indicated in the game menu for Day of Defeat Source, and are ignored in Half-Life 2 Deathmatch.
-* The server variable``mybot_min_players``` ensure that there will be a minimum number of players (Bots or real) at all times.
+* The server variable ```mybot_min_players``` ensure that there will be a minimum number of players (Bots or real) at all times.
   * For example, setting this value to 30 in a map with no players will create 30 bots.  If a player joins, a bot will drop automatically.  Bots dropped and added will attempt to keep the team balanced.
   * Setting the value to the default, -1, will disable the algorithm.
 
