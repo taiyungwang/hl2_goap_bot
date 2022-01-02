@@ -12,7 +12,7 @@ bool VoiceMessageSender::sendMessage(const std::shared_ptr<VoiceMessage> &messag
 	extern IVEngineServer *engine;
 	float time = engine->Time();
 	while (!sentMessages.empty()
-			&& time - std::get<0>(sentMessages.front()) > 5.0f) {
+			&& time - std::get<0>(sentMessages.front()) > 10.0f) {
 		sentMessages.pop_front();
 	}
 	SentMessage newMsg = std::make_tuple(time, message);
