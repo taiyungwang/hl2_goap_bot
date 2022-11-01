@@ -3,6 +3,7 @@
 #include "Item.h"
 #include <unordered_map>
 #include <list>
+#include <string>
 
 class Bot;
 class Vector;

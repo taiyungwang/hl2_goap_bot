@@ -1,11 +1,12 @@
 #pragma once
 
+#include <weapon/WeaponBuilder.h>
+#include <string>
 #include <unordered_map>
 #include <memory>
 
 class Weapon;
 class Blackboard;
-class WeaponBuilder;
 struct edict_t;
 
 
