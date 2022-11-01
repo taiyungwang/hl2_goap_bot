@@ -1,7 +1,5 @@
 #pragma once
 
-#include <list>
-
 class CCommand;
 struct edict_t;
 
