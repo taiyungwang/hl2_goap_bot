@@ -96,7 +96,7 @@ add_library(${PLUGIN_NAME} SHARED  VSPlugin.cpp)
 target_link_libraries(${PLUGIN_NAME}  
 	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player 
 	 voice goap goap_actions weapon_sys event bot_move ${VSP_NAVMESH_LIB} ${VSP_UTIL_LIB}
-	 tier1 mathlib vstdlib public tier0 ${LEGACY_STDIO} m)
+	 tier1 mathlib vstdlib public tier0 ${LEGACY_STDIO})
 
 #find installed mods on system.
 set (mods "tf;dod;hl2mp")
