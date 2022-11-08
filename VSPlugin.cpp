@@ -11,7 +11,6 @@
 #include <ivdebugoverlay.h>
 #include <filesystem.h>
 #include <tier1.h>
-#include <tier2/tier2.h>
 #include <iplayerinfo.h>
 #include <icvar.h>
 #include <vphysics_interface.h>
@@ -77,7 +76,6 @@ VSPlugin::VSPlugin() {
 bool VSPlugin::Load(CreateInterfaceFn interfaceFactory,
 		CreateInterfaceFn gameServerFactory) {
 	ConnectTier1Libraries(&interfaceFactory, 1);
-	ConnectTier2Libraries(&interfaceFactory, 1);
 	if (!load(mdlcache, interfaceFactory, MDLCACHE_INTERFACE_VERSION)
 			|| !load(physprops, interfaceFactory, VPHYSICS_SURFACEPROPS_INTERFACE_VERSION)
 			|| !load(filesystem, interfaceFactory, FILESYSTEM_INTERFACE_VERSION)
@@ -141,7 +139,6 @@ void VSPlugin::Unload(void) {
 	delete adaptor;
 	adaptor = nullptr;
 	DisconnectTier1Libraries();
-	DisconnectTier2Libraries();
 }
 
 PLUGIN_RESULT VSPlugin::ClientCommand(edict_t *pEntity,

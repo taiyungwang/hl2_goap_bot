@@ -14,12 +14,10 @@ set (VSP_NAVMESH ${PROJECT_SOURCE_DIR}/../valve_source_plugin_navmesh)
 
 set (BUILD_DIR "")
 
-set (tier2 tier2)
 set (LEGACY_STDIO legacy_stdio_definitions)
 
 if (${UNIX})
 	set (SRC_HOME $ENV{HOME})
-	set (tier2 :tier2.a)
 	if( ${APPLE} )
 		set (HL2SDK_LIBS ${HL2SDK_LIBS}/osx32)
 		add_definitions(-D_OSX -DOSX)
@@ -98,7 +96,7 @@ add_library(${PLUGIN_NAME} SHARED  VSPlugin.cpp)
 target_link_libraries(${PLUGIN_NAME}  
 	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player 
 	 voice goap goap_actions weapon_sys event bot_move ${VSP_NAVMESH_LIB} ${VSP_UTIL_LIB}
-	 tier1 mathlib tier2 vstdlib public tier0 ${LEGACY_STDIO} m)
+	 tier1 mathlib vstdlib public tier0 ${LEGACY_STDIO} m)
 
 #find installed mods on system.
 set (mods "tf;dod;hl2mp")
