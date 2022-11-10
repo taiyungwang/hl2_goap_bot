@@ -30,22 +30,30 @@ public:
 
 	/**
 	 * Takes a step on the nav mesh path.
-	 * @return True if the bot has reached its goal.
+	 * @return True if the bot cannot move further along the given path.
 	 */
 	bool step();
 
+	/**
+	 * @return True if the bot has reached the given goal
+	 */
 	bool reachedGoal() const;
 
+	/**
+	 * @param finalGoal Position of the goal
+	 * @param targetRadius Radius of the goal
+	 * @param sprint Whether the bot should be sprinting while navigating this path.
+	 */
 	void start(const Vector& finalGoal, float targetRadius, bool sprint);
 
 	Path &getPath() {
 		return path;
 	}
 
-	bool canMoveTo(const Vector& start, Vector to, float targetRadius, bool crouch) const;
-
 protected:
 	Blackboard& blackboard;
+
+	bool canMoveTo(const Vector& start, Vector to, float targetRadius, bool crouch) const;
 
 	virtual bool checkCanMove();
 
