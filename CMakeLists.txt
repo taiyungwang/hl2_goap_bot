@@ -15,19 +15,14 @@ set (VSP_NAVMESH ${PROJECT_SOURCE_DIR}/../valve_source_plugin_navmesh)
 set (BUILD_DIR "")
 
 set (LEGACY_STDIO legacy_stdio_definitions)
-
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+endif()
 if (${UNIX})
 	set (SRC_HOME $ENV{HOME})
-	if( ${APPLE} )
-		set (HL2SDK_LIBS ${HL2SDK_LIBS}/osx32)
-		add_definitions(-D_OSX -DOSX)
-		set( steam_root "${SRC_HOME}/Library/Application Support" )
-		set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=libc++")
-	else ()
-		set (HL2SDK_LIBS ${HL2SDK_LIBS}/linux32)
-		add_definitions(-D_LINUX -DLINUX -D_GLIBCXX_USE_CXX11_ABI=0) 
-		set( steam_root "${SRC_HOME}/.local/share/Steam" )
-	endif( ${APPLE} )
+	set (HL2SDK_LIBS ${HL2SDK_LIBS}/linux32)
+	add_definitions(-D_LINUX -DLINUX -D_GLIBCXX_USE_CXX11_ABI=0) 
+	set( steam_root "${SRC_HOME}/.local/share/Steam" )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")	
 	set( UNDEF "-Usprintf -Ustrncpy -UPROTECTED_THINGS_ENABLE" )
 	add_link_options(-static-libgcc  -static-libstdc++)	
@@ -52,7 +47,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL
 	endif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set( ARCH_FLAGS "-mtune=i686 -march=pentium3 -mmmx -m32 -fpermissive" )
 	add_definitions(-D_POSIX -DPOSIX -DGNUC -DNO_HOOK_MALLOC -DNO_MALLOC_OVERRIDE)
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-non-virtual-dtor -Wno-invalid-offsetof" )
 	add_definitions(-DSWDS -D_finite=finite -Dstricmp=strcasecmp  -Dstrnicmp=strncasecmp -D_vsnprintf=vsnprintf -D_alloca=alloca)	
 else () # MSVC
 	if (DEFINED CMAKE_BUILD_TYPE)
@@ -80,7 +74,6 @@ include_directories(${PROJECT_SOURCE_DIR} ${VSP_NAVMESH} ${HL2SDK_DIR}/common ut
 link_directories(${HL2SDK_LIBS})	
 
 add_library(public STATIC ${HL2SDK_DIR}/public/collisionutils.cpp)
-
 
 find_library(VSP_NAVMESH_LIB valve_navmesh ${PROJECT_BINARY_DIR}/../valve_source_plugin_navmesh/nav_mesh/${BUILD_DIR})
 find_library(VSP_UTIL_LIB plugin_util ${PROJECT_BINARY_DIR}/../valve_source_plugin_navmesh/util/${BUILD_DIR})
