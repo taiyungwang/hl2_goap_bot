@@ -1,6 +1,5 @@
 #include "Item.h"
 #include <util/BaseCombatWeapon.h>
-#include <util/EntityClassManager.h>
 #include <edict.h>
 #include <string>
 
@@ -11,7 +10,5 @@ bool Item::isAvailable() const {
 }
 
 bool Charger::isAvailable() const {
-	extern EntityClassManager *classManager;
-	return classManager->getClass("CBaseAnimating")->getEntityVar("m_flCycle")
-			.get<float>(ent) < 1.0f;
+	return BaseEntity(ent).get<float>("m_flCycle") < 1.0f;
 }

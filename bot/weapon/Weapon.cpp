@@ -9,7 +9,7 @@
 float Weapon::MELEE_RANGE = 50.0f;
 
 Weapon::Weapon(edict_t* ent) :
-		weap(ent), weaponName(ent->GetNetworkable()->GetClassName()) {
+		weap(ent) {
 	function[0] = function[1] = nullptr;
 	grenade = underWater = false;
 	minDeployRange = 0.0f;
@@ -27,8 +27,8 @@ int Weapon::getWeaponState() const {
 }
 
 bool Weapon::isDeployed() const {
-	return deployedCheck != nullptr && !weap->IsFree()
-			&& deployedCheck->get<bool>(weap);
+	return deployedVarName != nullptr && !weap->IsFree()
+			&& BaseCombatWeapon(weap).get<bool>(deployedVarName);
 }
 
 void Weapon::undeploy(Blackboard& blackboard) {

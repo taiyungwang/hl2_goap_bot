@@ -5,13 +5,11 @@
 #include "WeaponFunction.h"
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <util/EntityClassManager.h>
-#include <util/EntityClass.h>
 #include <util/SimpleException.h>
-#include <util/BaseCombatWeapon.h>
 #include <util/BasePlayer.h>
 #include <eiface.h>
 #include <shareddefs.h>
+#include <util/BaseCombatWeapon.h>
 
 int Arsenal::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) const {
 	int best = 0;
@@ -51,10 +49,7 @@ void Arsenal::reset() {
 }
 
 void Arsenal::update(edict_t* self) {
-	extern EntityClassManager* classManager;
-	CBaseHandle* weapList =
-			classManager->getClass("CBaseCombatCharacter")->getEntityVar(
-					"m_hMyWeapons").getPtr<CBaseHandle>(self);
+	CBaseHandle* weapList = BaseEntity(self).getPtr<CBaseHandle>("m_hMyWeapons");
 	for (int i = 0; i < MAX_WEAPONS; i++) {
 		int entIdx = weapList[i].GetEntryIndex();
 		extern IVEngineServer* engine;

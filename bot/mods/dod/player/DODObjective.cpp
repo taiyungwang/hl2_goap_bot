@@ -5,7 +5,7 @@
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
 #include <eiface.h>
-#include <utlvector.h>
+#include <algorithm>
 
 bool DODObjective::operator()(CNavArea *area, CNavArea *priorArea,
 		float travelDistanceSoFar) {
@@ -19,31 +19,18 @@ bool DODObjective::operator()(CNavArea *area, CNavArea *priorArea,
 		extern IServerGameEnts *servergameents;
 		edict_t* hit = result.m_pEnt == nullptr ? nullptr: servergameents->BaseEntityToEdict(result.m_pEnt);
 		if (hit == nullptr || !FClassnameIs(hit, "worldspawn")) {
-			hideSpots.AddToTail(areaHideSpots[i]->GetID());
+			hideSpots.push_back(areaHideSpots[i]->GetID());
 		}
 	}
 	return true;
 }
 
-class DODBombTarget: public BaseEntity {
-public:
-	DODBombTarget(edict_t *ent) :
-			BaseEntity("CDODBombTarget", ent) {
-	}
-
-	int getState() {
-		return get<int>("m_iState");
-	}
-};
-
 bool DODObjective::hasBombTargetInState(BombState state) const {
-	FOR_EACH_VEC(targets, i)
-	{
-		if (DODBombTarget(targets[i]).getState() == static_cast<int>(state)) {
-			return true;
-		}
-	}
-	return false;
+	return std::any_of(targets.begin(), targets.end(),
+			[state](edict_t *target) {
+				return BaseEntity(target).get<int>("m_iState")
+						== static_cast<int>(state);
+			});
 }
 
 int DODObjective::getOwner() const {

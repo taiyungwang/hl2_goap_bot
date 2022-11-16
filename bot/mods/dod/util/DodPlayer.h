@@ -4,7 +4,7 @@
 
 class DodPlayer: public BasePlayer {
 public:
-	DodPlayer(edict_t *ent): BasePlayer("CDODPlayer", ent) {
+	DodPlayer(edict_t *ent): BasePlayer(ent) {
 	}
 
 	int getPlayerClass() {

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <util/BaseEntity.h>
+#include "BaseCombatWeapon.h"
 
-class BaseGrenade: public BaseEntity {
+class BaseGrenade: public BaseCombatWeapon {
 public:
-	BaseGrenade(edict_t* ent): BaseEntity("CBaseGrenade", ent) {
+	BaseGrenade(edict_t* ent): BaseCombatWeapon(ent) {
 	}
 
 	float getDmgRadius() {

@@ -3,7 +3,7 @@
 #include <memory>
 
 class Blackboard;
-class EntityVar;
+class BaseEntity;
 class WeaponFunction;
 class Deployer;
 class Reloader;
@@ -79,8 +79,8 @@ public:
 	 */
 	WeaponFunction* chooseWeaponFunc(edict_t* self, float dist) const;
 
-	void setDeployable(EntityVar* deployableCheck, float minDeployRange) {
-		this->deployedCheck = deployableCheck;
+	void setDeployable(const char *deployedVarName, float minDeployRange) {
+		this->deployedVarName = deployedVarName;
 		this->minDeployRange = minDeployRange;
 	}
 
@@ -107,9 +107,7 @@ public:
 private:
 	std::shared_ptr<WeaponFunction> function[2];
 
-	const char* weaponName;
-
-	EntityVar* deployedCheck = nullptr;
+	const char* deployedVarName = nullptr;
 
 	float minDeployRange;
 

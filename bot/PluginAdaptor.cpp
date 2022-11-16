@@ -11,15 +11,12 @@
 #include "player/HidingSpotSelector.h"
 #include "player/VTableHook.h"
 #include <nav_mesh/nav_entities.h>
-#include <util/EntityClassManager.h>
 #include <util/EntityUtils.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
 
 CGlobalVars *gpGlobals = nullptr;
 ConVar r_visualizetraces("r_visualizetraces", "0", FCVAR_CHEAT);
-
-EntityClassManager *classManager = nullptr;
 CNavMesh* TheNavMesh = nullptr;
 
 ConVar mybot_debug("my_bot_debug", "0");
@@ -35,7 +32,6 @@ extern IVEngineServer* engine;
 PluginAdaptor::PluginAdaptor() {
 	// TODO: consider moving constructor initializations into init callback.
 	extern IServerGameDLL *servergamedll;
-	classManager = new EntityClassManager(servergamedll);
 	gpGlobals = playerinfomanager->GetGlobalVars();
 	TheNavMesh = new CNavMesh;
 	botBuilder = nullptr;
@@ -70,8 +66,6 @@ PluginAdaptor::PluginAdaptor() {
 PluginAdaptor::~PluginAdaptor() {
 	delete TheNavMesh;
 	TheNavMesh = nullptr;
-	delete classManager;
-	classManager = nullptr;
 	if (enableHook) {
 		unhookPlayerRunCommand();
 	}

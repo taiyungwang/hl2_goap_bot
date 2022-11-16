@@ -40,7 +40,7 @@ class AntiTankBuilder: public DeployableWeaponBuilder<Reloader> {
 public:
 	AntiTankBuilder() :
 			DeployableWeaponBuilder<Reloader>(0.9f, 500.0f, 2000.0f,
-					"CDODBaseRocketWeapon", "m_bDeployed") {
+					"m_bDeployed") {
 	}
 
 	std::shared_ptr<Weapon> build(edict_t *weap) const {
@@ -67,14 +67,14 @@ DODArsenalBuilder::DODArsenalBuilder() {
 	addPair<GrenadeLauncherBuilder>("weapon_riflegren_us", "weapon_riflegren_ger", 2000.0f);
 	addPair<MeleeWeaponBuilder>("weapon_amerknife", "weapon_spade");
 	addPair<DeployableWeaponBuilder<Reloader>>("weapon_garand", "weapon_k98",
-			0.8f, Weapon::MELEE_RANGE, 2000.0f, "CDODSniperWeapon", "m_bZoomed", 1000.0f);
+			0.8f, Weapon::MELEE_RANGE, 2000.0f, "m_bZoomed", 1000.0f);
 	addPair<DODSMGBuilder>("weapon_thompson", "weapon_mp40");
 	addPair<PistolBuilder>("weapon_colt", "weapon_p38", 0.2f);
 	addPair<GrenadeBuilder>("weapon_smoke_us", "weapon_smoke_ger");
 	addPair<GrenadeBuilder>("weapon_frag_us", "weapon_frag_ger");
 	addPair<DODAssaultRifleBuilder>("weapon_bar", "weapon_mp44");
 	addPair<DeployableWeaponBuilder<Reloader>>("weapon_spring", "weapon_k98_scoped",
-			0.8f, 1000.0f, 3600.0f, "CDODSniperWeapon", "m_bZoomed", 1000.0f);
+			0.8f, 1000.0f, 3600.0f, "m_bZoomed", 1000.0f);
 	addPair<DODMGBuilder>("weapon_30cal", "weapon_mg42");
 	addPair<AntiTankBuilder>("weapon_bazooka", "weapon_pschreck");
 	weaponBuilders["weapon_m1carbine"] = make_shared<PistolBuilder>(0.4f);

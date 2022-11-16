@@ -5,11 +5,9 @@
 #include <player/Bot.h>
 #include <player/Vision.h>
 #include <voice/VoiceMessageSender.h>
+#include <util/BaseGrenade.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
-#include <util/EntityClassManager.h>
-#include <util/EntityClass.h>
-#include <util/EntityVar.h>
 #include <in_buttons.h>
 
 bool DODUseFragGrenadeAction::execute() {
@@ -18,8 +16,7 @@ bool DODUseFragGrenadeAction::execute() {
 	if (self->getVision().getVisibleEnemies().size() < 2 || primeDuration++ >= 300) {
 		extern IVEngineServer *engine;
 		edict_t *weap = engine->PEntityOfEntIndex(self->getArsenal().getCurrWeaponIdx());
-		extern EntityClassManager* classManager;
-		if (classManager->getClass("CWeaponDODBaseGrenade")->getEntityVar("m_bPinPulled").get<bool>(weap)) {
+		if (BaseGrenade(weap).get<bool>("m_bPinPulled")) {
 			self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::FireInTheHole>(self->getEdict()));
 		}
 		return true;

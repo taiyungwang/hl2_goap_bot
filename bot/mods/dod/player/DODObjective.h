@@ -1,7 +1,7 @@
 #pragma once
 
 #include <nav_mesh/nav_pathfind.h>
-#include <utlvector.h>
+#include <vector>
 
 class DODObjectiveResource;
 struct edict_t;
@@ -13,12 +13,13 @@ public:
 		AVAILABLE,
 		ACTIVE
 	};
+
 	DODObjective(unsigned int idx, DODObjectiveResource &rsc) :
-			idx(idx), rsc(rsc) {
+		rsc(rsc), idx(idx){
 	}
 
 	void addTarget(edict_t* target) {
-		targets.AddToTail(target);
+		targets.push_back(target);
 	}
 
 	bool operator()(CNavArea *area, CNavArea *priorArea,
@@ -41,11 +42,11 @@ public:
 
 	bool hasBombs() const;
 
-	const CUtlVector<edict_t*>& getTargets() const {
+	const std::vector<edict_t*>& getTargets() const {
 		return targets;
 	}
 
-	const CUtlVector<int>& getHideSpots() const {
+	const std::vector<int>& getHideSpots() const {
 		return hideSpots;
 	}
 
@@ -54,7 +55,7 @@ private:
 
 	const unsigned idx;
 
-	CUtlVector<int> hideSpots;
+	std::vector<int> hideSpots;
 
-	CUtlVector<edict_t*> targets;
+	std::vector<edict_t*> targets;
 };

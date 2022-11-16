@@ -17,9 +17,6 @@
 #include <voice/AffirmativeVoiceMessage.h>
 #include <voice/GrenadeVoiceMessage.h>
 #include <move/Navigator.h>
-#include <util/EntityClassManager.h>
-#include <util/EntityClass.h>
-#include <util/EntityVar.h>
 #include <eiface.h>
 #include <goap/GoalManager.h>
 #include <vstdlib/random.h>

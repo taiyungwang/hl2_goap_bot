@@ -41,11 +41,11 @@ bool DODDefendPointAction::precondCheck() {
 		target = objectives->getObjective(choice);
 		auto &spots = target->getHideSpots();
 		// TODO: should we randomize spot selection?
-		FOR_EACH_VEC(spots, i)
+		for (auto spot: spots)
 		{
-			if (!selector->isInUse(spots[i], blackboard.getSelf()->getTeam())) {
+			if (!selector->isInUse(spot, blackboard.getSelf()->getTeam())) {
 				guardTarget = choice->GetCollideable()->GetCollisionOrigin();
-				selectorId = spots[i];
+				selectorId = spot;
 				targetLoc = selector->getSpotPos(selectorId);
 				if (target->hasBombTargetInState(DODObjective::BombState::ACTIVE)
 						&& targetLoc.DistTo(guardTarget) < 300.0f) {

@@ -7,7 +7,7 @@
 class DODMGBuilder: public DeployableWeaponBuilder<DODMGReloader, DODMGDeployer> {
 public:
 	DODMGBuilder() :
-			DeployableWeaponBuilder(0.8f, 500.0f, 3600.0f, "CDODBipodWeapon",
+			DeployableWeaponBuilder(0.8f, 500.0f, 3600.0f,
 					"m_bDeployed", 500.0f) {
 	}
 

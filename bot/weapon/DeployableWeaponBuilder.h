@@ -4,9 +4,7 @@
 #include "Weapon.h"
 #include "WeaponFunction.h"
 #include "Deployer.h"
-#include <util/EntityClassManager.h>
-#include <util/EntityVar.h>
-#include <util/EntityClass.h>
+#include <string>
 
 /**
  * Builds weapons that are zoomable, deployable, or have an alternate fire.
@@ -15,12 +13,9 @@ template<typename T, typename U = Deployer>
 class DeployableWeaponBuilder: public ReloadableWeaponBuilder<T> {
 public:
 	DeployableWeaponBuilder(float damage, float minRange, float maxRange,
-			const char* className, const char* varName, float zoomDist = 0.0f) :
-			damage(damage), minRange(minRange), maxRange(maxRange),
+			const char* varName, float zoomDist = 0.0f) :
+			damage(damage), minRange(minRange), maxRange(maxRange), deployableCheck(varName),
 			zoomDist(zoomDist) {
-		extern EntityClassManager* classManager;
-		deployableCheck = &classManager->getClass(className)->getEntityVar(
-				varName);
 	}
 
 	virtual ~DeployableWeaponBuilder() {
@@ -30,7 +25,7 @@ public:
 		auto weapon = ReloadableWeaponBuilder<T>::build(weap);
 		weapon->setPrimary(std::make_shared<WeaponFunction>(damage));
 		weapon->getPrimary()->getRange()[1] = 1000.0f;
-		weapon->setDeployable(deployableCheck, zoomDist);
+		weapon->setDeployable(deployableCheck.c_str(), zoomDist);
 		weapon->setDeployer(std::make_shared<U>(*weapon));
 		float* ranges = weapon->getPrimary()->getRange();
 		ranges[0] = minRange;
@@ -39,7 +34,7 @@ public:
 	}
 
 private:
-	EntityVar* deployableCheck;
+	const std::string deployableCheck;
 
 	float damage, zoomDist, minRange, maxRange;
 };

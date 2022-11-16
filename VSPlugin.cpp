@@ -5,7 +5,6 @@
 #include "VSPlugin.h"
 
 #include <bot/PluginAdaptor.h>
-#include <util/EntityClassManager.h>
 #include <IEngineTrace.h>
 #include <eiface.h>
 #include <ivdebugoverlay.h>
