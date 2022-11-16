@@ -47,7 +47,8 @@ bool DODDefendPointAction::precondCheck() {
 				guardTarget = choice->GetCollideable()->GetCollisionOrigin();
 				selectorId = spot;
 				targetLoc = selector->getSpotPos(selectorId);
-				if (target->hasBombTargetInState(DODObjective::BombState::ACTIVE)
+				if (objectives->isDetonation()
+						&& target->hasBombTargetInState(DODObjective::BombState::ACTIVE)
 						&& targetLoc.DistTo(guardTarget) < 300.0f) {
 					selectorId = -1;
 					continue;
@@ -63,12 +64,13 @@ bool DODDefendPointAction::precondCheck() {
 
 bool DODDefendPointAction::isTargetValid() const {
 	bool ours = target->getOwner() == blackboard.getSelf()->getTeam();
-	return (ours
-			&& (!objectives->isDetonation()
-					|| (target->hasBombs()
-							&& target->hasBombTargetInState(
-									DODObjective::BombState::AVAILABLE))))
-			|| (!ours
-					&& target->hasBombTargetInState(
-							DODObjective::BombState::ACTIVE));
+	if (!objectives->isDetonation()) {
+		return !ours;
+	}
+	if (!target->hasBombs()) {
+		return false;
+	}
+	return ours ?
+			target->hasBombTargetInState(DODObjective::BombState::AVAILABLE) :
+			target->hasBombTargetInState(DODObjective::BombState::ACTIVE);
 }
