@@ -1,0 +1,1 @@
+add_library(bot_util BaseCombatWeapon.cpp)
