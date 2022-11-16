@@ -30,7 +30,7 @@ jobs:
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     strategy:
       matrix: 
-        os: [ubuntu-20.04, windows-2019]
+        os: [ubuntu-22.04, windows-2019]
     runs-on: ${{ matrix.os }}      
     steps:
       - uses: actions/checkout@v2
@@ -43,7 +43,7 @@ jobs:
       - name: Create plugin binary directory
         run: mkdir ${{github.workspace}}/hl2_goap_bot/addons/mybot
       - name: Copy Artifact Linux
-        if: matrix.os == 'ubuntu-20.04'
+        if: matrix.os == 'ubuntu-22.04'
         run: cp ${{github.workspace}}/build/hl2_goap_bot/my_bot.so ${{github.workspace}}/hl2_goap_bot/addons/mybot
       - name: Copy Artifact Windows
         if: matrix.os == 'windows-2019'
