@@ -14,7 +14,8 @@ void GoToEntityAction::init() {
 
 bool GoToEntityAction::precondCheck() {
 	selectItem();
-	if (item == nullptr || item->IsFree()) {
+	if (item == nullptr || item->IsFree()
+			|| item->GetUnknown() == nullptr) {
 		return false;
 	}
 	setTargetLocAndRadius(item);
