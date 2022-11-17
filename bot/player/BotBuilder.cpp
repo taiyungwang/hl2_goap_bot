@@ -72,8 +72,6 @@ void BotBuilder::kickAllExcept(const CCommand &command) {
 			engine->ServerCommand((CUtlString("kickid ") + player.second->getUserId() + "\n").Get());
 		}
 	}
-	extern ConVar minPlayers;
-	minPlayers.SetValue(1);
 }
 
 class SwitchToBestInRangeWeaponAction: public SwitchToBestLoadedWeaponAction {

@@ -22,7 +22,7 @@ CNavMesh* TheNavMesh = nullptr;
 ConVar mybot_debug("my_bot_debug", "0");
 ConVar mybot_var("mybot_var", "0.5");
 
-ConVar minPlayers("mybot_max_players", "-1");
+ConVar minPlayers("mybot_min_players", "-1");
 
 CUtlMap<int, NavEntity*> blockers;
 
