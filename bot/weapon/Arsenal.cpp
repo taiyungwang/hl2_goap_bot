@@ -7,9 +7,10 @@
 #include <player/Bot.h>
 #include <util/SimpleException.h>
 #include <util/BasePlayer.h>
-#include <eiface.h>
-#include <shareddefs.h>
 #include <util/BaseCombatWeapon.h>
+#include <shareddefs.h>
+#include <server_class.h>
+#include <eiface.h>
 
 int Arsenal::getBestWeapon(Blackboard& blackboard, const WeaponFilter& ignore) const {
 	int best = 0;
@@ -50,11 +51,28 @@ void Arsenal::reset() {
 
 void Arsenal::update(edict_t* self) {
 	CBaseHandle* weapList = BaseEntity(self).getPtr<CBaseHandle>("m_hMyWeapons");
-	for (int i = 0; i < MAX_WEAPONS; i++) {
+	for (int i = 0; i < MAX_WEAPONS && weapList[i].IsValid(); i++) {
 		int entIdx = weapList[i].GetEntryIndex();
 		extern IVEngineServer* engine;
 		edict_t* weaponEnt = engine->PEntityOfEntIndex(entIdx);
 		if (weaponEnt == nullptr || weaponEnt->IsFree()) {
+			continue;
+		}
+		bool isWeapon = false;
+		// sometimes the handle is pointing to an entity that is not an weapon
+		// like when a round ends/begins in dod.
+		for (SendTable *st = weaponEnt->m_pNetworkable->GetServerClass()->m_pTable;
+				st != nullptr && !isWeapon; ) {
+			if (std::string(st->GetName()) == "DT_BaseCombatWeapon") {
+				isWeapon = true;
+			} else if (st->GetNumProps() == 0
+					|| std::string(st->GetProp(0)->GetName()) != "baseclass") {
+				st = nullptr;
+			} else {
+				st = st->GetProp(0)->GetDataTable();
+			}
+		}
+		if (!isWeapon) {
 			continue;
 		}
 		int weapState = BaseCombatWeapon(weaponEnt).getWeaponState();
