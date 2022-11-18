@@ -78,9 +78,6 @@ void Bot::think() {
 			}
 			rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle(),
 					mybot_rot_speed.GetFloat());
-			if (cmd.weaponselect != 0) {
-				world->updateState(WorldProp::USING_BEST_WEAP, true);
-			}
 		}
 		cmd.buttons = blackboard->getButtons().getPressed();
 		extern CGlobalVars *gpGlobals;
