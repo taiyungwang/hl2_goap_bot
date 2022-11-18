@@ -72,8 +72,8 @@ public:
 	virtual void abort() {
 	}
 
-	float getChanceToExec() const {
-		return chanceToExec;
+	virtual float getChanceToExec() const {
+		return 1.0f;
 	}
 
 protected:
@@ -82,6 +82,4 @@ protected:
 	WorldState precond;
 
 	GoalState effects;
-
-	float chanceToExec = 1.0f;
 };

@@ -20,7 +20,6 @@ SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 	effects = {WorldProp::ENEMY_SIGHTED, true};
 	targetRadius = 16.0f;
 	facing.x = facing.z = facing.y = 0.0f;
-	chanceToExec = snipeChance.GetFloat();
 }
 
 bool SnipeAction::onPlanningFinished() {
@@ -103,6 +102,10 @@ void SnipeAction::abort() {
 	if (weapon != nullptr) {
 		weapon->undeploy(blackboard);
 	}
+}
+
+float SnipeAction::getChanceToExec() const {
+	return snipeChance.GetFloat();
 }
 
 float SnipeAction::calculateFacing() {

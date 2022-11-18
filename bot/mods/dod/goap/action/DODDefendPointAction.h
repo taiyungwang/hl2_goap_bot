@@ -17,6 +17,8 @@ public:
 
 	bool execute();
 
+	float getChanceToExec() const;
+
 private:
 	const DODObjectives* objectives = nullptr;
 

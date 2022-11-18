@@ -14,7 +14,6 @@ static ConVar dodDefendChance("mybot_dod_defend_chance", "0.2");
 DODDefendPointAction::DODDefendPointAction(Blackboard &blackboard) :
 		SnipeAction(blackboard) {
 	effects = { WorldProp::POINTS_DEFENDED, true };
-	chanceToExec = dodDefendChance.GetFloat();
 }
 
 bool DODDefendPointAction::execute() {
@@ -60,6 +59,10 @@ bool DODDefendPointAction::precondCheck() {
 		}
 	}
 	return false;
+}
+
+float DODDefendPointAction::getChanceToExec() const {
+	return dodDefendChance.GetFloat();
 }
 
 bool DODDefendPointAction::isTargetValid() const {

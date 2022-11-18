@@ -22,6 +22,8 @@ public:
 
 	void abort();
 
+	float getChanceToExec() const;
+
 protected:
 	static HidingSpotSelector* selector;
 
