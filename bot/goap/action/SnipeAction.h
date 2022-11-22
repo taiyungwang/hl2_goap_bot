@@ -14,7 +14,7 @@ public:
 
 	virtual bool precondCheck() override;
 
-	bool onPlanningFinished();
+	bool init();
 
 	bool execute();
 

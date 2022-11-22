@@ -7,7 +7,7 @@
 #include <algorithm>
 
 GoalManager::GoalManager(const WorldState& worldState, Blackboard& blackboard) :
-		worldState(worldState), blackboard(blackboard) {
+		blackboard(blackboard), worldState(worldState) {
 	planBuilder = new Planner(worldState);
 }
 
@@ -38,7 +38,10 @@ void GoalManager::execute() {
 		if (planBuilder->findPlan(actions[goals[currentGoal++].action]->getEffects())) {
 			planBuilder->buildPlan(plan);
 			if (!plan.empty()) {
-				actions[plan.front()]->init();
+				if (!actions[plan.front()]->init()) {
+					reset();
+					return;
+				}
 			}
 		}
 	}
@@ -47,9 +50,7 @@ void GoalManager::execute() {
 			reset();
 		} else {
 			plan.pop();
-			if (!plan.empty()) {
-				actions[plan.front()]->init();
-			} else {
+			if (plan.empty() || !actions[plan.front()]->init()) {
 				reset();
 			}
 		}

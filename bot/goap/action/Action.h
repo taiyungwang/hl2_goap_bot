@@ -23,7 +23,8 @@ public:
 	 * Called once before action is executed.  This can be used to satisfy
 	 * dependencies on subsequent actions.
 	 */
-	virtual void init() {
+	virtual bool init() {
+		return true;
 	}
 
 	/**
@@ -33,15 +34,6 @@ public:
 	virtual bool precondCheck() {
 		return true;
 	}
-
-	/**
-	 * Invoked when planning is complete.  The call to this callback is ordered based on
-	 * order of action.  Returning false will cause the plan to fail.
-	 */
-	virtual bool onPlanningFinished() {
-		return true;
-	}
-
 	
 	/**
 	 * @return True if post conditions for the action are satisfied.

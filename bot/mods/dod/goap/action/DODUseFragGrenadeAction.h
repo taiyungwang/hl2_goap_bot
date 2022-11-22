@@ -10,8 +10,9 @@ public:
 			DODUseRifleGrenadeAction(blackboard) {
 	}
 
-	void init() {
+	bool init() {
 		primeDuration = 0;
+		return true;
 	}
 
 	bool execute();

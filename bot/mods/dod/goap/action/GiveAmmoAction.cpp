@@ -12,14 +12,17 @@ GiveAmmoAction::GiveAmmoAction(Blackboard &blackboard,
 	precond[WorldProp::ENEMY_SIGHTED] = false;
 }
 
-void GiveAmmoAction::init() {
-	GoToEntityAction::init();
+bool GiveAmmoAction::init() {
+	if (!GoToEntityAction::init()) {
+		return false;
+	}
 	if (item != nullptr) {
 		blackboard.getSelf()->getVoiceMessageSender().sendMessage(
 				std::make_shared<AffirmativeVoiceMessage>(
 						blackboard.getSelf()->getEdict()));
 	}
 	item = nullptr;
+	return true;
 }
 
 bool GiveAmmoAction::goalComplete() {

@@ -7,9 +7,12 @@
 #include <edict.h>
 #include <in_buttons.h>
 
-void GoToEntityAction::init() {
-	GoToAction::init();
+bool GoToEntityAction::init() {
+	if (!GoToAction::init()) {
+		return false;
+	}
 	blackboard.setTarget(item);
+	return true;
 }
 
 bool GoToEntityAction::precondCheck() {

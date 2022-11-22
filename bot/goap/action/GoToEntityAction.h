@@ -12,7 +12,7 @@ class GoToEntityAction: public GoToAction {
 public:
 	virtual bool precondCheck() override;
 
-	virtual void init();
+	virtual bool init();
 
 protected:
 	edict_t* item = nullptr;

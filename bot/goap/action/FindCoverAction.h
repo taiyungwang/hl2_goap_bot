@@ -11,7 +11,7 @@ public:
 
 	bool precondCheck() override;
 
-	bool onPlanningFinished() {
+	bool init() {
 		return true;
 	}
 

@@ -99,10 +99,6 @@ void Planner::buildPlan(std::queue<int> &path) const {
 		return;
 	}
 	for (int i = start->id; i != nodes.size() - 1; i = nodes[i].parent) {
-		if (!actions[nodes[i].id]->onPlanningFinished()) {
-			path = std::queue<int>();
-			return;
-		}
 		path.push(nodes[i].id);
 	}
 }

@@ -11,14 +11,11 @@ struct edict_t;
  */
 class GoToAction: public Action {
 public:
-
-	bool onPlanningFinished() override;
-
 	virtual bool execute();
 
 	virtual bool precondCheck() override = 0;
 
-	virtual void init();
+	virtual bool init();
 
 	virtual float getCost();
 

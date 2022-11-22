@@ -7,7 +7,7 @@ class GiveAmmoAction: public GoToEntityAction, public CommandHandler::Receiver {
 public:
 	GiveAmmoAction(Blackboard &blackboard, CommandHandler &commandHandler);
 
-	void init();
+	bool init();
 
 	bool goalComplete() override;
 

@@ -11,7 +11,7 @@ float GoToAction::getCost() {
 	return targetLoc.DistTo(blackboard.getSelf()->getCurrentPosition());
 }
 
-bool GoToAction::onPlanningFinished() {
+bool GoToAction::init() {
 	auto self = blackboard.getSelf();
 	Navigator::Path path;
 	int team = self->getTeam();
@@ -30,7 +30,8 @@ bool GoToAction::onPlanningFinished() {
 	NavMeshPathBuilderWithGoal(team, goal).build(path,
 			self->getArea());
 	if (!path.empty()) {
-		blackboard.getSelf()->getNavigator()->getPath().swap(path);
+		self->getNavigator()->getPath().swap(path);
+		self->getNavigator()->start(targetLoc, targetRadius, sprint);
 		return true;
 	}
 	if (mybot_debug.GetBool()) {
@@ -46,10 +47,6 @@ bool GoToAction::onPlanningFinished() {
 bool GoToAction::execute() {
 	canAbort = !blackboard.isOnLadder();
 	return blackboard.getSelf()->getNavigator()->step();
-}
-
-void GoToAction::init() {
-	blackboard.getSelf()->getNavigator()->start(targetLoc, targetRadius, sprint);
 }
 
 bool GoToAction::goalComplete() {

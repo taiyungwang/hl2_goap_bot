@@ -22,12 +22,12 @@ SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 	facing.x = facing.z = facing.y = 0.0f;
 }
 
-bool SnipeAction::onPlanningFinished() {
+bool SnipeAction::init() {
 	auto self = blackboard.getSelf();
 	int team = self->getTeam();
 	duration = 300;
 	const Weapon *weapon = self->getArsenal().getCurrWeapon();
-	if (!GoToAction::onPlanningFinished()
+	if (!GoToAction::init()
 			|| (weapon != nullptr && weapon->getMinDeployRange()
 			> calculateFacing())) {
 		selector->update(selectorId, team, false);
