@@ -14,7 +14,7 @@
 
 HidingSpotSelector* SnipeAction::selector = nullptr;
 
-ConVar snipeChance("mybot_snipe_chance", "0.5");
+ConVar snipeChance("mybot_snipe_chance", "0.1");
 
 SnipeAction::SnipeAction(Blackboard& blackboard) : GoToAction(blackboard) {
 	effects = {WorldProp::ENEMY_SIGHTED, true};
