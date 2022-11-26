@@ -67,6 +67,7 @@ bool FindCoverAction::precondCheck() {
 		return false;
 	}
 	self->getNavigator()->getPath().swap(path);
+	self->getNavigator()->start(targetLoc, targetRadius, sprint);
 	return true;
 }
 
