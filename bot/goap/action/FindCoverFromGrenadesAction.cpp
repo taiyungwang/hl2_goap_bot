@@ -20,7 +20,7 @@ void FindCoverFromGrenadesAction::setAvoidAreas() {
 	for (auto i: blackboard.getSelf()->getVision().getVisibleEntities()) {
 		extern IVEngineServer *engine;
 		edict_t *entity = engine->PEntityOfEntIndex(i);
-		float range = BaseGrenade(entity).getDmgRadius() + HalfHumanWidth;
+		float range = *BaseGrenade(entity).getDmgRadius() + HalfHumanWidth;
 		if (range > maxRange) {
 			maxRange = range;
 		}

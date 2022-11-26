@@ -7,15 +7,15 @@ public:
 	BaseGrenade(edict_t* ent): BaseCombatWeapon(ent) {
 	}
 
-	float getDmgRadius() {
-		return get<float>("m_DmgRadius");
+	float *getDmgRadius() const {
+		return getPtr<float>("m_DmgRadius");
 	}
 
-	edict_t* getThrower() {
+	edict_t* getThrower() const {
 		return getEntity("m_hThrower");
 	}
 
-	Vector getVelocity() {
-		return get<Vector>("m_vecVelocity");
+	Vector *getVelocity() const {
+		return getPtr<Vector>("m_vecVelocity");
 	}
 };

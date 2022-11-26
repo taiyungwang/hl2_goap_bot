@@ -27,8 +27,7 @@ int Weapon::getWeaponState() const {
 }
 
 bool Weapon::isDeployed() const {
-	return deployedVarName != nullptr && !weap->IsFree()
-			&& BaseCombatWeapon(weap).get<bool>(deployedVarName);
+	return deployedVarName != nullptr && BaseCombatWeapon(weap).get<bool>(deployedVarName, false);
 }
 
 void Weapon::undeploy(Blackboard& blackboard) {

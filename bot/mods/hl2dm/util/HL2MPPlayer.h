@@ -7,7 +7,7 @@ public:
 	HL2MPPlayer(edict_t *ent): BasePlayer(ent) {
 	}
 
-	bool isOnLadder() {
+	bool isOnLadder() const {
 		return getEntity("m_hLadder") != nullptr;
 	}
 };

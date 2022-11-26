@@ -7,19 +7,19 @@ public:
 	BaseCombatWeapon(edict_t *ent): BaseEntity(ent) {
 	}
 
-	int getWeaponState() {
-		return get<int>("m_iState");
+	int getWeaponState() const {
+		return get<int>("m_iState", 0);
 	}
 
-	int getAmmoType(int i) {
+	int getAmmoType(int i) const {
 		return *(getPtr<int>(AMMO_TYPES[i]));
 	}
 
-	int *getClipIndex(int i) {
+	int *getClipIndex(int i) const {
 		return getPtr<int>(CLIP_TYPES[i]);
 	}
 
-	edict_t *getOwner() {
+	edict_t *getOwner() const {
 		return getEntity("m_hOwner");
 	}
 

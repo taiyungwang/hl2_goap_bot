@@ -15,7 +15,7 @@ void DODObjectives::startRound() {
 	findEntWithMatchingName("dod_capture_area", capArea);
 	objectiveResource = new DODObjectiveResource(objRsrc[0]);
 	const Vector *position = objectiveResource->getCapturePositions();
-	for (int i = 0; i < objectiveResource->numCtrlPts(); i++) {
+	for (int i = 0; i < *objectiveResource->numCtrlPts(); i++) {
 		objectives.AddToTail(new DODObjective(i, *objectiveResource));
 		FOR_EACH_LL(ctrlPts, j)
 		{

@@ -7,19 +7,19 @@ public:
 	DodPlayer(edict_t *ent): BasePlayer(ent) {
 	}
 
-	int getPlayerClass() {
-		return get<int>("m_iPlayerClass");
+	int getPlayerClass() const {
+		return get<int>("m_iPlayerClass", -1);
 	}
 
-	bool isProne() {
-		return get<bool>("m_bProne");
+	bool isProne() const {
+		return *getPtr<bool>("m_bProne");
 	}
 
-	bool isDefusing() {
-		return get<bool>("m_bDefusing");
+	bool isDefusing() const {
+		return *getPtr<bool>("m_bDefusing");
 	}
 
-	bool isPlanting() {
-		return get<bool>("m_bPlanting");
+	bool isPlanting() const {
+		return *getPtr<bool>("m_bPlanting");
 	}
 };

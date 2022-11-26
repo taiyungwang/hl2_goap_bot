@@ -99,7 +99,7 @@ bool Navigator::step() {
 			|| blackboard.isOnLadder()) {
 		maxTime *= 1.5f;
 	}
-	float speed = BasePlayer(self->getEdict()).getVelocity().Length();
+	float speed = BasePlayer(self->getEdict()).getVelocity()->Length();
 	if (((attributes & NAV_MESH_CROUCH) && speed < 63.0f)
 			|| ((attributes & NAV_MESH_WALK) && speed < 150.0f)
 			|| speed < 190.0f) {

@@ -11,19 +11,19 @@ public:
 		return getPtr<int>("m_iOwner");
 	}
 
-	int numCtrlPts() {
-		return get<int>("m_iNumControlPoints");
+	int *numCtrlPts() const {
+		return getPtr<int>("m_iNumControlPoints");
 	}
 
-	Vector* getCapturePositions() {
+	Vector* getCapturePositions() const {
 		return getPtr<Vector>("m_vCPPositions");
 	}
 
-	int* getNumBombsRequired() {
+	int* getNumBombsRequired() const {
 		return getPtr<int>("m_iBombsRequired");
 	}
 
-	bool* getBombIsPlanted() {
+	bool* getBombIsPlanted() const {
 		return getPtr<bool>("m_bBombPlanted");
 	}
 };

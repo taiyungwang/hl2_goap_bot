@@ -16,7 +16,7 @@ bool DODUseFragGrenadeAction::execute() {
 	if (self->getVision().getVisibleEnemies().size() < 2 || primeDuration++ >= 300) {
 		extern IVEngineServer *engine;
 		edict_t *weap = engine->PEntityOfEntIndex(self->getArsenal().getCurrWeaponIdx());
-		if (BaseGrenade(weap).get<bool>("m_bPinPulled")) {
+		if (BaseGrenade(weap).get<bool>("m_bPinPulled", false)) {
 			self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::FireInTheHole>(self->getEdict()));
 		}
 		return true;

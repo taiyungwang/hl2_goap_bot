@@ -85,7 +85,7 @@ bool DODWorld::update(Blackboard& blackboard) {
 						|| (team == 3 && (FClassnameIs(entity, "grenade_frag_us")
 								|| FClassnameIs(entity, "grenade_riflegren_us")))))
 				&& self->getCurrentPosition().DistTo(entity->GetCollideable()->GetCollisionOrigin())
-				< grenade.getDmgRadius() + HalfHumanWidth) {
+				< *grenade.getDmgRadius() + HalfHumanWidth) {
 			updateState(WorldProp::EXPLOSIVE_NEAR, true);
 			if (grenade.getThrower() != self->getEdict()) {
 				self->getVoiceMessageSender().sendMessage(std::make_shared<GrenadeVoiceMessage>(self->getEdict()));

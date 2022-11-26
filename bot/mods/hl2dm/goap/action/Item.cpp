@@ -10,5 +10,5 @@ bool Item::isAvailable() const {
 }
 
 bool Charger::isAvailable() const {
-	return BaseEntity(ent).get<float>("m_flCycle") < 1.0f;
+	return BaseEntity(ent).get<float>("m_flCycle", 1.0f) < 1.0f;
 }

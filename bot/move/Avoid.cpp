@@ -96,7 +96,7 @@ MoveState* Avoid::move(const Vector& pos) {
 		}
 		blackboard.getButtons().hold(IN_FORWARD);
 	}
-	float speed = BasePlayer(self).getVelocity().Length();
+	float speed = BasePlayer(self).getVelocity()->Length();
 	if (!(ctx.getType() & NAV_MESH_CROUCH) && speed < minStuckSpeed.GetFloat()) {
 		stuckFrames++;
 	} else {
@@ -107,7 +107,6 @@ MoveState* Avoid::move(const Vector& pos) {
 	}
 	if (ctx.isStuck()) {
 		extern CGlobalVars *gpGlobals;
-		int idx = currBlocker == nullptr ? -1 : engine->IndexOfEdict(currBlocker);
 		if (currBlocker != nullptr) {
 			if (Q_stristr(currBlockerName, "func_team") != nullptr) {
 				// ensure that nothing else is blocking us.

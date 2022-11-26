@@ -81,7 +81,7 @@ void Player::think() {
 		}
 		noiseRange = 0.0f;
 		arsenal->update(ent);
-		if (BasePlayer(ent).getVelocity().Length() > 150.0f) {
+		if (BasePlayer(ent).getVelocity()->Length() > 150.0f) {
 			noiseRange = 100.0f;
 		}
 		int buttons = info->GetLastUserCommand().buttons;
