@@ -50,8 +50,6 @@ PluginAdaptor::PluginAdaptor() {
 		botBuilder = new HL2DMBotBuilder(commandHandler, *arsenalBuilder.get());
 		TheNavMesh->addPlayerSpawnName("info_player_start");
 	} else if (modPath == "dod") {
-		extern  ConVar snipeChance;
-		snipeChance.SetValue("1.0");
 		gameManager = new DODObjectives();
 		arsenalBuilder = std::make_shared<DODArsenalBuilder>();
 		botBuilder = new DODBotBuilder(gameManager, commandHandler, *arsenalBuilder.get());

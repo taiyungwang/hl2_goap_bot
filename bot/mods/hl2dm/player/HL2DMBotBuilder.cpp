@@ -97,17 +97,14 @@ public:\
 	ItemAmmo##weaponClass##Builder() : ItemAmmoBuilder(weaponName, ammo) {} \
 };
 
-
-#define DECL_ITEM_WEAPON_BUILDER_CLASS(weaponClass, weaponName) \
+#define DECL_AMMO_WEAPON_BUILDER_CLASSES(weaponClass, weaponName, ammo) \
+DECL_AMMO_BUILDER_CLASS(weaponClass, weaponName, ammo)\
+	\
 class Item##weaponClass##Builder: public ItemWeaponBuilder {\
 public:\
 	Item##weaponClass##Builder(): ItemWeaponBuilder(weaponName) {\
 	}\
 };
-
-#define DECL_AMMO_WEAPON_BUILDER_CLASSES(weaponClass, weaponName, ammo) \
-DECL_AMMO_BUILDER_CLASS(weaponClass, weaponName, ammo)\
-DECL_ITEM_WEAPON_BUILDER_CLASS(weaponClass, weaponName)
 
 DECL_AMMO_WEAPON_BUILDER_CLASSES(Pistol, "pistol", 150)
 DECL_AMMO_WEAPON_BUILDER_CLASSES(AR2, "weapon_ar2", 60)
