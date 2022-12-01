@@ -3,7 +3,6 @@
 #include "event/EventHandler.h"
 #include "player/CommandHandler.h"
 #include <strtools.h>
-#include <utlqueue.h>
 #include <memory>
 
 class Thinker;
@@ -32,11 +31,8 @@ public:
 
 	void gameFrame(bool isSimulating);
 
-	void clientActive(edict_t *pEntity) {
-	}
-
 	void clientPutInServer(edict_t *pEntity) {
-		activationQ.Insert(pEntity);
+		newPlayers.push_back(pEntity);
 	}
 
 	void clientDisconnect(edict_t *pEntity);
@@ -52,8 +48,18 @@ public:
 		commandHandler.handle(player, command);
 	}
 
+	std::list<edict_t*>& getNewPlayers() {
+		return newPlayers;
+	}
+
+	int getHookOffset() const {
+		return hookOffset;
+	}
+
 private:
-	bool enableHook = false, navMeshLoadAttempted = false;
+	bool navMeshLoadAttempted = false;
+
+	int hookOffset = -1;
 
 	GameManager* gameManager = nullptr;
 
@@ -67,6 +73,6 @@ private:
 
 	std::shared_ptr<HidingSpotSelector> hidingSpotSelector;
 
-	CUtlQueue<edict_t*> activationQ;
+	std::list<edict_t*> newPlayers;
 };
 

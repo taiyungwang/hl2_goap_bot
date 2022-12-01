@@ -9,7 +9,6 @@
 #include "player/Bot.h"
 #include "player/GameManager.h"
 #include "player/HidingSpotSelector.h"
-#include "player/VTableHook.h"
 #include <nav_mesh/nav_entities.h>
 #include <util/EntityUtils.h>
 #include <eiface.h>
@@ -28,6 +27,16 @@ CUtlMap<int, NavEntity*> blockers;
 
 extern IPlayerInfoManager *playerinfomanager;
 extern IVEngineServer* engine;
+
+
+static ConVar mybot_dod_playerruncommand_offset(
+		"mybot_dod_playerruncommand_offset",
+#ifndef _WIN32
+	"419"
+#else
+	"418"
+#endif
+);
 
 PluginAdaptor::PluginAdaptor() {
 	// TODO: consider moving constructor initializations into init callback.
@@ -53,7 +62,7 @@ PluginAdaptor::PluginAdaptor() {
 		gameManager = new DODObjectives();
 		arsenalBuilder = std::make_shared<DODArsenalBuilder>();
 		botBuilder = new DODBotBuilder(gameManager, commandHandler, *arsenalBuilder.get());
-		enableHook = true;
+		hookOffset = mybot_dod_playerruncommand_offset.GetInt();
 		TheNavMesh->addPlayerSpawnName("info_player_axis");
 		TheNavMesh->addPlayerSpawnName("info_player_allies");
 	} else {
@@ -64,9 +73,6 @@ PluginAdaptor::PluginAdaptor() {
 PluginAdaptor::~PluginAdaptor() {
 	delete TheNavMesh;
 	TheNavMesh = nullptr;
-	if (enableHook) {
-		unhookPlayerRunCommand();
-	}
 	if (botBuilder != nullptr) {
 		delete botBuilder;
 		botBuilder = nullptr;
@@ -89,15 +95,14 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		}
 		navMeshLoadAttempted = true;
 	}
-	while (!activationQ.IsEmpty()) {
-		edict_t* ent = activationQ.RemoveAtHead();
-		auto& players = Player::getPlayers();
+	const auto& players = Player::getPlayers();
+	newPlayers.remove_if([players, this](edict_t *ent) {
 		if (players.find(engine->IndexOfEdict(ent)) == players.end()) {
 			new Player(ent, arsenalBuilder->build());
-		} else if (enableHook) {
-			hookPlayerRunCommand(ent);
+			return true;
 		}
-	}
+		return false;
+	});
 	if (navMeshLoadAttempted && TheNavMesh != nullptr) {
 		CUtlLinkedList<unsigned short> toRemove;
 		FOR_EACH_MAP_FAST(blockers, i) {

@@ -4,7 +4,8 @@
 
 #include "VSPlugin.h"
 
-#include <bot/PluginAdaptor.h>
+#include "bot/PluginAdaptor.h"
+#include "player/Bot.h"
 #include <IEngineTrace.h>
 #include <eiface.h>
 #include <ivdebugoverlay.h>
@@ -14,6 +15,15 @@
 #include <icvar.h>
 #include <vphysics_interface.h>
 #include <datacache/imdlcache.h>
+#include <usercmd.h>
+#include <string>
+#include<string.h>
+#ifndef _WIN32
+#include <sys/mman.h>
+#else
+#include <Windows.h>
+#include <winnt.h>
+#endif
 
 IBotManager *botmanager = nullptr;
 IVDebugOverlay *debugoverlay = nullptr;
@@ -111,12 +121,105 @@ void VSPlugin::LevelInit(char const *pMapName) {
 	adaptor->levelInit(pMapName);
 }
 
-void VSPlugin::GameFrame(bool simulating) {
-	adaptor->gameFrame(simulating);
+
+DWORD VirtualTableHook(DWORD* pdwNewInterface, int vtable, DWORD newInterface) {
+	DWORD dwStor = pdwNewInterface[vtable], dwStorVal =
+			reinterpret_cast<DWORD>(&pdwNewInterface[vtable]);
+#ifdef _WIN32
+	DWORD dwOld;
+	char buf[256];
+	if (!VirtualProtect(&pdwNewInterface[vtable], 4, PAGE_EXECUTE_READWRITE, &dwOld)) {
+		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			buf, (sizeof(buf) / sizeof(buf[0])), NULL);
+		throw SimpleException(CUtlString(
+				"In VirtualTableHook while calling VirtualProtect for write access: ")
+				+ buf);
+	}
+#else
+	DWORD alignOffset = dwStorVal % sysconf(_SC_PAGE_SIZE);
+	// need page aligned address
+	char *addr = reinterpret_cast<char *>(dwStorVal - alignOffset);
+	int len = sizeof(DWORD) + alignOffset;
+	if (mprotect(addr, len, PROT_EXEC | PROT_READ | PROT_WRITE) == -1) {
+		Error(std::string("In VirtualTableHook while calling mprotect for write access: %s").c_str(),
+				strerror(errno));
+	}
+#endif
+	*reinterpret_cast<DWORD*>(dwStorVal) = newInterface;
+#ifdef _WIN32
+	if (!VirtualProtect(&pdwNewInterface[vtable], 4, dwOld, &dwOld)) {
+		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			buf, (sizeof(buf) / sizeof(buf[0])), NULL);
+		throw SimpleException(CUtlString(
+			"In VirtualTableHook while calling VirtualProtect to remove write access: ")
+			+ buf);
+	}
+#else
+	if (mprotect(addr, len, PROT_EXEC | PROT_READ) == -1) {
+		Error(std::string("In VirtualTableHook while calling mprotect to remove write access: %s").c_str(),
+				strerror(errno));
+	}
+#endif
+	return dwStor;
 }
 
-void VSPlugin::ClientActive(edict_t *pEntity) {
-	adaptor->clientActive(pEntity);
+void (CBaseEntity::*pPlayerRunCommand)(CUserCmd*, IMoveHelper*) = nullptr;
+
+#ifndef _WIN32
+void nPlayerRunCommand(CBaseEntity *_this, CUserCmd* pCmd,
+		IMoveHelper* pMoveHelper)
+#else
+void __fastcall nPlayerRunCommand(CBaseEntity *_this, void*, CUserCmd* pCmd, IMoveHelper* pMoveHelper)
+#endif
+{
+	extern IServerGameEnts *servergameents;
+	Bot* bot = dynamic_cast<Bot*>(Player::getPlayer(servergameents->BaseEntityToEdict(_this)));
+	if (bot != nullptr) {
+		auto cmd = bot->getCmd();
+		if (cmd != nullptr) {
+			// put the bot's commands into this move frame
+			pCmd->buttons = cmd->buttons;
+			pCmd->forwardmove = cmd->forwardmove;
+			pCmd->impulse = cmd->impulse;
+			pCmd->sidemove = cmd->sidemove;
+			pCmd->upmove = cmd->upmove;
+			pCmd->viewangles = cmd->viewangles;
+			pCmd->weaponselect = cmd->weaponselect;
+			pCmd->weaponsubtype = cmd->weaponsubtype;
+			pCmd->tick_count = cmd->tick_count;
+			pCmd->command_number = cmd->command_number;
+		}
+	}
+	(_this->*pPlayerRunCommand)(pCmd, pMoveHelper);
+}
+
+void hookPlayerRunCommand(edict_t *edict, int offset) {
+	IServerUnknown* unk = edict->GetUnknown();
+	if (unk == nullptr) {
+		Error("Could not get unknown in HookRunPlayerRunCommand.");
+	}
+	CBaseEntity *BasePlayer = unk->GetBaseEntity();
+	if (BasePlayer
+			&& pPlayerRunCommand == nullptr) {
+		*reinterpret_cast<DWORD*>(&pPlayerRunCommand) = VirtualTableHook(
+				reinterpret_cast<DWORD*>(*reinterpret_cast<DWORD*>(BasePlayer)), offset,
+				reinterpret_cast<DWORD>(nPlayerRunCommand));
+	}
+}
+
+void VSPlugin::GameFrame(bool simulating) {
+	const auto& players = Player::getPlayers();
+	adaptor->getNewPlayers().remove_if([this, players](edict_t *pEntity) {
+		if (adaptor->getHookOffset() > 0
+				&& players.find(engine->IndexOfEdict(pEntity)) != players.end()) {
+			hookPlayerRunCommand(pEntity, adaptor->getHookOffset());
+			return true;
+		}
+		return false;
+	});
+	adaptor->gameFrame(simulating);
 }
 
 void VSPlugin::ClientPutInServer(edict_t *pEntity, char const *playername) {
@@ -154,4 +257,3 @@ void VSPlugin::FireGameEvent(IGameEvent *event) {
 void VSPlugin::FireGameEvent(KeyValues *event) {
 	adaptor->handEvent(event);
 }
-

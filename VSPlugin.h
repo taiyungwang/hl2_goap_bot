@@ -36,7 +36,8 @@ public:
 
 	virtual void LevelShutdown(void);
 
-	virtual void ClientActive(edict_t *pEntity);
+	virtual void ClientActive(edict_t *pEntity) {
+	}
 
 	virtual void ClientDisconnect(edict_t *pEntity);
 
