@@ -17,7 +17,6 @@
 #include <datacache/imdlcache.h>
 #include <usercmd.h>
 #include <string>
-#include<string.h>
 #ifndef _WIN32
 #include <sys/mman.h>
 #else
@@ -120,7 +119,6 @@ void VSPlugin::LevelInit(char const *pMapName) {
 	gameeventmanager1->AddListener(this, true);
 	adaptor->levelInit(pMapName);
 }
-
 
 DWORD VirtualTableHook(DWORD* pdwNewInterface, int vtable, DWORD newInterface) {
 	DWORD dwStor = pdwNewInterface[vtable], dwStorVal =
