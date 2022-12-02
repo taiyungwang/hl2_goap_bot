@@ -37,6 +37,9 @@ bool SnipeAction::init() {
 }
 
 bool SnipeAction::precondCheck() {
+	if (selector == nullptr) {
+		return false;
+	}
 	int team = blackboard.getSelf()->getTeam();
 	selectorId = selector->select(targetLoc, team);
 	if (selectorId >= 0) {

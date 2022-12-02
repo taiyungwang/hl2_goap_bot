@@ -8,15 +8,18 @@
 class VoiceMessage;
 
 /**
- * Manages voice message sending for the bot.  The purpose of this class is to hide
- * iserverplugin.h from being included, but it might make sense to move this into
- * the Bot class.
+ * Manages voice message sending for the bot.  It might make sense to move this into
+ * the Bot class, but that would mean iserverplugin.h would be included.
  */
 
 class VoiceMessageSender {
 public:
 	using TypeInfoRef = std::reference_wrapper<const std::type_info>;
 
+	/**
+	 * Associates a voice message string with the a VoiceMessage class.
+	 * @param message String representation of the voice message as provided by the mod.
+	 */
 	template<typename T>
 	void addMessage(const std::string &message) {
 		messages[typeid(T)] = message;
