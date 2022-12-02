@@ -133,9 +133,8 @@ DWORD VirtualTableHook(DWORD* pdwNewInterface, int vtable, DWORD newInterface) {
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			buf, (sizeof(buf) / sizeof(buf[0])), NULL);
-		throw SimpleException(CUtlString(
-				"In VirtualTableHook while calling VirtualProtect for write access: ")
-				+ buf);
+		Error("In VirtualTableHook while calling VirtualProtect for write access: %s",
+				buf);
 	}
 #else
 	DWORD alignOffset = dwStorVal % sysconf(_SC_PAGE_SIZE);
@@ -153,9 +152,8 @@ DWORD VirtualTableHook(DWORD* pdwNewInterface, int vtable, DWORD newInterface) {
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			buf, (sizeof(buf) / sizeof(buf[0])), NULL);
-		throw SimpleException(CUtlString(
-			"In VirtualTableHook while calling VirtualProtect to remove write access: ")
-			+ buf);
+		Error("In VirtualTableHook while calling VirtualProtect to remove write access: %s",
+				buf);
 	}
 #else
 	if (mprotect(addr, len, PROT_EXEC | PROT_READ) == -1) {
