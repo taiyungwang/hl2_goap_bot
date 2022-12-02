@@ -41,6 +41,8 @@ IVModelInfo *modelinfo = nullptr;
 IPhysicsSurfaceProps *physprop = nullptr;
 IServerGameEnts *servergameents = nullptr;
 ICvar* cVars = nullptr;
+CGlobalVars *gpGlobals = nullptr;
+
 //
 // The plugin is a static singleton that is exported as an interface
 //
@@ -104,6 +106,7 @@ bool VSPlugin::Load(CreateInterfaceFn interfaceFactory,
 					"ServerGameEnts", 10, 1)) {
 		return false;
 	}
+	gpGlobals = playerinfomanager->GetGlobalVars();
 	adaptor = new PluginAdaptor();
 	ConVar_Register(0);
 	MathLib_Init();
@@ -210,9 +213,10 @@ void hookPlayerRunCommand(edict_t *edict, int offset) {
 void VSPlugin::GameFrame(bool simulating) {
 	const auto& players = Player::getPlayers();
 	adaptor->getNewPlayers().remove_if([this, players](edict_t *pEntity) {
-		if (adaptor->getHookOffset() > 0
-				&& players.find(engine->IndexOfEdict(pEntity)) != players.end()) {
-			hookPlayerRunCommand(pEntity, adaptor->getHookOffset());
+		if (players.find(engine->IndexOfEdict(pEntity)) != players.end()) {
+			if (adaptor->getHookOffset() > 0) {
+				hookPlayerRunCommand(pEntity, adaptor->getHookOffset());
+			}
 			return true;
 		}
 		return false;

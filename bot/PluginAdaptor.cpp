@@ -14,23 +14,11 @@
 #include <eiface.h>
 #include <iplayerinfo.h>
 
-CGlobalVars *gpGlobals = nullptr;
 ConVar r_visualizetraces("r_visualizetraces", "0", FCVAR_CHEAT);
-CNavMesh* TheNavMesh = nullptr;
-
 ConVar mybot_debug("my_bot_debug", "0");
 ConVar mybot_var("mybot_var", "0.5");
-
 ConVar minPlayers("mybot_min_players", "-1");
-
-CUtlMap<int, NavEntity*> blockers;
-
-extern IPlayerInfoManager *playerinfomanager;
-extern IVEngineServer* engine;
-
-
-static ConVar mybot_dod_playerruncommand_offset(
-		"mybot_dod_playerruncommand_offset",
+static ConVar mybot_dod_playerruncommand_offset("mybot_dod_playerruncommand_offset",
 #ifndef _WIN32
 	"419"
 #else
@@ -38,10 +26,15 @@ static ConVar mybot_dod_playerruncommand_offset(
 #endif
 );
 
+CNavMesh* TheNavMesh = nullptr;
+
+CUtlMap<int, NavEntity*> blockers;
+
+extern IVEngineServer* engine;
+
 PluginAdaptor::PluginAdaptor() {
 	// TODO: consider moving constructor initializations into init callback.
 	extern IServerGameDLL *servergamedll;
-	gpGlobals = playerinfomanager->GetGlobalVars();
 	TheNavMesh = new CNavMesh;
 	botBuilder = nullptr;
 	SetDefLessFunc(blockers);
@@ -129,6 +122,7 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		return;
 	}
 	auto count = Player::getTeamCount();
+	extern CGlobalVars *gpGlobals;
 	int botsToAdd = MIN(minPlayers.GetInt(), gpGlobals->maxClients - 1) - std::get<0>(count) - std::get<1>(count);
 	if (botsToAdd > 0) {
 		for (int i = 0; i < botsToAdd; i++) {
