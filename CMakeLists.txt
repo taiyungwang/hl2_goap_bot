@@ -23,7 +23,7 @@ if (${UNIX})
 	set (HL2SDK_LIBS ${HL2SDK_LIBS}/linux32)
 	add_definitions(-D_LINUX -DLINUX -D_GLIBCXX_USE_CXX11_ABI=0) 
 	set( steam_root "${SRC_HOME}/.local/share/Steam" )
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")	
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 	set( UNDEF "-Usprintf -Ustrncpy -UPROTECTED_THINGS_ENABLE" )
 	add_link_options(-static-libgcc  -static-libstdc++)	
 	file(GLOB TIER1_SRC ${HL2SDK_DIR}/tier1/*.cpp)
@@ -57,10 +57,10 @@ else () # MSVC
 	add_compile_options(
 		$<$<CONFIG:>:/MT> #---------|
 		$<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
+		$<$<CONFIG:Debug>:/GZ>
 		$<$<CONFIG:Release>:/MT> #--|
-		-arch:SSE -GS- -TP -W4 -fp:fast -GF -Zc:forScope -RTC1 -GR -Gd -Oy- -Fa -Fo -Fp -MP -Od -TP
 	)
-	string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+#	string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 	add_link_options($<$<CONFIG:Debug>:/NODEFAULTLIB:libcmt> 
 		$<$<CONFIG:Release>:/NODEFAULTLIB:libcmtd> 
 		/SAFESEH:NO)
@@ -74,10 +74,8 @@ include_directories(${PROJECT_SOURCE_DIR} ${VSP_NAVMESH} ${HL2SDK_DIR}/common ut
 link_directories(${HL2SDK_LIBS})	
 
 add_library(public STATIC ${HL2SDK_DIR}/public/collisionutils.cpp)
-
-find_library(VSP_NAVMESH_LIB valve_navmesh ${PROJECT_BINARY_DIR}/../valve_source_plugin_navmesh/nav_mesh/${BUILD_DIR})
-find_library(VSP_UTIL_LIB plugin_util ${PROJECT_BINARY_DIR}/../valve_source_plugin_navmesh/util/${BUILD_DIR})
-
+add_subdirectory(${VSP_NAVMESH}/util valve_source_plugin_navmesh/util)
+add_subdirectory(${VSP_NAVMESH}/nav_mesh valve_source_plugin_navmesh/nav_mesh)
 add_subdirectory(${PROJECT_SOURCE_DIR}/bot)
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 set (CXX_TEST_GEN ${CXX_DIR}/bin/cxxtestgen)
@@ -90,7 +88,7 @@ set(PLUGIN_NAME my_bot)
 add_library(${PLUGIN_NAME} SHARED  VSPlugin.cpp)
 target_link_libraries(${PLUGIN_NAME}  
 	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player 
-	 voice goap goap_actions weapon_sys event bot_move ${VSP_NAVMESH_LIB} ${VSP_UTIL_LIB} bot_util
+	 voice goap goap_actions weapon_sys event bot_move valve_navmesh plugin_util bot_util
 	 tier1 mathlib vstdlib public tier0 ${LEGACY_STDIO})
 
 #find installed mods on system.
