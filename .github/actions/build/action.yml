@@ -15,8 +15,7 @@ runs:
           choco install wget
           wget https://github.com/CxxTest/cxxtest/releases/download/4.4/cxxtest-4.4.tar.gz && tar xvzf cxxtest-4.4.tar.gz -C /c/;
         fi        
-      shell: bash
-    
+      shell: bash    
     - name: Checkout HL2SDK 
       uses: actions/checkout@v2
       with:
@@ -28,24 +27,7 @@ runs:
       with:
         repository: taiyungwang/valve_source_plugin_navmesh
         ref: master
-        path: valve_source_plugin_navmesh      
-    - name: Configure CMake for Navmesh Lib
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -S "${{ github.workspace }}/valve_source_plugin_navmesh" $([ $RUNNER_OS = Windows ] && printf %s '-A Win32' ) -B "${{ github.workspace }}/build/valve_source_plugin_navmesh" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
-      env: # specify compiler
-        CC: clang
-        CXX: clang++
-        BUILD_TYPE: Release        
-      shell: bash
-
-    - name: Build the NavMesh Lib
-      # Build your program with the given configuration
-      env: # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-        BUILD_TYPE: Release
-      run: cmake --build "${{ github.workspace }}/build/valve_source_plugin_navmesh" --config ${{env.BUILD_TYPE}}
-      shell: bash      
-      
+        path: valve_source_plugin_navmesh    
     - name: Configure CMake for Bot Plugin
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
@@ -55,7 +37,6 @@ runs:
         CXX: clang++
         BUILD_TYPE: Release        
       shell: bash
-
     - name: Build Bot plugin.
       # Build your program with the given configuration
       env: # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
