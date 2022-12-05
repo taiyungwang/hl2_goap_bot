@@ -54,25 +54,18 @@ else () # MSVC
 	else()
 		set (BUILD_DIR "Debug")
 	endif ()
-	add_compile_options(
-		$<$<CONFIG:>:/MT> #---------|
-		$<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
-		$<$<CONFIG:Debug>:/GZ>
-		$<$<CONFIG:Release>:/MT> #--|
-	)
-#	string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-	add_link_options($<$<CONFIG:Debug>:/NODEFAULTLIB:libcmt> 
-		$<$<CONFIG:Release>:/NODEFAULTLIB:libcmtd> 
-		/SAFESEH:NO)
+	add_compile_options(/MTd /MP)
+	add_link_options(/NODEFAULTLIB:libcmt)
 	add_definitions(-DCOMPILER_MSVC -DCOMPILER_MSVC32 -D_CRT_NO_VA_START_VALIDATION -D_CRT_SECURE_NO_DEPRECATE 
 		-D_CRT_NONSTDC_NO_DEPRECATE)
+
 endif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${ARCH_FLAGS}" )
 SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${ARCH_FLAGS}" )
 
 include_directories(${PROJECT_SOURCE_DIR} ${VSP_NAVMESH} ${HL2SDK_DIR}/common utils/common ${HL2SDK_DIR}/public ${HL2SDK_DIR}/public/mathlib ${HL2SDK_DIR}/public/tier0 ${HL2SDK_DIR}/public/tier1 ${HL2SDK_DIR}/public/game/server ${HL2SDK_DIR}/public/engine ${HL2SDK_DIR}/game/shared ${HL2SDK_DIR}/game/server ${CMAKE_CURRENT_SOURCE_DIR}/bot)
-link_directories(${HL2SDK_LIBS})	
 
+link_directories(${HL2SDK_LIBS})
 add_library(public STATIC ${HL2SDK_DIR}/public/collisionutils.cpp)
 add_subdirectory(${VSP_NAVMESH}/util valve_source_plugin_navmesh/util)
 add_subdirectory(${VSP_NAVMESH}/nav_mesh valve_source_plugin_navmesh/nav_mesh)
