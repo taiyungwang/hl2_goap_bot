@@ -12,8 +12,6 @@ set(HL2SDK_DIR "${PROJECT_SOURCE_DIR}/../hl2sdk")
 set (HL2SDK_LIBS ${HL2SDK_DIR}/lib/public)
 set (VSP_NAVMESH ${PROJECT_SOURCE_DIR}/../valve_source_plugin_navmesh)
 
-set (BUILD_DIR "")
-
 set (LEGACY_STDIO legacy_stdio_definitions)
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
@@ -49,12 +47,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL
 	add_definitions(-D_POSIX -DPOSIX -DGNUC -DNO_HOOK_MALLOC -DNO_MALLOC_OVERRIDE)
 	add_definitions(-DSWDS -D_finite=finite -Dstricmp=strcasecmp  -Dstrnicmp=strncasecmp -D_vsnprintf=vsnprintf -D_alloca=alloca)	
 else () # MSVC
-	if (DEFINED CMAKE_BUILD_TYPE)
-		set (BUILD_DIR ${CMAKE_BUILD_TYPE})
-	else()
-		set (BUILD_DIR "Debug")
-	endif ()
-	add_compile_options(/MTd /MP)
+	add_compile_options(/MTd)
 	add_link_options(/NODEFAULTLIB:libcmt)
 	add_definitions(-DCOMPILER_MSVC -DCOMPILER_MSVC32 -D_CRT_NO_VA_START_VALIDATION -D_CRT_SECURE_NO_DEPRECATE 
 		-D_CRT_NONSTDC_NO_DEPRECATE)
