@@ -95,7 +95,6 @@ void Player::think() {
 	}
 }
 
-
 int Player::getUserId() const {
 	extern IVEngineServer* engine;
 	return engine->GetPlayerUserId(ent);
@@ -121,7 +120,7 @@ int Player::getMaxHealth() const {
 }
 
 bool Player::handle(EventInfo* event) {
-	CUtlString name(event->getName());
+	std::string name(event->getName());
 	int eventUserId = event->getInt("userid");
 	// bot owns this event.
 	if (eventUserId == getUserId()) {

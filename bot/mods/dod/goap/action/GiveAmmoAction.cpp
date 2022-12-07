@@ -37,7 +37,7 @@ bool GiveAmmoAction::goalComplete() {
 bool GiveAmmoAction::receive(edict_t *sender, const CCommand &command) {
 	Player *player = Player::getPlayer(sender);
 	Bot *self = blackboard.getSelf();
-	if (player->getTeam() == self->getTeam()
+	if (player != nullptr && player->getTeam() == self->getTeam()
 			&& blackboard.getSelf()->getCurrentPosition().DistTo(
 					player->getCurrentPosition()) < 500.0f
 			&& self->getVoiceMessageSender().isMessage<DODVoiceMessage::NeedAmmo>(command.Arg(0))

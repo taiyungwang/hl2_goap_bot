@@ -21,9 +21,13 @@ void ItemMap::buildMap() {
 		}
 		CNavArea *area = Navigator::getArea(UTIL_FindGround(ent->GetCollideable()->GetCollisionOrigin()), 0);
 		if (area == nullptr) {
-			Warning("Unable to find item, %s, in nav mesh.\n", ent->GetClassName());
+			if (ignored.find(i) == ignored.end()) {
+				Warning("Unable to find item, %s, in nav mesh. Ignoring\n", ent->GetClassName());
+				ignored.insert(i);
+			}
 			continue;
 		}
+		ignored.erase(i);
 		if (items.find(area->GetID()) == items.end()) {
 			items.emplace(area->GetID(), std::list<std::shared_ptr<Item>>());
 		}

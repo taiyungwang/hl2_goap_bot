@@ -31,7 +31,6 @@ if (${UNIX})
 else ()
 	set (CXX_DIR "${DRIVE}:/cxxtest-4.4")
 	set (CXX_TEST_GEN "${CXX_DIR}/bin/cxxtestgen")		
-	add_definitions(-DWIN32 -D_WIN32 -DWINDOWS)
 endif (${UNIX})
 
 #compiler specific settings

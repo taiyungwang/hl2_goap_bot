@@ -97,7 +97,7 @@ void Bot::think() {
 
 bool Bot::handle(EventInfo* event) {
 	Player::handle(event);
-	CUtlString name(event->getName());
+	std::string name(event->getName());
 	int eventUserId = event->getInt("userid");
 	// bot owns this event.
 	if (eventUserId != getUserId()) {
@@ -137,7 +137,8 @@ bool Bot::handle(EventInfo* event) {
 
 bool Bot::receive(edict_t* sender, const CCommand& command) {
 	Player *player = getPlayer(sender);
-	if (player->getTeam() == getTeam()
+	if (player != nullptr 
+		&& player->getTeam() == getTeam()
 			&& canSee(*player)
 			&& voiceMessageSender.isMessage<AreaClearVoiceMessage>(command.Arg(0))) {
 		world->updateState(WorldProp::HEARD_AREA_CLEAR, true);
