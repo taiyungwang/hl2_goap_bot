@@ -1,0 +1,219 @@
+#include "MMSPlugin.h"
+#include "bot/PluginAdaptor.h"
+#include "player/Bot.h"
+#include <eiface.h>
+#include <iplayerinfo.h>
+#include <filesystem.h>
+#include <ivdebugoverlay.h>
+#include <IEngineTrace.h>
+#include <igameevents.h>
+#include <datacache/imdlcache.h>
+#include <vphysics_interface.h>
+#include <usercmd.h>
+
+IBotManager *botmanager = nullptr;
+IVDebugOverlay *debugoverlay = nullptr;
+IVEngineServer *engine = nullptr;
+IServerGameDLL *servergamedll = nullptr;
+IEngineTrace *enginetrace = nullptr;
+IServerPluginHelpers *helpers = nullptr;
+IPlayerInfoManager *playerinfomanager = nullptr;
+IFileSystem *filesystem;
+IGameEventManager2 *gameeventmanager = nullptr;
+IGameEventManager *gameeventmanager1 = nullptr;
+IMDLCache *mdlcache = nullptr;
+IServerGameClients *gameclients = nullptr;
+IPhysicsSurfaceProps *physprops = nullptr;
+IVModelInfo *modelinfo = nullptr;
+IPhysicsSurfaceProps *physprop = nullptr;
+IServerGameEnts *servergameents = nullptr;
+ICvar *cVars = nullptr;
+CGlobalVars *gpGlobals = nullptr;
+SamplePlugin metaModPlugin;
+
+PLUGIN_GLOBALVARS();
+
+/**
+ * Something like this is needed to register cvars/CON_COMMANDs.
+ */
+class BaseAccessor: public IConCommandBaseAccessor {
+public:
+	bool RegisterConCommandBase(ConCommandBase *pCommandBase) {
+		/* Always call META_REGCVAR instead of going through the engine. */
+		return META_REGCVAR(pCommandBase);
+	}
+} s_BaseAccessor;
+
+SH_DECL_HOOK6(IServerGameDLL, LevelInit, SH_NOATTRIB, 0, bool, char const*,
+		char const*, char const*, char const*, bool, bool);
+SH_DECL_HOOK1_void(IServerGameDLL, GameFrame, SH_NOATTRIB, 0, bool);
+SH_DECL_HOOK0_void(IServerGameDLL, LevelShutdown, SH_NOATTRIB, 0);
+SH_DECL_HOOK1_void(IServerGameClients, ClientDisconnect, SH_NOATTRIB, 0,
+		edict_t*);
+SH_DECL_HOOK2_void(IServerGameClients, ClientPutInServer, SH_NOATTRIB, 0,
+		edict_t*, char const*);
+SH_DECL_HOOK2(IGameEventManager2, FireEvent, SH_NOATTRIB, 0, bool, IGameEvent*,
+		bool);
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+SH_DECL_HOOK2_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t*,
+		const CCommand&);
+#else
+SH_DECL_HOOK1_void(IServerGameClients, ClientCommand, SH_NOATTRIB, 0, edict_t *);
+#endif
+SH_DECL_MANUALHOOK2_void(MHook_PlayerRunCmd, 0, 0, 0, CUserCmd*, IMoveHelper*);
+
+#define ENGINE_CALL(func) SH_CALL(engine, &IVEngineServer::func)
+
+PLUGIN_EXPOSE(SamplePlugin, metaModPlugin);
+
+bool SamplePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen,
+		bool late) {
+	PLUGIN_SAVEVARS();
+
+	GET_V_IFACE_CURRENT(GetEngineFactory, enginetrace, IEngineTrace,
+			INTERFACEVERSION_ENGINETRACE_SERVER);
+	GET_V_IFACE_CURRENT(GetEngineFactory, engine, IVEngineServer,
+			INTERFACEVERSION_VENGINESERVER);
+	GET_V_IFACE_CURRENT(GetEngineFactory, gameeventmanager, IGameEventManager2,
+			INTERFACEVERSION_GAMEEVENTSMANAGER2);
+	GET_V_IFACE_CURRENT(GetEngineFactory, helpers, IServerPluginHelpers,
+			INTERFACEVERSION_ISERVERPLUGINHELPERS);
+	GET_V_IFACE_CURRENT(GetEngineFactory, cVars, ICvar, CVAR_INTERFACE_VERSION);
+	GET_V_IFACE_CURRENT(GetEngineFactory, physprops, IPhysicsSurfaceProps,
+			VPHYSICS_SURFACEPROPS_INTERFACE_VERSION);
+	GET_V_IFACE_CURRENT(GetEngineFactory, modelinfo, IVModelInfo,
+			VMODELINFO_SERVER_INTERFACE_VERSION);
+	GET_V_IFACE_CURRENT(GetEngineFactory, mdlcache, IMDLCache,
+			MDLCACHE_INTERFACE_VERSION);
+	if (!engine->IsDedicatedServer()) {
+		GET_V_IFACE_CURRENT(GetEngineFactory, debugoverlay, IVDebugOverlay,
+				VDEBUG_OVERLAY_INTERFACE_VERSION);
+	}
+	GET_V_IFACE_ANY(GetEngineFactory, filesystem, IFileSystem,
+			FILESYSTEM_INTERFACE_VERSION)
+	GET_V_IFACE_ANY(GetServerFactory, servergameents, IServerGameEnts,
+			INTERFACEVERSION_SERVERGAMEENTS);
+	GET_V_IFACE_ANY(GetServerFactory, servergamedll, IServerGameDLL,
+			INTERFACEVERSION_SERVERGAMEDLL);
+	GET_V_IFACE_ANY(GetServerFactory, gameclients, IServerGameClients,
+			INTERFACEVERSION_SERVERGAMECLIENTS);
+	GET_V_IFACE_ANY(GetServerFactory, playerinfomanager, IPlayerInfoManager,
+			INTERFACEVERSION_PLAYERINFOMANAGER);
+	GET_V_IFACE_ANY(GetServerFactory, botmanager, IBotManager,
+			INTERFACEVERSION_PLAYERBOTMANAGER);
+	GET_V_IFACE_ANY(GetServerFactory, gameclients, IServerGameClients,
+			INTERFACEVERSION_SERVERGAMECLIENTS);
+	gpGlobals = ismm->GetCGlobals();
+	META_LOG(g_PLAPI, "Starting plugin.");
+	/* Load the VSP listener.  This is usually needed for IServerPluginHelpers. */
+	if (ismm->GetVSPInfo(NULL) == NULL) {
+		ismm->AddListener(this, this);
+		ismm->EnableVSPListener();
+	}
+	SH_ADD_HOOK_MEMFUNC(IServerGameDLL, LevelInit, servergamedll, this,
+			&SamplePlugin::Hook_LevelInit, true);
+	SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameFrame, servergamedll, this,
+			&SamplePlugin::Hook_GameFrame, true);
+	SH_ADD_HOOK_MEMFUNC(IServerGameDLL, LevelShutdown, servergamedll, this,
+			&SamplePlugin::Hook_LevelShutdown, false);
+	SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientDisconnect, gameclients, this,
+			&SamplePlugin::Hook_ClientDisconnect, true);
+	SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientPutInServer, gameclients,
+			this, &SamplePlugin::Hook_ClientPutInServer, true);
+	SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientCommand, gameclients, this,
+			&SamplePlugin::Hook_ClientCommand, false);
+	adaptor = std::make_shared<PluginAdaptor>();
+	if (adaptor->getHookOffset() > 0) {
+		SH_MANUALHOOK_RECONFIGURE(MHook_PlayerRunCmd, adaptor->getHookOffset(),
+				0, 0);
+	}
+#if SOURCE_ENGINE >= SE_ORANGEBOX
+	g_pCVar = cVars;
+	ConVar_Register(0, &s_BaseAccessor);
+#else
+	ConCommandBaseMgr::OneTimeInit(&s_BaseAccessor);
+#endif
+	ENGINE_CALL(LogPrint)("All hooks started!\n");
+	MathLib_Init();
+	return true;
+}
+
+bool SamplePlugin::Unload(char *error, size_t maxlen) {
+	adaptor.reset();
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, LevelInit, servergamedll, this, &SamplePlugin::Hook_LevelInit, true);
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, GameFrame, servergamedll, this, &SamplePlugin::Hook_GameFrame, true);
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, LevelShutdown, servergamedll, this, &SamplePlugin::Hook_LevelShutdown, false);
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientDisconnect, gameclients, this, &SamplePlugin::Hook_ClientDisconnect, true);
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientPutInServer, gameclients, this, &SamplePlugin::Hook_ClientPutInServer, true);
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientCommand, gameclients, this, &SamplePlugin::Hook_ClientCommand, false);
+	return true;
+}
+
+bool SamplePlugin::Hook_LevelInit(const char *pMapName,
+		char const *pMapEntities, char const *pOldLevel,
+		char const *pLandmarkName, bool loadGame, bool background) {
+	adaptor->levelInit(pMapName);
+	return true;
+}
+
+void SamplePlugin::Hook_GameFrame(bool simulating) {
+	/**
+	 * simulating:
+	 * ***********
+	 * true  | game is ticking
+	 * false | game is not ticking
+	 */
+	adaptor->getNewPlayers().remove_if(
+			[](edict_t *pEntity) {
+				return Player::isBot(pEntity);
+			});
+	adaptor->gameFrame(simulating);
+}
+
+void SamplePlugin::Hook_LevelShutdown() {
+	adaptor->levelShutdown();
+}
+
+void SamplePlugin::Hook_ClientDisconnect(edict_t *pEntity) {
+	if (adaptor->getHookOffset() > 0 && Player::isBot(pEntity)) {
+		SH_REMOVE_MANUALHOOK_MEMFUNC(MHook_PlayerRunCmd, pEntity, this,
+			&SamplePlugin::Hook_PlayerRunCmd, false);
+	}
+	adaptor->clientDisconnect(pEntity);
+}
+
+void SamplePlugin::Hook_ClientPutInServer(edict_t *pEntity,
+		char const *playername) {
+	if (Player::isBot(pEntity) && adaptor->getHookOffset() > 0) {
+		CBaseEntity *pEnt = servergameents->EdictToBaseEntity(pEntity);
+		if (pEnt) {
+			SH_ADD_MANUALHOOK_MEMFUNC(MHook_PlayerRunCmd, pEnt, this,
+					&SamplePlugin::Hook_PlayerRunCmd, false);
+		}
+	}
+	adaptor->clientPutInServer(pEntity);
+}
+
+void SamplePlugin::Hook_ClientCommand(edict_t *pEntity, const CCommand &args) {
+	adaptor->clientCommand(pEntity, args);
+}
+
+void SamplePlugin::Hook_PlayerRunCmd(CUserCmd *pCmd, IMoveHelper *moveHelper) {
+	Bot *bot = dynamic_cast<Bot*>(Player::getPlayer(
+			servergameents->BaseEntityToEdict(META_IFACEPTR(CBaseEntity))));
+	if (bot != nullptr) {
+		auto cmd = bot->getCmd();
+			// put the bot's commands into this move frame
+		pCmd->buttons = cmd.buttons;
+		pCmd->forwardmove = cmd.forwardmove;
+		pCmd->impulse = cmd.impulse;
+		pCmd->sidemove = cmd.sidemove;
+		pCmd->upmove = cmd.upmove;
+		pCmd->viewangles = cmd.viewangles;
+		pCmd->weaponselect = cmd.weaponselect;
+		pCmd->weaponsubtype = cmd.weaponsubtype;
+		pCmd->tick_count = cmd.tick_count;
+		pCmd->command_number = cmd.command_number;
+	}
+	RETURN_META(MRES_IGNORED);
+}

@@ -83,7 +83,6 @@ void Bot::think() {
 		extern CGlobalVars *gpGlobals;
 		cmd.tick_count = gpGlobals->tickcount;
 		if (mybot_mimic.GetBool()) {
-			auto& players = Player::getPlayers();
 			cmd = Player::getPlayers()[1]->getInfo()->GetLastUserCommand();
 		}
 		extern IBotManager *botmanager;
@@ -150,8 +149,8 @@ void Bot::setWorld(World* world) {
 	this->world = world;
 }
 
-CBotCmd* Bot::getCmd() const {
-	return blackboard == nullptr ? nullptr : &blackboard->getCmd();
+const CBotCmd &Bot::getCmd() const {
+	return blackboard->getCmd();
 }
 
 int Bot::getPlayerClass() const {

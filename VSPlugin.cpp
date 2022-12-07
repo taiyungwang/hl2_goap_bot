@@ -177,19 +177,17 @@ void __fastcall nPlayerRunCommand(CBaseEntity *_this, void*, CUserCmd* pCmd, IMo
 	Bot* bot = dynamic_cast<Bot*>(Player::getPlayer(servergameents->BaseEntityToEdict(_this)));
 	if (bot != nullptr) {
 		auto cmd = bot->getCmd();
-		if (cmd != nullptr) {
 			// put the bot's commands into this move frame
-			pCmd->buttons = cmd->buttons;
-			pCmd->forwardmove = cmd->forwardmove;
-			pCmd->impulse = cmd->impulse;
-			pCmd->sidemove = cmd->sidemove;
-			pCmd->upmove = cmd->upmove;
-			pCmd->viewangles = cmd->viewangles;
-			pCmd->weaponselect = cmd->weaponselect;
-			pCmd->weaponsubtype = cmd->weaponsubtype;
-			pCmd->tick_count = cmd->tick_count;
-			pCmd->command_number = cmd->command_number;
-		}
+		pCmd->buttons = cmd.buttons;
+		pCmd->forwardmove = cmd.forwardmove;
+		pCmd->impulse = cmd.impulse;
+		pCmd->sidemove = cmd.sidemove;
+		pCmd->upmove = cmd.upmove;
+		pCmd->viewangles = cmd.viewangles;
+		pCmd->weaponselect = cmd.weaponselect;
+		pCmd->weaponsubtype = cmd.weaponsubtype;
+		pCmd->tick_count = cmd.tick_count;
+		pCmd->command_number = cmd.command_number;
 	}
 	(_this->*pPlayerRunCommand)(pCmd, pMoveHelper);
 }
@@ -209,9 +207,8 @@ void hookPlayerRunCommand(edict_t *edict, int offset) {
 }
 
 void VSPlugin::GameFrame(bool simulating) {
-	const auto& players = Player::getPlayers();
-	adaptor->getNewPlayers().remove_if([this, players](edict_t *pEntity) {
-		if (players.find(engine->IndexOfEdict(pEntity)) != players.end()) {
+	adaptor->getNewPlayers().remove_if([this](edict_t *pEntity) {
+		if (Player::isBot(pEntity)) {
 			if (adaptor->getHookOffset() > 0) {
 				hookPlayerRunCommand(pEntity, adaptor->getHookOffset());
 			}

@@ -7,7 +7,6 @@
 class BasePlayer;
 class Bot;
 class Navigator;
-struct edict_t;
 
 class Blackboard {
 public:

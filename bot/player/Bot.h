@@ -58,7 +58,7 @@ public:
 
 	bool receive(edict_t* sender, const CCommand&) override;
 
-	CBotCmd* getCmd() const;
+	const CBotCmd &getCmd() const;
 
 	void setHookEnabled(bool hookEnabled) {
 		this->hookEnabled = hookEnabled;

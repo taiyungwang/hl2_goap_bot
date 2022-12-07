@@ -26,6 +26,8 @@ public:
 		return players;
 	}
 
+	static bool isBot(edict_t *ent);
+
 	static TeamCount getTeamCount();
 
 	static Player* getPlayer(edict_t* ent);

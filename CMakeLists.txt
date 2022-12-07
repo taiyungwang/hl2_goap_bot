@@ -11,6 +11,7 @@ set( steam_root "${DRIVE}:/Program Files (x86)/steam" )
 set(HL2SDK_DIR "${PROJECT_SOURCE_DIR}/../hl2sdk")
 set (HL2SDK_LIBS ${HL2SDK_DIR}/lib/public)
 set (VSP_NAVMESH ${PROJECT_SOURCE_DIR}/../valve_source_plugin_navmesh)
+set (MMS_DIR ${PROJECT_SOURCE_DIR}/../metamod-source/core)
 
 set (LEGACY_STDIO legacy_stdio_definitions)
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -23,8 +24,11 @@ if (${UNIX})
 	set( steam_root "${SRC_HOME}/.local/share/Steam" )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 	set( UNDEF "-Usprintf -Ustrncpy -UPROTECTED_THINGS_ENABLE" )
-	add_link_options(-static-libgcc  -static-libstdc++)	
-	file(GLOB TIER1_SRC ${HL2SDK_DIR}/tier1/*.cpp)
+	add_link_options(-static-libgcc -static-libstdc++)
+	set (TIER1_SRC tier1.cpp convar.cpp KeyValues.cpp utlstring.cpp strtools.cpp memstack.cpp bitbuf.cpp
+	 strtools_unicode.cpp qsort_s.cpp utlbuffer.cpp checksum_crc.cpp characterset.cpp generichash.cpp
+	 interface.cpp)
+	list(TRANSFORM TIER1_SRC PREPEND ${HL2SDK_DIR}/tier1/)
 	add_library(tier1 ${TIER1_SRC})
 	file(GLOB MATHLIB_SRC ${HL2SDK_DIR}/mathlib/*.cpp)
 	add_library(mathlib ${MATHLIB_SRC})
@@ -73,6 +77,15 @@ target_link_libraries(${PLUGIN_NAME}
 	 voice goap goap_actions weapon_sys event bot_move valve_navmesh plugin_util bot_util
 	 tier1 mathlib vstdlib public tier0 ${LEGACY_STDIO})
 
+add_library(${PLUGIN_NAME}_mm SHARED MMSPlugin.cpp)
+target_include_directories(${PLUGIN_NAME}_mm PRIVATE ${MMS_DIR} ${MMS_DIR}/sourcehook)
+target_compile_definitions(${PLUGIN_NAME}_mm PRIVATE SOURCE_ENGINE=4 
+	SE_EPISODEONE=1 SE_DARKMESSIAH=2 SE_ORANGEBOX=3 SE_ORANGEBOXVALVE=4 SE_LEFT4DEAD=5 SE_LEFT4DEAD2=6 
+	SE_ALIENSWARM)
+target_link_libraries(${PLUGIN_NAME}_mm
+	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player 
+	 voice goap goap_actions weapon_sys event bot_move valve_navmesh plugin_util bot_util
+	 tier1 mathlib vstdlib public tier0 ${LEGACY_STDIO})
 #find installed mods on system.
 set (mods "tf;dod;hl2mp")
 set( steam_dir steamapps/common )
@@ -83,6 +96,7 @@ foreach(GAME ${games})
 			set( src_dir "${GAME}" )
 			set( install_dir ${GAME}/${mod}/addons/mybot )
 	        install (TARGETS ${PLUGIN_NAME} DESTINATION ${install_dir})
+	        install (TARGETS ${PLUGIN_NAME}_mm DESTINATION ${install_dir})
 		endif (EXISTS ${GAME}/${mod})
 	endforeach(mod ${mods})
 endforeach(GAME ${games})

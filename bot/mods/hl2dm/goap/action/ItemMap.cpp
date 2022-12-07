@@ -19,7 +19,7 @@ void ItemMap::buildMap() {
 		if (itr == builders.end()) {
 			continue;
 		}
-		CNavArea *area = Navigator::getArea(UTIL_FindGround(ent->GetCollideable()->GetCollisionOrigin()), 0);
+		CNavArea *area = Navigator::getArea(UTIL_FindGround(ent->GetCollideable()->GetCollisionOrigin()), TEAM_ANY);
 		if (area == nullptr) {
 			if (ignored.find(i) == ignored.end()) {
 				Warning("Unable to find item, %s, in nav mesh. Ignoring\n", ent->GetClassName());

@@ -60,10 +60,7 @@ bool DODWorld::update(Blackboard& blackboard) {
 	auto arsenal = blackboard.getSelf()->getArsenal();
 	int baseBombId = arsenal.getWeaponIdByName("weapon_basebomb"),
 			weapIdx = arsenal.getCurrWeaponIdx();
-	if (getState(WorldProp::OUT_OF_AMMO) && baseBombId != weapIdx
-			&& !arsenal.getWeapon(weapIdx)->isGrenade()) {
-		self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::NeedAmmo>(self->getEdict()));
-	}
+	auto msgSender = self->getVoiceMessageSender();
 	updateState(WorldProp::HAS_BOMB, baseBombId != 0);
 	updateState(WorldProp::HAS_LIVE_GRENADE, false);
 	for (auto name: DODLiveGrenadeBuilder::NAMES) {
@@ -88,7 +85,7 @@ bool DODWorld::update(Blackboard& blackboard) {
 				< *grenade.getDmgRadius() + HalfHumanWidth) {
 			updateState(WorldProp::EXPLOSIVE_NEAR, true);
 			if (grenade.getThrower() != self->getEdict()) {
-				self->getVoiceMessageSender().sendMessage(std::make_shared<GrenadeVoiceMessage>(self->getEdict()));
+				msgSender.sendMessage(std::make_shared<GrenadeVoiceMessage>(self->getEdict()));
 			}
 			return true;
 		}
@@ -100,17 +97,21 @@ bool DODWorld::update(Blackboard& blackboard) {
 		}
 		std::string weap(enemy->getWeaponName());
 		if (weap == "weapon_30cal" || weap == "weapon_mg42") {
-			self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::MGAheadVoiceMessage>(self->getEdict()));
+			msgSender.sendMessage(std::make_shared<DODVoiceMessage::MGAheadVoiceMessage>(self->getEdict()));
 			break;
 		}
 		if (weap == "weapon_spring" || weap == "weapon_k98_scoped") {
-			self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::SniperAheadVoiceMessage>(self->getEdict()));
+			msgSender.sendMessage(std::make_shared<DODVoiceMessage::SniperAheadVoiceMessage>(self->getEdict()));
 			break;
 		}
 		if (weap == "weapon_bazooka" || weap == "weapon_pschreck") {
-			self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::RocketAheadVoiceMessage>(self->getEdict()));
+			msgSender.sendMessage(std::make_shared<DODVoiceMessage::RocketAheadVoiceMessage>(self->getEdict()));
 			break;
 		}
+	}
+	if (getState(WorldProp::OUT_OF_AMMO) && baseBombId != weapIdx
+			&& !arsenal.getWeapon(weapIdx)->isGrenade()) {
+		msgSender.sendMessage(std::make_shared<DODVoiceMessage::NeedAmmo>(self->getEdict()));
 	}
 	return false;
 }
