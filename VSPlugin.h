@@ -1,6 +1,5 @@
 #pragma once
 
-#include <igameevents.h>
 #include <iserverplugin.h>
 
 class PluginAdaptor;
@@ -8,7 +7,7 @@ class KeyValues;
 class CCommand;
 struct edict_t;
 
-class VSPlugin: public IServerPluginCallbacks, public IGameEventListener2, public IGameEventListener {
+class VSPlugin: public IServerPluginCallbacks {
 public:
 	VSPlugin();
 
@@ -72,11 +71,6 @@ public:
 
 	virtual void OnEdictFreed(const edict_t *edict) {
 	}
-
-	virtual void FireGameEvent(IGameEvent *event);
-
-	// IGameEventListener Interface
-	virtual void FireGameEvent(KeyValues *event);
 
 	virtual int GetCommandIndex() {
 		return m_iClientCommandIndex;

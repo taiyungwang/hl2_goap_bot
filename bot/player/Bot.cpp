@@ -4,7 +4,6 @@
 #include "Vision.h"
 #include "World.h"
 #include "FilterSelfAndEnemies.h"
-#include <event/EventInfo.h>
 #include <goap/action/GoToAction.h>
 #include <goap/GoalManager.h>
 #include <move/Navigator.h>
@@ -35,6 +34,17 @@ static ConVar mybotAimVar("mybot_aim_variance", "1.0f", 0,
 static ConVar mybotDangerAmt("mybot_danger_amount", "3.0f", 0,
 		"Amount of 'danger' to add to an area when a bot is killed.");
 
+extern IGameEventManager2* gameeventmanager;
+
+
+Bot::Bot(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal,
+	CommandHandler& commandHandler,
+	VoiceMessageSender& voiceMessageSender) :
+	Player(ent, arsenal), Receiver(commandHandler),
+	voiceMessageSender(voiceMessageSender) {
+	gameeventmanager->AddListener(this, "player_hurt", true);
+}
+
 Bot::~Bot() {
 	delete blackboard;
 	delete world;
@@ -42,6 +52,7 @@ Bot::~Bot() {
 	if (playerClassVar != nullptr) {
 		delete playerClassVar;
 	}
+	gameeventmanager->RemoveListener(this);
 }
 
 void Bot::think() {
@@ -94,13 +105,13 @@ void Bot::think() {
 	}
 }
 
-bool Bot::handle(EventInfo* event) {
-	Player::handle(event);
-	std::string name(event->getName());
-	int eventUserId = event->getInt("userid");
+void Bot::FireGameEvent(IGameEvent* event) {
+	Player::FireGameEvent(event);
+	std::string name(event->GetName());
+	int eventUserId = event->GetInt("userid");
 	// bot owns this event.
 	if (eventUserId != getUserId()) {
-		return false;
+		return;
 	}
 	if (name == "player_spawn") {
 		blackboard->reset();
@@ -108,18 +119,14 @@ bool Bot::handle(EventInfo* event) {
 		world->reset();
 		area = nullptr;
 		planner->resetPlanning(true);
-		return true;
-	}
-	if (name == "player_death") {
+	} else if (name == "player_death") {
 		if (area != nullptr) {
 			area->IncreaseDanger(getTeam(), mybotDangerAmt.GetFloat());
 		}
-		return false;
-	}
-	if (name == "player_hurt") {
-		int attacker = event->getInt("attacker");
-		if (event->getInt("attacker") == getUserId()) {
-			return false;
+	} else if (name == "player_hurt") {
+		int attacker = event->GetInt("attacker");
+		if (event->GetInt("attacker") == getUserId()) {
+			return;
 		}
 		world->updateState(WorldProp::HURT, true);
 		for (auto player: Player::getPlayers()) {
@@ -129,9 +136,7 @@ bool Bot::handle(EventInfo* event) {
 				break;
 			}
 		}
-		return true;
 	}
-	return false;
 }
 
 bool Bot::receive(edict_t* sender, const CCommand& command) {

@@ -30,10 +30,7 @@ public:
 
 	Bot(edict_t *ent, const std::shared_ptr<Arsenal> &arsenal,
 			CommandHandler& commandHandler,
-			VoiceMessageSender &voiceMessageSender) :
-			Player(ent, arsenal), Receiver(commandHandler),
-			voiceMessageSender(voiceMessageSender) {
-	}
+			VoiceMessageSender &voiceMessageSender);
 
 	~Bot();
 
@@ -54,7 +51,7 @@ public:
 		this->planner = planner;
 	}
 
-	bool handle(EventInfo *event);
+	void FireGameEvent(IGameEvent* event) override;
 
 	bool receive(edict_t* sender, const CCommand&) override;
 

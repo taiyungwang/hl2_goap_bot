@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CommandHandler.h"
-#include <event/EventHandler.h>
+#include <igameevents.h>
 #include <vector.h>
 #include <map>
 #include <string>
@@ -12,13 +12,13 @@ class CNavArea;
 /**
 * Chooses a Hiding spot using Thompson sampling.
 **/
-class HidingSpotSelector: public CommandHandler::Receiver, public EventHandler {
+class HidingSpotSelector: public CommandHandler::Receiver, public IGameEventListener2 {
 public:
 	HidingSpotSelector(CommandHandler& commandHandler);
 
 	bool receive(edict_t *sender, const CCommand &command) override;
 
-	bool handle(EventInfo* event) override;
+	void FireGameEvent(IGameEvent* event);
 
 	/**
 	 * @return -1 if no positions are available.

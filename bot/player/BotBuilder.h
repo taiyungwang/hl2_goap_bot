@@ -9,7 +9,6 @@ class Blackboard;
 class Bot;
 class BasePlayer;
 class CommandHandler;
-class Player;
 class GoalManager;
 class World;
 class HidingSpotSelector;

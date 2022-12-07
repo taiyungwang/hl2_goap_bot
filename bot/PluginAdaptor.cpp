@@ -1,6 +1,5 @@
 #include "PluginAdaptor.h"
 
-#include "event/EventInfo.h"
 #include "mods/hl2dm/player/HL2DMBotBuilder.h"
 #include "mods/hl2dm/weapon/HL2DMArsenalBuilder.h"
 #include "mods/dod/player/DODBotBuilder.h"
@@ -31,10 +30,11 @@ CNavMesh* TheNavMesh = nullptr;
 CUtlMap<int, NavEntity*> blockers;
 
 extern IVEngineServer* engine;
+extern IGameEventManager2* gameeventmanager;
 
 PluginAdaptor::PluginAdaptor() {
 	// TODO: consider moving constructor initializations into init callback.
-	extern IServerGameDLL *servergamedll;
+	gameeventmanager->AddListener(this, "nav_generate", true);
 	TheNavMesh = new CNavMesh;
 	botBuilder = nullptr;
 	SetDefLessFunc(blockers);
@@ -70,6 +70,7 @@ PluginAdaptor::~PluginAdaptor() {
 		delete botBuilder;
 		botBuilder = nullptr;
 	}
+	gameeventmanager->RemoveListener(this);
 }
 
 void PluginAdaptor::levelInit(const char* mapName) {
@@ -174,23 +175,7 @@ void PluginAdaptor::levelShutdown() {
 	hidingSpotSelector = nullptr;
 }
 
-template
-void PluginAdaptor::handEvent(IGameEvent* event);
-
-template
-void PluginAdaptor::handEvent(KeyValues* event);
-
-template<typename T>
-void PluginAdaptor::handEvent(T* event) {
-	EventInfoWrapper<T> wrapper(event);
-	EventHandler::notifyListeners(dynamic_cast<EventInfo*>(&wrapper));
-}
-
-bool PluginAdaptor::handle(EventInfo* event) {
-	// TODO: this doesn't really work.
-	if (Q_strcmp("nav_generate", event->getName()) == 0) {
-		blockers.PurgeAndDeleteElements();
-		return true;
-	}
-	return false;
+void PluginAdaptor::FireGameEvent(IGameEvent* event) {
+// TODO: this doesn't really work.
+	blockers.PurgeAndDeleteElements();
 }

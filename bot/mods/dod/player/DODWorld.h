@@ -1,15 +1,15 @@
 #pragma once
 
 #include <player/World.h>
-#include <event/EventHandler.h>
+#include <igameevents.h>
 
-class DODWorld: public World, public EventHandler {
+class DODWorld: public World, public IGameEventListener2 {
 public:
-	DODWorld(bool roundStarted) :
-			World(roundStarted) {
-	}
+	DODWorld(bool roundStarted);
 
-	bool handle(EventInfo* event);
+	~DODWorld();
+
+	void FireGameEvent(IGameEvent* event);
 
 private:
 	bool reset = false;

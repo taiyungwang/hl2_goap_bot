@@ -74,7 +74,7 @@ set(PLUGIN_NAME my_bot)
 add_library(${PLUGIN_NAME} SHARED  VSPlugin.cpp)
 target_link_libraries(${PLUGIN_NAME}  
 	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player 
-	 voice goap goap_actions weapon_sys event bot_move valve_navmesh plugin_util bot_util
+	 voice goap goap_actions weapon_sys bot_move valve_navmesh plugin_util bot_util
 	 tier1 mathlib vstdlib public tier0 ${LEGACY_STDIO})
 
 add_library(${PLUGIN_NAME}_mm SHARED MMSPlugin.cpp)
@@ -84,7 +84,7 @@ target_compile_definitions(${PLUGIN_NAME}_mm PRIVATE SOURCE_ENGINE=4
 	SE_ALIENSWARM)
 target_link_libraries(${PLUGIN_NAME}_mm
 	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player 
-	 voice goap goap_actions weapon_sys event bot_move valve_navmesh plugin_util bot_util
+	 voice goap goap_actions weapon_sys bot_move valve_navmesh plugin_util bot_util
 	 tier1 mathlib vstdlib public tier0 ${LEGACY_STDIO})
 #find installed mods on system.
 set (mods "tf;dod;hl2mp")

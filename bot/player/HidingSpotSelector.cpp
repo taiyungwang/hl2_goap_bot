@@ -2,7 +2,6 @@
 
 #include "Bot.h"
 #include <move/Navigator.h>
-#include <event/EventInfo.h>
 #include <nav_mesh/nav_area.h>
 #include <filesystem.h>
 #include <eiface.h>
@@ -22,6 +21,8 @@ HidingSpotSelector::HidingSpotSelector(CommandHandler &commandHandler) : Receive
 	buildFromNavMesh();
 	KeyValues *file = new KeyValues(ROOT_KEY);
 	navFileTimeStamp = filesystem->GetFileTime(getNavFileName().c_str(), "MOD");
+	extern IGameEventManager2* gameeventmanager;
+	gameeventmanager->AddListener(this, "player_death", true);
 	if (filesystem->IsDirectory((std::string(FILE_PREFIX)).c_str(), "MOD")
 			&& file->LoadFromFile(filesystem, getHidingSpotFileName().c_str(), "MOD")
 			&& file->GetInt(TIME_STAMP_KEY) == navFileTimeStamp) {
@@ -45,20 +46,17 @@ bool HidingSpotSelector::receive(edict_t *sender, const CCommand &command) {
 	return false;
 }
 
-bool HidingSpotSelector::handle(EventInfo* eventInfo) {
-	if (std::string("player_death") == eventInfo->getName()) {
-		for (auto player: { std::make_pair(Player::getPlayer(eventInfo->getInt("attacker")), true),
-			std::make_pair(Player::getPlayer(eventInfo->getInt("userid")), false) }) {
-			if (std::get<0>(player) == nullptr) {
-				continue;
-			}
-			int spot = std::get<0>(player)->getClosestHidingSpot();
-			if (spot >= 0) {
-				update(spot, std::get<0>(player)->getTeam(), std::get<1>(player));
-			}
+void HidingSpotSelector::FireGameEvent(IGameEvent* event) {
+	for (auto player: { std::make_pair(Player::getPlayer(event->GetInt("attacker")), true),
+		std::make_pair(Player::getPlayer(event->GetInt("userid")), false) }) {
+		if (std::get<0>(player) == nullptr) {
+			continue;
+		}
+		int spot = std::get<0>(player)->getClosestHidingSpot();
+		if (spot >= 0) {
+			update(spot, std::get<0>(player)->getTeam(), std::get<1>(player));
 		}
 	}
-	return false;
 }
 
 int HidingSpotSelector::select(Vector &pos, int team) const {

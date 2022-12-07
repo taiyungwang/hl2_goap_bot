@@ -7,7 +7,7 @@
 #ifndef UTILS_MYBOT_PLAYER_H_
 #define UTILS_MYBOT_PLAYER_H_
 
-#include <event/EventHandler.h>
+#include <igameevents.h>
 #include <unordered_map>
 #include <memory>
 
@@ -18,7 +18,7 @@ class CNavArea;
 class QAngle;
 struct edict_t;
 
-class Player: public EventHandler {
+class Player: public IGameEventListener2 {
 public:
 	using TeamCount = std::tuple<int, int>;
 
@@ -86,8 +86,7 @@ public:
 		return *arsenal.get();
 	}
 
-
-	virtual bool handle(EventInfo* event);
+	virtual void FireGameEvent(IGameEvent* event);
 
 	float getNoiseRange() const {
 		return noiseRange;

@@ -33,7 +33,6 @@ IServerPluginHelpers *helpers = nullptr;
 IPlayerInfoManager *playerinfomanager = nullptr;
 IFileSystem *filesystem;
 IGameEventManager2 *gameeventmanager = nullptr;
-IGameEventManager *gameeventmanager1 = nullptr;
 IMDLCache *mdlcache = nullptr;
 IServerGameClients* gameclients = nullptr;
 IPhysicsSurfaceProps *physprops = nullptr;
@@ -89,7 +88,6 @@ bool VSPlugin::Load(CreateInterfaceFn interfaceFactory,
 	if (!load(mdlcache, interfaceFactory, MDLCACHE_INTERFACE_VERSION)
 			|| !load(physprops, interfaceFactory, VPHYSICS_SURFACEPROPS_INTERFACE_VERSION)
 			|| !load(filesystem, interfaceFactory, FILESYSTEM_INTERFACE_VERSION)
-			|| !load(gameeventmanager1, interfaceFactory, INTERFACEVERSION_GAMEEVENTSMANAGER)
 			|| !load(gameeventmanager, interfaceFactory, INTERFACEVERSION_GAMEEVENTSMANAGER2)
 			|| !load(engine, interfaceFactory, INTERFACEVERSION_VENGINESERVER)
 			|| !load(helpers, interfaceFactory, INTERFACEVERSION_ISERVERPLUGINHELPERS)
@@ -118,8 +116,6 @@ const char *VSPlugin::GetPluginDescription(void) {
 }
 
 void VSPlugin::LevelInit(char const *pMapName) {
-	gameeventmanager->AddListener(this, "MyBot", true);
-	gameeventmanager1->AddListener(this, true);
 	adaptor->levelInit(pMapName);
 }
 
@@ -229,8 +225,6 @@ void VSPlugin::ClientDisconnect(edict_t *pEntity) {
 
 void VSPlugin::LevelShutdown(void) {
 	adaptor->levelShutdown();
-	gameeventmanager->RemoveListener(this);
-	gameeventmanager1->RemoveListener(this);
 }
 
 void VSPlugin::Unload(void) {
@@ -244,13 +238,4 @@ PLUGIN_RESULT VSPlugin::ClientCommand(edict_t *pEntity,
 		const CCommand &args) {
 	adaptor->clientCommand(pEntity, args);
 	return PLUGIN_CONTINUE;
-}
-
-void VSPlugin::FireGameEvent(IGameEvent *event) {
-	adaptor->handEvent(event);
-}
-
-// IGameEventListener Interface
-void VSPlugin::FireGameEvent(KeyValues *event) {
-	adaptor->handEvent(event);
 }

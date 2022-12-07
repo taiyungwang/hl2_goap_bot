@@ -8,8 +8,6 @@
 #include <mods/dod/goap/action/GiveAmmoAction.h>
 #include <mods/dod/voice/DODVoiceMessage.h>
 #include <mods/dod/util/DodPlayer.h>
-#include <event/EventHandler.h>
-#include <event/EventInfo.h>
 #include <goap/action/AttackAction.h>
 #include <player/Bot.h>
 #include <player/Blackboard.h>
@@ -27,6 +25,8 @@ static const char *CLASSES[2][CLASS_COUNT] { { "cls_garand", "cls_tommy",
 		"cls_bar", "cls_spring", "cls_30cal", "cls_bazooka" }, { "cls_mk98",
 		"cls_mp40", "cls_mp44", "cls_k98s", "cls_mg42", "cls_pschreck" } };
 
+extern IGameEventManager2* gameeventmanager;
+
 class FireInTheHole: public VoiceMessage {
 public:
 	FireInTheHole(edict_t *sender) :
@@ -38,6 +38,9 @@ public:
 DODBotBuilder::DODBotBuilder(GameManager *objectives,
 		CommandHandler &commandHandler, const ArsenalBuilder &arsenalBuilder) :
 		BotBuilder(objectives, commandHandler, arsenalBuilder) {
+	gameeventmanager->AddListener(this, "dod_round_active", true);
+	gameeventmanager->AddListener(this, "dod_round_win", true);
+	gameeventmanager->AddListener(this, "dod_game_over", true);
 	Bot::setClasses(&CLASSES);
 	teamPlay = true;
 	voiceMessageSender.addMessage<AreaClearVoiceMessage>("voice_areaclear");
@@ -92,19 +95,19 @@ void DODBotBuilder::updatePlanner(GoalManager &planner,
 	planner.addAction<DODGetBombAction>(0.0f);
 }
 
-bool DODBotBuilder::handle(EventInfo *event) {
-	CUtlString name(event->getName());
+DODBotBuilder::~DODBotBuilder() {
+	gameeventmanager->RemoveListener(this);
+}
+
+void DODBotBuilder::FireGameEvent(IGameEvent* event) {
+	std::string name(event->GetName());
 	if (name == "dod_round_active") {
 		objectives->startRound();
 		roundStarted = true;
-		return false;
-	}
-	if (name == "dod_game_over" || name == "dod_round_win") {
+	} else if (name == "dod_game_over" || name == "dod_round_win") {
 		roundStarted = false;
 		objectives->endRound();
-		return false;
 	}
-	return false;
 }
 
 World* DODBotBuilder::buildWorld() const {

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "event/EventHandler.h"
 #include "player/CommandHandler.h"
-#include <strtools.h>
+#include <igameevents.h>
 #include <memory>
 
 class Thinker;
@@ -16,7 +15,7 @@ struct edict_t;
 /**
  * Allows the use of either the VSDK Plugin or MetaMod Plugin.
  */
-class PluginAdaptor : public EventHandler {
+class PluginAdaptor : public IGameEventListener2 {
 public:
 
 	PluginAdaptor();
@@ -39,10 +38,7 @@ public:
 
 	void levelShutdown();
 
-	template<typename T>
-	void handEvent(T* event);
-
-	bool handle(EventInfo* event);
+	void FireGameEvent(IGameEvent* event);
 
 	void clientCommand(edict_t* player, const CCommand& command) {
 		commandHandler.handle(player, command);

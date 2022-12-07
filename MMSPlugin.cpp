@@ -20,7 +20,6 @@ IServerPluginHelpers *helpers = nullptr;
 IPlayerInfoManager *playerinfomanager = nullptr;
 IFileSystem *filesystem;
 IGameEventManager2 *gameeventmanager = nullptr;
-IGameEventManager *gameeventmanager1 = nullptr;
 IMDLCache *mdlcache = nullptr;
 IServerGameClients *gameclients = nullptr;
 IPhysicsSurfaceProps *physprops = nullptr;
@@ -29,7 +28,7 @@ IPhysicsSurfaceProps *physprop = nullptr;
 IServerGameEnts *servergameents = nullptr;
 ICvar *cVars = nullptr;
 CGlobalVars *gpGlobals = nullptr;
-SamplePlugin metaModPlugin;
+MMSPlugin metaModPlugin;
 
 PLUGIN_GLOBALVARS();
 
@@ -64,9 +63,9 @@ SH_DECL_MANUALHOOK2_void(MHook_PlayerRunCmd, 0, 0, 0, CUserCmd*, IMoveHelper*);
 
 #define ENGINE_CALL(func) SH_CALL(engine, &IVEngineServer::func)
 
-PLUGIN_EXPOSE(SamplePlugin, metaModPlugin);
+PLUGIN_EXPOSE(MMSPlugin, metaModPlugin);
 
-bool SamplePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen,
+bool MMSPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen,
 		bool late) {
 	PLUGIN_SAVEVARS();
 
@@ -111,17 +110,17 @@ bool SamplePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen,
 		ismm->EnableVSPListener();
 	}
 	SH_ADD_HOOK_MEMFUNC(IServerGameDLL, LevelInit, servergamedll, this,
-			&SamplePlugin::Hook_LevelInit, true);
+			&MMSPlugin::Hook_LevelInit, true);
 	SH_ADD_HOOK_MEMFUNC(IServerGameDLL, GameFrame, servergamedll, this,
-			&SamplePlugin::Hook_GameFrame, true);
+			&MMSPlugin::Hook_GameFrame, true);
 	SH_ADD_HOOK_MEMFUNC(IServerGameDLL, LevelShutdown, servergamedll, this,
-			&SamplePlugin::Hook_LevelShutdown, false);
+			&MMSPlugin::Hook_LevelShutdown, false);
 	SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientDisconnect, gameclients, this,
-			&SamplePlugin::Hook_ClientDisconnect, true);
+			&MMSPlugin::Hook_ClientDisconnect, true);
 	SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientPutInServer, gameclients,
-			this, &SamplePlugin::Hook_ClientPutInServer, true);
+			this, &MMSPlugin::Hook_ClientPutInServer, true);
 	SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientCommand, gameclients, this,
-			&SamplePlugin::Hook_ClientCommand, false);
+			&MMSPlugin::Hook_ClientCommand, false);
 	adaptor = std::make_shared<PluginAdaptor>();
 	if (adaptor->getHookOffset() > 0) {
 		SH_MANUALHOOK_RECONFIGURE(MHook_PlayerRunCmd, adaptor->getHookOffset(),
@@ -138,25 +137,25 @@ bool SamplePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen,
 	return true;
 }
 
-bool SamplePlugin::Unload(char *error, size_t maxlen) {
+bool MMSPlugin::Unload(char *error, size_t maxlen) {
 	adaptor.reset();
-	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, LevelInit, servergamedll, this, &SamplePlugin::Hook_LevelInit, true);
-	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, GameFrame, servergamedll, this, &SamplePlugin::Hook_GameFrame, true);
-	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, LevelShutdown, servergamedll, this, &SamplePlugin::Hook_LevelShutdown, false);
-	SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientDisconnect, gameclients, this, &SamplePlugin::Hook_ClientDisconnect, true);
-	SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientPutInServer, gameclients, this, &SamplePlugin::Hook_ClientPutInServer, true);
-	SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientCommand, gameclients, this, &SamplePlugin::Hook_ClientCommand, false);
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, LevelInit, servergamedll, this, &MMSPlugin::Hook_LevelInit, true);
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, GameFrame, servergamedll, this, &MMSPlugin::Hook_GameFrame, true);
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameDLL, LevelShutdown, servergamedll, this, &MMSPlugin::Hook_LevelShutdown, false);
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientDisconnect, gameclients, this, &MMSPlugin::Hook_ClientDisconnect, true);
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientPutInServer, gameclients, this, &MMSPlugin::Hook_ClientPutInServer, true);
+	SH_REMOVE_HOOK_MEMFUNC(IServerGameClients, ClientCommand, gameclients, this, &MMSPlugin::Hook_ClientCommand, false);
 	return true;
 }
 
-bool SamplePlugin::Hook_LevelInit(const char *pMapName,
+bool MMSPlugin::Hook_LevelInit(const char *pMapName,
 		char const *pMapEntities, char const *pOldLevel,
 		char const *pLandmarkName, bool loadGame, bool background) {
 	adaptor->levelInit(pMapName);
 	return true;
 }
 
-void SamplePlugin::Hook_GameFrame(bool simulating) {
+void MMSPlugin::Hook_GameFrame(bool simulating) {
 	/**
 	 * simulating:
 	 * ***********
@@ -170,35 +169,35 @@ void SamplePlugin::Hook_GameFrame(bool simulating) {
 	adaptor->gameFrame(simulating);
 }
 
-void SamplePlugin::Hook_LevelShutdown() {
+void MMSPlugin::Hook_LevelShutdown() {
 	adaptor->levelShutdown();
 }
 
-void SamplePlugin::Hook_ClientDisconnect(edict_t *pEntity) {
+void MMSPlugin::Hook_ClientDisconnect(edict_t *pEntity) {
 	if (adaptor->getHookOffset() > 0 && Player::isBot(pEntity)) {
 		SH_REMOVE_MANUALHOOK_MEMFUNC(MHook_PlayerRunCmd, pEntity, this,
-			&SamplePlugin::Hook_PlayerRunCmd, false);
+			&MMSPlugin::Hook_PlayerRunCmd, false);
 	}
 	adaptor->clientDisconnect(pEntity);
 }
 
-void SamplePlugin::Hook_ClientPutInServer(edict_t *pEntity,
+void MMSPlugin::Hook_ClientPutInServer(edict_t *pEntity,
 		char const *playername) {
 	if (Player::isBot(pEntity) && adaptor->getHookOffset() > 0) {
 		CBaseEntity *pEnt = servergameents->EdictToBaseEntity(pEntity);
 		if (pEnt) {
 			SH_ADD_MANUALHOOK_MEMFUNC(MHook_PlayerRunCmd, pEnt, this,
-					&SamplePlugin::Hook_PlayerRunCmd, false);
+					&MMSPlugin::Hook_PlayerRunCmd, false);
 		}
 	}
 	adaptor->clientPutInServer(pEntity);
 }
 
-void SamplePlugin::Hook_ClientCommand(edict_t *pEntity, const CCommand &args) {
+void MMSPlugin::Hook_ClientCommand(edict_t *pEntity, const CCommand &args) {
 	adaptor->clientCommand(pEntity, args);
 }
 
-void SamplePlugin::Hook_PlayerRunCmd(CUserCmd *pCmd, IMoveHelper *moveHelper) {
+void MMSPlugin::Hook_PlayerRunCmd(CUserCmd *pCmd, IMoveHelper *moveHelper) {
 	Bot *bot = dynamic_cast<Bot*>(Player::getPlayer(
 			servergameents->BaseEntityToEdict(META_IFACEPTR(CBaseEntity))));
 	if (bot != nullptr) {

@@ -1,19 +1,21 @@
 #pragma once
 
 #include <player/BotBuilder.h>
-#include <event/EventHandler.h>
 #include "DODObjectives.h"
+#include <igameevents.h>
 #include <set>
 
 class HL2MPPlayer;
 class HL2DMWorld;
 
-class DODBotBuilder: public BotBuilder, public EventHandler {
+class DODBotBuilder: public BotBuilder, public IGameEventListener2 {
 public:
 	DODBotBuilder(GameManager* objectives, CommandHandler& commandHandler,
 			const ArsenalBuilder& arsenalBuilder);
+	
+	~DODBotBuilder();
 
-	bool handle(EventInfo* event);
+	void FireGameEvent(IGameEvent* event);
 
 private:
 	std::set<std::string> liveGrenades;

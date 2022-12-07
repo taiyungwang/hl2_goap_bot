@@ -2,7 +2,6 @@
 
 #include <mods/dod/player/DODObjectives.h>
 #include <mods/dod/player/DODObjective.h>
-#include <event/EventInfo.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <util/EntityUtils.h>

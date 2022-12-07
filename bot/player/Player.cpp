@@ -4,7 +4,6 @@
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
-#include <event/EventInfo.h>
 #include <nav_mesh/nav_mesh.h>
 #include <nav_mesh/nav_area.h>
 #include <util/BasePlayer.h>
@@ -15,6 +14,7 @@
 std::unordered_map<int, Player*> Player::players;
 
 extern IVEngineServer* engine;
+extern IGameEventManager2* gameeventmanager;
 
 Player* Player::getPlayer(edict_t* ent) {
 	return getPlayer(engine->IndexOfEdict(ent));
@@ -39,11 +39,14 @@ Player::TeamCount Player::getTeamCount() {
 Player::Player(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal) :
 		ent(ent), arsenal(arsenal) {
 	extern IPlayerInfoManager *playerinfomanager;
+	gameeventmanager->AddListener(this, "player_spawn", true);
+	gameeventmanager->AddListener(this, "player_death", true);
 	info = playerinfomanager->GetPlayerInfo(ent);
 	players[engine->IndexOfEdict(ent)] = this;
 }
 
 Player::~Player() {
+	gameeventmanager->RemoveListener(this);
 	// Cant' rely on server index for server shutting down.
 	for(auto player: players) {
 		if (player.second == this) {
@@ -123,20 +126,18 @@ int Player::getMaxHealth() const {
 	return info->GetMaxHealth();
 }
 
-bool Player::handle(EventInfo* event) {
-	std::string name(event->getName());
-	int eventUserId = event->getInt("userid");
+void Player::FireGameEvent(IGameEvent* event) {
+	std::string name(event->GetName());
+	int eventUserId = event->GetInt("userid");
 	// bot owns this event.
 	if (eventUserId == getUserId()) {
 		if (name == "player_spawn") {
 			arsenal->reset();
 			inGame = true;
-		}
-		if (name == "player_death" && inGame) {
+		} else if (name == "player_death") {
 			inGame = false;
 		}
 	}
-	return false;
 }
 
 int Player::getClosestHidingSpot() const {

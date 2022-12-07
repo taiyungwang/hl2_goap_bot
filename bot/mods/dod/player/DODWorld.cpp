@@ -2,7 +2,6 @@
 
 #include <mods/dod/voice/DODVoiceMessage.h>
 #include <mods/dod/weapon/DODLiveGrenadeBuilder.h>
-#include <event/EventInfo.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <player/Blackboard.h>
@@ -13,6 +12,23 @@
 #include <util/EntityUtils.h>
 #include <util/BaseGrenade.h>
 
+extern IGameEventManager2* gameeventmanager;
+
+DODWorld::DODWorld(bool roundStarted) :
+	World(roundStarted) {
+	gameeventmanager->AddListener(this, "dod_bomb_planted", true);
+	gameeventmanager->AddListener(this, "dod_point_captured", true);
+	gameeventmanager->AddListener(this, "dod_bomb_exploded", true);
+	gameeventmanager->AddListener(this, "dod_bomb_defused", true);
+	gameeventmanager->AddListener(this, "dod_round_active", true);
+	gameeventmanager->AddListener(this, "dod_round_win", true);
+	gameeventmanager->AddListener(this, "dod_game_over", true);
+}
+
+DODWorld::~DODWorld() {
+	gameeventmanager->RemoveListener(this);
+}
+
 void DODWorld::addStates() {
 	states[WorldProp::ALL_POINTS_CAPTURED] = false;
 	states[WorldProp::POINTS_DEFENDED] = false;
@@ -22,19 +38,19 @@ void DODWorld::addStates() {
 	states[WorldProp::HEARD_NEED_AMMO] = true;
 }
 
-bool DODWorld::handle(EventInfo* event) {
-	CUtlString name(event->getName());
+void DODWorld::FireGameEvent(IGameEvent* event) {
+	std::string name(event->GetName());
 	bool bombPlanted = name == "dod_bomb_planted";
 	if (name == "dod_point_captured" || bombPlanted
 			|| name == "dod_bomb_exploded" || name == "dod_bomb_defused") {
 		for (auto player: Player::getPlayers()) {
-			if (player.second->getUserId() == event->getInt("userid")) {
+			if (player.second->getUserId() == event->GetInt("userid")) {
 				bombPlantTeam = bombPlanted ? player.second->getTeam() : 1;
 				break;
 			}
 		}
 		reset = true;
-		return false;
+		return;
 	}
 	if (name == "dod_round_active") {
 		if (!roundStarted) {
@@ -47,7 +63,6 @@ bool DODWorld::handle(EventInfo* event) {
 		reset = true;
 	}
 	updateState(WorldProp::ROUND_STARTED, roundStarted);
-	return false;
 }
 
 bool DODWorld::update(Blackboard& blackboard) {

@@ -8,7 +8,7 @@ class CUserCmd;
 class IMoveHelper;
 class PluginAdaptor;
 
-class SamplePlugin : public ISmmPlugin, public IMetamodListener
+class MMSPlugin : public ISmmPlugin, public IMetamodListener
 {
 public:
 	bool Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late);
