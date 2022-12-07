@@ -122,9 +122,9 @@ bool MMSPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen,
 	SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientCommand, gameclients, this,
 			&MMSPlugin::Hook_ClientCommand, false);
 	adaptor = std::make_shared<PluginAdaptor>();
-	if (adaptor->getHookOffset() > 0) {
-		SH_MANUALHOOK_RECONFIGURE(MHook_PlayerRunCmd, adaptor->getHookOffset(),
-				0, 0);
+	if (PluginAdaptor::getPlayerruncommandOffset() > 0) {
+		SH_MANUALHOOK_RECONFIGURE(MHook_PlayerRunCmd,
+				PluginAdaptor::getPlayerruncommandOffset(), 0, 0);
 	}
 #if SOURCE_ENGINE >= SE_ORANGEBOX
 	g_pCVar = cVars;
@@ -165,7 +165,7 @@ void MMSPlugin::Hook_GameFrame(bool simulating) {
 	adaptor->getNewPlayers().remove_if(
 			[this](edict_t *pEntity) {
 				if (dynamic_cast<Bot*>(Player::getPlayer(pEntity)) != nullptr) {
-					if (adaptor->getHookOffset() > 0) {
+					if (PluginAdaptor::getPlayerruncommandOffset()) {
 						SH_ADD_MANUALHOOK_MEMFUNC(MHook_PlayerRunCmd,
 								pEntity->GetUnknown()->GetBaseEntity(), this,
 								&MMSPlugin::Hook_PlayerRunCmd, false);
@@ -182,7 +182,7 @@ void MMSPlugin::Hook_LevelShutdown() {
 }
 
 void MMSPlugin::Hook_ClientDisconnect(edict_t *pEntity) {
-	if (adaptor->getHookOffset() > 0
+	if (PluginAdaptor::getPlayerruncommandOffset() > 0
 			&& dynamic_cast<Bot*>(Player::getPlayer(pEntity)) != nullptr) {
 		SH_REMOVE_MANUALHOOK_MEMFUNC(MHook_PlayerRunCmd, pEntity, this,
 			&MMSPlugin::Hook_PlayerRunCmd, false);

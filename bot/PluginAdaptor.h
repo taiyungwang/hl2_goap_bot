@@ -17,6 +17,7 @@ struct edict_t;
  */
 class PluginAdaptor : public IGameEventListener2 {
 public:
+	static int getPlayerruncommandOffset();
 
 	PluginAdaptor();
 
@@ -48,14 +49,8 @@ public:
 		return newPlayers;
 	}
 
-	int getHookOffset() const {
-		return hookOffset;
-	}
-
 private:
 	bool navMeshLoadAttempted = false;
-
-	int hookOffset = -1;
 
 	GameManager* gameManager = nullptr;
 

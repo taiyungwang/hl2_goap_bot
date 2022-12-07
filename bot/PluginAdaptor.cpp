@@ -16,13 +16,7 @@
 ConVar mybot_debug("my_bot_debug", "0");
 ConVar mybot_var("mybot_var", "0.5");
 ConVar minPlayers("mybot_min_players", "-1");
-static ConVar mybot_dod_playerruncommand_offset("mybot_dod_playerruncommand_offset",
-#ifndef _WIN32
-	"419"
-#else
-	"418"
-#endif
-);
+static ConVar playerruncommand_offset("mybot_playerruncommand_offset", "-1");
 
 CNavMesh* TheNavMesh = nullptr;
 
@@ -30,6 +24,10 @@ CUtlMap<int, NavEntity*> blockers;
 
 extern IVEngineServer* engine;
 extern IGameEventManager2* gameeventmanager;
+
+int PluginAdaptor::getPlayerruncommandOffset() {
+	return playerruncommand_offset.GetInt();
+}
 
 PluginAdaptor::PluginAdaptor() {
 	// TODO: consider moving constructor initializations into init callback.
@@ -54,7 +52,13 @@ PluginAdaptor::PluginAdaptor() {
 		gameManager = new DODObjectives();
 		arsenalBuilder = std::make_shared<DODArsenalBuilder>();
 		botBuilder = new DODBotBuilder(gameManager, commandHandler, *arsenalBuilder.get());
-		hookOffset = mybot_dod_playerruncommand_offset.GetInt();
+		playerruncommand_offset.SetValue(
+#ifndef _WIN32
+	"419"
+#else
+	"418"
+#endif
+				);
 		TheNavMesh->addPlayerSpawnName("info_player_axis");
 		TheNavMesh->addPlayerSpawnName("info_player_allies");
 	} else {
