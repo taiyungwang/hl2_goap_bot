@@ -20,10 +20,6 @@ Player* Player::getPlayer(edict_t* ent) {
 	return getPlayer(engine->IndexOfEdict(ent));
 }
 
-bool Player::isBot(edict_t *ent) {
-	return players.find(engine->IndexOfEdict(ent)) != players.end();
-}
-
 Player::TeamCount Player::getTeamCount() {
 	int count[] = {0, 0};
 	for (auto pair: players) {

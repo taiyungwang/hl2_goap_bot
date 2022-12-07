@@ -163,8 +163,16 @@ void MMSPlugin::Hook_GameFrame(bool simulating) {
 	 * false | game is not ticking
 	 */
 	adaptor->getNewPlayers().remove_if(
-			[](edict_t *pEntity) {
-				return Player::isBot(pEntity);
+			[this](edict_t *pEntity) {
+				if (dynamic_cast<Bot*>(Player::getPlayer(pEntity)) != nullptr) {
+					if (adaptor->getHookOffset() > 0) {
+						SH_ADD_MANUALHOOK_MEMFUNC(MHook_PlayerRunCmd,
+								pEntity->GetUnknown()->GetBaseEntity(), this,
+								&MMSPlugin::Hook_PlayerRunCmd, false);
+					}
+					return true;
+				}
+				return false;
 			});
 	adaptor->gameFrame(simulating);
 }
@@ -174,7 +182,8 @@ void MMSPlugin::Hook_LevelShutdown() {
 }
 
 void MMSPlugin::Hook_ClientDisconnect(edict_t *pEntity) {
-	if (adaptor->getHookOffset() > 0 && Player::isBot(pEntity)) {
+	if (adaptor->getHookOffset() > 0
+			&& dynamic_cast<Bot*>(Player::getPlayer(pEntity)) != nullptr) {
 		SH_REMOVE_MANUALHOOK_MEMFUNC(MHook_PlayerRunCmd, pEntity, this,
 			&MMSPlugin::Hook_PlayerRunCmd, false);
 	}
@@ -183,13 +192,6 @@ void MMSPlugin::Hook_ClientDisconnect(edict_t *pEntity) {
 
 void MMSPlugin::Hook_ClientPutInServer(edict_t *pEntity,
 		char const *playername) {
-	if (Player::isBot(pEntity) && adaptor->getHookOffset() > 0) {
-		CBaseEntity *pEnt = servergameents->EdictToBaseEntity(pEntity);
-		if (pEnt) {
-			SH_ADD_MANUALHOOK_MEMFUNC(MHook_PlayerRunCmd, pEnt, this,
-					&MMSPlugin::Hook_PlayerRunCmd, false);
-		}
-	}
 	adaptor->clientPutInServer(pEntity);
 }
 
