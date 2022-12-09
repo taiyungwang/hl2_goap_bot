@@ -47,7 +47,7 @@ jobs:
         run: cp ${{github.workspace}}/build/hl2_goap_bot/my_bot.so ${{github.workspace}}/build/hl2_goap_bot/my_bot_mm.so ${{github.workspace}}/hl2_goap_bot/addons/mybot
       - name: Copy Artifact Windows
         if: matrix.os == 'windows-2019'
-        run: cp ${{github.workspace}}/build/hl2_goap_bot/Release/my_bot.dll ${{github.workspace}}/build/hl2_goap_bot/Release/my_bot_mm.dll ${{github.workspace}}/hl2_goap_bot/addons/mybot
+        run: cp ${{github.workspace}}/build/hl2_goap_bot/Release/*.dll ${{github.workspace}}/hl2_goap_bot/addons/mybot
       - name: Compress Release Assets
         working-directory: ${{github.workspace}}/hl2_goap_bot
         run: tar -acf ${{github.workspace}}/hl2_goap_bot.tgz addons
