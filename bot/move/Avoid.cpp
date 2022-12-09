@@ -95,6 +95,7 @@ MoveState* Avoid::move(const Vector& pos) {
 			return new MoveLadder(ctx);
 		}
 		blackboard.getButtons().hold(IN_FORWARD);
+		blackboard.getButtons().tap(IN_USE);
 	}
 	float speed = BasePlayer(self).getVelocity()->Length();
 	if (!(ctx.getType() & NAV_MESH_CROUCH) && speed < minStuckSpeed.GetFloat()) {
