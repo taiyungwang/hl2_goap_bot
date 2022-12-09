@@ -1,7 +1,11 @@
 #include "RotationManager.h"
 
+#include <convar.h>
 #include <vector.h>
 #include <cmath>
+
+ConVar mybot_rot_speed("mybot_rot_speed", "0.3", 0,
+		"determines rotational acceleration rate in degrees");
 
 float RotationManager::clamp180(float angle) {
 	if (std::abs(angle) > 360.0f) {
@@ -34,9 +38,7 @@ void RotationManager::normalize(QAngle &angle) {
 	angle.x = Clamp(angle.x, -89.0f, 89.0f);
 }
 
-void RotationManager::getUpdatedPosition(QAngle &desiredPos, QAngle currentPos,
-		float accelMagnitude) {
-	this->accelMagnitude = accelMagnitude;
+void RotationManager::getUpdatedPosition(QAngle &desiredPos, QAngle currentPos) {
 	desiredPos -= currentPos;
 	normalize(desiredPos);
 	normalize(currentPos);
@@ -48,6 +50,7 @@ void RotationManager::getUpdatedPosition(QAngle &desiredPos, QAngle currentPos,
 
 float RotationManager::getUpdatedPos(float &speed, float desiredSpeed,
 		float currentPos) {
+	float accelMagnitude = mybot_rot_speed.GetFloat();
 	float accel = desiredSpeed > 0.0f ? accelMagnitude : -accelMagnitude;
 	// almost stopped
 	if (std::abs(speed) <= accelMagnitude

@@ -20,8 +20,7 @@ public:
 	/**
 	 * @param desiredPos The position the bots want to turned to.
 	 */
-	void getUpdatedPosition(QAngle& desiredPos, QAngle currentPos,
-			float accelMagintude);
+	void getUpdatedPosition(QAngle& desiredPos, QAngle currentPos);
 
 private:
 	static void normalize(QAngle& angle);
@@ -35,10 +34,8 @@ private:
 	 */
 	QAngle* momentum;
 
-	float accelMagnitude = 1.0f;
-
 	/**
 	 * Updates momentum and calculate the new position.
 	 */
-	float getUpdatedPos(float& speed, float desired, float currentPos);
+	static float getUpdatedPos(float& speed, float desired, float currentPos);
 };

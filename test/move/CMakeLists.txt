@@ -1,1 +1,1 @@
-add_cxxtest(move_test "RotationManagerTest" "bot_move;tier0")
+add_cxxtest(move_test "RotationManagerTest" "bot_move;tier1;tier0")

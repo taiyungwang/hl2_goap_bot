@@ -23,9 +23,6 @@
 
 PlayerClasses Bot::CLASSES = nullptr;
 
-static ConVar mybot_rot_speed("mybot_rot_speed", "0.3", 0,
-		"determines rotational acceleration rate in degrees");
-
 static ConVar mybot_mimic("mybot_mimic", "0");
 
 static ConVar mybotAimVar("mybot_aim_variance", "1.0f", 0,
@@ -87,8 +84,7 @@ void Bot::think() {
 				cmd.viewangles.x += RandomFloat(-mybotAimVar.GetFloat(), mybotAimVar.GetFloat());
 				cmd.viewangles.y += RandomFloat(-mybotAimVar.GetFloat(), mybotAimVar.GetFloat());
 			}
-			rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle(),
-					mybot_rot_speed.GetFloat());
+			rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle());
 		}
 		cmd.buttons = blackboard->getButtons().getPressed();
 		extern CGlobalVars *gpGlobals;

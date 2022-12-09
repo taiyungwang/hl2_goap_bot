@@ -27,8 +27,6 @@ public:
 private:
 	QAngle *desired, *current, *goal;
 
-	float accel = 1.0f;
-
 	void update(RotationManager& rotation);
 
 	void test(float expectedPosition[], int expectedLen);
