@@ -5,7 +5,7 @@
 #include <player/Blackboard.h>
 #include <util/UtilTrace.h>
 
-const float MoveStateContext::TARGET_OFFSET = 8.0f;
+const float MoveStateContext::TARGET_OFFSET = 9.0f;
 
 MoveStateContext::~MoveStateContext() {
 	delete state;
@@ -43,7 +43,7 @@ bool MoveStateContext::isAtTarget(const Vector& target, float targetOffset) cons
 		return false;
 	}
 	pos.z = target.z;
-	return pos.DistTo(target) < targetOffset + TARGET_OFFSET;
+	return pos.DistTo(target) <= targetOffset + TARGET_OFFSET;
 }
 
 bool MoveStateContext::reachedGoal(float targetOffset) {

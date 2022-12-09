@@ -17,9 +17,23 @@ GetClosestNeededItemAction::GetClosestNeededItemAction(Blackboard &blackboard) :
 	effects = { WorldProp::NEED_ITEM, false };
 }
 
+bool GetClosestNeededItemAction::init() {
+	if (resource->isCharger()) {
+		auto collideable = resource->getEnt()->GetCollideable();
+		targetRadius = (collideable->OBBMaxs().AsVector2D()
+				.DistTo(collideable->OBBMins().AsVector2D())) * 0.5f;
+	} else {
+		targetRadius = 0.0f;
+	}
+	return GoToEntityAction::init();
+}
+
 bool GetClosestNeededItemAction::execute() {
 	if (!GoToAction::execute()) {
 		return false;
+	}
+	if (!GoToAction::goalComplete()) {
+		return true;
 	}
 	auto self = blackboard.getSelf();
 	if (!resource->isCharger() || !resource->isAvailable()

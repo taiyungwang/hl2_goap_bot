@@ -15,6 +15,8 @@ public:
 
 	GetClosestNeededItemAction(Blackboard& blackboard);
 
+	virtual bool init();
+
 	bool onPlanningFinished() {
 		return true;
 	}
