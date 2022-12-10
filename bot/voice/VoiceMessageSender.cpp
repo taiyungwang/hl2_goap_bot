@@ -17,8 +17,8 @@ bool VoiceMessageSender::sendMessage(const std::shared_ptr<VoiceMessage> &messag
 	}
 	SentMessage newMsg = std::make_tuple(time, message);
 	for (auto sent : sentMessages) {
-		if (std::get<1>(newMsg)->operator()(std::get<1>(sent).get())) {
-			break;
+		if (!std::get<1>(newMsg)->operator()(std::get<1>(sent).get())) {
+			return false;
 		}
 	}
 	const auto &msgType = typeid(*message);

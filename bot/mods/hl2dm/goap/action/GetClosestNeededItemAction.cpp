@@ -32,11 +32,8 @@ bool GetClosestNeededItemAction::execute() {
 	if (!GoToAction::execute()) {
 		return false;
 	}
-	if (!GoToAction::goalComplete()) {
-		return true;
-	}
 	auto self = blackboard.getSelf();
-	if (!resource->isCharger() || !resource->isAvailable()
+	if (!GoToAction::goalComplete() || !resource->isCharger() || !resource->isAvailable()
 			|| (self->getHealth() > 99 && self->getArmor() > 99)) {
 		return true;
 	}
