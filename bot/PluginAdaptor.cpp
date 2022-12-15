@@ -6,7 +6,6 @@
 #include "mods/dod/weapon/DODArsenalBuilder.h"
 #include "goap/action/SnipeAction.h"
 #include "player/Bot.h"
-#include "player/GameManager.h"
 #include "player/HidingSpotSelector.h"
 #include <nav_mesh/nav_entities.h>
 #include <util/EntityUtils.h>
@@ -50,9 +49,8 @@ PluginAdaptor::PluginAdaptor() {
 		botBuilder = new HL2DMBotBuilder(commandHandler, *arsenalBuilder.get());
 		TheNavMesh->addPlayerSpawnName("info_player_start");
 	} else if (modPath == "dod") {
-		gameManager = new DODObjectives();
 		arsenalBuilder = std::make_shared<DODArsenalBuilder>();
-		botBuilder = new DODBotBuilder(gameManager, commandHandler, *arsenalBuilder.get());
+		botBuilder = new DODBotBuilder(commandHandler, *arsenalBuilder.get());
 		playerruncommand_offset.SetValue(
 #ifndef _WIN32
 	"419"
@@ -170,9 +168,6 @@ void PluginAdaptor::levelShutdown() {
 		delete players.begin()->second;
 	}
 	blockers.PurgeAndDeleteElements();
-	if (gameManager != nullptr) {
-		gameManager->endRound();
-	}
 	if (hidingSpotSelector) {
 		hidingSpotSelector->save();
 	}

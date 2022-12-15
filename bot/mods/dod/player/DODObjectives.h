@@ -1,6 +1,6 @@
 #pragma once
 
-#include <player/GameManager.h>
+#include <igameevents.h>
 #include <utllinkedlist.h>
 #include <unordered_map>
 #include <vector>
@@ -10,31 +10,17 @@ class DODObjectiveResource;
 class DODObjective;
 struct edict_t;
 
-class DODObjectives: public GameManager {
+class DODObjectives: public IGameEventListener2 {
 public:
-	DODObjectives() {
-		endRound();
-	}
+	DODObjectives();
 
-	~DODObjectives() {
-		endRound();
-	}
+	~DODObjectives();
 
 	/**
 	 * @param areaEntity Entity for a given bomb or capture area.
 	 * @Return -1 if the index is not found otherwise The index for a given capture or bomb area entity.
 	 */
 	int getIndex(edict_t *areaEntity) const;
-
-	/**
-	 * Callback for when a round starts
-	 */
-	void startRound();
-
-	/**
-	 * Callback for when a round ends.
-	 */
-	void endRound();
 
 	bool roundStarted() const {
 		return objectiveResource != nullptr;
@@ -53,6 +39,8 @@ public:
 		return ctrlPts;
 	}
 
+	void FireGameEvent(IGameEvent* event);
+
 private:
 	bool detonation;
 
@@ -66,4 +54,14 @@ private:
 
 	void addCapTarget(const Vector &pos,
 			const CUtlLinkedList<edict_t*> &targets);
+
+	/**
+	 * Callback for when a round starts
+	 */
+	void startRound();
+
+	/**
+	 * Callback for when a round ends.
+	 */
+	void endRound();
 };

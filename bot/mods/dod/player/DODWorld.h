@@ -5,7 +5,7 @@
 
 class DODWorld: public World, public IGameEventListener2 {
 public:
-	DODWorld(bool roundStarted);
+	DODWorld();
 
 	~DODWorld();
 

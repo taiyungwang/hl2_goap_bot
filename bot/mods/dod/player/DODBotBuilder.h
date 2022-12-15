@@ -2,25 +2,20 @@
 
 #include <player/BotBuilder.h>
 #include "DODObjectives.h"
-#include <igameevents.h>
 #include <set>
 
 class HL2MPPlayer;
 class HL2DMWorld;
 
-class DODBotBuilder: public BotBuilder, public IGameEventListener2 {
+class DODBotBuilder: public BotBuilder {
 public:
-	DODBotBuilder(GameManager* objectives, CommandHandler& commandHandler,
+	DODBotBuilder(CommandHandler& commandHandler,
 			const ArsenalBuilder& arsenalBuilder);
-	
-	~DODBotBuilder();
-
-	void FireGameEvent(IGameEvent* event);
 
 private:
-	std::set<std::string> liveGrenades;
+	DODObjectives objectives;
 
-	bool roundStarted = false;
+	std::set<std::string> liveGrenades;
 
 	void updatePlanner(GoalManager& planner, Blackboard& blackboard) const;
 

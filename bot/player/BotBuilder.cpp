@@ -19,9 +19,8 @@
 
 extern IVEngineServer* engine;
 
-BotBuilder::BotBuilder(GameManager* objectives, CommandHandler& commandHandler,
-		const ArsenalBuilder& arsenalBuilder): objectives(objectives),
-				commandHandler(commandHandler),
+BotBuilder::BotBuilder(CommandHandler& commandHandler,
+		const ArsenalBuilder& arsenalBuilder): commandHandler(commandHandler),
 				arsenalBuilder(arsenalBuilder) {
 	addCommand("mybot_add_bot", "Add a bot to the server", &BotBuilder::addBot);
 	addCommand("mybot_add_all_bots", "Fill server with bots", &BotBuilder::addAllBots);

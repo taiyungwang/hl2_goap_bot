@@ -6,6 +6,22 @@
 #include <nav_mesh/nav_entities.h>
 #include <eiface.h>
 #include <utlmap.h>
+#include <string>
+
+extern IGameEventManager2* gameeventmanager;
+
+DODObjectives::DODObjectives() {
+	endRound();
+	gameeventmanager->AddListener(this, "dod_round_active", true);
+	gameeventmanager->AddListener(this, "dod_round_win", true);
+	gameeventmanager->AddListener(this, "dod_game_over", true);
+}
+
+
+DODObjectives::~DODObjectives() {
+	gameeventmanager->RemoveListener(this);
+	endRound();
+}
 
 void DODObjectives::startRound() {
 	CUtlLinkedList<edict_t*> bombsOnMap, capArea, objRsrc;
@@ -16,7 +32,8 @@ void DODObjectives::startRound() {
 	objectiveResource = new DODObjectiveResource(objRsrc[0]);
 	const Vector *position = objectiveResource->getCapturePositions();
 	for (int i = 0; i < *objectiveResource->numCtrlPts(); i++) {
-		objectives.push_back(std::make_shared<DODObjective>(i, *objectiveResource));
+		objectives.push_back(
+				std::make_shared<DODObjective>(i, *objectiveResource));
 		FOR_EACH_LL(ctrlPts, j)
 		{
 			ICollideable *collideable = ctrlPts[j]->GetCollideable();
@@ -31,7 +48,8 @@ void DODObjectives::startRound() {
 				ctrlPointsMap[ctrlPts[j]] = i;
 			}
 		}
-		SearchSurroundingAreas(TheNavMesh->GetNearestNavArea(ctrlPts[i]), *objectives.back(), 2000.0f);
+		SearchSurroundingAreas(TheNavMesh->GetNearestNavArea(ctrlPts[i]),
+				*objectives.back(), 2000.0f);
 	}
 	extern CGlobalVars *gpGlobals;
 	extern IVEngineServer *engine;
@@ -58,15 +76,16 @@ void DODObjectives::endRound() {
 	}
 }
 
-const DODObjective* DODObjectives::getObjective(edict_t* target) const {
+const DODObjective* DODObjectives::getObjective(edict_t *target) const {
 	auto key = ctrlPointsMap.find(target);
-	return ctrlPointsMap.end () != key ? objectives[key->second].get() : nullptr;
+	return ctrlPointsMap.end() != key ? objectives[key->second].get() : nullptr;
 }
 
-void DODObjectives::addCapTarget(const Vector& pos,
-		const CUtlLinkedList<edict_t*>& targets) {
-	FOR_EACH_LL(targets, k) {
-		ICollideable* collideable = targets[k]->GetCollideable();
+void DODObjectives::addCapTarget(const Vector &pos,
+		const CUtlLinkedList<edict_t*> &targets) {
+	FOR_EACH_LL(targets, k)
+	{
+		ICollideable *collideable = targets[k]->GetCollideable();
 		if (collideable != nullptr) {
 			Vector targetPos = collideable->GetCollisionOrigin();
 			if (targetPos.LengthSqr() == 0.0f) {
@@ -80,3 +99,13 @@ void DODObjectives::addCapTarget(const Vector& pos,
 		}
 	}
 }
+
+void DODObjectives::FireGameEvent(IGameEvent *event) {
+	std::string name(event->GetName());
+	if (name == "dod_round_active") {
+		startRound();
+	} else if (name == "dod_game_over" || name == "dod_round_win") {
+		endRound();
+	}
+}
+

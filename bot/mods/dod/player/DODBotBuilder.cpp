@@ -23,14 +23,9 @@ static const char *CLASSES[2][CLASS_COUNT] { { "cls_garand", "cls_tommy",
 		"cls_bar", "cls_spring", "cls_30cal", "cls_bazooka" }, { "cls_mk98",
 		"cls_mp40", "cls_mp44", "cls_k98s", "cls_mg42", "cls_pschreck" } };
 
-extern IGameEventManager2* gameeventmanager;
 
-DODBotBuilder::DODBotBuilder(GameManager *objectives,
-		CommandHandler &commandHandler, const ArsenalBuilder &arsenalBuilder) :
-		BotBuilder(objectives, commandHandler, arsenalBuilder) {
-	gameeventmanager->AddListener(this, "dod_round_active", true);
-	gameeventmanager->AddListener(this, "dod_round_win", true);
-	gameeventmanager->AddListener(this, "dod_game_over", true);
+DODBotBuilder::DODBotBuilder(CommandHandler &commandHandler,
+		const ArsenalBuilder &arsenalBuilder) : BotBuilder(commandHandler, arsenalBuilder) {
 	Bot::setClasses(&CLASSES);
 	teamPlay = true;
 	messages[VoiceMessage::ENEMY_SIGHTED] = "voice_enemyahead";
@@ -78,31 +73,15 @@ void DODBotBuilder::updatePlanner(GoalManager &planner,
 	planner.addAction<DODUseRifleGrenadeAction>(0.92f);
 	planner.addAction<DODUseSmokeGrenadeAction>(0.84f);
 	planner.addAction<DODDestroyObjectAction>(0.82f);
-	planner.addAction<DODDefuseBombAction>(0.64f)->setObjectives(dynamic_cast<DODObjectives*>(objectives));
-	planner.addAction<DODDefendPointAction>(0.63f)->setObjectives(
-			dynamic_cast<DODObjectives*>(objectives));
-	planner.addAction<DODBombTargetAction>(0.62f)->setObjectives(dynamic_cast<DODObjectives*>(objectives));
-	planner.addAction<CapturePointAction>(0.61f)->setObjectives(dynamic_cast<DODObjectives*>(objectives));
+	planner.addAction<DODDefuseBombAction>(0.64f)->setObjectives(&objectives);
+	planner.addAction<DODDefendPointAction>(0.63f)->setObjectives(&objectives);
+	planner.addAction<DODBombTargetAction>(0.62f)->setObjectives(&objectives);
+	planner.addAction<CapturePointAction>(0.61f)->setObjectives(&objectives);
 	planner.addAction<DODGetBombAction>(0.0f);
 }
 
-DODBotBuilder::~DODBotBuilder() {
-	gameeventmanager->RemoveListener(this);
-}
-
-void DODBotBuilder::FireGameEvent(IGameEvent* event) {
-	std::string name(event->GetName());
-	if (name == "dod_round_active") {
-		objectives->startRound();
-		roundStarted = true;
-	} else if (name == "dod_game_over" || name == "dod_round_win") {
-		roundStarted = false;
-		objectives->endRound();
-	}
-}
-
 World* DODBotBuilder::buildWorld() const {
-	return new DODWorld(roundStarted);
+	return new DODWorld();
 }
 
 void DODBotBuilder::modHandleCommand(const CCommand &command, Bot* bot) const {

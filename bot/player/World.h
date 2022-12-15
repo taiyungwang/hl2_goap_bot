@@ -6,10 +6,6 @@ class Blackboard;
 
 class World {
 public:
-
-	World(bool roundStarted = true): roundStarted(roundStarted) {
-	}
-
 	virtual ~World() {
 	}
 
@@ -30,7 +26,7 @@ public:
 	}
 
 protected:
-	bool roundStarted;
+	bool roundStarted = false;
 
 	WorldState states;
 

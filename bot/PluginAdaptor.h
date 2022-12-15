@@ -5,7 +5,6 @@
 #include <memory>
 
 class Thinker;
-class GameManager;
 class BotBuilder;
 class ArsenalBuilder;
 class VoiceCommand;
@@ -51,8 +50,6 @@ public:
 
 private:
 	bool navMeshLoadAttempted = false;
-
-	GameManager* gameManager = nullptr;
 
 	CommandHandler commandHandler;
 

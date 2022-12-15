@@ -12,8 +12,7 @@
 
 extern IGameEventManager2* gameeventmanager;
 
-DODWorld::DODWorld(bool roundStarted) :
-	World(roundStarted) {
+DODWorld::DODWorld() {
 	gameeventmanager->AddListener(this, "dod_bomb_planted", true);
 	gameeventmanager->AddListener(this, "dod_point_captured", true);
 	gameeventmanager->AddListener(this, "dod_bomb_exploded", true);

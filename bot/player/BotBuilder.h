@@ -6,7 +6,6 @@
 #include <list>
 #include <memory>
 
-class GameManager;
 class Blackboard;
 class Bot;
 class BasePlayer;
@@ -19,7 +18,7 @@ struct edict_t;
 
 class BotBuilder: public ICommandCallback {
 public:
-	BotBuilder(GameManager* objectives, CommandHandler& commandHandler,
+	BotBuilder(CommandHandler& commandHandler,
 			const ArsenalBuilder& arsenalBuilder);
 
 	virtual ~BotBuilder();
@@ -31,8 +30,6 @@ public:
 	virtual void onFrame() {}
 
 protected:
-	GameManager* objectives;
-
 	bool teamPlay = false;
 
 	std::unordered_map<unsigned int, std::string> messages;

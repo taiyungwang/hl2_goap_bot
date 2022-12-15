@@ -128,7 +128,7 @@ public:
 };
 
 HL2DMBotBuilder::HL2DMBotBuilder(CommandHandler& commandHandler, const ArsenalBuilder &arsenalBuilder) :
-		BotBuilder(nullptr, commandHandler, arsenalBuilder) {
+		BotBuilder(commandHandler, arsenalBuilder) {
 	itemMap.addItemBuilder<HealthKitBuilder>("item_healthkit");
 	itemMap.addItemBuilder<HealthKitBuilder>("item_healthvial");
 	itemMap.addItemBuilder<HealthChargerBuilder>("item_healthcharger");
