@@ -14,7 +14,6 @@ class Navigator;
 class World;
 class CBotCmd;
 class CGameTrace;
-class VoiceMessageSender;
 class ITraceFilter;
 
 typedef const char *(*PlayerClasses)[2][6];
@@ -30,7 +29,7 @@ public:
 
 	Bot(edict_t *ent, const std::shared_ptr<Arsenal> &arsenal,
 			CommandHandler& commandHandler,
-			VoiceMessageSender &voiceMessageSender);
+			const std::unordered_map<unsigned int, std::string> &messages);
 
 	~Bot();
 
@@ -85,9 +84,7 @@ public:
 
 	bool canSee(edict_t* target) const;
 
-	VoiceMessageSender& getVoiceMessageSender() {
-		return voiceMessageSender;
-	}
+	bool sendVoiceMessage(const unsigned int message);
 
 	Vision& getVision() {
 		return vision;
@@ -126,10 +123,22 @@ public:
 		resetPlanner = reset;
 	}
 
+	bool isVoiceMessageType(unsigned int messageType, const char* message) const {
+		return messages.at(messageType) == message;
+	}
+
+	void setHasRadio(bool radio) {
+		hasRadio = radio;
+	}
+
 private:
 	static PlayerClasses CLASSES;
 
-	VoiceMessageSender &voiceMessageSender;
+	const std::unordered_map<unsigned int, std::string> &messages;
+
+	using SentMessage = std::tuple<bool, float, std::string>;
+
+	std::list<SentMessage> sentMessages;
 
 	Vision vision;
 
@@ -149,7 +158,8 @@ private:
 
 	Vector viewTarget;
 
-	bool hookEnabled = false, wantToListen = true, aiming = false, resetPlanner = false;
+	bool hookEnabled = false, wantToListen = true, aiming = false, resetPlanner = false,
+			hasRadio = false;
 
 	bool canShoot(CGameTrace &result, const Vector &vecAbsEnd) const;
 

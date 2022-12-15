@@ -4,7 +4,6 @@
 #include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <player/Vision.h>
-#include <voice/VoiceMessageSender.h>
 #include <util/BaseGrenade.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
@@ -17,7 +16,7 @@ bool DODUseFragGrenadeAction::execute() {
 		extern IVEngineServer *engine;
 		edict_t *weap = engine->PEntityOfEntIndex(self->getArsenal().getCurrWeaponIdx());
 		if (BaseGrenade(weap).get<bool>("m_bPinPulled", false)) {
-			self->getVoiceMessageSender().sendMessage(std::make_shared<DODVoiceMessage::FireInTheHole>(self->getEdict()));
+			self->sendVoiceMessage(DODVoiceMessage::FIRE_IN_THE_HOLE);
 		}
 		return true;
 	}

@@ -6,8 +6,6 @@
 #include <weapon/Weapon.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <voice/GrenadeVoiceMessage.h>
-#include <voice/VoiceMessageSender.h>
 #include <nav_mesh/nav.h>
 #include <util/EntityUtils.h>
 #include <util/BaseGrenade.h>
@@ -75,7 +73,6 @@ bool DODWorld::update(Blackboard& blackboard) {
 	auto arsenal = blackboard.getSelf()->getArsenal();
 	int baseBombId = arsenal.getWeaponIdByName("weapon_basebomb"),
 			weapIdx = arsenal.getCurrWeaponIdx();
-	auto msgSender = self->getVoiceMessageSender();
 	updateState(WorldProp::HAS_BOMB, baseBombId != 0);
 	updateState(WorldProp::HAS_LIVE_GRENADE, false);
 	for (auto name: DODLiveGrenadeBuilder::NAMES) {
@@ -100,7 +97,7 @@ bool DODWorld::update(Blackboard& blackboard) {
 				< *grenade.getDmgRadius() + HalfHumanWidth) {
 			updateState(WorldProp::EXPLOSIVE_NEAR, true);
 			if (grenade.getThrower() != self->getEdict()) {
-				msgSender.sendMessage(std::make_shared<GrenadeVoiceMessage>(self->getEdict()));
+				self->sendVoiceMessage(DODVoiceMessage::GRENADE);
 			}
 			return true;
 		}
@@ -112,21 +109,21 @@ bool DODWorld::update(Blackboard& blackboard) {
 		}
 		std::string weap(enemy->getWeaponName());
 		if (weap == "weapon_30cal" || weap == "weapon_mg42") {
-			msgSender.sendMessage(std::make_shared<DODVoiceMessage::MGAheadVoiceMessage>(self->getEdict()));
+			self->sendVoiceMessage(DODVoiceMessage::MG_AHEAD);
 			break;
 		}
 		if (weap == "weapon_spring" || weap == "weapon_k98_scoped") {
-			msgSender.sendMessage(std::make_shared<DODVoiceMessage::SniperAheadVoiceMessage>(self->getEdict()));
+			self->sendVoiceMessage(DODVoiceMessage::SNIPER);
 			break;
 		}
 		if (weap == "weapon_bazooka" || weap == "weapon_pschreck") {
-			msgSender.sendMessage(std::make_shared<DODVoiceMessage::RocketAheadVoiceMessage>(self->getEdict()));
+			self->sendVoiceMessage(DODVoiceMessage::ROCKET_AHEAD);
 			break;
 		}
 	}
 	if (getState(WorldProp::OUT_OF_AMMO) && baseBombId != weapIdx
 			&& !arsenal.getWeapon(weapIdx)->isGrenade()) {
-		msgSender.sendMessage(std::make_shared<DODVoiceMessage::NeedAmmo>(self->getEdict()));
+		self->sendVoiceMessage(DODVoiceMessage::NEED_AMMO);
 	}
 	return false;
 }

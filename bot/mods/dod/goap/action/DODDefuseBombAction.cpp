@@ -5,8 +5,7 @@
 #include <mods/dod/util/DodPlayer.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <voice/NeedBackupVoiceMessage.h>
-#include <voice/VoiceMessageSender.h>
+#include <voice/VoiceMessage.h>
 #include <nav_mesh/nav.h>
 #include <util/UtilTrace.h>
 #include <in_buttons.h>
@@ -37,7 +36,7 @@ bool DODDefuseBombAction::execute() {
 	}
 	interruptable = false;
 	Bot *self = blackboard.getSelf();
-	self->getVoiceMessageSender().sendMessage(std::make_shared<NeedBackupVoiceMessage>(self->getEdict()));
+	self->sendVoiceMessage(VoiceMessage::NEED_BACKUP);
 	useItem();
 	return false;
 }

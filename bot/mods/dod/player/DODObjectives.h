@@ -1,9 +1,10 @@
 #pragma once
 
 #include <player/GameManager.h>
-#include <utlmap.h>
-#include <utlvector.h>
 #include <utllinkedlist.h>
+#include <unordered_map>
+#include <vector>
+#include <memory>
 
 class DODObjectiveResource;
 class DODObjective;
@@ -11,8 +12,6 @@ struct edict_t;
 
 class DODObjectives: public GameManager {
 public:
-	typedef CCopyableUtlVector<edict_t*> CapTarget;
-
 	DODObjectives() {
 		endRound();
 	}
@@ -42,7 +41,7 @@ public:
 	}
 
 	/**
-	 * @return True if the current map is a dentonation type map.
+	 * @return True if the current map is a detonation type map.
 	 */
 	bool isDetonation() const {
 		return detonation;
@@ -59,11 +58,11 @@ private:
 
 	DODObjectiveResource *objectiveResource = nullptr;
 
-	CUtlMap<edict_t*, int> ctrlPointsMap;
+	std::unordered_map<edict_t*, int> ctrlPointsMap;
 
 	CUtlLinkedList<edict_t*> ctrlPts;
 
-	CUtlVector<DODObjective*> objectives;
+	std::vector<std::shared_ptr<DODObjective>> objectives;
 
 	void addCapTarget(const Vector &pos,
 			const CUtlLinkedList<edict_t*> &targets);

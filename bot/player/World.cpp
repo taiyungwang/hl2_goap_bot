@@ -2,10 +2,10 @@
 
 #include "Blackboard.h"
 #include "Bot.h"
-#include <voice/AreaClearVoiceMessage.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <util/BaseEntity.h>
+#include <voice/VoiceMessage.h>
 #include <eiface.h>
 
 void World::reset() {
@@ -21,14 +21,11 @@ void World::reset() {
 	states[WorldProp::OUT_OF_AMMO] = false;
 	states[WorldProp::WEAPON_IN_RANGE] = false;
 	states[WorldProp::ROUND_STARTED] = roundStarted;
-	states[WorldProp::HEARD_AREA_CLEAR] = false;
 	states[WorldProp::EXPLOSIVE_NEAR] = false;
 	addStates();
 }
 
 bool World::think(Blackboard& blackboard) {
-	bool& enemySighted = states[WorldProp::ENEMY_SIGHTED];
-	updateState(WorldProp::HEARD_AREA_CLEAR, false);
 	updateState(WorldProp::EXPLOSIVE_NEAR, false);
 	Bot* self = blackboard.getSelf();
 	updateState(WorldProp::MULTIPLE_ENEMY_SIGHTED,
@@ -78,11 +75,12 @@ bool World::think(Blackboard& blackboard) {
 	updateState(WorldProp::HURT, false);
 	updateState(WorldProp::IS_BLOCKED, blackboard.getBlocker() != nullptr);
 	// reset planner if this is first time we see enemy.
-	bool noEnemy = !enemySighted;
-	if (enemySighted && enemy == nullptr
-			&& !states[WorldProp::HEARD_AREA_CLEAR]) {
-		updateState(WorldProp::HEARD_AREA_CLEAR, true);
+	bool sawEnemy = states[WorldProp::ENEMY_SIGHTED];
+	states[WorldProp::ENEMY_SIGHTED] = enemy != nullptr;
+	bool shouldReset = update(blackboard);
+	if (!sawEnemy && states[WorldProp::ENEMY_SIGHTED]) {
+		self->sendVoiceMessage(VoiceMessage::ENEMY_SIGHTED);
+		return true;
 	}
-	enemySighted = enemy != nullptr;
-	return update(blackboard) || (noEnemy && enemySighted) || hurt;
+	return shouldReset || hurt;
 }

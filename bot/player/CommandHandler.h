@@ -16,6 +16,10 @@ public:
 				Object(handler) {
 		}
 
+		/**
+		 * Receives a client command.
+		 * @Return True if the client was only intended for the recipient.
+		 */
 		virtual bool receive(edict_t *sender, const CCommand &command) = 0;
 	};
 

@@ -1,8 +1,10 @@
 #pragma once
 
-#include <voice/VoiceMessageSender.h>
 #include <convar.h>
-#include <utlhashtable.h>
+#include <unordered_map>
+#include <string>
+#include <list>
+#include <memory>
 
 class GameManager;
 class Blackboard;
@@ -23,7 +25,7 @@ public:
 	virtual ~BotBuilder();
 
 	void CommandCallback(const CCommand &command) {
-		(this->**cmdCallbacks.GetPtr(command.Arg(0)))(command);
+		(this->*cmdCallbacks.at(command.Arg(0)))(command);
 	}
 
 	virtual void onFrame() {}
@@ -33,7 +35,7 @@ protected:
 
 	bool teamPlay = false;
 
-	VoiceMessageSender voiceMessageSender;
+	std::unordered_map<unsigned int, std::string> messages;
 
 	CommandHandler& commandHandler;
 
@@ -58,9 +60,9 @@ private:
 
 	HidingSpotSelector* hidingSpotSelector = nullptr;
 
-	CUtlHashtable<const char*, CmdFuncPtr> cmdCallbacks;
+	std::unordered_map<std::string, CmdFuncPtr> cmdCallbacks;
 
-	CUtlLinkedList<ConCommand*> commands;
+	std::list<std::shared_ptr<ConCommand>> commands;
 
 	Bot* build(edict_t* ent);
 

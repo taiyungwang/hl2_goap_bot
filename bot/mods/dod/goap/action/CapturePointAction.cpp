@@ -41,7 +41,7 @@ bool CapturePointAction::precondCheck() {
 	if (item == nullptr) {
 		return false;
 	}
-	setTargetLocAndRadius(objectives->getObjective(item)->getTargets()[0]);
+	setTargetLocAndRadius(objectives->getObjective(item)->getFirstTarget());
 	return true;
 }
 

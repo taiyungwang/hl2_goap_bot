@@ -1,1 +1,0 @@
-add_library(voice AreaClearVoiceMessage.cpp NeedBackupVoiceMessage.cpp VoiceMessageSender.cpp)

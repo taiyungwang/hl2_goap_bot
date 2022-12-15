@@ -32,8 +32,8 @@ BotBuilder::BotBuilder(GameManager* objectives, CommandHandler& commandHandler,
 }
 
 BotBuilder::~BotBuilder() {
-	cmdCallbacks.RemoveAll();
-	commands.PurgeAndDeleteElements();
+	cmdCallbacks.clear();
+	commands.clear();
 	if (hidingSpotSelector != nullptr) {
 		delete hidingSpotSelector;
 	}
@@ -84,7 +84,7 @@ public:
 
 Bot* BotBuilder::build(edict_t* ent) {
 	Bot* bot = new Bot(ent, arsenalBuilder.build(), commandHandler,
-			voiceMessageSender);
+			messages);
 	Blackboard *blackboard = new Blackboard(bot, buildEntity(ent));
 	bot->setNavigator(std::make_shared<Navigator>(*blackboard));
 	bot->setBlackboard(blackboard);
@@ -129,6 +129,6 @@ void BotBuilder::addAllBots(const CCommand &command) {
 }
 
 void BotBuilder::addCommand(const char* name, const char* description, CmdFuncPtr ptr) {
-	commands.AddToTail(new ConCommand(name, this, description));
-	cmdCallbacks.Insert(commands[commands.Tail()]->GetName(), ptr);
+	commands.push_back(std::make_shared<ConCommand>(name, this, description));
+	cmdCallbacks[commands.back()->GetName()] = ptr;
 }

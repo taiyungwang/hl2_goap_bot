@@ -12,6 +12,7 @@
 #include <util/EntityUtils.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
+#include <utlmap.h>
 
 ConVar mybot_debug("my_bot_debug", "0");
 ConVar mybot_var("mybot_var", "0.5");

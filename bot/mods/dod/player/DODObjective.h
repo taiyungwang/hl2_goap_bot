@@ -42,8 +42,8 @@ public:
 
 	bool hasBombs() const;
 
-	const std::vector<edict_t*>& getTargets() const {
-		return targets;
+	edict_t* getFirstTarget() const {
+		return targets.at(0);
 	}
 
 	const std::vector<int>& getHideSpots() const {

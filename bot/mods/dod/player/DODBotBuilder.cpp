@@ -11,9 +11,7 @@
 #include <goap/action/AttackAction.h>
 #include <player/Bot.h>
 #include <player/Blackboard.h>
-#include <voice/AreaClearVoiceMessage.h>
-#include <voice/AffirmativeVoiceMessage.h>
-#include <voice/GrenadeVoiceMessage.h>
+#include <voice/VoiceMessage.h>
 #include <move/Navigator.h>
 #include <eiface.h>
 #include <goap/GoalManager.h>
@@ -27,14 +25,6 @@ static const char *CLASSES[2][CLASS_COUNT] { { "cls_garand", "cls_tommy",
 
 extern IGameEventManager2* gameeventmanager;
 
-class FireInTheHole: public VoiceMessage {
-public:
-	FireInTheHole(edict_t *sender) :
-			VoiceMessage(sender) {
-
-	}
-};
-
 DODBotBuilder::DODBotBuilder(GameManager *objectives,
 		CommandHandler &commandHandler, const ArsenalBuilder &arsenalBuilder) :
 		BotBuilder(objectives, commandHandler, arsenalBuilder) {
@@ -43,15 +33,16 @@ DODBotBuilder::DODBotBuilder(GameManager *objectives,
 	gameeventmanager->AddListener(this, "dod_game_over", true);
 	Bot::setClasses(&CLASSES);
 	teamPlay = true;
-	voiceMessageSender.addMessage<AreaClearVoiceMessage>("voice_areaclear");
-	voiceMessageSender.addMessage<GrenadeVoiceMessage>("voice_grenade");
-	voiceMessageSender.addMessage<NeedBackupVoiceMessage>("voice_backup");
-	voiceMessageSender.addMessage<AffirmativeVoiceMessage>("voice_yessir");
-	voiceMessageSender.addMessage<DODVoiceMessage::FireInTheHole>("voice_fireinhole");
-	voiceMessageSender.addMessage<DODVoiceMessage::NeedAmmo>("voice_needammo");
-	voiceMessageSender.addMessage<DODVoiceMessage::MGAheadVoiceMessage>("voice_mgahead");
-	voiceMessageSender.addMessage<DODVoiceMessage::SniperAheadVoiceMessage>("voice_sniper");
-	voiceMessageSender.addMessage<DODVoiceMessage::RocketAheadVoiceMessage>("voice_bazookaspotted");
+	messages[VoiceMessage::ENEMY_SIGHTED] = "voice_enemyahead";
+	messages[VoiceMessage::AREA_CLEAR] = "voice_areaclear";
+	messages[VoiceMessage::NEED_BACKUP] = "voice_backup";
+	messages[VoiceMessage::AFFIRMATIVE] = "voice_yessir";
+	messages[DODVoiceMessage::GRENADE] = "voice_grenade";
+	messages[DODVoiceMessage::FIRE_IN_THE_HOLE] = "voice_fireinhole";
+	messages[DODVoiceMessage::NEED_AMMO] = "voice_needammo";
+	messages[DODVoiceMessage::MG_AHEAD] = "voice_mgahead";
+	messages[DODVoiceMessage::SNIPER] = "voice_sniper";
+	messages[DODVoiceMessage::ROCKET_AHEAD] = "voice_bazookaspotted";
 }
 
 void DODBotBuilder::updatePlanner(GoalManager &planner,

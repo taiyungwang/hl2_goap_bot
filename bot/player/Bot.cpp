@@ -8,8 +8,6 @@
 #include <goap/GoalManager.h>
 #include <move/Navigator.h>
 #include <move/RotationManager.h>
-#include <voice/AreaClearVoiceMessage.h>
-#include <voice/VoiceMessageSender.h>
 #include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <nav_mesh/nav_area.h>
@@ -32,13 +30,14 @@ static ConVar mybotDangerAmt("mybot_danger_amount", "3.0f", 0,
 		"Amount of 'danger' to add to an area when a bot is killed.");
 
 extern IGameEventManager2* gameeventmanager;
+extern IVEngineServer *engine;
 
 
 Bot::Bot(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal,
 	CommandHandler& commandHandler,
-	VoiceMessageSender& voiceMessageSender) :
+	const std::unordered_map<unsigned int, std::string> &messages) :
 	Player(ent, arsenal), Receiver(commandHandler),
-	voiceMessageSender(voiceMessageSender) {
+	messages(messages) {
 	gameeventmanager->AddListener(this, "player_hurt", true);
 }
 
@@ -135,13 +134,39 @@ void Bot::FireGameEvent(IGameEvent* event) {
 	}
 }
 
+bool Bot::sendVoiceMessage(const unsigned int messageType) {
+	if (messages.find(messageType) == messages.end()) {
+		return false;
+	}
+	float time = engine->Time();
+	while (!sentMessages.empty()
+			&& time - std::get<1>(sentMessages.front()) > 10.0f) {
+		sentMessages.pop_front();
+	}
+	const auto &message = messages.at(messageType);
+	for (const auto &sent : sentMessages) {
+		if (std::get<0>(sent) || message == std::get<2>(sent)) {
+			return false;
+		}
+	}
+	extern IServerPluginHelpers *helpers;
+	helpers->ClientCommand(getEdict(), message.c_str());
+	sentMessages.emplace_back(std::make_tuple(true, time, message));
+	return true;
+}
+
 bool Bot::receive(edict_t* sender, const CCommand& command) {
-	Player *player = getPlayer(sender);
-	if (player != nullptr 
-		&& player->getTeam() == getTeam()
-			&& canSee(*player)
-			&& voiceMessageSender.isMessage<AreaClearVoiceMessage>(command.Arg(0))) {
-		world->updateState(WorldProp::HEARD_AREA_CLEAR, true);
+	if ((hasRadio && Player::getPlayer(sender)->getTeam() == getTeam())
+			|| vision.getNearbyTeammates().find(engine->IndexOfEdict(sender))
+			!= vision.getNearbyTeammates().end()) {
+		for (auto& sent: sentMessages) {
+			if (std::get<2>(sent) == command.Arg(0)) {
+				std::get<1>(sent) = engine->Time();
+				return false;
+			}
+		}
+		sentMessages.emplace_back(std::make_tuple(false,
+				engine->Time(), command.Arg(0)));
 	}
 	return false;
 }

@@ -2,11 +2,10 @@
 
 #include "Bot.h"
 #include "Blackboard.h"
-#include <voice/AreaClearVoiceMessage.h>
-#include <voice/VoiceMessageSender.h>
 #include <nav_mesh/nav.h>
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
+#include <voice/VoiceMessage.h>
 #include <eiface.h>
 #include <ivdebugoverlay.h>
 #include <vector>
@@ -30,7 +29,6 @@ void Vision::updateVisiblity(Bot *self) {
 	if (pvsSize == 0) {
 		return;
 	}
-	float closest = INFINITY;
 	nearByTeammates.clear();
 	struct Visible {
 		int player;
@@ -79,8 +77,7 @@ void Vision::updateVisiblity(Bot *self) {
 			}
 		}
 		if (areaClear) {
-			self->getVoiceMessageSender().sendMessage(
-					std::make_shared<AreaClearVoiceMessage>(self->getEdict()));
+			self->sendVoiceMessage(VoiceMessage::AREA_CLEAR);
 		}
 	}
 	extern ConVar mybot_debug;

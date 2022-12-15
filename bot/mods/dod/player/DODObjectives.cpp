@@ -5,9 +5,9 @@
 #include <mods/dod/util/DODObjectiveResource.h>
 #include <nav_mesh/nav_entities.h>
 #include <eiface.h>
+#include <utlmap.h>
 
 void DODObjectives::startRound() {
-	SetDefLessFunc(ctrlPointsMap);
 	CUtlLinkedList<edict_t*> bombsOnMap, capArea, objRsrc;
 	findEntWithMatchingName("dod_objective_resource", objRsrc);
 	findEntWithMatchingName("dod_control_point", ctrlPts);
@@ -16,7 +16,7 @@ void DODObjectives::startRound() {
 	objectiveResource = new DODObjectiveResource(objRsrc[0]);
 	const Vector *position = objectiveResource->getCapturePositions();
 	for (int i = 0; i < *objectiveResource->numCtrlPts(); i++) {
-		objectives.AddToTail(new DODObjective(i, *objectiveResource));
+		objectives.push_back(std::make_shared<DODObjective>(i, *objectiveResource));
 		FOR_EACH_LL(ctrlPts, j)
 		{
 			ICollideable *collideable = ctrlPts[j]->GetCollideable();
@@ -28,10 +28,10 @@ void DODObjectives::startRound() {
 				} else {
 					addCapTarget(position[i], capArea);
 				}
-				ctrlPointsMap.Insert(ctrlPts[j], i);
+				ctrlPointsMap[ctrlPts[j]] = i;
 			}
 		}
-		SearchSurroundingAreas(TheNavMesh->GetNearestNavArea(ctrlPts[i]), *objectives.Tail(), 2000.0f);
+		SearchSurroundingAreas(TheNavMesh->GetNearestNavArea(ctrlPts[i]), *objectives.back(), 2000.0f);
 	}
 	extern CGlobalVars *gpGlobals;
 	extern IVEngineServer *engine;
@@ -52,15 +52,15 @@ void DODObjectives::endRound() {
 	if (objectiveResource != nullptr) {
 		delete objectiveResource;
 		objectiveResource = nullptr;
-		ctrlPointsMap.RemoveAll();
+		ctrlPointsMap.clear();
 		ctrlPts.RemoveAll();
-		objectives.PurgeAndDeleteElements();
+		objectives.clear();
 	}
 }
 
 const DODObjective* DODObjectives::getObjective(edict_t* target) const {
-	auto key = ctrlPointsMap.Find(target);
-	return ctrlPointsMap.IsValidIndex(key) ? objectives[ctrlPointsMap[key]] : nullptr;
+	auto key = ctrlPointsMap.find(target);
+	return ctrlPointsMap.end () != key ? objectives[key->second].get() : nullptr;
 }
 
 void DODObjectives::addCapTarget(const Vector& pos,
@@ -75,7 +75,7 @@ void DODObjectives::addCapTarget(const Vector& pos,
 				targetPos = (maxs + mins) / 2.0f;
 			}
 			if (pos.DistTo(targetPos) < 400.0f) {
-				objectives.Tail()->addTarget(targets[k]);
+				objectives.back()->addTarget(targets[k]);
 			}
 		}
 	}

@@ -11,68 +11,71 @@ class VSPlugin: public IServerPluginCallbacks {
 public:
 	VSPlugin();
 
+	virtual ~VSPlugin() {
+	}
+
 	// IServerPluginCallbacks methods
-	virtual bool Load(CreateInterfaceFn interfaceFactory,
+	bool Load(CreateInterfaceFn interfaceFactory,
 			CreateInterfaceFn gameServerFactory);
 
-	virtual void Unload(void);
+	void Unload(void);
 
-	virtual void Pause(void) {
+	void Pause(void) {
 	}
 
-	virtual void UnPause(void) {
+	void UnPause(void) {
 	}
 
-	virtual const char *GetPluginDescription(void);
+	const char *GetPluginDescription(void);
 
-	virtual void LevelInit(char const *pMapName);
+	void LevelInit(char const *pMapName);
 
-	virtual void ServerActivate(edict_t *pEdictList, int edictCount,
+	void ServerActivate(edict_t *pEdictList, int edictCount,
 			int clientMax) {
 	}
 
-	virtual void GameFrame(bool simulating);
+	void GameFrame(bool simulating);
 
-	virtual void LevelShutdown(void);
+	void LevelShutdown(void);
 
-	virtual void ClientActive(edict_t *pEntity) {
+	void ClientActive(edict_t *pEntity) {
 	}
 
-	virtual void ClientDisconnect(edict_t *pEntity);
+	void ClientDisconnect(edict_t *pEntity);
 
-	virtual void ClientPutInServer(edict_t *pEntity, char const *playername);
+	void ClientPutInServer(edict_t *pEntity, char const *playername);
 
-	virtual void SetCommandClient(int index) {
+	void SetCommandClient(int index) {
 		m_iClientCommandIndex = index;
 	}
-	virtual void ClientSettingsChanged(edict_t *pEdict) {
+	void ClientSettingsChanged(edict_t *pEdict) {
 	}
-	virtual PLUGIN_RESULT ClientConnect(bool *bAllowConnect, edict_t *pEntity,
+	PLUGIN_RESULT ClientConnect(bool *bAllowConnect, edict_t *pEntity,
 			const char *pszName, const char *pszAddress, char *reject,
 			int maxrejectlen) {
 		// store client info
 		return PLUGIN_CONTINUE;
 	}
 
-	virtual PLUGIN_RESULT ClientCommand(edict_t *pEntity,
+	PLUGIN_RESULT ClientCommand(edict_t *pEntity,
 			const CCommand &args);
 
-	virtual PLUGIN_RESULT NetworkIDValidated(const char *pszUserName,
+	PLUGIN_RESULT NetworkIDValidated(const char *pszUserName,
 			const char *pszNetworkID) {
 		return PLUGIN_CONTINUE;
 	}
-	virtual void OnQueryCvarValueFinished(QueryCvarCookie_t iCookie,
+	void OnQueryCvarValueFinished(QueryCvarCookie_t iCookie,
 			edict_t *pPlayerEntity, EQueryCvarValueStatus eStatus,
 			const char *pCvarName, const char *pCvarValue) {
 	}
 
-	virtual void OnEdictAllocated(edict_t *edict) {
+	void OnEdictAllocated(edict_t *edict) {
 	}
 
-	virtual void OnEdictFreed(const edict_t *edict) {
+	void OnEdictFreed(const edict_t *edict) {
 	}
 
-	virtual int GetCommandIndex() {
+	int GetCommandIndex() {
 		return m_iClientCommandIndex;
 	}
 private:
