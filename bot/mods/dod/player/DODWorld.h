@@ -14,8 +14,6 @@ public:
 private:
 	bool reset = false;
 
-	int bombPlantTeam = 1;
-
 	void addStates();
 
 	bool update(Blackboard& blackboard);

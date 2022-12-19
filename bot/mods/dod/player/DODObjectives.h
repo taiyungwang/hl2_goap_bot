@@ -16,12 +16,6 @@ public:
 
 	~DODObjectives();
 
-	/**
-	 * @param areaEntity Entity for a given bomb or capture area.
-	 * @Return -1 if the index is not found otherwise The index for a given capture or bomb area entity.
-	 */
-	int getIndex(edict_t *areaEntity) const;
-
 	bool roundStarted() const {
 		return objectiveResource != nullptr;
 	}

@@ -72,7 +72,7 @@ public:
 	}
 
 	const char *GetVersion() {
-		return "1.2.0";
+		return "1.3.0";
 	}
 
 	const char *GetDate() {
@@ -84,6 +84,7 @@ public:
 	}
 
 	void Hook_PlayerRunCmd(CUserCmd *ucmd, IMoveHelper *moveHelper);
+
 private:
 	std::shared_ptr<PluginAdaptor> adaptor;
 };

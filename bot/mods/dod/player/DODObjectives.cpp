@@ -17,7 +17,6 @@ DODObjectives::DODObjectives() {
 	gameeventmanager->AddListener(this, "dod_game_over", true);
 }
 
-
 DODObjectives::~DODObjectives() {
 	gameeventmanager->RemoveListener(this);
 	endRound();
@@ -108,4 +107,3 @@ void DODObjectives::FireGameEvent(IGameEvent *event) {
 		endRound();
 	}
 }
-

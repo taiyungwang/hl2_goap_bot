@@ -40,12 +40,6 @@ void DODWorld::FireGameEvent(IGameEvent* event) {
 	bool bombPlanted = name == "dod_bomb_planted";
 	if (name == "dod_point_captured" || bombPlanted
 			|| name == "dod_bomb_exploded" || name == "dod_bomb_defused") {
-		for (auto player: Player::getPlayers()) {
-			if (player.second->getUserId() == event->GetInt("userid")) {
-				bombPlantTeam = bombPlanted ? player.second->getTeam() : 1;
-				break;
-			}
-		}
 		reset = true;
 		return;
 	}
@@ -54,7 +48,6 @@ void DODWorld::FireGameEvent(IGameEvent* event) {
 			reset = true;
 		}
 		roundStarted = true;
-		bombPlantTeam = 1;
 	} else if (name == "dod_round_win" || name == "dod_game_over") {
 		roundStarted = false;
 		reset = true;

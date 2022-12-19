@@ -203,7 +203,7 @@ void hookPlayerRunCommand(edict_t *edict, int offset) {
 }
 
 void VSPlugin::GameFrame(bool simulating) {
-	adaptor->getNewPlayers().remove_if([this](edict_t *pEntity) {
+	adaptor->getNewPlayers().remove_if([](edict_t *pEntity) {
 		auto player = Player::getPlayer(pEntity);
 		if (dynamic_cast<Bot*>(player) != nullptr) {
 			if (PluginAdaptor::getPlayerruncommandOffset() > 0) {
