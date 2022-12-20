@@ -26,8 +26,6 @@ public:
 	}
 
 protected:
-	bool roundStarted = false;
-
 	WorldState states;
 
 	virtual void addStates() = 0;

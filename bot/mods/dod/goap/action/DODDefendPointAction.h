@@ -15,7 +15,9 @@ public:
 
 	bool precondCheck() override;
 
-	bool execute();
+	bool execute() {
+		return isTargetValid() && SnipeAction::execute();
+	}
 
 	float getChanceToExec() const;
 

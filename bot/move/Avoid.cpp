@@ -13,7 +13,6 @@
 #include <util/UtilTrace.h>
 #include <util/EntityUtils.h>
 #include <util/BasePlayer.h>
-#include <utlmap.h>
 #include <eiface.h>
 #include <in_buttons.h>
 
@@ -179,14 +178,12 @@ MoveState* Avoid::move(const Vector& pos) {
 
 void Avoid::setTeamWall(edict_t *blocker, int team) {
 	// assume the first team that gets block correctly identifies the team blocker.
-	extern CUtlMap<int, NavEntity*> blockers;
+	extern std::unordered_map<int, CFuncNavBlocker> blockers;
 	int idx = engine->IndexOfEdict(blocker);
-	if (blockers.IsValidIndex(blockers.Find(idx))) {
-		return;
+	if (blockers.find(idx) == blockers.end()) {
+		blockers.emplace(idx, blocker);
+		blockers.at(idx).setBlockedTeam(team);
 	}
-	CFuncNavBlocker* navBlocker = new CFuncNavBlocker(blocker);
-	navBlocker->setBlockedTeam(team);
-	blockers.Insert(idx, navBlocker);
 }
 
 /**

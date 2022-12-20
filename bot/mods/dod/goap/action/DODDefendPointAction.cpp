@@ -16,15 +16,7 @@ DODDefendPointAction::DODDefendPointAction(Blackboard &blackboard) :
 	effects = { WorldProp::POINTS_DEFENDED, true };
 }
 
-bool DODDefendPointAction::execute() {
-	return objectives->roundStarted() && isTargetValid()
-			&& SnipeAction::execute();
-}
-
 bool DODDefendPointAction::precondCheck() {
-	if (!objectives->roundStarted()) {
-		return false;
-	}
 	const auto &points = objectives->getCtrlPts();
 	CUtlLinkedList<edict_t*> available;
 	FOR_EACH_LL(points, i)

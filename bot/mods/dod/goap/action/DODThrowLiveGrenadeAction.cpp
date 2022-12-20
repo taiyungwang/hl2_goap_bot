@@ -7,9 +7,8 @@
 const Player* DODThrowLiveGrenadeAction::chooseTarget() const {
 	float closest = INFINITY;
 	auto self = blackboard.getSelf();
-	auto vision = self->getVision();
 	const Player *target = nullptr;
-	for (auto i: vision.getVisibleEnemies()) {
+	for (auto i: self->getVision().getVisibleEnemies()) {
 		auto enemy = Player::getPlayer(i);
 		float dist = self->getCurrentPosition().DistTo(enemy->getCurrentPosition());
 		if (dist < closest) {

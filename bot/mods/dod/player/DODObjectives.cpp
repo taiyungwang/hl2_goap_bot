@@ -28,7 +28,7 @@ void DODObjectives::startRound() {
 	findEntWithMatchingName("dod_control_point", ctrlPts);
 	findEntWithMatchingName("dod_bomb_target", bombsOnMap);
 	findEntWithMatchingName("dod_capture_area", capArea);
-	objectiveResource = new DODObjectiveResource(objRsrc[0]);
+	DODObjectiveResource *objectiveResource = new DODObjectiveResource(objRsrc[0]);
 	const Vector *position = objectiveResource->getCapturePositions();
 	for (int i = 0; i < *objectiveResource->numCtrlPts(); i++) {
 		objectives.push_back(
@@ -52,27 +52,23 @@ void DODObjectives::startRound() {
 	}
 	extern CGlobalVars *gpGlobals;
 	extern IVEngineServer *engine;
-	extern CUtlMap<int, NavEntity*> blockers;
+	extern std::unordered_map<int, CFuncNavBlocker> blockers;
 	for (int i = gpGlobals->maxClients + 1; i < gpGlobals->maxEntities; i++) {
 		edict_t *ent = engine->PEntityOfEntIndex(i);
 		if (ent != nullptr && !ent->IsFree()
 				&& ent->GetIServerEntity() != nullptr
 				&& FClassnameIs(ent, "prop_dynamic")
-				&& blockers.Find(i) == blockers.InvalidIndex()) {
-			blockers.Insert(i, new CFuncNavBlocker(ent));
+				&& blockers.find(i) == blockers.end()) {
+			blockers.emplace(i, ent);
 		}
 	}
 }
 
 void DODObjectives::endRound() {
 	detonation = false;
-	if (objectiveResource != nullptr) {
-		delete objectiveResource;
-		objectiveResource = nullptr;
-		ctrlPointsMap.clear();
-		ctrlPts.RemoveAll();
-		objectives.clear();
-	}
+	ctrlPointsMap.clear();
+	ctrlPts.RemoveAll();
+	objectives.clear();
 }
 
 const DODObjective* DODObjectives::getObjective(edict_t *target) const {

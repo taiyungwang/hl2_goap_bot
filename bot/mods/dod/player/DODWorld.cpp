@@ -37,12 +37,12 @@ void DODWorld::addStates() {
 
 void DODWorld::FireGameEvent(IGameEvent* event) {
 	std::string name(event->GetName());
-	bool bombPlanted = name == "dod_bomb_planted";
-	if (name == "dod_point_captured" || bombPlanted
+	if (name == "dod_point_captured" || name == "dod_bomb_planted"
 			|| name == "dod_bomb_exploded" || name == "dod_bomb_defused") {
 		reset = true;
 		return;
 	}
+	bool roundStarted = states[WorldProp::ROUND_STARTED];
 	if (name == "dod_round_active") {
 		if (!roundStarted) {
 			reset = true;

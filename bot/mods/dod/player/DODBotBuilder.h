@@ -2,7 +2,6 @@
 
 #include <player/BotBuilder.h>
 #include "DODObjectives.h"
-#include <set>
 
 class HL2MPPlayer;
 class HL2DMWorld;
@@ -14,8 +13,6 @@ public:
 
 private:
 	DODObjectives objectives;
-
-	std::set<std::string> liveGrenades;
 
 	void updatePlanner(GoalManager& planner, Blackboard& blackboard) const;
 

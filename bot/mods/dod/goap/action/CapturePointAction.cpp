@@ -34,9 +34,6 @@ bool CapturePointAction::isAvailable(edict_t* ent) {
 }
 
 bool CapturePointAction::precondCheck() {
-	if (!objectives->roundStarted()) {
-		return false;
-	}
 	selectItem();
 	if (item == nullptr) {
 		return false;

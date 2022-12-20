@@ -6,7 +6,6 @@
 #include <vector>
 #include <memory>
 
-class DODObjectiveResource;
 class DODObjective;
 struct edict_t;
 
@@ -15,10 +14,6 @@ public:
 	DODObjectives();
 
 	~DODObjectives();
-
-	bool roundStarted() const {
-		return objectiveResource != nullptr;
-	}
 
 	/**
 	 * @return True if the current map is a detonation type map.
@@ -37,8 +32,6 @@ public:
 
 private:
 	bool detonation;
-
-	DODObjectiveResource *objectiveResource = nullptr;
 
 	std::unordered_map<edict_t*, int> ctrlPointsMap;
 

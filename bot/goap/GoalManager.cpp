@@ -37,11 +37,9 @@ void GoalManager::execute() {
 	while (plan.empty() && getNextGoal()) {
 		if (planBuilder->findPlan(actions[goals[currentGoal++].action]->getEffects())) {
 			planBuilder->buildPlan(plan);
-			if (!plan.empty()) {
-				if (!actions[plan.front()]->init()) {
-					reset();
-					return;
-				}
+			if (!plan.empty() && !actions[plan.front()]->init()) {
+				reset();
+				return;
 			}
 		}
 	}

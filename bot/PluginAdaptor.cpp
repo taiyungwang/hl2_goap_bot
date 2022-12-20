@@ -11,7 +11,6 @@
 #include <util/EntityUtils.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
-#include <utlmap.h>
 
 ConVar mybot_debug("my_bot_debug", "0");
 ConVar mybot_var("mybot_var", "0.5");
@@ -20,7 +19,7 @@ static ConVar playerruncommand_offset("mybot_playerruncommand_offset", "-1");
 
 CNavMesh* TheNavMesh = nullptr;
 
-CUtlMap<int, NavEntity*> blockers;
+std::unordered_map<int, CFuncNavBlocker> blockers;
 
 extern IVEngineServer* engine;
 extern IGameEventManager2* gameeventmanager;
@@ -34,7 +33,6 @@ PluginAdaptor::PluginAdaptor() {
 	gameeventmanager->AddListener(this, "nav_generate", true);
 	TheNavMesh = new CNavMesh;
 	botBuilder = nullptr;
-	SetDefLessFunc(blockers);
 	char gameDir[MAX_PATH];
 	engine->GetGameDir(gameDir, MAX_PATH);
 	std::string modPath(gameDir);
@@ -100,19 +98,13 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		return false;
 	});
 	if (navMeshLoadAttempted && TheNavMesh != nullptr) {
-		CUtlLinkedList<unsigned short> toRemove;
-		FOR_EACH_MAP_FAST(blockers, i) {
-			edict_t* blocker = blockers[i]->getEntity();
-			if (blocker->IsFree()) {
-				toRemove.AddToTail(i);
-				blockers[i]->InputDisable();
-				delete blockers[i];
+		for (auto itr = blockers.begin(); itr != blockers.end();) {
+			if (itr->second.getEntity()->IsFree()) {
+				itr->second.InputDisable();
+				itr = blockers.erase(itr);
 			} else {
-				blockers[i]->InputEnable();
+				itr++->second.InputEnable();
 			}
-		}
-		FOR_EACH_LL(toRemove, i) {
-			blockers.RemoveAt(toRemove[i]);
 		}
 		TheNavMesh->Update();
 		botBuilder->onFrame();
@@ -167,7 +159,7 @@ void PluginAdaptor::levelShutdown() {
 	while(players.size() > 0) {
 		delete players.begin()->second;
 	}
-	blockers.PurgeAndDeleteElements();
+	blockers.clear();
 	if (hidingSpotSelector) {
 		hidingSpotSelector->save();
 	}
@@ -176,5 +168,5 @@ void PluginAdaptor::levelShutdown() {
 
 void PluginAdaptor::FireGameEvent(IGameEvent* event) {
 // TODO: this doesn't really work.
-	blockers.PurgeAndDeleteElements();
+	blockers.clear();
 }
