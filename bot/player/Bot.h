@@ -60,10 +60,6 @@ public:
 		this->hookEnabled = hookEnabled;
 	}
 
-	void setInGame(bool inGame = false) {
-		this->inGame = inGame;
-	}
-
 	void setDesiredClassId(int classId = -1) {
 		this->desiredClassId = classId;
 	}

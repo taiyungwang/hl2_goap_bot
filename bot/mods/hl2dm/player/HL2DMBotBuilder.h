@@ -10,12 +10,12 @@ class HL2DMBotBuilder: public BotBuilder {
 public:
 	HL2DMBotBuilder(CommandHandler& commandHandler, const ArsenalBuilder &arsenalBuilder);
 
-	void onFrame() override {
-		itemMap.buildMap();
-	}
-
 private:
 	ItemMap itemMap;
+
+	void modOnFrame() override {
+		itemMap.buildMap();
+	}
 
 	void updatePlanner(GoalManager &planner, Blackboard &blackboard) const;
 

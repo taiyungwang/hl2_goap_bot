@@ -105,7 +105,7 @@ protected:
 
 	std::shared_ptr<Arsenal> arsenal;
 
-	bool inGame = false;
+	bool inGame = true;
 
 	CNavArea *area = nullptr;
 

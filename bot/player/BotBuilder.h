@@ -27,7 +27,7 @@ public:
 		(this->*cmdCallbacks.at(command.Arg(0)))(command);
 	}
 
-	virtual void onFrame() {}
+	void onFrame();
 
 protected:
 	bool teamPlay = false;
@@ -42,6 +42,8 @@ protected:
 	virtual BasePlayer* buildEntity(edict_t* ent) const;
 
 	virtual World* buildWorld() const = 0;
+
+	virtual void modOnFrame() {}
 
 	virtual void modHandleCommand(const CCommand &command, Bot* bot) const {
 	}

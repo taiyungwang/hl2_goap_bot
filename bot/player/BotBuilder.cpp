@@ -19,6 +19,8 @@
 
 extern IVEngineServer* engine;
 
+static ConVar minPlayers("mybot_min_players", "-1");
+
 BotBuilder::BotBuilder(CommandHandler& commandHandler,
 		const ArsenalBuilder& arsenalBuilder): commandHandler(commandHandler),
 				arsenalBuilder(arsenalBuilder) {
@@ -89,7 +91,6 @@ Bot* BotBuilder::build(edict_t* ent) {
 	bot->setBlackboard(blackboard);
 	World* world = buildWorld();
 	world->reset();
-	bot->setInGame(world->getState(WorldProp::ROUND_STARTED));
 	bot->setWorld(world);
 	GoalManager *planner = new GoalManager(world->getStates(), *blackboard);
 	planner->addAction<FindCoverFromGrenadesAction>(0.95f);
@@ -104,6 +105,42 @@ Bot* BotBuilder::build(edict_t* ent) {
 	updatePlanner(*planner, *blackboard);
 	bot->setPlanner(planner);
 	return modBuild(bot, *blackboard);
+}
+
+void BotBuilder::onFrame() {
+	modOnFrame();
+	if (minPlayers.GetInt() < 0) {
+		return;
+	}
+	auto count = Player::getTeamCount();
+	extern CGlobalVars *gpGlobals;
+	int botsToAdd = MIN(minPlayers.GetInt(), gpGlobals->maxClients - 1) - std::get<0>(count) - std::get<1>(count);
+	if (botsToAdd > 0) {
+		for (int i = 0; i < botsToAdd; i++) {
+			const char *args[] = { "mybot_add_bot" };
+			addBot(CCommand(1, args));
+		}
+	} else if (botsToAdd < 0) {
+		for (auto player : Player::getPlayers()) {
+			int team = player.second->getTeam();
+			if (team < 2) {
+				continue;
+			}
+			bool team3Less = std::get<1>(count) < std::get<0>(count);
+			if ((team == 2 && team3Less) || (team == 3 && !team3Less)) {
+				engine->ServerCommand((std::string("kickid ") + std::to_string(player.second->getUserId())
+						+ "\n").c_str());
+				if (team == 2) {
+					std::get<0>(count)--;
+				} else {
+					std::get<1>(count)--;
+				}
+			}
+			if (std::get<0>(count) + std::get<1>(count) == minPlayers.GetInt()) {
+				break;
+			}
+		}
+	}
 }
 
 BasePlayer* BotBuilder::buildEntity(edict_t* ent) const {
