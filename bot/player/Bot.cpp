@@ -42,9 +42,9 @@ Bot::Bot(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal,
 }
 
 Bot::~Bot() {
+	delete planner;
 	delete blackboard;
 	delete world;
-	delete planner;
 	if (playerClassVar != nullptr) {
 		delete playerClassVar;
 	}
