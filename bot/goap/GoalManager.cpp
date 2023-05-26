@@ -15,6 +15,9 @@ GoalManager::~GoalManager() {
 	if (planBuilder != nullptr) {
 		delete planBuilder;
 	}
+	if (!plan.empty()) {
+		actions[plan.front()]->abort();
+	}
 	for(auto action: actions)
 	{
 		delete action;
