@@ -154,9 +154,11 @@ void BotBuilder::addAllBots(const CCommand &command) {
 		const char* team = i % 2 == 0 ? "2" : "3";
 		std::string name = std::string("Bot") + std::to_string(i);
 		if (command.ArgC() > 1) {
-			addBot(CCommand(4, (const char *[]){"addbot", name.c_str(), team, command.Arg(1) }));
+			const char* args[] = {"addbot", name.c_str(), team, command.Arg(1) };
+			addBot(CCommand(4, args));
 		} else {
-			addBot(CCommand(3, (const char *[]){"addbot", name.c_str(), team }));
+			const char *args[] = { "addbot", name.c_str(), team };
+			addBot(CCommand(3, args));
 		}
 	}
 }
