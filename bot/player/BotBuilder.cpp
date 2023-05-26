@@ -18,6 +18,7 @@
 #include <util/BasePlayer.h>
 
 extern IVEngineServer* engine;
+extern CGlobalVars *gpGlobals;
 
 static ConVar minPlayers("mybot_min_players", "-1");
 
@@ -28,8 +29,6 @@ BotBuilder::BotBuilder(CommandHandler& commandHandler,
 	addCommand("mybot_add_all_bots", "Fill server with bots", &BotBuilder::addAllBots);
 	addCommand("mybot_kick_all_bots_except", "Kicks all bots except bot with given name",
 			&BotBuilder::kickAllExcept);
-	extern ICvar* cVars;
-	teamPlay = cVars->FindVar("mp_teamplay")->GetBool();
 }
 
 BotBuilder::~BotBuilder() {
@@ -44,18 +43,19 @@ void BotBuilder::addBot(const CCommand &command) {
 	static int botCount = 0;
 	extern IBotManager *botmanager;
 	int team = 0;
-	if (teamPlay) {
+	extern ICvar* cVars;
+	if (cVars->FindVar("mp_teamplay")->GetBool()) {
 		auto count = Player::getTeamCount();
 		team = std::get<0>(count) > std::get<1>(count) ? 3 : 2;
 	}
-	botCount %= 32;
+	botCount %= gpGlobals->maxClients;
 	if (command.ArgC() > 2) {
 		team = (atoi(command.Arg(2)) - 1) % 2 + 2;
 	}
 	edict_t *pEdict = botmanager->CreateBot(
 			command.ArgC() > 1 ?
 					command.Arg(1) :
-					(CUtlString("Bot") + botCount++).Get());
+					(std::string("Bot") + std::to_string(botCount++)).c_str());
 	if (pEdict == nullptr) {
 		Warning("IBotManager::CreateBot failed");
 		botCount--;
@@ -69,8 +69,9 @@ void BotBuilder::addBot(const CCommand &command) {
 void BotBuilder::kickAllExcept(const CCommand &command) {
 	for (auto player : Player::getPlayers()) {
 		if (dynamic_cast<Bot*>(player.second) != nullptr
-				&& CUtlString(player.second->getName()) != command.Arg(1)) {
-			engine->ServerCommand((CUtlString("kickid ") + player.second->getUserId() + "\n").Get());
+				&& std::string(player.second->getName()) != command.Arg(1)) {
+			engine->ServerCommand((std::string("kickid ") + std::to_string(player.second->getUserId())
+					+ "\n").c_str());
 		}
 	}
 }
@@ -113,7 +114,6 @@ void BotBuilder::onFrame() {
 		return;
 	}
 	auto count = Player::getTeamCount();
-	extern CGlobalVars *gpGlobals;
 	int botsToAdd = MIN(minPlayers.GetInt(), gpGlobals->maxClients - 1) - std::get<0>(count) - std::get<1>(count);
 	if (botsToAdd > 0) {
 		for (int i = 0; i < botsToAdd; i++) {
@@ -152,14 +152,11 @@ void BotBuilder::addAllBots(const CCommand &command) {
 	int botsToAdd = gpGlobals->maxClients - 2 - Player::getPlayers().size();
 	for (int i = 0; i < botsToAdd; i++) {
 		const char* team = i % 2 == 0 ? "2" : "3";
-		CUtlString name("Bot");
-		name += i;
+		std::string name = std::string("Bot") + std::to_string(i);
 		if (command.ArgC() > 1) {
-			const char* args[] = {"addbot", name.Get(), team, command.Arg(1) };
-			addBot(CCommand(4, args));
+			addBot(CCommand(4, (const char *[]){"addbot", name.c_str(), team, command.Arg(1) }));
 		} else {
-			const char* args[] = {"addbot", name.Get(), team };
-			addBot(CCommand(3, args));
+			addBot(CCommand(3, (const char *[]){"addbot", name.c_str(), team }));
 		}
 	}
 }

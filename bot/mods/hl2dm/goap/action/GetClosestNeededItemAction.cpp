@@ -6,6 +6,7 @@
 #include <player/Buttons.h>
 #include <move/Navigator.h>
 #include <nav_mesh/nav_area.h>
+#include <util/BaseEntity.h>
 #include <util/UtilTrace.h>
 #include <in_buttons.h>
 
@@ -25,6 +26,7 @@ bool GetClosestNeededItemAction::init() {
 	} else {
 		targetRadius = 0.0f;
 	}
+	animationCycle = *BaseEntity(item).getPtr<float>("m_flCycle");
 	return GoToEntityAction::init();
 }
 
@@ -37,7 +39,9 @@ bool GetClosestNeededItemAction::execute() {
 			|| (self->getHealth() > 99 && self->getArmor() > 99)) {
 		return true;
 	}
-	useItem();
+	float newCycle = *BaseEntity(item).getPtr<float>("m_flCycle");
+	useItem(newCycle != animationCycle);
+	animationCycle = newCycle;
 	return false;
 }
 

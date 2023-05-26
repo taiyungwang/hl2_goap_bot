@@ -29,9 +29,9 @@ public:
 
 	void onFrame();
 
-protected:
-	bool teamPlay = false;
+	void kickAllExcept(const CCommand &command);
 
+protected:
 	std::unordered_map<unsigned int, std::string> messages;
 
 	CommandHandler& commandHandler;
@@ -68,8 +68,6 @@ private:
 	void addAllBots(const CCommand &command);
 
 	void addBot(const CCommand &command);
-
-	void kickAllExcept(const CCommand &command);
 
 	void addCommand(const char* name, const char* description, CmdFuncPtr ptr);
 };

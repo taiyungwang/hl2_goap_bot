@@ -80,7 +80,7 @@ DODArsenalBuilder::DODArsenalBuilder() {
 	weaponBuilders["weapon_m1carbine"] = make_shared<PistolBuilder>(0.4f);
 	weaponBuilders["weapon_c96"] = make_shared<C96Builder>();
 	weaponBuilders["weapon_basebomb"] = make_shared<UtilityToolBuilder>();
-	for (const auto grenade: DODLiveGrenadeBuilder::NAMES) {
+	for (const auto& grenade: DODLiveGrenadeBuilder::NAMES) {
 		weaponBuilders[grenade] = make_shared<DODLiveGrenadeBuilder>();
 	}
 }

@@ -8,6 +8,9 @@
 
 static ConVar mybotAttackDelay("mybot_attack_delay", "60");
 
+static ConVar mybotAimVar("mybot_aim_variance", "1.0f", 0,
+		"range of randomness for a bot's aim");
+
 KillAction::KillAction(Blackboard &blackboard) :
 		AttackAction(blackboard) {
 	effects = { WorldProp::ENEMY_SIGHTED, false };
@@ -19,7 +22,7 @@ bool KillAction::precondCheck() {
 	dur = UINT_MAX;
 	target = blackboard.getSelf()->getVision().getTargetedPlayer();
 	if (target > 0) {
-		blackboard.getSelf()->setAiming(true);
+		blackboard.getSelf()->setAimOffset(mybotAimVar.GetFloat());
 		return true;
 	}
 	return false;

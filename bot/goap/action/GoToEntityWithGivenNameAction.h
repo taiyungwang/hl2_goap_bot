@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GoToEntityAction.h"
-#include <utllinkedlist.h>
 
 /**
  * Action to get an item that is consumed.

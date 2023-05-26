@@ -94,9 +94,7 @@ public:
 		return inGame;
 	}
 
-	CNavArea *getArea() const {
-		return area;
-	}
+	CNavArea *getArea() const;
 
 	int getClosestHidingSpot() const;
 
@@ -106,8 +104,6 @@ protected:
 	std::shared_ptr<Arsenal> arsenal;
 
 	bool inGame = true;
-
-	CNavArea *area = nullptr;
 
 private:
 	IPlayerInfo* info;

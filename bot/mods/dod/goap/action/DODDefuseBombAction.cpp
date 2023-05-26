@@ -37,7 +37,7 @@ bool DODDefuseBombAction::execute() {
 	interruptable = false;
 	Bot *self = blackboard.getSelf();
 	self->sendVoiceMessage(VoiceMessage::NEED_BACKUP);
-	useItem();
+	useItem(isActingOnBomb(self->getEdict()));
 	return false;
 }
 
@@ -49,7 +49,7 @@ bool DODDefuseBombAction::isAvailable(edict_t* ent) {
 		if (player.second != blackboard.getSelf()
 				&& player.second->getTeam() == blackboard.getSelf()->getTeam()
 				&& player.second->getCurrentPosition().DistTo(ent->GetCollideable()->GetCollisionOrigin()) < 100.0f
-				&& isTeammateActing(player.second->getEdict())) {
+				&& isActingOnBomb(player.second->getEdict())) {
 			return false;
 		}
 	}
@@ -63,6 +63,6 @@ bool DODDefuseBombAction::isAvailable(const DODObjective& obj) {
 			&& obj.hasBombTargetInState(DODObjective::BombState::ACTIVE);
 }
 
-bool DODDefuseBombAction::isTeammateActing(edict_t* teammate) const {
+bool DODDefuseBombAction::isActingOnBomb(edict_t* teammate) const {
 	return DodPlayer(teammate).isDefusing();
 }

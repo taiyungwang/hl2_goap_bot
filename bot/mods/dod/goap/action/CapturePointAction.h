@@ -1,7 +1,6 @@
 #pragma once
 
 #include <goap/action/GoToEntityWithGivenNameAction.h>
-#include <utlvector.h>
 
 class DODObjectives;
 class DODObjective;

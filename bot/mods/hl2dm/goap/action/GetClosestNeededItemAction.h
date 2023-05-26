@@ -26,6 +26,8 @@ public:
 private:
 	static const ItemMap *itemMap;
 
+	float animationCycle = 0.0f;
+
 	std::shared_ptr<Item> resource;
 
 	void selectItem() override;

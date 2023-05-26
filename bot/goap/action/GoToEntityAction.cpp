@@ -15,6 +15,14 @@ bool GoToEntityAction::init() {
 	return true;
 }
 
+bool GoToEntityAction::execute() {
+	if (GoToAction::execute()) {
+		blackboard.getSelf()->setAimOffset(0.0f);
+		return true;
+	}
+	return false;
+}
+
 bool GoToEntityAction::precondCheck() {
 	selectItem();
 	if (item == nullptr || item->IsFree()
@@ -38,8 +46,12 @@ void GoToEntityAction::setTargetLocAndRadius(edict_t* target) {
 	targetLoc.z = UTIL_FindGround(targetLoc).z;
 }
 
-void GoToEntityAction::useItem() {
+void GoToEntityAction::useItem(bool isActive) {
 	blackboard.getButtons().hold(IN_USE);
+	if (isActive) {
+		return;
+	}
+	blackboard.getSelf()->setAimOffset(5.0f);
 	Vector itemPos = UTIL_FindGround(
 				item->GetCollideable()->GetCollisionOrigin());
 	itemPos.z += HumanEyeHeight - 10.0f;

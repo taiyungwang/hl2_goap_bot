@@ -99,6 +99,7 @@ bool AttackAction::execute() {
 
 bool AttackAction::goalComplete() {
 	abort();
+	blackboard.getSelf()->setAimOffset(0.0f);
 	blackboard.setBlocker(nullptr);
 	return targetDestroyed();
 }
@@ -106,7 +107,7 @@ bool AttackAction::goalComplete() {
 
 void AttackAction::abort() {
 	auto self = blackboard.getSelf();
-	self->setAiming(false);
+	self->setAimOffset(0.0f);
 	Weapon* weapon = self->getArsenal().getCurrWeapon();
 	if (weapon != nullptr) {
 		weapon->undeploy(blackboard);

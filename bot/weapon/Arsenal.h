@@ -46,7 +46,7 @@ public:
 
 	template<typename Func>
 	void visit(Func visitor) const {
-		for (auto const weapon: weapons) {
+		for (auto const& weapon: weapons) {
 			if (visitor(weapon.first, weapon.second.get())) {
 				break;
 			}

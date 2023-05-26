@@ -9,5 +9,5 @@ public:
 private:
 	bool isAvailable(const DODObjective& obj);
 
-	bool isTeammateActing(edict_t* teammate) const override;
+	bool isActingOnBomb(edict_t* player) const override;
 };

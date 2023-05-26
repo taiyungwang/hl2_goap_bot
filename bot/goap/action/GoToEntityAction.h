@@ -14,6 +14,8 @@ public:
 
 	virtual bool init();
 
+	virtual bool execute() override;
+
 protected:
 	edict_t* item = nullptr;
 
@@ -24,5 +26,5 @@ protected:
 
 	void setTargetLocAndRadius(edict_t* target);
 
-	void useItem();
+	void useItem(bool isActive);
 };

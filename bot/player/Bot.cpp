@@ -23,9 +23,6 @@ PlayerClasses Bot::CLASSES = nullptr;
 
 static ConVar mybot_mimic("mybot_mimic", "0");
 
-static ConVar mybotAimVar("mybot_aim_variance", "1.0f", 0,
-		"range of randomness for a bot's aim");
-
 static ConVar mybotDangerAmt("mybot_danger_amount", "3.0f", 0,
 		"Amount of 'danger' to add to an area when a bot is killed.");
 
@@ -79,9 +76,9 @@ void Bot::think() {
 						NDEBUG_PERSIST_TILL_NEXT_SERVER);
 			}
 			VectorAngles(viewTarget - getEyesPos(), cmd.viewangles);
-			if (aiming && vision.getTargetedPlayer() > 0) {
-				cmd.viewangles.x += RandomFloat(-mybotAimVar.GetFloat(), mybotAimVar.GetFloat());
-				cmd.viewangles.y += RandomFloat(-mybotAimVar.GetFloat(), mybotAimVar.GetFloat());
+			if (vision.getTargetedPlayer() > 0) {
+				cmd.viewangles.x += RandomFloat(-aimOffset, aimOffset);
+				cmd.viewangles.y += RandomFloat(-aimOffset, aimOffset);
 			}
 			rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle());
 		}
@@ -112,9 +109,9 @@ void Bot::FireGameEvent(IGameEvent* event) {
 		blackboard->reset();
 		vision.reset();
 		world->reset();
-		area = nullptr;
 		planner->resetPlanning(true);
 	} else if (name == "player_death") {
+		auto area = getArea();
 		if (area != nullptr) {
 			area->IncreaseDanger(getTeam(), mybotDangerAmt.GetFloat());
 		}

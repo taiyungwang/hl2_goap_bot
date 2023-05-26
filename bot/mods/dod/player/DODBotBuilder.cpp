@@ -27,7 +27,6 @@ static const char *CLASSES[2][CLASS_COUNT] { { "cls_garand", "cls_tommy",
 DODBotBuilder::DODBotBuilder(CommandHandler &commandHandler,
 		const ArsenalBuilder &arsenalBuilder) : BotBuilder(commandHandler, arsenalBuilder) {
 	Bot::setClasses(&CLASSES);
-	teamPlay = true;
 	messages[VoiceMessage::ENEMY_SIGHTED] = "voice_enemyahead";
 	messages[VoiceMessage::AREA_CLEAR] = "voice_areaclear";
 	messages[VoiceMessage::NEED_BACKUP] = "voice_backup";

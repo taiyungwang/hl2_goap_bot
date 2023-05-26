@@ -23,7 +23,7 @@ protected:
 
 	virtual bool isAvailable(const DODObjective& obj);
 
-	virtual bool isTeammateActing(edict_t* teammate) const;
+	virtual bool isActingOnBomb(edict_t* teammate) const;
 
 private:
 	bool isAvailable(edict_t* ent);

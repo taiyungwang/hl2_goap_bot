@@ -20,7 +20,6 @@ void World::reset() {
 	states[WorldProp::WEAPON_LOADED] = true;
 	states[WorldProp::OUT_OF_AMMO] = false;
 	states[WorldProp::WEAPON_IN_RANGE] = false;
-	states[WorldProp::ROUND_STARTED] = false;
 	states[WorldProp::EXPLOSIVE_NEAR] = false;
 	addStates();
 }

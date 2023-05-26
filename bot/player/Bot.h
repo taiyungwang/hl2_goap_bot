@@ -103,8 +103,8 @@ public:
 	void traceMove(CGameTrace &traceResult, const Vector &start,
 			const Vector &goal, bool crouch, const ITraceFilter &filter) const;
 
-	void setAiming(bool aiming) {
-		this->aiming = aiming;
+	void setAimOffset(float aiming) {
+		aimOffset = aiming;
 	}
 
 	void setNavigator(const std::shared_ptr<Navigator>& navigator) {
@@ -146,6 +146,8 @@ private:
 
 	int desiredClassId = -1;
 
+	float aimOffset = 0.0f;
+
 	GoalManager *planner = nullptr;
 
 	World *world = nullptr;
@@ -154,7 +156,7 @@ private:
 
 	Vector viewTarget;
 
-	bool hookEnabled = false, wantToListen = true, aiming = false, resetPlanner = false,
+	bool hookEnabled = false, wantToListen = true, resetPlanner = false,
 			hasRadio = false;
 
 	bool canShoot(CGameTrace &result, const Vector &vecAbsEnd) const;

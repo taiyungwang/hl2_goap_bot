@@ -77,11 +77,6 @@ void Player::think() {
 		inGame = false;
 	}
 	if (inGame) {
-		extern CNavMesh* TheNavMesh;
-		area = TheNavMesh->GetNavArea(ent, 0);
-		if (area == nullptr) {
-			area = Navigator::getArea(getCurrentPosition(), getTeam());
-		}
 		noiseRange = 0.0f;
 		arsenal->update(ent);
 		if (BasePlayer(ent).getVelocity()->Length() > 150.0f) {
@@ -136,8 +131,21 @@ void Player::FireGameEvent(IGameEvent* event) {
 	}
 }
 
+CNavArea *Player::getArea() const {
+	if (!inGame) {
+		return nullptr;
+	}
+	extern CNavMesh* TheNavMesh;
+	auto area = TheNavMesh->GetNavArea(ent, 0);
+	if (area == nullptr) {
+		area = Navigator::getArea(getCurrentPosition(), getTeam());
+	}
+	return area;
+}
+
 int Player::getClosestHidingSpot() const {
 	int spot = -1;
+	auto area = getArea();
 	if (area != nullptr) {
 		auto spots = area->GetHidingSpots();
 		float closest = INFINITY;
