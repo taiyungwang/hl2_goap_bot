@@ -13,6 +13,7 @@ static ConVar dodDefendChance("mybot_dod_defend_chance", "0.2");
 
 DODDefendPointAction::DODDefendPointAction(Blackboard &blackboard) :
 		SnipeAction(blackboard) {
+	precond[WorldProp::ROUND_STARTED] = true;
 	effects = { WorldProp::POINTS_DEFENDED, true };
 }
 
