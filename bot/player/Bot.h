@@ -127,6 +127,8 @@ public:
 		hasRadio = radio;
 	}
 
+	bool isOnLadder() const;
+
 private:
 	static PlayerClasses CLASSES;
 

@@ -80,7 +80,7 @@ bool Navigator::step() {
 	if ((topArea == nullptr && !path.empty()) || lastArea == nullptr
 			|| lastArea->IsBlocked(self->getTeam())
 			// bot fell off due to bad pathing.
-			|| (!moveCtx->nextGoalIsLadderStart() && !blackboard.isOnLadder()
+			|| (!moveCtx->nextGoalIsLadderStart() && !self->isOnLadder()
 					&& moveCtx->getGoal().z - loc.z > JumpCrouchHeight
 					&& moveCtx->getGoal().AsVector2D().DistTo(loc.AsVector2D())
 							< HalfHumanWidth)) {
@@ -96,7 +96,7 @@ bool Navigator::step() {
 	}
 	int maxTime = maxAreaTime.GetInt();
 	if ((attributes & NAV_MESH_CROUCH) || moveCtx->nextGoalIsLadderStart()
-			|| blackboard.isOnLadder()) {
+			|| self->isOnLadder()) {
 		maxTime *= 1.5f;
 	}
 	float speed = BasePlayer(self->getEdict()).getVelocity()->Length();
@@ -133,7 +133,7 @@ bool Navigator::step() {
 	// do look
 	if (sprint || (blackboard.getBlocker() == nullptr
 			&& blackboard.getSelf()->getVision().getTargetedPlayer() == 0
-			&& !blackboard.isOnLadder()
+			&& !self->isOnLadder()
 			&& moveCtx->getLadderDir() == CNavLadder::NUM_LADDER_DIRECTIONS)) {
 		Vector look = moveCtx->getGoal();
 		look.z += HumanEyeHeight;
@@ -165,7 +165,7 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 		return false;
 	}
 	if (lastAreaId < 0
-			|| (moveCtx->nextGoalIsLadderStart() && blackboard.isOnLadder())
+			|| (moveCtx->nextGoalIsLadderStart() && blackboard.getSelf()->isOnLadder())
 			|| (!moveCtx->hasGoal()
 					&& (moveCtx->getGoal() == topArea->GetCenter()
 							// close to next path.top()
@@ -184,12 +184,13 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 	lastAreaId = std::get<0>(path.back());
 	auto top = path.back();
 	path.pop_back();
+	auto self = blackboard.getSelf();
 	topArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.back()));
 	bool canSkip = topArea != nullptr && ((path.empty() && canMoveTo(finalGoal, false))
 		|| (!path.empty() && getPortalToTopArea(goal) && canMoveTo(goal, false))
 		// already on ladder and the next area is reached via ladder
-		|| (blackboard.isOnLadder() && std::get<1>(path.back()) >= 4 && std::get<1>(path.back()) <= 5));
-	if (!blackboard.isOnLadder()) {
+		|| (self->isOnLadder() && std::get<1>(path.back()) >= 4 && std::get<1>(path.back()) <= 5));
+	if (!self->isOnLadder()) {
 		// make sure we are not skipping area that will cause us to walk off of a cliff.
 		Vector dir = loc - goal;
 		if (path.empty()) {

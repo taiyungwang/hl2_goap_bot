@@ -1,17 +1,23 @@
 #pragma once
 
 #include <player/World.h>
-#include <igameevents.h>
+#include <player/GameEventListener.h>
 
-class DODWorld: public World, public IGameEventListener2 {
+class DODWorld: public World, public GameEventListener {
 public:
+	static void setRoundStarted(bool started) {
+		roundStarted = started;
+	}
+
 	DODWorld();
 
-	~DODWorld();
-
-	void FireGameEvent(IGameEvent* event);
+	void FireGameEvent(IGameEvent* event) {
+		reset = true;
+	}
 
 private:
+	static bool roundStarted;
+
 	bool reset = false;
 
 	void addStates();

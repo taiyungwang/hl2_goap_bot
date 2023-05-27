@@ -37,7 +37,7 @@ MoveState* Jump::move(const Vector& currPos) {
 	Vector pos(currPos), goal((ctx.getGoal() - currPos).Normalized() * 16.0f + pos);
 	pos.z += 48.0f;
 	goal.z = pos.z;
-	if ((!ctx.getBlackboard().isOnLadder() && ctx.trace(pos, goal, true,
+	if ((!ctx.getBlackboard().getSelf()->isOnLadder() && ctx.trace(pos, goal, true,
 			IgnoreSelfAndTeammates(ctx.getBlackboard().getSelf()->getEdict())).DidHit())
 			|| !ctx.getBlackboard().getButtons().jump()) {
 		return new Avoid(ctx, new StepLeft(ctx));

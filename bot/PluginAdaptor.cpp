@@ -21,7 +21,6 @@ CNavMesh* TheNavMesh = nullptr;
 std::unordered_map<int, CFuncNavBlocker> blockers;
 
 extern IVEngineServer* engine;
-extern IGameEventManager2* gameeventmanager;
 
 int PluginAdaptor::getPlayerruncommandOffset() {
 	return playerruncommand_offset.GetInt();
@@ -29,7 +28,7 @@ int PluginAdaptor::getPlayerruncommandOffset() {
 
 PluginAdaptor::PluginAdaptor() {
 	// TODO: consider moving constructor initializations into init callback.
-	gameeventmanager->AddListener(this, "nav_generate", true);
+	listenForGameEvent({"nav_generate"});
 	TheNavMesh = new CNavMesh;
 	botBuilder = nullptr;
 	char gameDir[MAX_PATH];
@@ -69,7 +68,6 @@ PluginAdaptor::~PluginAdaptor() {
 		delete botBuilder;
 		botBuilder = nullptr;
 	}
-	gameeventmanager->RemoveListener(this);
 }
 
 void PluginAdaptor::levelInit(const char* mapName) {

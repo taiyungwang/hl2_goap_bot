@@ -1,7 +1,7 @@
 #pragma once
 
 #include "player/CommandHandler.h"
-#include <igameevents.h>
+#include "player/GameEventListener.h"
 #include <memory>
 
 class Thinker;
@@ -14,7 +14,7 @@ struct edict_t;
 /**
  * Allows the use of either the VSDK Plugin or MetaMod Plugin.
  */
-class PluginAdaptor : public IGameEventListener2 {
+class PluginAdaptor : public GameEventListener {
 public:
 	static int getPlayerruncommandOffset();
 

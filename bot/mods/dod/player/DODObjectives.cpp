@@ -8,18 +8,9 @@
 #include <utlmap.h>
 #include <string>
 
-extern IGameEventManager2* gameeventmanager;
-
 DODObjectives::DODObjectives() {
 	endRound();
-	gameeventmanager->AddListener(this, "dod_round_active", true);
-	gameeventmanager->AddListener(this, "dod_round_win", true);
-	gameeventmanager->AddListener(this, "dod_game_over", true);
-}
-
-DODObjectives::~DODObjectives() {
-	gameeventmanager->RemoveListener(this);
-	endRound();
+	listenForGameEvent({"dod_round_active", "dod_round_win", "dod_game_over"});
 }
 
 void DODObjectives::startRound() {
@@ -99,7 +90,7 @@ void DODObjectives::FireGameEvent(IGameEvent *event) {
 	std::string name(event->GetName());
 	if (name == "dod_round_active") {
 		startRound();
-	} else if (name == "dod_game_over" || name == "dod_round_win") {
+	} else {
 		endRound();
 	}
 }

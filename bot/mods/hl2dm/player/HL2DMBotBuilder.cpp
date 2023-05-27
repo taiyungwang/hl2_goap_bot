@@ -165,10 +165,10 @@ void HL2DMBotBuilder::updatePlanner(GoalManager& planner,
 	planner.addAction<UseGravityGunAction>(0.71f);
 }
 
-BasePlayer* HL2DMBotBuilder::buildEntity(edict_t* ent) const {
-	return new HL2MPPlayer(ent);
-}
-
 World* HL2DMBotBuilder::buildWorld() const {
 	return new HL2DMWorld();
+}
+
+void HL2DMBotBuilder::modHandleCommand(const CCommand &command, Bot* bot) const {
+	bot->setPlayerClassVar<HL2MPPlayer>();
 }

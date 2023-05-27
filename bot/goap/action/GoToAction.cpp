@@ -45,7 +45,7 @@ bool GoToAction::init() {
 }
 
 bool GoToAction::execute() {
-	canAbort = !blackboard.isOnLadder();
+	canAbort = !blackboard.getSelf()->isOnLadder();
 	return blackboard.getSelf()->getNavigator()->step();
 }
 

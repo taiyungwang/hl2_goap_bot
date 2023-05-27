@@ -87,7 +87,7 @@ MoveState* Avoid::move(const Vector& pos) {
 			? nullptr : currBlocker->GetClassName();
 	int team = blackboard.getSelf()->getTeam();
 	edict_t* self = blackboard.getSelf()->getEdict();
-	if (blackboard.isOnLadder()) {
+	if (blackboard.getSelf()->isOnLadder()) {
 		if (ctx.nextGoalIsLadderStart()) {
 			delete nextState;
 			nextState = nullptr;

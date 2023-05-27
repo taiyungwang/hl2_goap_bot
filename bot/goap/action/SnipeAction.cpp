@@ -52,7 +52,7 @@ bool SnipeAction::execute() {
 	if (!GoToAction::execute()) {
 		return false;
 	}
-	if (!GoToAction::goalComplete() || blackboard.isOnLadder()) {
+	if (!GoToAction::goalComplete() || blackboard.getSelf()->isOnLadder()) {
 		return true;
 	}
 	Vector aim;

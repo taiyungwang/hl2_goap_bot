@@ -87,7 +87,7 @@ public:
 Bot* BotBuilder::build(edict_t* ent) {
 	Bot* bot = new Bot(ent, arsenalBuilder.build(), commandHandler,
 			messages);
-	Blackboard *blackboard = new Blackboard(bot, buildEntity(ent));
+	Blackboard *blackboard = new Blackboard(bot);
 	bot->setNavigator(std::make_shared<Navigator>(*blackboard));
 	bot->setBlackboard(blackboard);
 	World* world = buildWorld();
@@ -141,10 +141,6 @@ void BotBuilder::onFrame() {
 			}
 		}
 	}
-}
-
-BasePlayer* BotBuilder::buildEntity(edict_t* ent) const {
-	return new BasePlayer(ent);
 }
 
 void BotBuilder::addAllBots(const CCommand &command) {

@@ -6,10 +6,12 @@
 class HL2MPPlayer;
 class HL2DMWorld;
 
-class DODBotBuilder: public BotBuilder {
+class DODBotBuilder: public BotBuilder, public GameEventListener {
 public:
 	DODBotBuilder(CommandHandler& commandHandler,
 			const ArsenalBuilder& arsenalBuilder);
+
+	void FireGameEvent(IGameEvent* event);
 
 private:
 	DODObjectives objectives;

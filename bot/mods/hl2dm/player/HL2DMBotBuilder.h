@@ -19,7 +19,7 @@ private:
 
 	void updatePlanner(GoalManager &planner, Blackboard &blackboard) const;
 
-	BasePlayer* buildEntity(edict_t *ent) const;
+	void modHandleCommand(const CCommand &command, Bot* bot) const;
 
 	World* buildWorld() const;
 };

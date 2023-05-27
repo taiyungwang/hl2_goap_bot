@@ -21,8 +21,7 @@ HidingSpotSelector::HidingSpotSelector(CommandHandler &commandHandler) : Receive
 	buildFromNavMesh();
 	KeyValues *file = new KeyValues(ROOT_KEY);
 	navFileTimeStamp = filesystem->GetFileTime(getNavFileName().c_str(), "MOD");
-	extern IGameEventManager2* gameeventmanager;
-	gameeventmanager->AddListener(this, "player_death", true);
+	listenForGameEvent({"player_death"});
 	if (filesystem->IsDirectory((std::string(FILE_PREFIX)).c_str(), "MOD")
 			&& file->LoadFromFile(filesystem, getHidingSpotFileName().c_str(), "MOD")
 			&& file->GetInt(TIME_STAMP_KEY) == navFileTimeStamp) {

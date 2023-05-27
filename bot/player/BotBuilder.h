@@ -39,8 +39,6 @@ protected:
 	virtual void updatePlanner(GoalManager& planner,
 			Blackboard& blackboard) const = 0;
 
-	virtual BasePlayer* buildEntity(edict_t* ent) const;
-
 	virtual World* buildWorld() const = 0;
 
 	virtual void modOnFrame() {}

@@ -14,7 +14,6 @@
 std::unordered_map<int, Player*> Player::players;
 
 extern IVEngineServer* engine;
-extern IGameEventManager2* gameeventmanager;
 
 Player* Player::getPlayer(edict_t* ent) {
 	return getPlayer(engine->IndexOfEdict(ent));
@@ -35,8 +34,7 @@ Player::TeamCount Player::getTeamCount() {
 Player::Player(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal) :
 		ent(ent), arsenal(arsenal) {
 	extern IPlayerInfoManager *playerinfomanager;
-	gameeventmanager->AddListener(this, "player_spawn", true);
-	gameeventmanager->AddListener(this, "player_death", true);
+	listenForGameEvent({"player_spawn", "player_death"});
 	info = playerinfomanager->GetPlayerInfo(ent);
 	players[engine->IndexOfEdict(ent)] = this;
 }

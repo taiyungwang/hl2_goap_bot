@@ -1,6 +1,6 @@
 #pragma once
 
-#include <igameevents.h>
+#include <player/GameEventListener.h>
 #include <utllinkedlist.h>
 #include <unordered_map>
 #include <vector>
@@ -9,11 +9,13 @@
 class DODObjective;
 struct edict_t;
 
-class DODObjectives: public IGameEventListener2 {
+class DODObjectives: public GameEventListener {
 public:
 	DODObjectives();
 
-	~DODObjectives();
+	~DODObjectives() {
+		endRound();
+	}
 
 	/**
 	 * @return True if the current map is a detonation type map.

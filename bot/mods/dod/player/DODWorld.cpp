@@ -10,20 +10,11 @@
 #include <util/EntityUtils.h>
 #include <util/BaseGrenade.h>
 
-extern IGameEventManager2* gameeventmanager;
+bool DODWorld::roundStarted = false;
 
 DODWorld::DODWorld() {
-	gameeventmanager->AddListener(this, "dod_bomb_planted", true);
-	gameeventmanager->AddListener(this, "dod_point_captured", true);
-	gameeventmanager->AddListener(this, "dod_bomb_exploded", true);
-	gameeventmanager->AddListener(this, "dod_bomb_defused", true);
-	gameeventmanager->AddListener(this, "dod_round_active", true);
-	gameeventmanager->AddListener(this, "dod_round_win", true);
-	gameeventmanager->AddListener(this, "dod_game_over", true);
-}
-
-DODWorld::~DODWorld() {
-	gameeventmanager->RemoveListener(this);
+	listenForGameEvent( { "dod_bomb_planted", "dod_point_captured",
+			"dod_bomb_exploded", "dod_bomb_defused" });
 }
 
 void DODWorld::addStates() {
@@ -33,26 +24,7 @@ void DODWorld::addStates() {
 	states[WorldProp::BOMB_DEFUSED] = false;
 	states[WorldProp::HAS_LIVE_GRENADE] = false;
 	states[WorldProp::HEARD_NEED_AMMO] = true;
-}
-
-void DODWorld::FireGameEvent(IGameEvent* event) {
-	std::string name(event->GetName());
-	if (name == "dod_point_captured" || name == "dod_bomb_planted"
-			|| name == "dod_bomb_exploded" || name == "dod_bomb_defused") {
-		reset = true;
-		return;
-	}
-	bool roundStarted = states[WorldProp::ROUND_STARTED];
-	if (name == "dod_round_active") {
-		if (!roundStarted) {
-			reset = true;
-		}
-		roundStarted = true;
-	} else if (name == "dod_round_win" || name == "dod_game_over") {
-		roundStarted = false;
-		reset = true;
-	}
-	updateState(WorldProp::ROUND_STARTED, roundStarted);
+	states[WorldProp::ROUND_STARTED] = roundStarted;
 }
 
 bool DODWorld::update(Blackboard& blackboard) {
@@ -67,6 +39,10 @@ bool DODWorld::update(Blackboard& blackboard) {
 			weapIdx = arsenal.getCurrWeaponIdx();
 	updateState(WorldProp::HAS_BOMB, baseBombId != 0);
 	updateState(WorldProp::HAS_LIVE_GRENADE, false);
+	if (states[WorldProp::ROUND_STARTED] != roundStarted) {
+		updateState(WorldProp::ROUND_STARTED, roundStarted);
+		reset = true;
+	}
 	for (auto name: DODLiveGrenadeBuilder::NAMES) {
 		if (arsenal.getWeaponIdByName(name.c_str()) > 0) {
 			updateState(WorldProp::HAS_LIVE_GRENADE, true);

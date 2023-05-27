@@ -23,7 +23,6 @@ static const char *CLASSES[2][CLASS_COUNT] { { "cls_garand", "cls_tommy",
 		"cls_bar", "cls_spring", "cls_30cal", "cls_bazooka" }, { "cls_mk98",
 		"cls_mp40", "cls_mp44", "cls_k98s", "cls_mg42", "cls_pschreck" } };
 
-
 DODBotBuilder::DODBotBuilder(CommandHandler &commandHandler,
 		const ArsenalBuilder &arsenalBuilder) : BotBuilder(commandHandler, arsenalBuilder) {
 	Bot::setClasses(&CLASSES);
@@ -37,6 +36,11 @@ DODBotBuilder::DODBotBuilder(CommandHandler &commandHandler,
 	messages[DODVoiceMessage::MG_AHEAD] = "voice_mgahead";
 	messages[DODVoiceMessage::SNIPER] = "voice_sniper";
 	messages[DODVoiceMessage::ROCKET_AHEAD] = "voice_bazookaspotted";
+	listenForGameEvent({"dod_round_active", "dod_round_win", "dod_game_over"});
+}
+
+void DODBotBuilder::FireGameEvent(IGameEvent* event) {
+	DODWorld::setRoundStarted(std::string(event->GetName()) == "dod_round_active");
 }
 
 void DODBotBuilder::updatePlanner(GoalManager &planner,

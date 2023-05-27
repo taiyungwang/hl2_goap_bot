@@ -26,16 +26,14 @@ static ConVar mybot_mimic("mybot_mimic", "0");
 static ConVar mybotDangerAmt("mybot_danger_amount", "3.0f", 0,
 		"Amount of 'danger' to add to an area when a bot is killed.");
 
-extern IGameEventManager2* gameeventmanager;
 extern IVEngineServer *engine;
-
 
 Bot::Bot(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal,
 	CommandHandler& commandHandler,
 	const std::unordered_map<unsigned int, std::string> &messages) :
 	Player(ent, arsenal), Receiver(commandHandler),
 	messages(messages) {
-	gameeventmanager->AddListener(this, "player_hurt", true);
+	listenForGameEvent({"player_hurt"});
 }
 
 Bot::~Bot() {
@@ -45,7 +43,6 @@ Bot::~Bot() {
 	if (playerClassVar != nullptr) {
 		delete playerClassVar;
 	}
-	gameeventmanager->RemoveListener(this);
 }
 
 void Bot::think() {
@@ -62,7 +59,7 @@ void Bot::think() {
 			wantToListen = true;
 			cmd.Reset();
 			if ((world->think(*blackboard) || resetPlanner)
-					&& !blackboard->isOnLadder()) {
+					&& !isOnLadder()) {
 				resetPlanner = false;
 				planner->resetPlanning(false);
 			}
@@ -199,6 +196,10 @@ void Bot::traceMove(CGameTrace &traceResult, const Vector &start,
 	extern ConVar mybot_debug;
 	UTIL_TraceHull(heading.Normalized() * HalfHumanWidth + start,
 			goal, mins, maxs, MASK_PLAYERSOLID, filter, &traceResult, mybot_debug.GetBool());
+}
+
+bool Bot::isOnLadder() const {
+	return playerClassVar->isOnLadder();
 }
 
 bool Bot::canShoot(trace_t& result, const Vector &vecAbsEnd) const {

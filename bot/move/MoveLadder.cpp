@@ -19,7 +19,7 @@ MoveState* MoveLadder::move(const Vector& currPos) {
 	auto &bb = ctx.getBlackboard();
 	auto self = bb.getSelf();
 	float prevDist = remainingDist;
-	if (bb.isOnLadder()) {
+	if (self->isOnLadder()) {
 		remainingDist = std::abs(currPos.z - ctx.getLadderEnd().z);
 		if (prevDist < 0.0f) {
 			prevDist = remainingDist;
@@ -35,7 +35,7 @@ MoveState* MoveLadder::move(const Vector& currPos) {
 	}
 	self->setViewTarget(lookAt);
 	Buttons& buttons = bb.getButtons();
-	if (bb.isOnLadder()) {
+	if (self->isOnLadder()) {
 		if (!moved) {
 			if (startedClimbing && (atEnd || remainingDist < TARGET_OFFSET)) {
 				buttons.tap(IN_USE);

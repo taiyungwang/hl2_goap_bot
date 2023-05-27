@@ -1,7 +1,7 @@
 #pragma once
 
+#include "GameEventListener.h"
 #include "CommandHandler.h"
-#include <igameevents.h>
 #include <vector.h>
 #include <map>
 #include <string>
@@ -12,7 +12,7 @@ class CNavArea;
 /**
 * Chooses a Hiding spot using Thompson sampling.
 **/
-class HidingSpotSelector: public CommandHandler::Receiver, public IGameEventListener2 {
+class HidingSpotSelector: public CommandHandler::Receiver, public GameEventListener {
 public:
 	HidingSpotSelector(CommandHandler& commandHandler);
 

@@ -4,27 +4,24 @@
 #include <eiface.h>
 #include <iplayerinfo.h>
 
-class BasePlayer;
 class Bot;
-class Navigator;
 
 class Blackboard {
 public:
 
 	static float clamp180(float angle);
 
-	Blackboard(Bot* player,
-			BasePlayer* entInstance);
+	Blackboard(Bot *self) :
+			self(self) {
+	}
 
-	void reset();
-
-	~Blackboard();
+	void reset() {
+		target = blocker = nullptr;
+	}
 
 	Buttons& getButtons() {
 		return buttons;
 	}
-
-	bool isOnLadder();
 
 	Bot* getSelf() {
 		return self;
@@ -59,6 +56,4 @@ private:
 		* target = nullptr;
 
 	Buttons buttons;
-
-	BasePlayer* entInstance;
 };

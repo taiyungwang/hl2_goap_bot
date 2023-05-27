@@ -17,7 +17,8 @@ ReloadWeaponAction::ReloadWeaponAction(Blackboard& blackboard) :
 }
 
 bool ReloadWeaponAction::precondCheck() {
-	return blackboard.getSelf()->getVision().getVisibleEnemies().empty() && !blackboard.isOnLadder();
+	return blackboard.getSelf()->getVision().getVisibleEnemies().empty()
+			&& !blackboard.getSelf()->isOnLadder();
 }
 
 bool ReloadWeaponAction::execute() {

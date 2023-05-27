@@ -7,7 +7,7 @@
 #ifndef UTILS_MYBOT_PLAYER_H_
 #define UTILS_MYBOT_PLAYER_H_
 
-#include <igameevents.h>
+#include "GameEventListener.h"
 #include <unordered_map>
 #include <memory>
 
@@ -18,7 +18,7 @@ class CNavArea;
 class QAngle;
 struct edict_t;
 
-class Player: public IGameEventListener2 {
+class Player: public GameEventListener {
 public:
 	using TeamCount = std::tuple<int, int>;
 
