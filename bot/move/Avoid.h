@@ -11,7 +11,7 @@ struct edict_t;
 class Avoid: public MoveState {
 public:
 	Avoid(MoveStateContext& ctx, MoveState* nextState) :
-			MoveState(ctx), nextState(nextState), blocker(nullptr) {
+			MoveState(ctx), blocker(nullptr), nextState(nextState){
 	}
 	/**
 	 * Moves toward the given goal, but attempt to avoid any local obstacles.
