@@ -330,7 +330,7 @@ bool Navigator::setLadderStart() {
 	return false;
 }
 
-void Navigator::lookAtFurthestVisibleArea() {
+void Navigator::lookAtFurthestVisibleArea() const {
 	Vector look = finalGoal;
 	look.z += HumanEyeHeight;
 	if (path.size() == 1) {
@@ -349,14 +349,14 @@ void Navigator::lookAtFurthestVisibleArea() {
 		}
 		look = furthest->GetCenter();
 		look.z += HumanEyeHeight;
-		self->setViewTarget(look);
 		if (!self->canSee(look)) {
 			break;
 		}
+		self->setViewTarget(look);
 	}
 }
 
-
+// TODO: change this to take Path entry and last area id so it is not dependent on the path
 bool Navigator::getPortalToTopArea(Vector& portal) const {
 	int dirToTop = std::get<1>(path.back());
 	if (dirToTop >= NUM_DIRECTIONS || lastAreaId < 0) {

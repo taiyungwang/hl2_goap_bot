@@ -88,5 +88,5 @@ private:
 	 */
 	bool setLadderStart();
 
-	void lookAtFurthestVisibleArea();
+	void lookAtFurthestVisibleArea() const;
 };

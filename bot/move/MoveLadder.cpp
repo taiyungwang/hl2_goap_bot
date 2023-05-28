@@ -37,12 +37,14 @@ MoveState* MoveLadder::move(const Vector& currPos) {
 	Buttons& buttons = bb.getButtons();
 	if (self->isOnLadder()) {
 		if (!moved) {
-			if (startedClimbing && (atEnd || remainingDist < TARGET_OFFSET)) {
-				buttons.tap(IN_USE);
-			}
-			if (stuckFrames++ > 40) {
-				ctx.setLadderDir(CNavLadder::NUM_LADDER_DIRECTIONS);
-				return new Stopped(ctx);
+			if (startedClimbing) {
+				if (atEnd || remainingDist < TARGET_OFFSET) {
+					buttons.tap(IN_USE);
+				}
+				if (stuckFrames++ > 40) {
+					ctx.setLadderDir(CNavLadder::NUM_LADDER_DIRECTIONS);
+					return new Stopped(ctx);
+				}
 			}
 		} else {
 			stuckFrames = 0;
@@ -57,7 +59,6 @@ MoveState* MoveLadder::move(const Vector& currPos) {
 			return new Stopped(ctx);
 		}
 		startedClimbing = false;
-		self->lookStraight();
 		buttons.tap(IN_USE);
 		moveStraight(ctx.getLadderEnd());
 	}
