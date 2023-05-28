@@ -87,10 +87,5 @@ void DODObjectives::addCapTarget(const Vector &pos,
 }
 
 void DODObjectives::FireGameEvent(IGameEvent *event) {
-	std::string name(event->GetName());
-	if (name == "dod_round_active") {
-		startRound();
-	} else {
-		endRound();
-	}
+	std::string(event->GetName()) == "dod_round_active" ? startRound() : endRound();
 }

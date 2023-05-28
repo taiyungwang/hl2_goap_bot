@@ -72,7 +72,7 @@ public:
 	}
 
 	const char *GetVersion() {
-		return "1.3.0";
+		return "1.3.2";
 	}
 
 	const char *GetDate() {
