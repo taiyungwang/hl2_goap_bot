@@ -9,11 +9,14 @@
 #include <string>
 
 DODObjectives::DODObjectives() {
-	endRound();
-	listenForGameEvent({"dod_round_active", "dod_round_win", "dod_game_over"});
+	listenForGameEvent({"dod_round_active"});
 }
 
-void DODObjectives::startRound() {
+void DODObjectives::FireGameEvent(IGameEvent *event) {
+	detonation = false;
+	ctrlPointsMap.clear();
+	ctrlPts.RemoveAll();
+	objectives.clear();
 	CUtlLinkedList<edict_t*> bombsOnMap, capArea, objRsrc;
 	findEntWithMatchingName("dod_objective_resource", objRsrc);
 	findEntWithMatchingName("dod_control_point", ctrlPts);
@@ -55,13 +58,6 @@ void DODObjectives::startRound() {
 	}
 }
 
-void DODObjectives::endRound() {
-	detonation = false;
-	ctrlPointsMap.clear();
-	ctrlPts.RemoveAll();
-	objectives.clear();
-}
-
 const DODObjective* DODObjectives::getObjective(edict_t *target) const {
 	auto key = ctrlPointsMap.find(target);
 	return ctrlPointsMap.end() != key ? objectives[key->second].get() : nullptr;
@@ -84,8 +80,4 @@ void DODObjectives::addCapTarget(const Vector &pos,
 			}
 		}
 	}
-}
-
-void DODObjectives::FireGameEvent(IGameEvent *event) {
-	std::string(event->GetName()) == "dod_round_active" ? startRound() : endRound();
 }

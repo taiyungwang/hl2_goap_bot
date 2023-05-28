@@ -28,7 +28,7 @@ bool DODObjective::operator()(CNavArea *area, CNavArea *priorArea,
 bool DODObjective::hasBombTargetInState(BombState state) const {
 	return std::any_of(targets.begin(), targets.end(),
 			[state](edict_t *target) {
-				return BaseEntity(target).get<int>("m_iState", 0)
+				return *BaseEntity(target).getPtr<int>("m_iState")
 						== static_cast<int>(state);
 			});
 }

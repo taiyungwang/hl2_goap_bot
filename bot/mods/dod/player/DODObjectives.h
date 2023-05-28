@@ -13,10 +13,6 @@ class DODObjectives: public GameEventListener {
 public:
 	DODObjectives();
 
-	~DODObjectives() {
-		endRound();
-	}
-
 	/**
 	 * @return True if the current map is a detonation type map.
 	 */
@@ -33,7 +29,7 @@ public:
 	void FireGameEvent(IGameEvent* event);
 
 private:
-	bool detonation;
+	bool detonation = false;
 
 	std::unordered_map<edict_t*, int> ctrlPointsMap;
 
@@ -43,14 +39,4 @@ private:
 
 	void addCapTarget(const Vector &pos,
 			const CUtlLinkedList<edict_t*> &targets);
-
-	/**
-	 * Callback for when a round starts
-	 */
-	void startRound();
-
-	/**
-	 * Callback for when a round ends.
-	 */
-	void endRound();
 };
