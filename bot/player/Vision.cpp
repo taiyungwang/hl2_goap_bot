@@ -51,7 +51,7 @@ void Vision::updateVisiblity(Bot *self) {
 		Vector targetDir(targetEyes - selfEyes);
 		if (targetDir.Length() <= 1.0f
 				|| !engine->CheckOriginInPVS(targetEyes, pvs, pvsSize)
-				|| facing.Dot(targetDir) <= 0.0f) {
+				|| facing.Dot(targetDir.Normalized()) <= 0.0f) {
 			continue;
 		}
 		enemies.emplace_back();
@@ -121,7 +121,7 @@ void Vision::updateVisiblity(Bot *self) {
 		}
 		Vector targetPos = ent->GetCollideable()->GetCollisionOrigin();
 		if (ent->GetCollideable()->GetCollisionOrigin().DistTo(selfEyes) > 300.0f
-				|| facing.Dot(targetPos - selfEyes) <= 0.0f
+				|| facing.Dot((targetPos - selfEyes).Normalized()) <= 0.0f
 				|| !self->canSee(ent)) {
 			continue;
 		}
