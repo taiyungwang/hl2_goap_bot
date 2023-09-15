@@ -19,13 +19,9 @@ GetClosestNeededItemAction::GetClosestNeededItemAction(Blackboard &blackboard) :
 }
 
 bool GetClosestNeededItemAction::init() {
-	if (resource->isCharger()) {
-		auto collideable = resource->getEnt()->GetCollideable();
+	auto collideable = resource->getEnt()->GetCollideable();
 		targetRadius = (collideable->OBBMaxs().AsVector2D()
 				.DistTo(collideable->OBBMins().AsVector2D())) * 0.5f;
-	} else {
-		targetRadius = 0.0f;
-	}
 	animationCycle = *BaseEntity(item).getPtr<float>("m_flCycle");
 	return GoToEntityAction::init();
 }
@@ -35,7 +31,7 @@ bool GetClosestNeededItemAction::execute() {
 		return false;
 	}
 	auto self = blackboard.getSelf();
-	if (!GoToAction::goalComplete() || !resource->isCharger() || !resource->isAvailable()
+	if (!GoToAction::goalComplete() || !resource->isCharger()
 			|| (self->getHealth() > 99 && self->getArmor() > 99)) {
 		return true;
 	}
@@ -43,6 +39,11 @@ bool GetClosestNeededItemAction::execute() {
 	useItem(newCycle != animationCycle);
 	animationCycle = newCycle;
 	return false;
+}
+
+bool GetClosestNeededItemAction::goalComplete() {
+	return GoToAction::goalComplete() || (!resource->isAvailable()
+			&& blackboard.getSelf()->getCurrentPosition().DistTo(targetLoc) < targetRadius + HalfHumanWidth);
 }
 
 void GetClosestNeededItemAction::selectItem() {

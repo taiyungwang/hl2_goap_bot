@@ -23,6 +23,8 @@ public:
 
 	bool execute() override;
 
+	bool goalComplete() override;
+
 private:
 	static const ItemMap *itemMap;
 
