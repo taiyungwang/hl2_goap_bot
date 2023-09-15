@@ -36,6 +36,8 @@ protected:
 
 	CommandHandler& commandHandler;
 
+	bool teamPlay = false;
+
 	virtual void updatePlanner(GoalManager& planner,
 			Blackboard& blackboard) const = 0;
 

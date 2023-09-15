@@ -37,6 +37,7 @@ DODBotBuilder::DODBotBuilder(CommandHandler &commandHandler,
 	messages[DODVoiceMessage::SNIPER] = "voice_sniper";
 	messages[DODVoiceMessage::ROCKET_AHEAD] = "voice_bazookaspotted";
 	listenForGameEvent({"dod_round_active", "dod_round_win", "dod_game_over"});
+	teamPlay = true;
 }
 
 void DODBotBuilder::FireGameEvent(IGameEvent* event) {
