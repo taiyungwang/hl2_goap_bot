@@ -1,7 +1,6 @@
 #include "NavMeshPathBuilder.h"
 
 #include <nav_mesh/nav_area.h>
-#include <initializer_list>
 
 void NavMeshPathBuilder::build(Path& path, CNavArea *start) {
 	if (start == nullptr) {

@@ -71,7 +71,7 @@ private:
 class ItemAmmoBuilder: public ItemBuilder {
 public:
 	ItemAmmoBuilder(const char *weapon, int maxAmmo, bool secondary = false) :
-			WEAPON_NAME(weapon), MAX_AMMO(maxAmmo), SECONDARY(secondary) {
+		SECONDARY(secondary), WEAPON_NAME(weapon), MAX_AMMO(maxAmmo) {
 	}
 
 	bool need(const Bot &bot) const override {

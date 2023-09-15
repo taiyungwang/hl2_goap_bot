@@ -128,6 +128,5 @@ private:
 	Vector goal, ladderEnd;
 	CNavLadder::LadderDirectionType ladderDir;
 	MoveState* state = nullptr;
-	edict_t* blocker = nullptr;
 	trace_t traceResult;
 };

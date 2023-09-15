@@ -73,7 +73,6 @@ edict_t* GoToAction::randomChoice(CUtlLinkedList<edict_t*>& active) {
 		choices.Tail().m_value = 1.0f / active[i]->GetCollideable()->GetCollisionOrigin().DistTo(blackboard.getSelf()->getCurrentPosition());
 		totalDist += choices.Tail().m_value;
 	}
-	float totalProb = 0.0f;
 	FOR_EACH_VEC(choices, i) {
 		choices[i].m_value /= totalDist;
 		if (i > 0) {

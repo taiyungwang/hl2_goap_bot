@@ -52,8 +52,7 @@ void GoToEntityAction::useItem(bool isActive) {
 		return;
 	}
 	blackboard.getSelf()->setAimOffset(5.0f);
-	Vector itemPos = UTIL_FindGround(
-				item->GetCollideable()->GetCollisionOrigin());
+	Vector itemPos(targetLoc);
 	itemPos.z += HumanEyeHeight - 10.0f;
 	blackboard.getSelf()->setViewTarget(itemPos);
 }

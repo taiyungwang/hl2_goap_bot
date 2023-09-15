@@ -27,10 +27,10 @@ GoalManager::~GoalManager() {
 }
 
 void GoalManager::resetPlanning(bool force) {
-	if (!force && !plan.empty() && !actions[plan.front()]->isInterruptable()) {
-		return;
-	}
 	if (!plan.empty()) {
+		if (!force && !actions[plan.front()]->isInterruptable()) {
+			return;
+		}
 		actions[plan.front()]->abort();
 	}
 	reset();
@@ -59,6 +59,7 @@ void GoalManager::execute() {
 }
 
 bool GoalManager::getNextGoal() {
+	bool noGoalsFound = currentGoal == 0;
 	for (; currentGoal < goals.size(); currentGoal++) {
 		auto& goal = goals[currentGoal];
 		auto& effect = actions[goal.action]->getEffects();
@@ -67,6 +68,9 @@ bool GoalManager::getNextGoal() {
 			&& (chanceToExec >= 1.0f || chanceToExec > RandomFloat(0, 1.0f))) {
 			return true;
 		}
+	}
+	if (noGoalsFound) {
+		Warning("Unable to find a goal.\n");
 	}
 	reset();
 	return false;
