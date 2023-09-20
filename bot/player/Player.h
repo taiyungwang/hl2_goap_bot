@@ -35,6 +35,8 @@ public:
 				players[idx] : nullptr;
 	}
 
+	static Player *getPlayerByUserId(int userId);
+
 	Player(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal);
 
 	virtual ~Player();

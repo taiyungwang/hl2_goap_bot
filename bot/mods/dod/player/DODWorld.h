@@ -11,14 +11,14 @@ public:
 
 	DODWorld();
 
-	void FireGameEvent(IGameEvent* event) {
-		reset = true;
-	}
+	void FireGameEvent(IGameEvent* event);
 
 private:
 	static bool roundStarted;
 
 	bool reset = false;
+
+	int teamWithDeadDefuserOrPlanter = 0;
 
 	void addStates();
 

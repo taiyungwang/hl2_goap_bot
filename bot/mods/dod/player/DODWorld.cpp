@@ -14,7 +14,17 @@ bool DODWorld::roundStarted = false;
 
 DODWorld::DODWorld() {
 	listenForGameEvent( { "dod_bomb_planted", "dod_point_captured",
-			"dod_bomb_exploded", "dod_bomb_defused" });
+			"dod_bomb_exploded", "dod_bomb_defused", "dod_kill_planter",
+			"dod_kill_defuser" });
+}
+
+void DODWorld::FireGameEvent(IGameEvent* event) {
+	std::string name(event->GetName());
+	if (name != "dod_kill_planter" && name != "dod_kill_defuser") {
+		reset = true;
+	} else {
+		teamWithDeadDefuserOrPlanter = Player::getPlayerByUserId(event->GetInt("victimid"))->getTeam();
+	}
 }
 
 void DODWorld::addStates() {
@@ -28,12 +38,18 @@ void DODWorld::addStates() {
 }
 
 bool DODWorld::update(Blackboard& blackboard) {
+	Bot *self = blackboard.getSelf();
+	int team = self->getTeam();
+	if (teamWithDeadDefuserOrPlanter > 0) {
+		if (team == teamWithDeadDefuserOrPlanter) {
+			reset = true;
+		}
+		teamWithDeadDefuserOrPlanter = 0;
+	}
 	if (reset) {
 		reset = false;
 		return true;
 	}
-	Bot *self = blackboard.getSelf();
-	int team = self->getTeam();
 	auto arsenal = blackboard.getSelf()->getArsenal();
 	int baseBombId = arsenal.getWeaponIdByName("weapon_basebomb"),
 			weapIdx = arsenal.getCurrWeaponIdx();

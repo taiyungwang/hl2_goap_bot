@@ -31,6 +31,15 @@ Player::TeamCount Player::getTeamCount() {
 	return std::make_tuple(count[0], count[1]);
 }
 
+Player *Player::getPlayerByUserId(int userId) {
+	for (auto pair: players) {
+		if (pair.second->getUserId() == userId) {
+			return pair.second;
+		}
+	}
+	return nullptr;
+}
+
 Player::Player(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal) :
 		ent(ent), arsenal(arsenal) {
 	extern IPlayerInfoManager *playerinfomanager;
@@ -40,7 +49,6 @@ Player::Player(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal) :
 }
 
 Player::~Player() {
-	gameeventmanager->RemoveListener(this);
 	// Cant' rely on server index for server shutting down.
 	for(auto player: players) {
 		if (player.second == this) {

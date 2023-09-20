@@ -2,7 +2,6 @@
 
 #include "Planner.h"
 #include "action/Action.h"
-#include <player/Player.h>
 #include <vstdlib/random.h>
 #include <algorithm>
 
