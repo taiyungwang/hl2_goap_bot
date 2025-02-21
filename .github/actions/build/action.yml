@@ -9,7 +9,7 @@ runs:
   steps:
     - name: Install Dependent packages
       run: |
-        if [ $RUNNER_OS = Windows ] then;
+        if [ $RUNNER_OS = Windows ]; then
           choco install wget
           wget https://github.com/CxxTest/cxxtest/releases/download/4.4/cxxtest-4.4.tar.gz && tar xvzf cxxtest-4.4.tar.gz -C /c/;
         fi        
