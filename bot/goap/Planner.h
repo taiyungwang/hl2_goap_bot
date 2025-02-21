@@ -52,7 +52,7 @@ private:
 
 	const WorldState& worldState;
 
-	struct GoalStateHash: public std::unary_function<GoalState, std::size_t> {
+	struct GoalStateHash {
 		std::size_t operator()(const GoalState &k) const {
 			return static_cast<std::size_t>(std::get<0>(k))
 					^ static_cast<std::size_t>(std::get<1>(k));
