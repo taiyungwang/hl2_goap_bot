@@ -29,6 +29,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
 	add_definitions(-DGNUC -DNO_HOOK_MALLOC -DNO_MALLOC_OVERRIDE)
 	add_definitions(-DSWDS -D_finite=finite -Dstricmp=strcasecmp  -Dstrnicmp=strncasecmp -D_vsnprintf=vsnprintf -D_alloca=alloca)
 else () # MSVC
+	add_defintions(-DCOMPILER_MSVC)
 	add_compile_options(/MTd /MP)
 	add_link_options(/NODEFAULTLIB:libcmt)
 endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
