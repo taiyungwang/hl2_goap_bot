@@ -29,7 +29,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
 	add_definitions(-DGNUC -DNO_HOOK_MALLOC -DNO_MALLOC_OVERRIDE)
 	add_definitions(-DSWDS -D_finite=finite -Dstricmp=strcasecmp  -Dstrnicmp=strncasecmp -D_vsnprintf=vsnprintf -D_alloca=alloca)
 else () # MSVC
-	add_definitions(-DCOMPILER_MSVC)
+	add_definitions(-DCOMPILER_MSVC64)
 	add_compile_options(/MTd /MP)
 	add_link_options(/NODEFAULTLIB:libcmt)
 endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -55,7 +55,7 @@ else ()
 	set (HL2SDK_LIBS ${HL2SDK_LIBS}/x64)
 	set (CXX_DIR "${DRIVE}:/cxxtest-4.4")
 	set (CXX_TEST_GEN "${CXX_DIR}/bin/cxxtestgen")		
-	add_definitions(-DPLATFORM_WINDOWS_PC -D_WIN32)
+	add_definitions(-DPLATFORM_WINDOWS_PC)
 endif (UNIX)
 
 include_directories(${PROJECT_SOURCE_DIR} ${VSP_NAVMESH} ${HL2SDK_DIR}/common utils/common ${HL2SDK_DIR}/public ${HL2SDK_DIR}/public/mathlib ${HL2SDK_DIR}/public/tier0 ${HL2SDK_DIR}/public/tier1 ${HL2SDK_DIR}/public/game/server ${HL2SDK_DIR}/public/engine ${HL2SDK_DIR}/game/shared ${HL2SDK_DIR}/game/server ${CMAKE_CURRENT_SOURCE_DIR}/bot)
