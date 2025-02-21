@@ -25,7 +25,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
 	else()
 		add_definitions( -D__clang__ )
 		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dangling-else -Wno-c++11-narrowing -Wno-inconsistent-missing-override")
-	endif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	add_definitions(-DGNUC -DNO_HOOK_MALLOC -DNO_MALLOC_OVERRIDE)
 	add_definitions(-DSWDS -D_finite=finite -Dstricmp=strcasecmp  -Dstrnicmp=strncasecmp -D_vsnprintf=vsnprintf -D_alloca=alloca)
 else () # MSVC
