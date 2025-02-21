@@ -55,6 +55,7 @@ else ()
 	set (HL2SDK_LIBS ${HL2SDK_LIBS}/x64)
 	set (CXX_DIR "${DRIVE}:/cxxtest-4.4")
 	set (CXX_TEST_GEN "${CXX_DIR}/bin/cxxtestgen")		
+	add_definitions(-DPLATFORM_WINDOWS_PC)
 endif (${UNIX})
 
 include_directories(${PROJECT_SOURCE_DIR} ${VSP_NAVMESH} ${HL2SDK_DIR}/common utils/common ${HL2SDK_DIR}/public ${HL2SDK_DIR}/public/mathlib ${HL2SDK_DIR}/public/tier0 ${HL2SDK_DIR}/public/tier1 ${HL2SDK_DIR}/public/game/server ${HL2SDK_DIR}/public/engine ${HL2SDK_DIR}/game/shared ${HL2SDK_DIR}/game/server ${CMAKE_CURRENT_SOURCE_DIR}/bot)
