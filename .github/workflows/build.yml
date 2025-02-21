@@ -17,9 +17,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022]
+        os: [ubuntu-latest, windows-latest]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         path: hl2_goap_bot
     - name: Checkout and Build project 
@@ -30,6 +30,6 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build/hl2_goap_bot
       # TODO: only run tests on linux since windows requires tier0.dll, which is only available from steam.
-      if: matrix.os == 'ubuntu-22.04'      
+      if: matrix.os == 'ubuntu-latest'      
       run: ctest -C Release
       
