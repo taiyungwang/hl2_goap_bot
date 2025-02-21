@@ -5,6 +5,7 @@
 
 class CCommand;
 class CUserCmd;
+class CBasePlayer;
 class IMoveHelper;
 class PluginAdaptor;
 

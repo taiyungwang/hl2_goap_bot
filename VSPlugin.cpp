@@ -6,6 +6,8 @@
 
 #include "bot/PluginAdaptor.h"
 #include "player/Bot.h"
+#include <shareddefs.h>
+#include <usercmd.h>
 #include <IEngineTrace.h>
 #include <eiface.h>
 #include <ivdebugoverlay.h>
@@ -15,7 +17,6 @@
 #include <icvar.h>
 #include <vphysics_interface.h>
 #include <datacache/imdlcache.h>
-#include <usercmd.h>
 #include <string>
 #ifndef _WIN32
 #include <sys/mman.h>

@@ -9,6 +9,7 @@ class BotBuilder;
 class ArsenalBuilder;
 class VoiceCommand;
 class HidingSpotSelector;
+class CBasePlayer;
 struct edict_t;
 
 /**

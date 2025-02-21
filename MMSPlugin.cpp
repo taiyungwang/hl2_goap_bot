@@ -1,6 +1,8 @@
 #include "MMSPlugin.h"
 #include "bot/PluginAdaptor.h"
 #include "player/Bot.h"
+#include <shareddefs.h>
+#include <usercmd.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
 #include <filesystem.h>
@@ -9,7 +11,6 @@
 #include <igameevents.h>
 #include <datacache/imdlcache.h>
 #include <vphysics_interface.h>
-#include <usercmd.h>
 
 IBotManager *botmanager = nullptr;
 IVDebugOverlay *debugoverlay = nullptr;
