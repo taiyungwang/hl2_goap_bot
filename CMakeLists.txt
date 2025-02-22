@@ -3,8 +3,8 @@ cmake_minimum_required (VERSION 3.28.3)
 project (PluginBot)
 
 add_definitions(-DPLATFORM_64BITS -DX64BITS -DRAD_TELEMETRY_DISABLED)
-
-set(DRIVE c CACHE STRING "User specified drive for Windows")
+find_package (Python COMPONENTS Interpreter Development)
+set(DRIVE C CACHE STRING "User specified drive for Windows")
 set (CXX_DIR "" CACHE STRING "CXX Path")
 set( steam_root "${DRIVE}:/Program Files (x86)/steam" )
 set(HL2SDK_DIR "${PROJECT_SOURCE_DIR}/../hl2sdk")
@@ -33,7 +33,7 @@ else () # MSVC
 	add_compile_options($<$<CONFIG:>:/MT> #---------|
 		$<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
 		$<$<CONFIG:Release>:/MT> #--|
-		-arch:SSE -GS- -TP -W4 -fp:fast -GF -Zc:forScope -RTC1 -GR -Gd -Oy- -Fa -Fo -Fp -MP -Od -TP)
+		-GS- -TP -W4 -fp:fast -GF -Zc:forScope -RTC1 -GR -Gd -Oy- -Fa -Fo -Fp -MP -Od -TP)
 	add_link_options(/NODEFAULTLIB:libcmt)
 endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${ARCH_FLAGS}" )
@@ -48,13 +48,6 @@ if (UNIX)
 	set( steam_root "$ENV{HOME}/.steam/steam" )
 	set( UNDEF "-Usprintf -Ustrncpy -UPROTECTED_THINGS_ENABLE" )
 	add_link_options(-static-libgcc -static-libstdc++)
-	set (TIER1_SRC tier1.cpp convar.cpp KeyValues.cpp utlstring.cpp strtools.cpp memstack.cpp bitbuf.cpp
-	 strtools_unicode.cpp qsort_s.cpp utlbuffer.cpp checksum_crc.cpp characterset.cpp generichash.cpp
-	 interface.cpp)
-	list(TRANSFORM TIER1_SRC PREPEND ${HL2SDK_DIR}/tier1/)
-	add_library(tier1 ${TIER1_SRC})
-	file(GLOB MATHLIB_SRC ${HL2SDK_DIR}/mathlib/*.cpp)
-	add_library(mathlib ${MATHLIB_SRC})
 else ()
 	set (HL2SDK_LIBS ${HL2SDK_LIBS}/x64)
 	set (CXX_DIR "${DRIVE}:/cxxtest-4.4")
@@ -62,10 +55,18 @@ else ()
 	add_definitions(-DPLATFORM_WINDOWS_PC)
 endif (UNIX)
 
+file(GLOB MATHLIB_SRC ${HL2SDK_DIR}/mathlib/*.cpp)
+add_library(mathlib ${MATHLIB_SRC})
+set (TIER1_SRC tier1.cpp convar.cpp KeyValues.cpp utlstring.cpp strtools.cpp memstack.cpp bitbuf.cpp
+	strtools_unicode.cpp qsort_s.cpp utlbuffer.cpp checksum_crc.cpp characterset.cpp generichash.cpp
+	interface.cpp)
+list(TRANSFORM TIER1_SRC PREPEND ${HL2SDK_DIR}/tier1/)
+add_library(tier1 ${TIER1_SRC})
+
 include_directories(${PROJECT_SOURCE_DIR} ${VSP_NAVMESH} ${HL2SDK_DIR}/common utils/common ${HL2SDK_DIR}/public ${HL2SDK_DIR}/public/mathlib ${HL2SDK_DIR}/public/tier0 ${HL2SDK_DIR}/public/tier1 ${HL2SDK_DIR}/public/game/server ${HL2SDK_DIR}/public/engine ${HL2SDK_DIR}/game/shared ${HL2SDK_DIR}/game/server ${CMAKE_CURRENT_SOURCE_DIR}/bot)
 
 link_directories(${HL2SDK_LIBS})
-add_library(public STATIC ${HL2SDK_DIR}/public/collisionutils.cpp)
+add_library(publiclib STATIC ${HL2SDK_DIR}/public/collisionutils.cpp)
 add_subdirectory(${VSP_NAVMESH}/util valve_source_plugin_navmesh/util)
 add_subdirectory(${VSP_NAVMESH}/nav_mesh valve_source_plugin_navmesh/nav_mesh)
 add_subdirectory(${PROJECT_SOURCE_DIR}/bot)
@@ -76,11 +77,11 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 set(PLUGIN_NAME my_bot)
-add_library(${PLUGIN_NAME} SHARED  VSPlugin.cpp)
-target_link_libraries(${PLUGIN_NAME}  
+add_library(${PLUGIN_NAME} SHARED VSPlugin.cpp)
+target_link_libraries(${PLUGIN_NAME} 
 	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player 
 	 goap goap_actions weapon_sys bot_move valve_navmesh plugin_util bot_util
-	 tier1 mathlib vstdlib public tier0)
+	 tier1 mathlib vstdlib publiclib tier0)
 
 add_library(${PLUGIN_NAME}_mm SHARED MMSPlugin.cpp)
 target_include_directories(${PLUGIN_NAME}_mm PRIVATE ${MMS_DIR} ${MMS_DIR}/sourcehook)
@@ -90,7 +91,7 @@ target_compile_definitions(${PLUGIN_NAME}_mm PRIVATE SOURCE_ENGINE=4
 target_link_libraries(${PLUGIN_NAME}_mm
 	 bot_main dod_player dod_weapon dod_goap_actions hl2dm_player hl2dm_weapon hl2dm_goap_actions player 
 	 goap goap_actions weapon_sys bot_move valve_navmesh plugin_util bot_util
-	 tier1 mathlib vstdlib public tier0)
+	 tier1 mathlib vstdlib publiclib tier0)
 #find installed mods on system.
 set (mods "tf;dod;hl2mp")
 set( steam_dir steamapps/common )

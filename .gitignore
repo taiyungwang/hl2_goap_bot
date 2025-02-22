@@ -1,2 +1,7 @@
 # eclipse files.
 .project
+# visual studio
+.vs
+out
+# cmake config
+CMakeSettings.json

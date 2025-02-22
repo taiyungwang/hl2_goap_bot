@@ -123,7 +123,7 @@ void VSPlugin::LevelInit(char const *pMapName) {
 DWORD VirtualTableHook(DWORD* pdwNewInterface, int vtable, DWORD newInterface) {
 	DWORD dwStor = pdwNewInterface[vtable], dwStorVal =
 			reinterpret_cast<DWORD>(&pdwNewInterface[vtable]);
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS_PC
 	DWORD dwOld;
 	char buf[256];
 	if (!VirtualProtect(&pdwNewInterface[vtable], 4, PAGE_EXECUTE_READWRITE, &dwOld)) {
@@ -144,7 +144,7 @@ DWORD VirtualTableHook(DWORD* pdwNewInterface, int vtable, DWORD newInterface) {
 	}
 #endif
 	*reinterpret_cast<DWORD*>(dwStorVal) = newInterface;
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS_PC
 	if (!VirtualProtect(&pdwNewInterface[vtable], 4, dwOld, &dwOld)) {
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),

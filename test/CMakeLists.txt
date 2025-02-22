@@ -10,12 +10,12 @@ macro(add_cxxtest test_name suites libs)
 		list(APPEND headers ${CMAKE_CURRENT_SOURCE_DIR}/${suite}.h)
 		list(APPEND srcs ${CMAKE_CURRENT_SOURCE_DIR}/${suite}.cpp)
 	endforeach(suite ${suites})
-	add_custom_command(PRE_BUILD 
+	add_custom_command(
 		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${test_name}_runner.cpp
-		COMMAND ${CXX_TEST_GEN} --error-printer -o ${CMAKE_CURRENT_BINARY_DIR}/${test_name}_runner.cpp ${headers}
+		COMMAND ${CXX_TEST_GEN} --error-printer -o "${CMAKE_CURRENT_BINARY_DIR}/${test_name}_runner.cpp" ${headers}
 		DEPENDS ${headers})
 	add_executable(${test_name} ${CMAKE_CURRENT_BINARY_DIR}/${test_name}_runner.cpp ${srcs})
-	target_link_libraries(${test_name}  ${libs} ${LEGACY_STDIO})
+	target_link_libraries(${test_name}  ${libs})
 	add_test(${test_name} ${test_name})
 endmacro(add_cxxtest)
 

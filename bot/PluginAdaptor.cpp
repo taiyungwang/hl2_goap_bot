@@ -48,10 +48,10 @@ PluginAdaptor::PluginAdaptor() {
 		arsenalBuilder = std::make_shared<DODArsenalBuilder>();
 		botBuilder = new DODBotBuilder(commandHandler, *arsenalBuilder.get());
 		playerruncommand_offset.SetValue(
-#ifndef _WIN32
-	"419"
+#ifdef PLATFORM_WINDOWS_PC
+	"425"
 #else
-	"418"
+	"426"
 #endif
 				);
 		TheNavMesh->addPlayerSpawnName("info_player_axis");
