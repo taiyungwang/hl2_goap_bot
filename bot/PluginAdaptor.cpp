@@ -9,6 +9,7 @@
 #include "player/HidingSpotSelector.h"
 #include <nav_mesh/nav_entities.h>
 #include <util/EntityUtils.h>
+#include <util/common_util.h>
 #include <eiface.h>
 #include <iplayerinfo.h>
 
@@ -31,20 +32,12 @@ PluginAdaptor::PluginAdaptor() {
 	listenForGameEvent({"nav_generate"});
 	TheNavMesh = new CNavMesh;
 	botBuilder = nullptr;
-	char gameDir[MAX_PATH];
-	engine->GetGameDir(gameDir, MAX_PATH);
-	std::string modPath(gameDir);
-	auto lastDelim = modPath.rfind('/');
-	if (lastDelim == modPath.npos) {
-		lastDelim = modPath.rfind('\\');
-	}
-	modPath = modPath.substr(lastDelim + 1);
 	// TODO: make mod checking more stringent.
-	if (modPath == "hl2mp") {
+	if (isGameName("hl2mp")) {
 		arsenalBuilder = std::make_shared<HL2DMArsenalBuilder>();
 		botBuilder = new HL2DMBotBuilder(commandHandler, *arsenalBuilder.get());
 		TheNavMesh->addPlayerSpawnName("info_player_start");
-	} else if (modPath == "dod") {
+	} else if (isGameName("dod")) {
 		arsenalBuilder = std::make_shared<DODArsenalBuilder>();
 		botBuilder = new DODBotBuilder(commandHandler, *arsenalBuilder.get());
 		playerruncommand_offset.SetValue(
@@ -57,7 +50,7 @@ PluginAdaptor::PluginAdaptor() {
 		TheNavMesh->addPlayerSpawnName("info_player_axis");
 		TheNavMesh->addPlayerSpawnName("info_player_allies");
 	} else {
-		Msg("Mod not supported, %s.\n", modPath.c_str());
+		Msg("Mod not supported, \n");
 	}
 }
 

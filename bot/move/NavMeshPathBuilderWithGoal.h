@@ -2,6 +2,9 @@
 
 #include "NavMeshPathBuilder.h"
 
+/**
+ * A * path search with a specific area given as the goal.
+ */
 class NavMeshPathBuilderWithGoal: public NavMeshPathBuilder {
 public:
 	NavMeshPathBuilderWithGoal(int team, CNavArea *goal) :

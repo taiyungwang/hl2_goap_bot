@@ -120,13 +120,24 @@ void VSPlugin::LevelInit(char const *pMapName) {
 	adaptor->levelInit(pMapName);
 }
 
-DWORD VirtualTableHook(DWORD* pdwNewInterface, int vtable, DWORD newInterface) {
-	DWORD dwStor = pdwNewInterface[vtable], dwStorVal =
-			reinterpret_cast<DWORD>(&pdwNewInterface[vtable]);
+#if defined(POSIX)
+typedef uint64_t DWORD64, *PDWORD64;
+#endif
+
+#if INTPTR_MAX == INT64_MAX
+typedef DWORD64 FuncPtrType;
+#else
+typedef DWORD FuncPtrType;
+#endif
+
+
+FuncPtrType VirtualTableHook(FuncPtrType* pdwNewInterface, int vtable, FuncPtrType newInterface) {
+	FuncPtrType dwStor = pdwNewInterface[vtable],
+			dwStorVal =reinterpret_cast<FuncPtrType>(&pdwNewInterface[vtable]);
 #ifdef PLATFORM_WINDOWS_PC
-	DWORD dwOld;
+	FuncPtrType dwOld;
 	char buf[256];
-	if (!VirtualProtect(&pdwNewInterface[vtable], 4, PAGE_EXECUTE_READWRITE, &dwOld)) {
+	if (!VirtualProtect(&pdwNewInterface[vtable], sizeof(FuncPtrType), PAGE_EXECUTE_READWRITE, &dwOld)) {
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			buf, (sizeof(buf) / sizeof(buf[0])), NULL);
@@ -134,18 +145,18 @@ DWORD VirtualTableHook(DWORD* pdwNewInterface, int vtable, DWORD newInterface) {
 				buf);
 	}
 #else
-	DWORD alignOffset = dwStorVal % sysconf(_SC_PAGE_SIZE);
+	FuncPtrType alignOffset = dwStorVal % sysconf(_SC_PAGE_SIZE);
 	// need page aligned address
 	char *addr = reinterpret_cast<char *>(dwStorVal - alignOffset);
-	int len = sizeof(DWORD) + alignOffset;
+	int len = sizeof(FuncPtrType) + alignOffset;
 	if (mprotect(addr, len, PROT_EXEC | PROT_READ | PROT_WRITE) == -1) {
 		Error(std::string("In VirtualTableHook while calling mprotect for write access: %s").c_str(),
 				strerror(errno));
 	}
 #endif
-	*reinterpret_cast<DWORD*>(dwStorVal) = newInterface;
+	*reinterpret_cast<FuncPtrType*>(dwStorVal) = newInterface;
 #ifdef PLATFORM_WINDOWS_PC
-	if (!VirtualProtect(&pdwNewInterface[vtable], 4, dwOld, &dwOld)) {
+	if (!VirtualProtect(&pdwNewInterface[vtable], sizeof(FuncPtrType), dwOld, &dwOld)) {
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			buf, (sizeof(buf) / sizeof(buf[0])), NULL);
@@ -197,9 +208,9 @@ void hookPlayerRunCommand(edict_t *edict, int offset) {
 	CBaseEntity *BasePlayer = unk->GetBaseEntity();
 	if (BasePlayer
 			&& pPlayerRunCommand == nullptr) {
-		*reinterpret_cast<DWORD*>(&pPlayerRunCommand) = VirtualTableHook(
-				reinterpret_cast<DWORD*>(*reinterpret_cast<DWORD*>(BasePlayer)), offset,
-				reinterpret_cast<DWORD>(nPlayerRunCommand));
+		*reinterpret_cast<FuncPtrType*>(&pPlayerRunCommand) = VirtualTableHook(
+				reinterpret_cast<FuncPtrType*>(*reinterpret_cast<FuncPtrType*>(BasePlayer)), offset,
+				reinterpret_cast<FuncPtrType>(nPlayerRunCommand));
 	}
 }
 
