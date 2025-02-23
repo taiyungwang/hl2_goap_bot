@@ -133,11 +133,11 @@ typedef DWORD FuncPtrType;
 
 FuncPtrType VirtualTableHook(FuncPtrType* pdwNewInterface, int vtable, FuncPtrType newInterface) {
 	FuncPtrType dwStor = pdwNewInterface[vtable],
-			dwStorVal =reinterpret_cast<FuncPtrType>(&pdwNewInterface[vtable]);
+			dwStorVal = reinterpret_cast<FuncPtrType>(&pdwNewInterface[vtable]);
 #ifdef PLATFORM_WINDOWS_PC
-	FuncPtrType dwOld;
+	DWORD dwOld, dwNew = PAGE_EXECUTE_READWRITE;
 	char buf[256];
-	if (!VirtualProtect(&pdwNewInterface[vtable], sizeof(FuncPtrType), PAGE_EXECUTE_READWRITE, &dwOld)) {
+	if (!VirtualProtect(&pdwNewInterface[vtable], 4, dwNew, &dwOld)) {
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			buf, (sizeof(buf) / sizeof(buf[0])), NULL);
@@ -156,11 +156,11 @@ FuncPtrType VirtualTableHook(FuncPtrType* pdwNewInterface, int vtable, FuncPtrTy
 #endif
 	*reinterpret_cast<FuncPtrType*>(dwStorVal) = newInterface;
 #ifdef PLATFORM_WINDOWS_PC
-	if (!VirtualProtect(&pdwNewInterface[vtable], sizeof(FuncPtrType), dwOld, &dwOld)) {
+	if (!VirtualProtect(&pdwNewInterface[vtable], 4, dwOld, &dwNew)) {
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			buf, (sizeof(buf) / sizeof(buf[0])), NULL);
-		Error("In VirtualTableHook while calling VirtualProtect to remove write access: %s",
+		Error("In VirtualTableHook while calling VirtualProtect to revert mem protection: %s",
 				buf);
 	}
 #else
@@ -174,12 +174,7 @@ FuncPtrType VirtualTableHook(FuncPtrType* pdwNewInterface, int vtable, FuncPtrTy
 
 void (CBaseEntity::*pPlayerRunCommand)(CUserCmd*, IMoveHelper*) = nullptr;
 
-#ifndef _WIN32
-void nPlayerRunCommand(CBaseEntity *_this, CUserCmd* pCmd,
-		IMoveHelper* pMoveHelper)
-#else
-void __fastcall nPlayerRunCommand(CBaseEntity *_this, void*, CUserCmd* pCmd, IMoveHelper* pMoveHelper)
-#endif
+void FASTCALL nPlayerRunCommand(CBaseEntity *_this, void*, CUserCmd* pCmd, IMoveHelper* pMoveHelper)
 {
 	extern IServerGameEnts *servergameents;
 	Bot* bot = dynamic_cast<Bot*>(Player::getPlayer(servergameents->BaseEntityToEdict(_this)));

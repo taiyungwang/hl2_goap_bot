@@ -5,7 +5,7 @@ project (PluginBot)
 add_definitions(-DPLATFORM_64BITS -DX64BITS -DRAD_TELEMETRY_DISABLED)
 find_package (Python COMPONENTS Interpreter Development)
 set(DRIVE C CACHE STRING "User specified drive for Windows")
-set (CXX_DIR "" CACHE STRING "CXX Path")
+set (CXX_DIR "" STRING "CXX Path")
 set( steam_root "${DRIVE}:/Program Files (x86)/steam" )
 set(HL2SDK_DIR "${PROJECT_SOURCE_DIR}/../hl2sdk")
 set (HL2SDK_LIBS ${HL2SDK_DIR}/lib/public)
@@ -30,11 +30,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
 	add_definitions(-DSWDS -D_finite=finite -Dstricmp=strcasecmp  -Dstrnicmp=strncasecmp -D_vsnprintf=vsnprintf -D_alloca=alloca)
 else () # MSVC
 	add_definitions(-DCOMPILER_MSVC64 -DCOMPILER_MSVC)
-	add_compile_options($<$<CONFIG:>:/MT> #---------|
-		$<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
-		$<$<CONFIG:Release>:/MT> #--|
-		-GS- -TP -W4 -fp:fast -GF -Zc:forScope -RTC1 -GR -Gd -Oy- -Fa -Fo -Fp -MP -Od -TP)
-	add_link_options(/NODEFAULTLIB:libcmt)
 endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${ARCH_FLAGS}" )
 SET( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${ARCH_FLAGS}" )
