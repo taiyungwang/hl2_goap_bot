@@ -122,11 +122,6 @@ bool MMSPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen,
 			this, &MMSPlugin::Hook_ClientPutInServer, true);
 	SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientCommand, gameclients, this,
 			&MMSPlugin::Hook_ClientCommand, false);
-	adaptor = std::make_shared<PluginAdaptor>();
-	if (PluginAdaptor::getPlayerruncommandOffset() > 0) {
-		SH_MANUALHOOK_RECONFIGURE(MHook_PlayerRunCmd,
-				PluginAdaptor::getPlayerruncommandOffset(), 0, 0);
-	}
 #if SOURCE_ENGINE >= SE_ORANGEBOX
 	g_pCVar = cVars;
 	ConVar_Register(0, &s_BaseAccessor);
@@ -135,6 +130,11 @@ bool MMSPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen,
 #endif
 	ENGINE_CALL(LogPrint)("All hooks started!\n");
 	MathLib_Init();
+	adaptor = std::make_shared<PluginAdaptor>();
+	if (PluginAdaptor::getPlayerruncommandOffset() > 0) {
+		SH_MANUALHOOK_RECONFIGURE(MHook_PlayerRunCmd,
+				PluginAdaptor::getPlayerruncommandOffset(), 0, 0);
+	}
 	return true;
 }
 
