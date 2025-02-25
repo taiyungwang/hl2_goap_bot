@@ -120,24 +120,13 @@ void VSPlugin::LevelInit(char const *pMapName) {
 	adaptor->levelInit(pMapName);
 }
 
-#if defined(POSIX)
-typedef uint64_t DWORD64, *PDWORD64;
-#endif
-
-#if INTPTR_MAX == INT64_MAX
-typedef DWORD64 FuncPtrType;
-#else
-typedef DWORD FuncPtrType;
-#endif
-
-
-FuncPtrType VirtualTableHook(FuncPtrType* pdwNewInterface, int vtable, FuncPtrType newInterface) {
-	FuncPtrType dwStor = pdwNewInterface[vtable],
-			dwStorVal = reinterpret_cast<FuncPtrType>(&pdwNewInterface[vtable]);
+uint64_t VirtualTableHook(uint64_t* pdwNewInterface, int vtable, uint64_t newInterface) {
+	uint64_t dwStor = pdwNewInterface[vtable],
+			dwStorVal = reinterpret_cast<uint64_t>(&pdwNewInterface[vtable]);
 #ifdef PLATFORM_WINDOWS_PC
-	DWORD dwOld, dwNew = PAGE_EXECUTE_READWRITE;
+	DWORD dwOld;
 	char buf[256];
-	if (!VirtualProtect(&pdwNewInterface[vtable], 4, dwNew, &dwOld)) {
+	if (!VirtualProtect(&pdwNewInterface[vtable], 4, PAGE_EXECUTE_READWRITE, &dwOld)) {
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			buf, (sizeof(buf) / sizeof(buf[0])), NULL);
@@ -145,22 +134,22 @@ FuncPtrType VirtualTableHook(FuncPtrType* pdwNewInterface, int vtable, FuncPtrTy
 				buf);
 	}
 #else
-	FuncPtrType alignOffset = dwStorVal % sysconf(_SC_PAGE_SIZE);
+	uint64_t alignOffset = dwStorVal % sysconf(_SC_PAGE_SIZE);
 	// need page aligned address
 	char *addr = reinterpret_cast<char *>(dwStorVal - alignOffset);
-	int len = sizeof(FuncPtrType) + alignOffset;
+	int len = sizeof(uint64_t) + alignOffset;
 	if (mprotect(addr, len, PROT_EXEC | PROT_READ | PROT_WRITE) == -1) {
 		Error(std::string("In VirtualTableHook while calling mprotect for write access: %s").c_str(),
 				strerror(errno));
 	}
 #endif
-	*reinterpret_cast<FuncPtrType*>(dwStorVal) = newInterface;
+	*reinterpret_cast<uint64_t*>(dwStorVal) = newInterface;
 #ifdef PLATFORM_WINDOWS_PC
-	if (!VirtualProtect(&pdwNewInterface[vtable], 4, dwOld, &dwNew)) {
+	if (!VirtualProtect(&pdwNewInterface[vtable], 4, dwOld, &dwOld)) {
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			buf, (sizeof(buf) / sizeof(buf[0])), NULL);
-		Error("In VirtualTableHook while calling VirtualProtect to revert mem protection: %s",
+		Error("In VirtualTableHook while calling VirtualProtect to remove write access: %s",
 				buf);
 	}
 #else
@@ -174,7 +163,8 @@ FuncPtrType VirtualTableHook(FuncPtrType* pdwNewInterface, int vtable, FuncPtrTy
 
 void (CBaseEntity::*pPlayerRunCommand)(CUserCmd*, IMoveHelper*) = nullptr;
 
-void FASTCALL nPlayerRunCommand(CBaseEntity *_this, void*, CUserCmd* pCmd, IMoveHelper* pMoveHelper)
+void FASTCALL nPlayerRunCommand(CBaseEntity *_this, CUserCmd* pCmd,
+		IMoveHelper* pMoveHelper)
 {
 	extern IServerGameEnts *servergameents;
 	Bot* bot = dynamic_cast<Bot*>(Player::getPlayer(servergameents->BaseEntityToEdict(_this)));
@@ -203,9 +193,9 @@ void hookPlayerRunCommand(edict_t *edict, int offset) {
 	CBaseEntity *BasePlayer = unk->GetBaseEntity();
 	if (BasePlayer
 			&& pPlayerRunCommand == nullptr) {
-		*reinterpret_cast<FuncPtrType*>(&pPlayerRunCommand) = VirtualTableHook(
-				reinterpret_cast<FuncPtrType*>(*reinterpret_cast<FuncPtrType*>(BasePlayer)), offset,
-				reinterpret_cast<FuncPtrType>(nPlayerRunCommand));
+		*reinterpret_cast<uint64_t*>(&pPlayerRunCommand) = VirtualTableHook(
+				reinterpret_cast<uint64_t*>(*reinterpret_cast<uint64_t*>(BasePlayer)), offset,
+				reinterpret_cast<uint64_t>(nPlayerRunCommand));
 	}
 }
 

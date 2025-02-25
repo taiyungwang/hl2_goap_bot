@@ -129,7 +129,7 @@ MoveState* Avoid::move(const Vector& pos) {
 		}
 		return nextState;
 	}
-	if (Q_stristr(currBlockerName, "func_team") != nullptr) {
+	if (currBlockerName != nullptr && Q_stristr(currBlockerName, "func_team") != nullptr) {
 		blocker = currBlocker;
 	}
 	if (blocker != nullptr
