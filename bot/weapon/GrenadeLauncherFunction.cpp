@@ -15,11 +15,11 @@ GrenadeLauncherFunction::GrenadeLauncherFunction() :
 
 Vector GrenadeLauncherFunction::getAim(const Vector& target,
 		const Vector& eye) const {
-	extern ICvar* cVars;
+	extern ICvar* g_pCVar;
 	float dist = target.AsVector2D().DistTo(eye.AsVector2D());
 	return Vector(target.x, target.y,
 			dist > range[1] ? dist
-					: (target.z + dist / range[1] * cVars->FindVar("sv_gravity")->GetFloat())
+					: (target.z + dist / range[1] * g_pCVar->FindVar("sv_gravity")->GetFloat())
 					  - eye.z + target.z + HumanEyeHeight);
 }
 

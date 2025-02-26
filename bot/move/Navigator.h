@@ -1,7 +1,6 @@
 #pragma once
 
 #include <utlvector.h>
-#include <shareddefs.h>
 #include <vector>
 
 class Blackboard;

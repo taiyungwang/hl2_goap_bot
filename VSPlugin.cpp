@@ -40,7 +40,6 @@ IPhysicsSurfaceProps *physprops = nullptr;
 IVModelInfo *modelinfo = nullptr;
 IPhysicsSurfaceProps *physprop = nullptr;
 IServerGameEnts *servergameents = nullptr;
-ICvar* cVars = nullptr;
 CGlobalVars *gpGlobals = nullptr;
 
 //
@@ -96,7 +95,6 @@ bool VSPlugin::Load(CreateInterfaceFn interfaceFactory,
 			|| !load(modelinfo, interfaceFactory, VMODELINFO_SERVER_INTERFACE_VERSION)
 			|| (!engine->IsDedicatedServer() && !load(debugoverlay, interfaceFactory,
 					VDEBUG_OVERLAY_INTERFACE_VERSION))
-			|| !load(cVars, interfaceFactory, CVAR_INTERFACE_VERSION)
 			|| !loadUndefined(playerinfomanager, gameServerFactory, "PlayerInfoManager", 3, 2)
 			|| !loadUndefined(gameclients, gameServerFactory, "ServerGameClients", 5, 4)
 			|| !loadUndefined(servergamedll, gameServerFactory, "ServerGameDLL", 12, 10)

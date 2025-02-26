@@ -43,8 +43,8 @@ void BotBuilder::addBot(const CCommand &command) {
 	static int botCount = 0;
 	extern IBotManager *botmanager;
 	int team = 0;
-	extern ICvar* cVars;
-	if (teamPlay || cVars->FindVar("mp_teamplay")->GetBool()) {
+	extern ICvar* g_pCVar;
+	if (teamPlay || g_pCVar->FindVar("mp_teamplay")->GetBool()) {
 		auto count = Player::getTeamCount();
 		team = std::get<0>(count) > std::get<1>(count) ? 3 : 2;
 	}

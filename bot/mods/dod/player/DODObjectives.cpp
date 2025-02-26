@@ -41,6 +41,7 @@ void DODObjectives::FireGameEvent(IGameEvent *event) {
 				ctrlPointsMap[ctrlPts[j]] = i;
 			}
 		}
+		extern CNavMesh *TheNavMesh;
 		SearchSurroundingAreas(TheNavMesh->GetNearestNavArea(ctrlPts[i]),
 				*objectives.back(), 2000.0f);
 	}

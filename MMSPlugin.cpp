@@ -27,7 +27,7 @@ IPhysicsSurfaceProps *physprops = nullptr;
 IVModelInfo *modelinfo = nullptr;
 IPhysicsSurfaceProps *physprop = nullptr;
 IServerGameEnts *servergameents = nullptr;
-ICvar *cVars = nullptr;
+extern ICvar *g_pCVar;
 CGlobalVars *gpGlobals = nullptr;
 MMSPlugin metaModPlugin;
 
@@ -78,7 +78,7 @@ bool MMSPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen,
 			INTERFACEVERSION_GAMEEVENTSMANAGER2);
 	GET_V_IFACE_CURRENT(GetEngineFactory, helpers, IServerPluginHelpers,
 			INTERFACEVERSION_ISERVERPLUGINHELPERS);
-	GET_V_IFACE_CURRENT(GetEngineFactory, cVars, ICvar, CVAR_INTERFACE_VERSION);
+	GET_V_IFACE_CURRENT(GetEngineFactory, g_pCVar, ICvar, CVAR_INTERFACE_VERSION);
 	GET_V_IFACE_CURRENT(GetEngineFactory, physprops, IPhysicsSurfaceProps,
 			VPHYSICS_SURFACEPROPS_INTERFACE_VERSION);
 	GET_V_IFACE_CURRENT(GetEngineFactory, modelinfo, IVModelInfo,
@@ -123,7 +123,6 @@ bool MMSPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen,
 	SH_ADD_HOOK_MEMFUNC(IServerGameClients, ClientCommand, gameclients, this,
 			&MMSPlugin::Hook_ClientCommand, false);
 #if SOURCE_ENGINE >= SE_ORANGEBOX
-	g_pCVar = cVars;
 	ConVar_Register(0, &s_BaseAccessor);
 #else
 	ConCommandBaseMgr::OneTimeInit(&s_BaseAccessor);
