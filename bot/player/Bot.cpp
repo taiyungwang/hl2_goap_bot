@@ -23,9 +23,6 @@ PlayerClasses Bot::CLASSES = nullptr;
 
 static ConVar mybot_mimic("mybot_mimic", "0");
 
-static ConVar mybotDangerAmt("mybot_danger_amount", "3.0f", 0,
-		"Amount of 'danger' to add to an area when a bot is killed.");
-
 extern IVEngineServer *engine;
 
 Bot::Bot(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal,
@@ -98,29 +95,25 @@ void Bot::FireGameEvent(IGameEvent* event) {
 	Player::FireGameEvent(event);
 	std::string name(event->GetName());
 	int eventUserId = event->GetInt("userid");
-	// bot owns this event.
 	if (eventUserId != getUserId()) {
 		return;
 	}
+	// bot owns this event.
 	if (name == "player_spawn") {
 		blackboard->reset();
 		vision.reset();
 		world->reset();
 		planner->resetPlanning(true);
-	} else if (name == "player_death") {
-		auto area = getArea();
-		if (area != nullptr) {
-			area->IncreaseDanger(getTeam(), mybotDangerAmt.GetFloat());
-		}
 	} else if (name == "player_hurt") {
 		int attacker = event->GetInt("attacker");
-		if (event->GetInt("attacker") == getUserId()) {
+		if (attacker == getUserId()) {
 			return;
 		}
-		world->updateState(WorldProp::HURT, true);
 		for (auto player: Player::getPlayers()) {
-			if (player.second->getUserId() == attacker) {
+			if (player.second->getUserId() == attacker
+					&& player.first != vision.getTargetedPlayer()) {
 				wantToListen = false;
+				world->updateState(WorldProp::HURT, true);
 				viewTarget = player.second->getEyesPos();
 				break;
 			}

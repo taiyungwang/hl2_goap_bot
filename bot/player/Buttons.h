@@ -22,7 +22,7 @@ public:
 
 	/**
 	 * Returns an OR'd value of all buttons pressed.  The button
-	 * states are updated. This should be called once per frame.
+	 * states are updated per frame.
 	 */
 	int getPressed();
 

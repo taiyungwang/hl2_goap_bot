@@ -13,6 +13,9 @@
 
 std::unordered_map<int, Player*> Player::players;
 
+static ConVar mybotDangerAmt("mybot_danger_amount", "3.0f", 0,
+		"Amount of 'danger' to add to an area for a team when a teammate is killed.");
+
 extern IVEngineServer* engine;
 
 Player* Player::getPlayer(edict_t* ent) {
@@ -126,13 +129,18 @@ int Player::getMaxHealth() const {
 void Player::FireGameEvent(IGameEvent* event) {
 	std::string name(event->GetName());
 	int eventUserId = event->GetInt("userid");
+	if (eventUserId != getUserId()) {
+		return;
+	}
 	// bot owns this event.
-	if (eventUserId == getUserId()) {
-		if (name == "player_spawn") {
-			arsenal->reset();
-			inGame = true;
-		} else if (name == "player_death") {
-			inGame = false;
+	if (name == "player_spawn") {
+		arsenal->reset();
+		inGame = true;
+	}  else if (name == "player_death") {
+		inGame = false;
+		auto area = getArea();
+		if (area != nullptr) {
+			area->IncreaseDanger(getTeam(), mybotDangerAmt.GetFloat());
 		}
 	}
 }

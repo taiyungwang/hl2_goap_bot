@@ -8,9 +8,6 @@ class Bot;
 
 class Blackboard {
 public:
-
-	static float clamp180(float angle);
-
 	Blackboard(Bot *self) :
 			self(self) {
 	}
