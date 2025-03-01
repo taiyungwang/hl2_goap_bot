@@ -87,7 +87,7 @@ float FindCoverAction::getHeuristicCost(CNavArea *area) const {
 	for (auto i: blackboard.getSelf()->getVision().getNearbyTeammates()) {
 		cost += area->GetCenter().DistTo(Player::getPlayer(i)->getCurrentPosition());
 	}
-	return cost;
+	return MAX(0.0, cost);
 }
 
 bool FindCoverAction::shouldSearch(CNavArea *area) const {

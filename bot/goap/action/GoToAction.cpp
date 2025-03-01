@@ -68,9 +68,13 @@ edict_t* GoToAction::randomChoice(CUtlLinkedList<edict_t*>& active) {
 	float totalDist = 0.0f;
 	CUtlVector<CUtlKeyValuePair<edict_t*, float>> choices;
 	FOR_EACH_LL(active, i) {
+		auto *collide = active[i]->GetCollideable();
+		if (collide == nullptr) {
+			continue;
+		}
 		choices.AddToTail();
 		choices.Tail().m_key = active[i];
-		choices.Tail().m_value = 1.0f / active[i]->GetCollideable()->GetCollisionOrigin().DistTo(blackboard.getSelf()->getCurrentPosition());
+		choices.Tail().m_value = 1.0f / collide->GetCollisionOrigin().DistTo(blackboard.getSelf()->getCurrentPosition());
 		totalDist += choices.Tail().m_value;
 	}
 	FOR_EACH_VEC(choices, i) {

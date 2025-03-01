@@ -88,7 +88,7 @@ bool DODWorld::update(Blackboard& blackboard) {
 	}
 	for (int i : self->getVision().getVisibleEnemies()) {
 		const Player *enemy = Player::getPlayer(i);
-		if (enemy == nullptr) {
+		if (enemy == nullptr || enemy->getWeaponName() == nullptr) {
 			continue;
 		}
 		std::string weap(enemy->getWeaponName());
