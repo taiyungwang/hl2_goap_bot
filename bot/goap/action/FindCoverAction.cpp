@@ -20,7 +20,6 @@ bool FindCoverAction::foundGoal(CNavArea *area) {
 	eyes.z += HumanEyeHeight;
 	Bot* self = blackboard.getSelf();
 	FilterSelfAndEnemies filter(self->getEdict());
-	trace_t result;
 	for (auto avoid: areasToAvoid) {
 		if (area->GetCenter().DistTo(std::get<1>(avoid)->GetCollideable()->GetCollisionOrigin()) > maxRange) {
 			continue;

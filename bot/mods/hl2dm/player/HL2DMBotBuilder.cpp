@@ -91,29 +91,16 @@ private:
 	const int MAX_AMMO;
 };
 
-#define DECL_AMMO_BUILDER_CLASS(weaponClass, weaponName, ammo) \
-class ItemAmmo##weaponClass##Builder: public ItemAmmoBuilder {\
-public:\
-	ItemAmmo##weaponClass##Builder() : ItemAmmoBuilder(weaponName, ammo) {} \
-};
-
-#define DECL_AMMO_WEAPON_BUILDER_CLASSES(weaponClass, weaponName, ammo) \
-DECL_AMMO_BUILDER_CLASS(weaponClass, weaponName, ammo)\
-	\
-class Item##weaponClass##Builder: public ItemWeaponBuilder {\
-public:\
-	Item##weaponClass##Builder(): ItemWeaponBuilder(weaponName) {\
-	}\
-};
-
-DECL_AMMO_WEAPON_BUILDER_CLASSES(Pistol, "pistol", 150)
-DECL_AMMO_WEAPON_BUILDER_CLASSES(AR2, "weapon_ar2", 60)
-DECL_AMMO_WEAPON_BUILDER_CLASSES(SMG, "weapon_smg1", 225)
-DECL_AMMO_WEAPON_BUILDER_CLASSES(Shotgun, "weapon_shotgun", 30)
-DECL_AMMO_WEAPON_BUILDER_CLASSES(RPG, "weapon_rpg", 3)
-DECL_AMMO_WEAPON_BUILDER_CLASSES(Crossbow, "weapon_crossbow", 10)
-DECL_AMMO_WEAPON_BUILDER_CLASSES(Magnum, "weapon_357", 12)
-DECL_AMMO_BUILDER_CLASS(Grenade, "weapon_grenade", 5)
+#define DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(weaponClass, weaponName, ammo, ammoName) \
+		class ItemAmmo##weaponClass##Builder: public ItemAmmoBuilder {\
+		public:\
+			ItemAmmo##weaponClass##Builder() : ItemAmmoBuilder(weaponName, ammo) {} \
+		};			\
+		class Item##weaponClass##Builder: public ItemWeaponBuilder {\
+		public:\
+			Item##weaponClass##Builder(): ItemWeaponBuilder(weaponName) {\
+			}\
+		};itemMap.addItemBuilder<Item##weaponClass##Builder>(ammoName);
 
 class ItemAmmoSmgGrenadeBuilder: public ItemAmmoBuilder {
 public:
@@ -134,27 +121,27 @@ HL2DMBotBuilder::HL2DMBotBuilder(CommandHandler& commandHandler, const ArsenalBu
 	itemMap.addItemBuilder<HealthChargerBuilder>("item_healthcharger");
 	itemMap.addItemBuilder<BatteryBuilder>("item_battery");
 	itemMap.addItemBuilder<SuitChargerBuilder>("item_suitcharger");
-	itemMap.addItemBuilder<ItemAmmoPistolBuilder>("item_ammo_pistol");
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Pistol, "pistol", 150, "item_ammo_pistol")
 	itemMap.addItemBuilder<ItemAmmoPistolBuilder>("item_ammo_pistol_large");
-	itemMap.addItemBuilder<ItemPistolBuilder>("weapon_pistol");
-	itemMap.addItemBuilder<ItemAmmoAR2Builder>("item_ammo_ar2");
+	itemMap.addItemBuilder<ItemAmmoPistolBuilder>("weapon_pistol");
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(AR2, "weapon_ar2", 60, "item_ammo_ar2")
 	itemMap.addItemBuilder<ItemAmmoAR2Builder>("item_ammo_ar2_large");
 	itemMap.addItemBuilder<ItemAmmoAR2AltBuilder>("item_ammo_ar2_altfire");
-	itemMap.addItemBuilder<ItemSMGBuilder>("weapon_smg1");
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(SMG, "weapon_smg1", 225, "weapon_smg1")
 	itemMap.addItemBuilder<ItemAmmoSMGBuilder>("item_ammo_smg1");
 	itemMap.addItemBuilder<ItemAmmoSMGBuilder>("item_ammo_smg1_large");
 	itemMap.addItemBuilder<ItemAmmoSmgGrenadeBuilder>("item_ammo_smg1_grenade");
-	itemMap.addItemBuilder<ItemShotgunBuilder>("weapon_shotgun");
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Shotgun, "weapon_shotgun", 30, "weapon_shotgun")
 	itemMap.addItemBuilder<ItemAmmoShotgunBuilder>("item_box_buckshot");
-	itemMap.addItemBuilder<ItemCrossbowBuilder>("weapon_crossbow");
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Crossbow, "weapon_crossbow", 10, "weapon_crossbow")
 	itemMap.addItemBuilder<ItemAmmoCrossbowBuilder>("item_ammo_crossbow");
 	itemMap.addItemBuilder<ItemAmmoCrossbowBuilder>("item_ammo_crossbow_large");
-	itemMap.addItemBuilder<ItemMagnumBuilder>("weapon_357");
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Magnum, "weapon_357", 12, "weapon_357")
 	itemMap.addItemBuilder<ItemAmmoMagnumBuilder>("item_ammo_357");
 	itemMap.addItemBuilder<ItemAmmoMagnumBuilder>("item_ammo_357_large");
-	itemMap.addItemBuilder<ItemRPGBuilder>("weapon_rpg");
-	itemMap.addItemBuilder<ItemAmmoMagnumBuilder>("item_rpg_round");
-	itemMap.addItemBuilder<ItemAmmoGrenadeBuilder>("weapon_frag");
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(RPG, "weapon_rpg", 3, "weapon_rpg")
+	itemMap.addItemBuilder<ItemAmmoRPGBuilder>("item_rpg_round");
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Grenade, "weapon_grenade", 5, "weapon_frag")
 }
 
 void HL2DMBotBuilder::updatePlanner(GoalManager& planner,
