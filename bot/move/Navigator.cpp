@@ -108,13 +108,14 @@ bool Navigator::step() {
 		areaTime = 0;
 	}
 	if (areaTime > maxTime) {
+		blackboard.getSelf()->consoleWarn(std::string("Unable to reach area ") + std::to_string(topArea->GetID()));
 		areaTime = 0;
 		moveCtx->setStuck(true);
 	}
 	float goalDist = moveCtx->getGoal().DistTo(loc);
 	if (moveCtx->hasGoal() && goalDist > 1000.0f
 			&& !canMoveTo(moveCtx->getGoal(), attributes & NAV_MESH_CROUCH)) {
-		Warning("Goal is too far from current position: %f.\n", goalDist);
+		blackboard.getSelf()->consoleWarn(std::string("Goal is too far from current position: ") + std::to_string(goalDist));
 		return true;
 	}
 	if (path.empty()) {

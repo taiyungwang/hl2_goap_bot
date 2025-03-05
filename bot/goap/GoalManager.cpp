@@ -2,6 +2,9 @@
 
 #include "Planner.h"
 #include "action/Action.h"
+#include <player/Blackboard.h>
+#include <player/Bot.h>
+#include <convar.h>
 #include <vstdlib/random.h>
 #include <algorithm>
 
@@ -51,6 +54,10 @@ void GoalManager::execute() {
 		} else {
 			plan.pop();
 			if (plan.empty() || !actions[plan.front()]->init()) {
+				extern ConVar mybot_debug;
+				if (mybot_debug.GetBool()) {
+					blackboard.getSelf()->consoleMsg("No more plans.");
+				}
 				reset();
 			}
 		}
@@ -69,7 +76,7 @@ bool GoalManager::getNextGoal() {
 		}
 	}
 	if (noGoalsFound) {
-		Warning("Unable to find a goal.\n");
+		blackboard.getSelf()->consoleWarn("Unable to find a goal.\n");
 	}
 	reset();
 	return false;

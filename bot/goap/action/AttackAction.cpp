@@ -50,10 +50,6 @@ bool AttackAction::execute() {
 		return true;
 	}
 	edict_t* selfEnt = self->getEdict();
-	WeaponFunction* weapFunc = weapon->chooseWeaponFunc(selfEnt, dist);
-	if (!weapFunc->isInRange(dist)) {
-		return true;
-	}
 	if (weapon->getDeployer() != nullptr && weapon->getMinDeployRange() < dist) {
 		if (!weapon->getDeployer()->execute(blackboard)) {
 			return false;
@@ -66,6 +62,7 @@ bool AttackAction::execute() {
 	if (targetEnt == nullptr || targetDestroyed()) {
 		return true;
 	}
+	WeaponFunction* weapFunc = weapon->chooseWeaponFunc(selfEnt, dist);
 	if (weapFunc->isExplosive()) {
 		targetLoc = targetEnt->GetCollideable()->GetCollisionOrigin();
 	}
@@ -74,22 +71,21 @@ bool AttackAction::execute() {
 		targetLoc = weapFunc->getAim(targetLoc, eyes);
 		adjustAim = false;
 	}
-	bool crouch = weapFunc->isMelee()
-			&& eyes.z - targetLoc.z > 20.0f
-			&& (moveCtx->getTraceResult().startsolid
-				|| dist < HalfHumanWidth * 2.0f);
 	Buttons& buttons = blackboard.getButtons();
 	self->setWantToListen(false);
 	self->setViewTarget(targetLoc);
-	if (crouch) {
+	if (weapFunc->isMelee() && eyes.z - targetLoc.z > 20.0f
+			&& (moveCtx->getTraceResult().startsolid || dist < HalfHumanWidth * 2.0f)) {
 		buttons.hold(IN_DUCK);
-	} else if (weapFunc->isMelee()) {
-		const auto& tr = moveCtx->getTraceResult();
-		if (!tr.DidHit() || (!tr.startsolid
-				&& tr.startpos.DistTo(tr.endpos) > HalfHumanWidth)) {
-			moveCtx->setGoal(targetLoc);
-			CNavArea* area = Navigator::getArea(selfEnt, self->getTeam());
-			moveCtx->move(area == nullptr ? NAV_MESH_INVALID: area->GetAttributes());
+	}
+	if (!weapFunc->isInRange(dist)) {
+		Vector forward = targetLoc - self->getCurrentPosition();
+		if (dist < weapFunc->getRange()[0]) { // we're too close
+			forward.x = -forward.x;
+			forward.y = -forward.y;
+		}
+		moveCtx->setGoal(targetLoc + forward);
+		if (weapFunc->isMelee()) {
 			buttons.hold(IN_SPEED);
 		}
 	}

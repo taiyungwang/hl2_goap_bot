@@ -61,6 +61,9 @@ bool SnipeAction::execute() {
 	self->setViewTarget(aim * 100.0f + blackboard.getSelf()->getCurrentPosition());
 	self->lookStraight();
 	Weapon *weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
+	if (weapon == nullptr) {
+		return true;
+	}
 	Deployer* deployer = weapon->getDeployer();
 	if (deployer != nullptr && self->getAimAccuracy() > 0.8f) {
 		if (!deployer->execute(blackboard)) {

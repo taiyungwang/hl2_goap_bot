@@ -129,6 +129,10 @@ public:
 
 	bool isOnLadder() const;
 
+	void consoleMsg(const std::string& message) const;
+
+	void consoleWarn(const std::string& message) const;
+
 private:
 	static PlayerClasses CLASSES;
 

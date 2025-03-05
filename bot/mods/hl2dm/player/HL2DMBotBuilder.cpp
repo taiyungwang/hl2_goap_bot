@@ -64,43 +64,41 @@ public:
 		return nullptr == arsenal.getWeapon(arsenal.getWeaponIdByName(WEAPON_NAME.c_str()));
 	}
 
-private:
+protected:
 	const std::string WEAPON_NAME;
 };
 
-class ItemAmmoBuilder: public ItemBuilder {
+class ItemAmmoBuilder: public ItemWeaponBuilder {
 public:
-	ItemAmmoBuilder(const char *weapon, int maxAmmo, bool secondary = false) :
-		SECONDARY(secondary), WEAPON_NAME(weapon), MAX_AMMO(maxAmmo) {
+	ItemAmmoBuilder(const char *weapon, int maxAmmo, bool secondary = false) : ItemWeaponBuilder(weapon),
+		SECONDARY(secondary), MAX_AMMO(maxAmmo) {
 	}
 
 	bool need(const Bot &bot) const override {
 		auto arsenal = bot.getArsenal();
-		Weapon *weapon = arsenal.getWeapon(
-				arsenal.getWeaponIdByName(WEAPON_NAME.c_str()));
-		return weapon != nullptr
-				&& ((!SECONDARY && weapon->getPrimary()->getAmmo(bot.getEdict()) < MAX_AMMO)
-						||(SECONDARY && weapon->getSecondary()->getAmmo(bot.getEdict()) < MAX_AMMO));
+		Weapon *weapon = arsenal.getWeapon(arsenal.getWeaponIdByName(WEAPON_NAME.c_str()));
+		return weapon != nullptr && (SECONDARY ? weapon->getSecondary() : weapon->getPrimary())->getAmmo(bot.getEdict()) < MAX_AMMO;
 	}
 
 private:
 	const bool SECONDARY;
 
-	const std::string WEAPON_NAME;
-
 	const int MAX_AMMO;
 };
 
 #define DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(weaponClass, weaponName, ammo, ammoName) \
-		class ItemAmmo##weaponClass##Builder: public ItemAmmoBuilder {\
-		public:\
-			ItemAmmo##weaponClass##Builder() : ItemAmmoBuilder(weaponName, ammo) {} \
-		};			\
-		class Item##weaponClass##Builder: public ItemWeaponBuilder {\
-		public:\
-			Item##weaponClass##Builder(): ItemWeaponBuilder(weaponName) {\
-			}\
-		};itemMap.addItemBuilder<Item##weaponClass##Builder>(ammoName);
+	class ItemAmmo##weaponClass##Builder: public ItemAmmoBuilder {\
+	public:\
+		ItemAmmo##weaponClass##Builder() : ItemAmmoBuilder(weaponName, ammo) {} \
+	};			\
+	itemMap.addItemBuilder<ItemAmmo##weaponClass##Builder>(ammoName);\
+	class Item##weaponClass##Builder: public ItemWeaponBuilder {\
+	public:\
+		Item##weaponClass##Builder(): ItemWeaponBuilder(weaponName) {\
+		}\
+	};\
+	itemMap.addItemBuilder<Item##weaponClass##Builder>(weaponName);
+
 
 class ItemAmmoSmgGrenadeBuilder: public ItemAmmoBuilder {
 public:
@@ -123,24 +121,18 @@ HL2DMBotBuilder::HL2DMBotBuilder(CommandHandler& commandHandler, const ArsenalBu
 	itemMap.addItemBuilder<SuitChargerBuilder>("item_suitcharger");
 	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Pistol, "pistol", 150, "item_ammo_pistol")
 	itemMap.addItemBuilder<ItemAmmoPistolBuilder>("item_ammo_pistol_large");
-	itemMap.addItemBuilder<ItemAmmoPistolBuilder>("weapon_pistol");
 	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(AR2, "weapon_ar2", 60, "item_ammo_ar2")
 	itemMap.addItemBuilder<ItemAmmoAR2Builder>("item_ammo_ar2_large");
 	itemMap.addItemBuilder<ItemAmmoAR2AltBuilder>("item_ammo_ar2_altfire");
-	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(SMG, "weapon_smg1", 225, "weapon_smg1")
-	itemMap.addItemBuilder<ItemAmmoSMGBuilder>("item_ammo_smg1");
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(SMG, "weapon_smg1", 225, "item_ammo_smg1")
 	itemMap.addItemBuilder<ItemAmmoSMGBuilder>("item_ammo_smg1_large");
 	itemMap.addItemBuilder<ItemAmmoSmgGrenadeBuilder>("item_ammo_smg1_grenade");
-	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Shotgun, "weapon_shotgun", 30, "weapon_shotgun")
-	itemMap.addItemBuilder<ItemAmmoShotgunBuilder>("item_box_buckshot");
-	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Crossbow, "weapon_crossbow", 10, "weapon_crossbow")
-	itemMap.addItemBuilder<ItemAmmoCrossbowBuilder>("item_ammo_crossbow");
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Shotgun, "weapon_shotgun", 30, "item_box_buckshot")
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Crossbow, "weapon_crossbow", 10, "item_ammo_crossbow")
 	itemMap.addItemBuilder<ItemAmmoCrossbowBuilder>("item_ammo_crossbow_large");
-	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Magnum, "weapon_357", 12, "weapon_357")
-	itemMap.addItemBuilder<ItemAmmoMagnumBuilder>("item_ammo_357");
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Magnum, "weapon_357", 12, "item_ammo_357")
 	itemMap.addItemBuilder<ItemAmmoMagnumBuilder>("item_ammo_357_large");
-	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(RPG, "weapon_rpg", 3, "weapon_rpg")
-	itemMap.addItemBuilder<ItemAmmoRPGBuilder>("item_rpg_round");
+	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(RPG, "weapon_rpg", 3, "item_rpg_round")
 	DECL_AMMO_WEAPON_BUILDER_CLASSES_AND_ADD(Grenade, "weapon_grenade", 5, "weapon_frag")
 }
 

@@ -30,6 +30,8 @@ private:
 
 	float animationCycle = 0.0f;
 
+	unsigned int animationCycleUnchangedFrames = 0;
+
 	std::shared_ptr<Item> resource;
 
 	void selectItem() override;

@@ -277,3 +277,11 @@ void Bot::listen() {
 		}
 	}
 }
+
+void Bot::consoleMsg(const std::string& message) const {
+	Msg((std::string(getName()) + ": " + message + "\n").c_str());
+}
+
+void Bot::consoleWarn(const std::string& message) const {
+	Warning((std::string(getName()) + ": " + message + "\n").c_str());
+}

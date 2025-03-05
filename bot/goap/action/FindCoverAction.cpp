@@ -71,7 +71,7 @@ bool FindCoverAction::precondCheck() {
 }
 
 float FindCoverAction::getHeuristicCost(CNavArea *area) const {
-	float cost = 0.0f;
+	float cost = area->GetCenter().DistTo(blackboard.getSelf()->getCurrentPosition());
 	Vector eyes(area->GetCenter());
 	for (auto avoid: areasToAvoid) {
 		Vector enemyEyes;
@@ -81,12 +81,12 @@ float FindCoverAction::getHeuristicCost(CNavArea *area) const {
 		if (result.DidHit()) {
 			continue;
 		}
-		cost -= area->GetCenter().DistTo(std::get<1>(avoid)->GetCollideable()->GetCollisionOrigin());
+		cost /= area->GetCenter().DistTo(std::get<1>(avoid)->GetCollideable()->GetCollisionOrigin());
 	}
 	for (auto i: blackboard.getSelf()->getVision().getNearbyTeammates()) {
-		cost += area->GetCenter().DistTo(Player::getPlayer(i)->getCurrentPosition());
+		cost *= area->GetCenter().DistTo(Player::getPlayer(i)->getCurrentPosition()) / 2.0f;
 	}
-	return MAX(0.0, cost);
+	return cost;
 }
 
 bool FindCoverAction::shouldSearch(CNavArea *area) const {
