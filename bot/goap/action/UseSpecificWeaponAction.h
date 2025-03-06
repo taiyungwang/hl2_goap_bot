@@ -1,12 +1,12 @@
 #pragma once
 
-#include "WeaponAction.h"
+#include "SwitchToDesiredWeaponAction.h"
 
-class UseSpecificWeaponAction: public WeaponAction {
+class UseSpecificWeaponAction: public SwitchToDesiredWeaponAction {
 public:
 	UseSpecificWeaponAction(Blackboard& blackboard);
 
-	virtual bool precondCheck();
+	bool precondCheck() override;
 
 protected:
 	int weapIdx = 0;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <unordered_map>
 
 class Weapon;
 struct edict_t;
@@ -18,3 +19,6 @@ public:
 protected:
 	float damage1, damage2;
 };
+
+typedef std::unordered_map<std::string, std::shared_ptr<WeaponBuilder>> WeaponBuilders;
+

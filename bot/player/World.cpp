@@ -2,7 +2,6 @@
 
 #include "Blackboard.h"
 #include "Bot.h"
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <util/BaseEntity.h>
 #include <voice/VoiceMessage.h>
@@ -29,7 +28,6 @@ bool World::think(Blackboard& blackboard) {
 	Bot* self = blackboard.getSelf();
 	updateState(WorldProp::MULTIPLE_ENEMY_SIGHTED,
 			self->getVision().getVisibleEnemies().size() > 1);
-	Arsenal& arsenal = blackboard.getSelf()->getArsenal();
 	edict_t* blocker = blackboard.getBlocker();
 	if (blocker != nullptr && (BaseEntity(blocker).isDestroyedOrUsed()
 			|| (self->getFacing().Dot(blocker->GetCollideable()->GetCollisionOrigin()
@@ -39,9 +37,9 @@ bool World::think(Blackboard& blackboard) {
 		blackboard.setBlocker(nullptr);
 	}
 	bool inRange = true;
-	const Weapon* weap = arsenal.getCurrWeapon();
+	const auto weap = self->getCurrWeapon();
 	const Player* enemy = Player::getPlayer(self->getVision().getTargetedPlayer());
-	if (weap != nullptr) {
+	if (weap) {
 		const Vector& pos = self->getEyesPos();
 		if (enemy != nullptr) {
 			inRange = weap->isInRange(enemy->getEyesPos().DistTo(pos));

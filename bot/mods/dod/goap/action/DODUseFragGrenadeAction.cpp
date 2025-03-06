@@ -5,7 +5,6 @@
 #include <player/Bot.h>
 #include <player/Vision.h>
 #include <util/BaseGrenade.h>
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <in_buttons.h>
 
@@ -14,7 +13,7 @@ bool DODUseFragGrenadeAction::execute() {
 	self->setViewTarget(target);
 	if (self->getVision().getVisibleEnemies().size() < 2 || primeDuration++ >= 300) {
 		extern IVEngineServer *engine;
-		edict_t *weap = engine->PEntityOfEntIndex(self->getArsenal().getCurrWeaponIdx());
+		edict_t *weap = engine->PEntityOfEntIndex(self->getCurrWeaponIdx());
 		if (BaseGrenade(weap).get<bool>("m_bPinPulled", false)) {
 			self->sendVoiceMessage(DODVoiceMessage::FIRE_IN_THE_HOLE);
 		}

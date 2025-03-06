@@ -27,7 +27,7 @@ public:
 
 	static void canSee(CGameTrace& result, const Vector& start, const Vector& end);
 
-	Bot(edict_t *ent, const std::shared_ptr<Arsenal> &arsenal,
+	Bot(edict_t *ent, const WeaponBuilders& arsenal,
 			CommandHandler& commandHandler,
 			const std::unordered_map<unsigned int, std::string> &messages);
 
@@ -133,6 +133,16 @@ public:
 
 	void consoleWarn(const std::string& message) const;
 
+	int getDesiredWeapon() const {
+		return desiredWeapon;
+	}
+
+	void setDesiredWeapon(int weapon) {
+		desiredWeapon = weapon;
+	}
+
+	int getBestWeapon() const;
+
 private:
 	static PlayerClasses CLASSES;
 
@@ -150,7 +160,7 @@ private:
 
 	std::shared_ptr<Navigator> navigator;
 
-	int desiredClassId = -1;
+	int desiredClassId = -1, desiredWeapon = 0;
 
 	float aimOffset = 0.0f;
 

@@ -2,16 +2,16 @@
 
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <weapon/Arsenal.h>
 
 bool SwitchToDesiredWeaponAction::precondCheck() {
 	return !blackboard.getSelf()->isOnLadder();
 }
 
 bool SwitchToDesiredWeaponAction::execute() {
-	if (arsenal.getDesiredWeaponIdx() == arsenal.getCurrWeaponIdx()) {
+	int desiredWeapIdx = blackboard.getSelf()->getDesiredWeapon();
+	if (desiredWeapIdx == blackboard.getSelf()->getCurrWeaponIdx()) {
 		return true;
 	}
-	blackboard.getCmd().weaponselect = arsenal.getDesiredWeaponIdx();
+	blackboard.getCmd().weaponselect = desiredWeapIdx;
 	return false;
 }

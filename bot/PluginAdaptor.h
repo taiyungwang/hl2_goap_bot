@@ -6,7 +6,6 @@
 
 class Thinker;
 class BotBuilder;
-class ArsenalBuilder;
 class VoiceCommand;
 class HidingSpotSelector;
 class CBasePlayer;
@@ -55,8 +54,6 @@ private:
 	CommandHandler commandHandler;
 
 	BotBuilder* botBuilder;
-
-	std::shared_ptr<ArsenalBuilder> arsenalBuilder;
 
 	std::shared_ptr<VoiceCommand> voiceCommand;
 

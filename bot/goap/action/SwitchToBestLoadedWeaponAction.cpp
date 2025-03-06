@@ -3,7 +3,6 @@
 #include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <util/BasePlayer.h>
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 
 SwitchToBestLoadedWeaponAction::SwitchToBestLoadedWeaponAction(
@@ -12,18 +11,15 @@ SwitchToBestLoadedWeaponAction::SwitchToBestLoadedWeaponAction(
 	effects = {WorldProp::WEAPON_LOADED, true};
 }
 
-static bool ignore(const Weapon* weap, Blackboard& blackboard, float dist) {
-	return weap->isClipEmpty() || !weap->isInRange(dist);
-}
-
 bool SwitchToBestLoadedWeaponAction::precondCheck() {
 	if (!SwitchToDesiredWeaponAction::precondCheck()) {
 		return false;
 	}
-	int best = arsenal.getBestWeapon(blackboard, ignore);
-	if (best == 0 || best == arsenal.getCurrWeaponIdx()) {
+	Bot *self = blackboard.getSelf();
+	int best = self->getBestWeapon();
+	if (best == 0 || best == self->getCurrWeaponIdx()) {
 		return false;
 	}
-	arsenal.setDesiredWeaponIdx(best);
+	self->setDesiredWeapon(best);
 	return true;
 }

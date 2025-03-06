@@ -4,15 +4,27 @@
 #include <mods/hl2dm/goap/action/UseGravityGunAction.h>
 #include <mods/hl2dm/goap/action/GetClosestNeededItemAction.h>
 #include <mods/hl2dm/goap/action/Item.h>
+#include <mods/hl2dm/weapon/MagnumBuilder.h>
+#include <mods/hl2dm/weapon/CrossbowBuilder.h>
+#include <mods/hl2dm/weapon/AR2Builder.h>
+#include <mods/hl2dm/weapon/SMGBuilder.h>
+#include <mods/hl2dm/weapon/ShotgunFunction.h>
+
 #include <mods/hl2dm/util/HL2MPPlayer.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <goap/action/GoToAction.h>
 #include <goap/action/ThrowGrenadeAction.h>
 #include <goap/GoalManager.h>
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
+#include <weapon/MeleeWeaponBuilder.h>
+#include <weapon/PistolBuilder.h>
+#include <weapon/MeleeWeaponBuilder.h>
+#include <weapon/SimpleWeaponBuilder.h>
+#include <weapon/GrenadeBuilder.h>
+#include <weapon/RPGBuilder.h>
+#include <weapon/UtilityToolBuilder.h>
 
 class HealthChargerBuilder: public ChargerBuilder {
 public:
@@ -60,8 +72,7 @@ public:
 	}
 
 	bool need(const Bot &bot) const override {
-		auto arsenal = bot.getArsenal();
-		return nullptr == arsenal.getWeapon(arsenal.getWeaponIdByName(WEAPON_NAME.c_str()));
+		return !bot.getWeapon(WEAPON_NAME.c_str());
 	}
 
 protected:
@@ -75,9 +86,8 @@ public:
 	}
 
 	bool need(const Bot &bot) const override {
-		auto arsenal = bot.getArsenal();
-		Weapon *weapon = arsenal.getWeapon(arsenal.getWeaponIdByName(WEAPON_NAME.c_str()));
-		return weapon != nullptr && (SECONDARY ? weapon->getSecondary() : weapon->getPrimary())->getAmmo(bot.getEdict()) < MAX_AMMO;
+		auto weapon = bot.getWeapon(WEAPON_NAME.c_str());
+		return weapon  && (SECONDARY ? weapon->getSecondary() : weapon->getPrimary())->getAmmo(bot.getEdict()) < MAX_AMMO;
 	}
 
 private:
@@ -112,8 +122,20 @@ public:
 	}
 };
 
-HL2DMBotBuilder::HL2DMBotBuilder(CommandHandler& commandHandler, const ArsenalBuilder &arsenalBuilder) :
-		BotBuilder(commandHandler, arsenalBuilder) {
+HL2DMBotBuilder::HL2DMBotBuilder(CommandHandler& commandHandler) :
+		BotBuilder(commandHandler) {
+	weaponBuilders["weapon_stunstick"] = std::make_shared<MeleeWeaponBuilder>();
+	weaponBuilders["weapon_crowbar"] = std::make_shared<MeleeWeaponBuilder>();
+	weaponBuilders["weapon_pistol"] = std::make_shared<PistolBuilder>(0.2f);
+	weaponBuilders["weapon_smg1"] = std::make_shared<SMGBuilder>();
+	weaponBuilders["weapon_ar2"] = std::make_shared<AR2Builder>();
+	weaponBuilders["weapon_shotgun"] = std::make_shared<SimpleWeaponBuilder<ShotgunFunction>>();
+	weaponBuilders["weapon_357"] = std::make_shared<MagnumBuilder>();
+	weaponBuilders["weapon_crossbow"] = std::make_shared<CrossbowBuilder>();
+	weaponBuilders["weapon_frag"] = std::make_shared<GrenadeBuilder>(600.0f);
+	weaponBuilders["weapon_rpg"] = std::make_shared<RPGBuilder>();
+	weaponBuilders["weapon_physcannon"] = std::make_shared<UtilityToolBuilder>(768.0f);
+
 	itemMap.addItemBuilder<HealthKitBuilder>("item_healthkit");
 	itemMap.addItemBuilder<HealthKitBuilder>("item_healthvial");
 	itemMap.addItemBuilder<HealthChargerBuilder>("item_healthcharger");

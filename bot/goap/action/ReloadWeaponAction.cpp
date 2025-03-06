@@ -4,7 +4,6 @@
 #include <player/Bot.h>
 #include <player/Buttons.h>
 #include <weapon/Reloader.h>
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <util/SimpleException.h>
 #include <in_buttons.h>
@@ -22,8 +21,8 @@ bool ReloadWeaponAction::precondCheck() {
 }
 
 bool ReloadWeaponAction::execute() {
-	Weapon* weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
-	if (weapon == nullptr) {
+	auto weapon = blackboard.getSelf()->getCurrWeapon();
+	if (!weapon) {
 		return true;
 	}
 	Reloader* reloader = weapon->getReloader();

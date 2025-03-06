@@ -2,7 +2,6 @@
 
 #include <mods/dod/voice/DODVoiceMessage.h>
 #include <mods/dod/weapon/DODLiveGrenadeBuilder.h>
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <player/Blackboard.h>
 #include <player/Bot.h>
@@ -50,9 +49,8 @@ bool DODWorld::update(Blackboard& blackboard) {
 		reset = false;
 		return true;
 	}
-	auto arsenal = blackboard.getSelf()->getArsenal();
-	int baseBombId = arsenal.getWeaponIdByName("weapon_basebomb"),
-			weapIdx = arsenal.getCurrWeaponIdx();
+	int baseBombId = self->getWeaponId("weapon_basebomb"),
+			weapIdx = self->getCurrWeaponIdx();
 	updateState(WorldProp::HAS_BOMB, baseBombId != 0);
 	updateState(WorldProp::HAS_LIVE_GRENADE, false);
 	if (states[WorldProp::ROUND_STARTED] != roundStarted) {
@@ -60,12 +58,12 @@ bool DODWorld::update(Blackboard& blackboard) {
 		reset = true;
 	}
 	for (auto name: DODLiveGrenadeBuilder::NAMES) {
-		if (arsenal.getWeaponIdByName(name.c_str()) > 0) {
+		if (self->getWeaponId(name.c_str()) > 0) {
 			updateState(WorldProp::HAS_LIVE_GRENADE, true);
 			return true;
 		}
 	}
-	for (auto i: blackboard.getSelf()->getVision().getVisibleEntities()) {
+	for (auto i: self->getVision().getVisibleEntities()) {
 		extern IVEngineServer *engine;
 		edict_t *entity = engine->PEntityOfEntIndex(i);
 		if (entity == nullptr || entity->IsFree()) {
@@ -106,7 +104,7 @@ bool DODWorld::update(Blackboard& blackboard) {
 		}
 	}
 	if (getState(WorldProp::OUT_OF_AMMO) && baseBombId != weapIdx
-			&& !arsenal.getWeapon(weapIdx)->isGrenade()) {
+			&& !self->getWeapon(weapIdx)->isGrenade()) {
 		self->sendVoiceMessage(DODVoiceMessage::NEED_AMMO);
 	}
 	return false;

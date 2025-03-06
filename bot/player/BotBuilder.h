@@ -1,10 +1,9 @@
 #pragma once
 
+#include <weapon/WeaponBuilder.h>
 #include <convar.h>
-#include <unordered_map>
 #include <string>
 #include <list>
-#include <memory>
 
 class Blackboard;
 class Bot;
@@ -13,13 +12,13 @@ class CommandHandler;
 class GoalManager;
 class World;
 class HidingSpotSelector;
-class ArsenalBuilder;
 struct edict_t;
 
 class BotBuilder: public ICommandCallback {
 public:
-	BotBuilder(CommandHandler& commandHandler,
-			const ArsenalBuilder& arsenalBuilder);
+	static std::shared_ptr<BotBuilder> factory(CommandHandler& commandHandler);
+
+	BotBuilder(CommandHandler& commandHandler);
 
 	virtual ~BotBuilder();
 
@@ -31,12 +30,18 @@ public:
 
 	void kickAllExcept(const CCommand &command);
 
+	const WeaponBuilders &getWeaponBuilders() const {
+		return weaponBuilders;
+	}
+
 protected:
 	std::unordered_map<unsigned int, std::string> messages;
 
 	CommandHandler& commandHandler;
 
 	bool teamPlay = false;
+
+	WeaponBuilders weaponBuilders;
 
 	virtual void updatePlanner(GoalManager& planner,
 			Blackboard& blackboard) const = 0;
@@ -53,8 +58,6 @@ protected:
 	}
 
 private:
-	const ArsenalBuilder& arsenalBuilder;
-
 	typedef void (BotBuilder::*CmdFuncPtr)(const CCommand &command);
 
 	HidingSpotSelector* hidingSpotSelector = nullptr;

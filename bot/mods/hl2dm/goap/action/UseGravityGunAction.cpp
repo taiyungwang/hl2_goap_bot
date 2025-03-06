@@ -3,7 +3,6 @@
 #include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <player/Vision.h>
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
 
@@ -24,7 +23,7 @@ bool UseGravityGunAction::execute() {
 		blackboard.setBlocker(nullptr);
 		return true;
 	}
-	arsenal.getCurrWeapon()->getPrimary()->attack(blackboard.getButtons(),
+	self->getCurrWeapon()->getPrimary()->attack(blackboard.getButtons(),
 				dist);
 	return false;
 }

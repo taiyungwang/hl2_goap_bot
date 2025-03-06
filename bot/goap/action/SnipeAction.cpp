@@ -4,7 +4,6 @@
 #include <player/Buttons.h>
 #include <player/Bot.h>
 #include <player/HidingSpotSelector.h>
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <weapon/Deployer.h>
 #include <nav_mesh/nav_mesh.h>
@@ -26,9 +25,9 @@ bool SnipeAction::init() {
 	auto self = blackboard.getSelf();
 	int team = self->getTeam();
 	duration = 300;
-	const Weapon *weapon = self->getArsenal().getCurrWeapon();
+	const auto weapon = self->getCurrWeapon();
 	if (!GoToAction::init()
-			|| (weapon != nullptr && weapon->getMinDeployRange()
+			|| (weapon && weapon->getMinDeployRange()
 			> calculateFacing())) {
 		selector->update(selectorId, team, false);
 		return false;
@@ -60,8 +59,8 @@ bool SnipeAction::execute() {
 	auto self = blackboard.getSelf();
 	self->setViewTarget(aim * 100.0f + blackboard.getSelf()->getCurrentPosition());
 	self->lookStraight();
-	Weapon *weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
-	if (weapon == nullptr) {
+	auto weapon = blackboard.getSelf()->getCurrWeapon();
+	if (!weapon) {
 		return true;
 	}
 	Deployer* deployer = weapon->getDeployer();
@@ -82,8 +81,8 @@ bool SnipeAction::execute() {
 bool SnipeAction::goalComplete() {
 	int team = blackboard.getSelf()->getTeam();
 	selector->setInUse(selectorId, team, false);
-	auto weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
-	if (weapon != nullptr) {
+	auto weapon = blackboard.getSelf()->getCurrWeapon();
+	if (weapon) {
 		weapon->undeploy(blackboard);
 	}
 	if (GoToAction::goalComplete()) {
@@ -104,7 +103,7 @@ void SnipeAction::abort() {
 		// if we see an enemy at our spot, then it's successful.
 		selector->update(selectorId, team, true);
 	}
-	auto weapon = self->getArsenal().getCurrWeapon();
+	auto weapon = self->getCurrWeapon();
 	if (weapon != nullptr) {
 		weapon->undeploy(blackboard);
 	}

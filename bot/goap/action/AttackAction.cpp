@@ -5,7 +5,6 @@
 #include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <player/Vision.h>
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
 #include <weapon/Deployer.h>
@@ -45,8 +44,8 @@ bool AttackAction::execute() {
 	Bot* self = blackboard.getSelf();
 	Vector targetLoc = self->getViewTarget();
 	float dist = targetLoc.DistTo(self->getCurrentPosition());
-	Weapon* weapon = self->getArsenal().getCurrWeapon();
-	if (weapon == nullptr || dur-- < 1 || weapon->isClipEmpty()) {
+	auto weapon = self->getCurrWeapon();
+	if (!weapon || dur-- < 1 || weapon->isClipEmpty()) {
 		return true;
 	}
 	edict_t* selfEnt = self->getEdict();
@@ -104,8 +103,8 @@ bool AttackAction::goalComplete() {
 void AttackAction::abort() {
 	auto self = blackboard.getSelf();
 	self->setAimOffset(0.0f);
-	Weapon* weapon = self->getArsenal().getCurrWeapon();
-	if (weapon != nullptr) {
+	auto weapon = self->getCurrWeapon();
+	if (weapon) {
 		weapon->undeploy(blackboard);
 	}
 	moveCtx->stop();

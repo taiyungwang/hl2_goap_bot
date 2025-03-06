@@ -1,11 +1,11 @@
 #pragma once
 
-#include "WeaponAction.h"
+#include "Action.h"
 
-class SwitchToDesiredWeaponAction: public WeaponAction {
+class SwitchToDesiredWeaponAction: public Action {
 public:
 	SwitchToDesiredWeaponAction(Blackboard& blackboard) :
-			WeaponAction(blackboard) {
+			Action(blackboard) {
 		effects = {WorldProp::USING_DESIRED_WEAPON, true};
 	}
 

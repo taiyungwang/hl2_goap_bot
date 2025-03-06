@@ -36,5 +36,7 @@ public:
 private:
 	const std::string deployableCheck;
 
+	std::shared_ptr<U> deplolyer;
+
 	float damage, zoomDist, minRange, maxRange;
 };

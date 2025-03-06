@@ -2,23 +2,21 @@
 
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
+#include <eiface.h>
 
-UseSpecificWeaponAction::UseSpecificWeaponAction(Blackboard& blackboard) :
-		WeaponAction(blackboard) {
+UseSpecificWeaponAction::UseSpecificWeaponAction(Blackboard& blackboard) : SwitchToDesiredWeaponAction(blackboard) {
 	precond[WorldProp::USING_DESIRED_WEAPON] = true;
 }
 
 bool UseSpecificWeaponAction::precondCheck() {
 	weapIdx = 0;
-	arsenal.visit([this](int i, const Weapon* weapon) mutable -> bool {
+	blackboard.getSelf()->forMyWeapons([this](edict_t *weaponEnt) mutable -> bool {
 		extern IVEngineServer* engine;
-		edict_t* ent = engine->PEntityOfEntIndex(i);
-		if (ent != nullptr && !ent->IsFree()
-				&& this->canUse(i)) {
+		int i = engine->IndexOfEdict(weaponEnt);
+		if (this->canUse(i)) {
 			weapIdx = i;
-			arsenal.setDesiredWeaponIdx(weapIdx);
+			blackboard.getSelf()->setDesiredWeapon(weapIdx);
 			return true;
 		}
 		return false;
@@ -27,5 +25,5 @@ bool UseSpecificWeaponAction::precondCheck() {
 }
 
 bool UseSpecificWeaponAction::canUse(int i) const {
-	return !arsenal.getWeapon(i)->isOutOfAmmo(blackboard.getSelf()->getEdict());
+	return !blackboard.getSelf()->getWeapon(i)->isOutOfAmmo(blackboard.getSelf()->getEdict());
 }

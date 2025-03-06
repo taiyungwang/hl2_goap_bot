@@ -8,13 +8,15 @@
 #include <goap/GoalManager.h>
 #include <move/Navigator.h>
 #include <move/RotationManager.h>
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
+#include <weapon/WeaponFunction.h>
 #include <nav_mesh/nav_area.h>
 #include <util/SimpleException.h>
 #include <util/BasePlayer.h>
+#include <util/BaseCombatWeapon.h>
 #include <util/EntityUtils.h>
 #include <util/UtilTrace.h>
+#include <shareddefs.h>
 #include <ivdebugoverlay.h>
 #include <IEngineTrace.h>
 #include <in_buttons.h>
@@ -25,7 +27,7 @@ static ConVar mybot_mimic("mybot_mimic", "0");
 
 extern IVEngineServer *engine;
 
-Bot::Bot(edict_t* ent, const std::shared_ptr<Arsenal>& arsenal,
+Bot::Bot(edict_t* ent, const WeaponBuilders& arsenal,
 	CommandHandler& commandHandler,
 	const std::unordered_map<unsigned int, std::string> &messages) :
 	Player(ent, arsenal), Receiver(commandHandler),
@@ -284,4 +286,15 @@ void Bot::consoleMsg(const std::string& message) const {
 
 void Bot::consoleWarn(const std::string& message) const {
 	Warning((std::string(getName()) + ": " + message + "\n").c_str());
+}
+
+int Bot::getBestWeapon() const {
+	int targetedPlayer = vision.getTargetedPlayer();
+	edict_t* target = nullptr;
+	if (targetedPlayer > 0) {
+		target = Player::getPlayer(targetedPlayer)->getEdict();
+	} else if (blackboard->getBlocker() != nullptr) {
+		target = blackboard->getBlocker();
+	}
+	return Player::getBestWeapon(target);
 }

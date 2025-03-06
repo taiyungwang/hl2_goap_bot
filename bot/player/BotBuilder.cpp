@@ -14,7 +14,6 @@
 #include <goap/action/FindCoverFromGrenadesAction.h>
 #include <goap/action/SwitchWeaponAction.h>
 #include <goap/GoalManager.h>
-#include <weapon/ArsenalBuilder.h>
 #include <util/BasePlayer.h>
 
 extern IVEngineServer* engine;
@@ -22,9 +21,7 @@ extern CGlobalVars *gpGlobals;
 
 static ConVar minPlayers("mybot_min_players", "-1");
 
-BotBuilder::BotBuilder(CommandHandler& commandHandler,
-		const ArsenalBuilder& arsenalBuilder): commandHandler(commandHandler),
-				arsenalBuilder(arsenalBuilder) {
+BotBuilder::BotBuilder(CommandHandler& commandHandler): commandHandler(commandHandler) {
 	addCommand("mybot_add_bot", "Add a bot to the server", &BotBuilder::addBot);
 	addCommand("mybot_add_all_bots", "Fill server with bots", &BotBuilder::addAllBots);
 	addCommand("mybot_kick_all_bots_except", "Kicks all bots except bot with given name",
@@ -85,7 +82,7 @@ public:
 };
 
 Bot* BotBuilder::build(edict_t* ent) {
-	Bot* bot = new Bot(ent, arsenalBuilder.build(), commandHandler,
+	Bot* bot = new Bot(ent, weaponBuilders, commandHandler,
 			messages);
 	Blackboard *blackboard = new Blackboard(bot);
 	bot->setNavigator(std::make_shared<Navigator>(*blackboard));

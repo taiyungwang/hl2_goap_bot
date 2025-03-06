@@ -2,7 +2,6 @@
 
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <limits>
 
@@ -36,8 +35,8 @@ bool KillAction::execute()  {
 		framesToWait = mybotAttackDelay.GetInt();
 	}
 	const Player *player = Player::getPlayer(target);
-	Weapon *weapon = self->getArsenal().getCurrWeapon();
-	return ((weapon != nullptr && weapon->getDeployer() != nullptr
+	auto weapon = self->getCurrWeapon();
+	return ((weapon && weapon->getDeployer() != nullptr
 			&& player != nullptr && weapon->getMinDeployRange()
 			< player->getCurrentPosition().DistTo(self->getCurrentPosition())
 			&& !weapon->isDeployed())

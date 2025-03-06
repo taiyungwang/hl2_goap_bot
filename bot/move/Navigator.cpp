@@ -5,7 +5,6 @@
 #include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
 #include <nav_mesh/nav_mesh.h>
 #include <nav_mesh/nav_area.h>
@@ -108,7 +107,7 @@ bool Navigator::step() {
 		areaTime = 0;
 	}
 	if (areaTime > maxTime) {
-		blackboard.getSelf()->consoleWarn(std::string("Unable to reach area ") + std::to_string(topArea->GetID()));
+		blackboard.getSelf()->consoleWarn(std::string("Unable to get to next area from: ") + std::to_string(lastAreaId));
 		areaTime = 0;
 		moveCtx->setStuck(true);
 	}
@@ -148,7 +147,7 @@ bool Navigator::step() {
 }
 
 bool Navigator::checkCanMove() {
-	Weapon* weapon = blackboard.getSelf()->getArsenal().getCurrWeapon();
+	auto weapon = blackboard.getSelf()->getCurrWeapon();
 	if (weapon != nullptr && weapon->isDeployed()) {
 		weapon->undeploy(blackboard);
 		return false;

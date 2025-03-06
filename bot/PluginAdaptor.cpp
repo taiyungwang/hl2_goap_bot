@@ -1,9 +1,7 @@
 #include "PluginAdaptor.h"
 
 #include "mods/hl2dm/player/HL2DMBotBuilder.h"
-#include "mods/hl2dm/weapon/HL2DMArsenalBuilder.h"
 #include "mods/dod/player/DODBotBuilder.h"
-#include "mods/dod/weapon/DODArsenalBuilder.h"
 #include "goap/action/SnipeAction.h"
 #include "player/Bot.h"
 #include "player/HidingSpotSelector.h"
@@ -34,12 +32,10 @@ PluginAdaptor::PluginAdaptor() {
 	botBuilder = nullptr;
 	// TODO: make mod checking more stringent.
 	if (isGameName("hl2mp")) {
-		arsenalBuilder = std::make_shared<HL2DMArsenalBuilder>();
-		botBuilder = new HL2DMBotBuilder(commandHandler, *arsenalBuilder.get());
+		botBuilder = new HL2DMBotBuilder(commandHandler);
 		TheNavMesh->addPlayerSpawnName("info_player_start");
 	} else if (isGameName("dod")) {
-		arsenalBuilder = std::make_shared<DODArsenalBuilder>();
-		botBuilder = new DODBotBuilder(commandHandler, *arsenalBuilder.get());
+		botBuilder = new DODBotBuilder(commandHandler);
 		playerruncommand_offset.SetValue(
 #ifdef PLATFORM_WINDOWS_PC
 	"425"
@@ -82,7 +78,7 @@ void PluginAdaptor::gameFrame(bool simulating) {
 	const auto& players = Player::getPlayers();
 	newPlayers.remove_if([players, this](edict_t *ent) {
 		if (players.find(engine->IndexOfEdict(ent)) == players.end()) {
-			new Player(ent, arsenalBuilder->build());
+			new Player(ent, botBuilder->getWeaponBuilders());
 			return true;
 		}
 		return false;

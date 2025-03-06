@@ -2,7 +2,6 @@
 
 #include <player/Blackboard.h>
 #include <player/Bot.h>
-#include <weapon/Arsenal.h>
 #include <weapon/WeaponFunction.h>
 #include <weapon/Weapon.h>
 #include <nav_mesh/nav.h>
@@ -10,15 +9,16 @@
 
 bool ThrowGrenadeAction::precondCheck() {
 	auto self = blackboard.getSelf();
-	if (!UseSpecificWeaponAction::precondCheck() || arsenal.getWeapon(weapIdx) == nullptr
-			|| arsenal.getWeapon(weapIdx)->isOutOfAmmo(self->getEdict())) {
+	auto weapon = self->getWeapon(weapIdx);
+	if (!weapon || !UseSpecificWeaponAction::precondCheck() || self->getWeapon(weapIdx) == nullptr
+			|| weapon->isOutOfAmmo(self->getEdict())) {
 		return false;
 	}
 	auto player = chooseTarget();
 	if (player == nullptr) {
 		return false;
 	}
-	target = arsenal.getWeapon(weapIdx)->chooseWeaponFunc(self->getEdict(),
+	target = weapon->chooseWeaponFunc(self->getEdict(),
 			self->getEyesPos().DistTo(player->getCurrentPosition()))->getAim(player->getCurrentPosition(),
 					self->getEyesPos());
 	return true;
@@ -35,7 +35,7 @@ bool ThrowGrenadeAction::execute() {
 }
 
 const Player* ThrowGrenadeAction::chooseTarget() const {
-	Weapon *grenade = arsenal.getWeapon(weapIdx);
+	auto grenade = blackboard.getSelf()->getWeapon(weapIdx);
 	const Player *target = nullptr;
 	auto &vision = blackboard.getSelf()->getVision();
 	auto enemies = vision.getVisibleEnemies();

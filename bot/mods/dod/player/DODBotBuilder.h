@@ -8,8 +8,7 @@ class HL2DMWorld;
 
 class DODBotBuilder: public BotBuilder, public GameEventListener {
 public:
-	DODBotBuilder(CommandHandler& commandHandler,
-			const ArsenalBuilder& arsenalBuilder);
+	DODBotBuilder(CommandHandler& commandHandler);
 
 	void FireGameEvent(IGameEvent* event);
 
@@ -23,4 +22,7 @@ private:
 	void modHandleCommand(const CCommand &command, Bot* bot) const;
 
 	Bot *modBuild(Bot *bot, Blackboard& blackboard) override;
+
+	template<typename _Tp, typename... _Args>
+	void addPair(const char* name1, const char* name2, _Args&&... args);
 };

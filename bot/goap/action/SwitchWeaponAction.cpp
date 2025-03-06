@@ -1,7 +1,7 @@
 #include "SwitchWeaponAction.h"
 
-#include <weapon/Arsenal.h>
 #include <weapon/Weapon.h>
+#include <player/Bot.h>
 #include <player/Blackboard.h>
 
 SwitchWeaponAction::SwitchWeaponAction(Blackboard& blackboard) :
@@ -13,12 +13,10 @@ bool SwitchWeaponAction::precondCheck() {
 	if (!SwitchToDesiredWeaponAction::precondCheck()) {
 		return false;
 	}
-	int best = arsenal.getBestWeapon(blackboard,
-			[] (const Weapon*, Blackboard&, float) {
-		return false;
-	});
-	if (best > 0 && best != arsenal.getCurrWeaponIdx()) {
-		arsenal.setDesiredWeaponIdx(best);
+	Bot *self = blackboard.getSelf();
+	int best = self->getBestWeapon();
+	if (best > 0 && best != self->getCurrWeaponIdx()) {
+		self->setDesiredWeapon(best);
 		return true;
 	}
 	return false;

@@ -1,4 +1,4 @@
 add_library(goap_actions GoToAction.cpp KillAction.cpp FindCoverAction.cpp ThrowGrenadeAction.cpp
  SwitchWeaponAction.cpp GoToEntityAction.cpp AttackAction.cpp ReloadWeaponAction.cpp 
  SnipeAction.cpp SwitchToBestLoadedWeaponAction.cpp SwitchToDesiredWeaponAction.cpp
- UseSpecificWeaponAction.cpp WeaponAction.cpp GoToEntityWithGivenNameAction.cpp FindCoverFromGrenadesAction.cpp)
+ UseSpecificWeaponAction.cpp GoToEntityWithGivenNameAction.cpp FindCoverFromGrenadesAction.cpp)
