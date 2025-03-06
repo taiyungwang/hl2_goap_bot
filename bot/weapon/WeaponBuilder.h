@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <string>
 
 class Weapon;
 struct edict_t;
