@@ -5,18 +5,16 @@
 #include <move/Navigator.h>
 #include <move/MoveStateContext.h>
 #include <player/Bot.h>
-#include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <weapon/Weapon.h>
 #include <in_buttons.h>
 
-void DODMGDeployerProneState::deploy(Blackboard& blackboard) {
-	auto self = blackboard.getSelf();
+void DODMGDeployerProneState::deploy(Bot *self) {
 	edict_t* selfEnt = self->getEdict();
 	if (!DodPlayer(selfEnt).isProne()) {
 		if (wait++ == 0) {
 			targetIdx = self->getVision().getTargetedPlayer();
-			blackboard.getButtons().hold(IN_ALT1);
+			self->getButtons().hold(IN_ALT1);
 		} else if (wait >= PRONE_TIMEOUT) {
 			context->setState(std::shared_ptr<DODMGDeployerState>(nullptr));
 		}
@@ -35,11 +33,11 @@ void DODMGDeployerProneState::deploy(Blackboard& blackboard) {
 		return;
 	}
 	if (seeEnemies || target == nullptr) {
-		blackboard.getButtons().tap(IN_ATTACK2);
+		self->getButtons().tap(IN_ATTACK2);
 		return;
 	}
 	if (!moveCtx) {
-		moveCtx = std::make_shared<MoveStateContext>(blackboard);
+		moveCtx = std::make_shared<MoveStateContext>(self);
 		moveCtx->setGoal(self->getViewTarget());
 		moveCtx->traceMove(false);
 	}

@@ -19,7 +19,7 @@ public:
 protected:
 	edict_t* item = nullptr;
 
-	GoToEntityAction(Blackboard& blackboard): GoToAction(blackboard) {
+	GoToEntityAction(Bot *self): GoToAction(self) {
 	}
 
 	virtual void selectItem() = 0;

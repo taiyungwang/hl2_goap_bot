@@ -4,8 +4,8 @@
 
 class DODThrowLiveGrenadeAction: public ThrowGrenadeAction {
 public:
-	DODThrowLiveGrenadeAction(Blackboard &blackboard) :
-		ThrowGrenadeAction(blackboard) {
+	DODThrowLiveGrenadeAction(Bot *self) :
+		ThrowGrenadeAction(self) {
 		effects = { WorldProp::HAS_LIVE_GRENADE, false };
 	}
 

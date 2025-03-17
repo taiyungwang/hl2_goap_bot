@@ -7,7 +7,7 @@ class DODObjective;
 
 class DODDefendPointAction: public SnipeAction {
 public:
-	DODDefendPointAction(Blackboard& blackboard);
+	DODDefendPointAction(Bot *self);
 
 	void setObjectives(const DODObjectives* objectives) {
 		this->objectives = objectives;

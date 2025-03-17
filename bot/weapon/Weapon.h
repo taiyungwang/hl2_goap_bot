@@ -2,7 +2,7 @@
 
 #include <memory>
 
-class Blackboard;
+class Bot;
 class BaseEntity;
 class WeaponFunction;
 class Deployer;
@@ -54,7 +54,7 @@ public:
 
 	bool isDeployed() const;
 
-	void undeploy(Blackboard& blackboard);
+	void undeploy(Bot *self);
 
 	edict_t* getEdict() const {
 		return weap;

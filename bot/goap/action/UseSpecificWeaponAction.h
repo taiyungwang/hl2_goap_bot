@@ -4,7 +4,7 @@
 
 class UseSpecificWeaponAction: public SwitchToDesiredWeaponAction {
 public:
-	UseSpecificWeaponAction(Blackboard& blackboard);
+	UseSpecificWeaponAction(Bot *self);
 
 	bool precondCheck() override;
 

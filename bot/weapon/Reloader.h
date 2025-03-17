@@ -10,5 +10,5 @@ public:
 	virtual ~Reloader() {
 	}
 
-	virtual bool execute(Blackboard& blackboard);
+	virtual bool execute(Bot *self);
 };

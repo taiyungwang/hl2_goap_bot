@@ -1,11 +1,10 @@
 #include "GiveAmmoAction.h"
 #include <mods/dod/voice/DODVoiceMessage.h>
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 
-GiveAmmoAction::GiveAmmoAction(Blackboard &blackboard,
+GiveAmmoAction::GiveAmmoAction(Bot *self,
 		CommandHandler &commandHandler) :
-		GoToEntityAction(blackboard), Receiver(commandHandler) {
+		GoToEntityAction(self), Receiver(commandHandler) {
 	effects = { WorldProp::HEARD_NEED_AMMO, false };
 	precond[WorldProp::ENEMY_SIGHTED] = false;
 }
@@ -15,7 +14,7 @@ bool GiveAmmoAction::init() {
 		return false;
 	}
 	if (item != nullptr) {
-		blackboard.getSelf()->sendVoiceMessage(VoiceMessage::AFFIRMATIVE);
+		self->sendVoiceMessage(VoiceMessage::AFFIRMATIVE);
 	}
 	item = nullptr;
 	return true;
@@ -26,15 +25,14 @@ bool GiveAmmoAction::goalComplete() {
 		return false;
 	}
 	extern IServerPluginHelpers *helpers;
-	helpers->ClientCommand(blackboard.getSelf()->getEdict(), "dropammo");
+	helpers->ClientCommand(self->getEdict(), "dropammo");
 	return true;
 }
 
 bool GiveAmmoAction::receive(edict_t *sender, const CCommand &command) {
 	Player *player = Player::getPlayer(sender);
-	Bot *self = blackboard.getSelf();
 	if (player != nullptr && player->getTeam() == self->getTeam()
-			&& blackboard.getSelf()->getCurrentPosition().DistTo(
+			&& self->getCurrentPosition().DistTo(
 					player->getCurrentPosition()) < 500.0f
 			&& self->isVoiceMessageType(DODVoiceMessage::NEED_AMMO, command.Arg(0))
 			&& self->canSee(*player)) {

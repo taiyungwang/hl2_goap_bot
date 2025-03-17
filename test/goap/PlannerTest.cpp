@@ -8,13 +8,13 @@ std::queue<int> plan;
 WorldState worldState;
 Planner planner(worldState);
 
-class Blackboard {
+class Bot {
 } bb;
 
 class TestAction: public Action {
 public:
 	TestAction(const GoalState &effect) :
-			Action(bb) {
+			Action(&bb) {
 		effects = effect;
 		planner.addAction(this);
 	}

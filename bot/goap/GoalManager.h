@@ -5,7 +5,7 @@
 
 class Action;
 class Planner;
-class Blackboard;
+class Bot;
 
 /**
  * Manages a list of actions associated with their respective goals.  The goals are repeatedly executed
@@ -17,7 +17,7 @@ public:
 	/**
 	 * Builds a list of actions and a list of goals.
 	 */
-	GoalManager(const WorldState& worldState, Blackboard& blackboard);
+	GoalManager(const WorldState& worldState, Bot *self);
 
 	~GoalManager();
 
@@ -33,7 +33,7 @@ public:
 	 */
 	template<typename T, typename... Args>
 	T* addAction(float priority, Args&&... args) {
-		T* action = new T(blackboard, args...);
+		T* action = new T(self, args...);
 		addAction(priority, action);
 		return action;
 	}
@@ -49,7 +49,7 @@ private:
 
 	std::queue<int> plan;
 
-	Blackboard& blackboard;
+	Bot *self;
 
 	const WorldState& worldState;
 

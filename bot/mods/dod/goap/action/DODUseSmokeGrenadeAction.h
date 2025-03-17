@@ -6,8 +6,8 @@ class Player;
 
 class DODUseSmokeGrenadeAction: public DODThrowLiveGrenadeAction {
 public:
-	DODUseSmokeGrenadeAction(Blackboard& blackboard) :
-		DODThrowLiveGrenadeAction(blackboard) {
+	DODUseSmokeGrenadeAction(Bot *self) :
+		DODThrowLiveGrenadeAction(self) {
 		effects = {WorldProp::ENEMY_SIGHTED, false};
 	}
 

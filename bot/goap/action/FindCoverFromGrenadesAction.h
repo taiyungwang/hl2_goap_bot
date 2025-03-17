@@ -4,7 +4,7 @@
 
 class FindCoverFromGrenadesAction: public FindCoverAction {
 public:
-	FindCoverFromGrenadesAction(Blackboard &blackboard);
+	FindCoverFromGrenadesAction(Bot *self);
 
 private:
 	void setAvoidAreas() override;

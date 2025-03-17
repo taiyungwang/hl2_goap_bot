@@ -3,7 +3,6 @@
 #include "MoveStateContext.h"
 #include "StepLeft.h"
 #include "Avoid.h"
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <player/Buttons.h>
 #include <util/UtilTrace.h>
@@ -37,9 +36,9 @@ MoveState* Jump::move(const Vector& currPos) {
 	Vector pos(currPos), goal((ctx.getGoal() - currPos).Normalized() * 16.0f + pos);
 	pos.z += 48.0f;
 	goal.z = pos.z;
-	if ((!ctx.getBlackboard().getSelf()->isOnLadder() && ctx.trace(pos, goal, true,
-			IgnoreSelfAndTeammates(ctx.getBlackboard().getSelf()->getEdict())).DidHit())
-			|| !ctx.getBlackboard().getButtons().jump()) {
+	if ((!ctx.getSelf()->isOnLadder() && ctx.trace(pos, goal, true,
+			IgnoreSelfAndTeammates(ctx.getSelf()->getEdict())).DidHit())
+			|| !ctx.getSelf()->getButtons().jump()) {
 		return new Avoid(ctx, new StepLeft(ctx));
 	}
 	moveStraight(ctx.getGoal());

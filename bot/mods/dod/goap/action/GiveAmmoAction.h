@@ -5,7 +5,7 @@
 
 class GiveAmmoAction: public GoToEntityAction, public CommandHandler::Receiver {
 public:
-	GiveAmmoAction(Blackboard &blackboard, CommandHandler &commandHandler);
+	GiveAmmoAction(Bot *self, CommandHandler &commandHandler);
 
 	bool init();
 

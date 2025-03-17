@@ -1,7 +1,6 @@
 #include "DODUseFragGrenadeAction.h"
 
 #include <mods/dod/voice/DODVoiceMessage.h>
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <player/Vision.h>
 #include <util/BaseGrenade.h>
@@ -9,7 +8,6 @@
 #include <in_buttons.h>
 
 bool DODUseFragGrenadeAction::execute() {
-	Bot* self = blackboard.getSelf();
 	self->setViewTarget(target);
 	if (self->getVision().getVisibleEnemies().size() < 2 || primeDuration++ >= 300) {
 		extern IVEngineServer *engine;
@@ -20,7 +18,7 @@ bool DODUseFragGrenadeAction::execute() {
 		return true;
 	}
 	self->setWantToListen(false);
-	blackboard.getButtons().hold(IN_ATTACK);
+	self->getButtons().hold(IN_ATTACK);
 	return false;
 }
 

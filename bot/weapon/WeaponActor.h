@@ -1,6 +1,6 @@
 #pragma once
 
-class Blackboard;
+class Bot;
 class Weapon;
 
 /**
@@ -18,7 +18,7 @@ public:
 	 * Executes an action against the given weapon.
 	 * @return True if action is complete.
 	 */
-	virtual bool execute(Blackboard& blackboard) = 0;
+	virtual bool execute(Bot *self) = 0;
 
 protected:
 	const Weapon& weapon;

@@ -7,5 +7,5 @@ public:
 	DODMGReloader(const Weapon& weap): Reloader(weap) {
 	}
 
-	bool execute(Blackboard& blackboard);
+	bool execute(Bot *self);
 };

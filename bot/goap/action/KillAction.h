@@ -4,7 +4,7 @@
 
 class KillAction: public AttackAction {
 public:
-	KillAction(Blackboard& blackboard);
+	KillAction(Bot *self);
 
 	bool precondCheck();
 

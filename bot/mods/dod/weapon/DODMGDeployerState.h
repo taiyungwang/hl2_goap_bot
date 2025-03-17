@@ -1,7 +1,7 @@
 #pragma once
 
 class DODMGDeployer;
-class Blackboard;
+class Bot;
 
 class DODMGDeployerState {
 public:
@@ -11,7 +11,7 @@ public:
 	virtual ~DODMGDeployerState() {
 	}
 
-	virtual void deploy(Blackboard& blackboard) = 0;
+	virtual void deploy(Bot *self) = 0;
 
 protected:
 	DODMGDeployer *context;

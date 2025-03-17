@@ -11,7 +11,6 @@
 #include <mods/hl2dm/weapon/ShotgunFunction.h>
 
 #include <mods/hl2dm/util/HL2MPPlayer.h>
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <goap/action/GoToAction.h>
 #include <goap/action/ThrowGrenadeAction.h>
@@ -56,8 +55,8 @@ public:
 
 class ThrowFragGrenadeAction: public ThrowGrenadeAction {
 public:
-	ThrowFragGrenadeAction(Blackboard &blackboard) :
-			ThrowGrenadeAction(blackboard) {
+	ThrowFragGrenadeAction(Bot *self) :
+			ThrowGrenadeAction(self) {
 	}
 
 private:
@@ -159,7 +158,7 @@ HL2DMBotBuilder::HL2DMBotBuilder(CommandHandler& commandHandler) :
 }
 
 void HL2DMBotBuilder::updatePlanner(GoalManager& planner,
-		Blackboard& blackboard) const {
+		Bot* self) const {
 	planner.addAction<ThrowFragGrenadeAction>(0.92f);
 	GetClosestNeededItemAction::setItemMap(&itemMap);
 	planner.addAction<GetClosestNeededItemAction>(0.54f);

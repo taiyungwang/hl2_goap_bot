@@ -1,15 +1,14 @@
 #include "FindCoverFromGrenadesAction.h"
 
 #include <move/Navigator.h>
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <player/FilterSelfAndEnemies.h>
 #include <util/BaseGrenade.h>
 #include <util/UtilTrace.h>
 #include <eiface.h>
 
-FindCoverFromGrenadesAction::FindCoverFromGrenadesAction(Blackboard &blackboard) :
-		FindCoverAction(blackboard) {
+FindCoverFromGrenadesAction::FindCoverFromGrenadesAction(Bot *self) :
+		FindCoverAction(self) {
 	precond.clear();
 	effects = { WorldProp::EXPLOSIVE_NEAR, false };
 }
@@ -17,7 +16,7 @@ FindCoverFromGrenadesAction::FindCoverFromGrenadesAction(Blackboard &blackboard)
 void FindCoverFromGrenadesAction::setAvoidAreas() {
 	// TODO: this assumes that only relevant grenades are in the visible entities list.
 	maxRange = 0.0f;
-	for (auto i: blackboard.getSelf()->getVision().getVisibleEntities()) {
+	for (auto i: self->getVision().getVisibleEntities()) {
 		extern IVEngineServer *engine;
 		edict_t *entity = engine->PEntityOfEntIndex(i);
 		float range = *BaseGrenade(entity).getDmgRadius() + HalfHumanWidth;
@@ -27,7 +26,7 @@ void FindCoverFromGrenadesAction::setAvoidAreas() {
 		if (entity == nullptr || entity->IsFree()) {
 			continue;
 		}
-		CNavArea* area = Navigator::getArea(entity, blackboard.getSelf()->getTeam());
+		CNavArea* area = Navigator::getArea(entity, self->getTeam());
 		if (area != nullptr) {
 			areasToAvoid[area] = entity;
 		}

@@ -2,7 +2,7 @@
 
 #include <goap/WorldCond.h>
 
-class Blackboard;
+class Bot;
 
 /**
  * Defines a GOAP action.
@@ -10,8 +10,7 @@ class Blackboard;
 class Action {
 public:
 
-	Action(Blackboard& blackboard) :
-		blackboard(blackboard) {
+	Action(Bot *self): self(self) {
 	}
 
 	virtual ~Action() {
@@ -69,7 +68,7 @@ public:
 	}
 
 protected:
-	Blackboard& blackboard;
+	Bot *self;
 
 	WorldState precond;
 

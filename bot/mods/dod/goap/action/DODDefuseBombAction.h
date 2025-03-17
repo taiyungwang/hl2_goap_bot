@@ -4,7 +4,7 @@
 
 class DODDefuseBombAction : public CapturePointAction {
 public:
-	DODDefuseBombAction(Blackboard& blackboard);
+	DODDefuseBombAction(Bot *self);
 
 	bool precondCheck() override;
 

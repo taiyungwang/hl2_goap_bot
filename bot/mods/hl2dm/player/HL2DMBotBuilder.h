@@ -17,7 +17,7 @@ private:
 		itemMap.buildMap();
 	}
 
-	void updatePlanner(GoalManager &planner, Blackboard &blackboard) const;
+	void updatePlanner(GoalManager &planner, Bot *bot) const;
 
 	void modHandleCommand(const CCommand &command, Bot* bot) const;
 

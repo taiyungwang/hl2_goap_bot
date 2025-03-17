@@ -2,7 +2,7 @@
 #include "DODMGDeployerStartState.h"
 #include <weapon/Weapon.h>
 
-bool DODMGDeployer::execute(Blackboard& blackboard) {
+bool DODMGDeployer::execute(Bot *self) {
 	if (!started && !weapon.isDeployed()) {
 		started = true;
 		state = std::make_shared<DODMGDeployerStartState>(this);
@@ -11,11 +11,11 @@ bool DODMGDeployer::execute(Blackboard& blackboard) {
 		started = false;
 		return true;
 	}
-	state->deploy(blackboard);
+	state->deploy(self);
 	return false;
 }
 
-void DODMGDeployer::undeploy(Blackboard& blackboard) {
-	Deployer::undeploy(blackboard);
+void DODMGDeployer::undeploy(Bot *self) {
+	Deployer::undeploy(self);
 }
 

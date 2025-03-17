@@ -5,7 +5,6 @@
 #include "MoveStateContext.h"
 #include "StepLeft.h"
 #include "Jump.h"
-#include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
 #include <weapon/Weapon.h>
@@ -72,7 +71,6 @@ MoveState* Avoid::move(const Vector& pos) {
 		delete nextState;
 		return new Stopped(ctx);
 	}
-	Blackboard& blackboard = ctx.getBlackboard();
 	bool crouching = ctx.getType() & NAV_MESH_CROUCH;
 	Vector goal = ctx.getGoal();
 	const trace_t& result = ctx.trace(goal, crouching);
@@ -85,18 +83,19 @@ MoveState* Avoid::move(const Vector& pos) {
 	edict_t* currBlocker = getEdict(result);
 	const char* currBlockerName = currBlocker == nullptr || currBlocker->IsFree()
 			? nullptr : currBlocker->GetClassName();
-	int team = blackboard.getSelf()->getTeam();
-	edict_t* self = blackboard.getSelf()->getEdict();
-	if (blackboard.getSelf()->isOnLadder()) {
+	Bot *self = ctx.getSelf();
+	int team = self->getTeam();
+	edict_t* selfEnt = self->getEdict();
+	if (self->isOnLadder()) {
 		if (ctx.nextGoalIsLadderStart()) {
 			delete nextState;
 			nextState = nullptr;
 			return new MoveLadder(ctx);
 		}
-		blackboard.getButtons().hold(IN_FORWARD);
-		blackboard.getButtons().tap(IN_USE);
+		self->getButtons().hold(IN_FORWARD);
+		self->getButtons().tap(IN_USE);
 	}
-	float speed = BasePlayer(self).getVelocity()->Length();
+	float speed = BasePlayer(selfEnt).getVelocity()->Length();
 	if (!(ctx.getType() & NAV_MESH_CROUCH) && speed < minStuckSpeed.GetFloat()) {
 		stuckFrames++;
 	} else {
@@ -110,7 +109,7 @@ MoveState* Avoid::move(const Vector& pos) {
 		if (currBlocker != nullptr) {
 			if (Q_stristr(currBlockerName, "func_team") != nullptr) {
 				// ensure that nothing else is blocking us.
-				if (!ctx.trace(pos, goal, crouching, IgnoreSelfAndTeamWall(self)).DidHit()
+				if (!ctx.trace(pos, goal, crouching, IgnoreSelfAndTeamWall(selfEnt)).DidHit()
 						|| (Q_stristr(getEdict(result)->GetClassName(), "worldspawn") != nullptr
 								&& result.plane.normal.z < nav_slope_limit.GetFloat())) {
 					setTeamWall(currBlocker, team);
@@ -120,7 +119,7 @@ MoveState* Avoid::move(const Vector& pos) {
 					|| (Q_stristr(currBlockerName, "player") != nullptr
 							&& ctx.trace(pos, goal, crouching,
 									IgnoreAllButPhysicsAndBreakable()).DidHit())) {
-				blackboard.setBlocker(currBlocker);
+				self->setBlocker(currBlocker);
 			}
 		}
 		if (dynamic_cast<Stopped*>(nextState) == nullptr) {
@@ -222,10 +221,9 @@ protected:
 
 
 float Avoid::trace(const Vector& pos, const Vector& goal) const {
-	auto &blackboard = ctx.getBlackboard();
-	edict_t *self = blackboard.getSelf()->getEdict();
+	edict_t *selfEnt = ctx.getSelf()->getEdict();
 	FilterList filter;
-	filter.add(self).add(blackboard.getTarget()).add(BasePlayer(self).getGroundEntity());
+	filter.add(selfEnt).add(ctx.getSelf()->getTarget()).add(BasePlayer(selfEnt).getGroundEntity());
 	trace_t tr;
 	int ignoreSize = filter.getIgnoreSize();
 	do {

@@ -1,6 +1,5 @@
 #include "BotBuilder.h"
 
-#include "Blackboard.h"
 #include "Bot.h"
 #include "World.h"
 #include "HidingSpotSelector.h"
@@ -75,8 +74,7 @@ void BotBuilder::kickAllExcept(const CCommand &command) {
 
 class SwitchToBestInRangeWeaponAction: public SwitchToBestLoadedWeaponAction {
 public:
-	SwitchToBestInRangeWeaponAction(Blackboard &blackboard) :
-			SwitchToBestLoadedWeaponAction(blackboard) {
+	SwitchToBestInRangeWeaponAction(Bot *self): SwitchToBestLoadedWeaponAction(self) {
 		effects = { WorldProp::WEAPON_IN_RANGE, true };
 	}
 };
@@ -84,13 +82,11 @@ public:
 Bot* BotBuilder::build(edict_t* ent) {
 	Bot* bot = new Bot(ent, weaponBuilders, commandHandler,
 			messages);
-	Blackboard *blackboard = new Blackboard(bot);
-	bot->setNavigator(std::make_shared<Navigator>(*blackboard));
-	bot->setBlackboard(blackboard);
+	bot->setNavigator(std::make_shared<Navigator>(bot));
 	World* world = buildWorld();
 	world->reset();
 	bot->setWorld(world);
-	GoalManager *planner = new GoalManager(world->getStates(), *blackboard);
+	GoalManager *planner = new GoalManager(world->getStates(), bot);
 	planner->addAction<FindCoverFromGrenadesAction>(0.95f);
 	planner->addAction<ReloadWeaponAction>(0.86f);
 	planner->addAction<KillAction>(0.85f);
@@ -100,9 +96,9 @@ Bot* BotBuilder::build(edict_t* ent) {
 	planner->addAction<SwitchToDesiredWeaponAction>(0.0f);
 	planner->addAction<SwitchToBestLoadedWeaponAction>(0.0f);
 	planner->addAction<SwitchToBestInRangeWeaponAction>(0.0f);
-	updatePlanner(*planner, *blackboard);
+	updatePlanner(*planner, bot);
 	bot->setPlanner(planner);
-	return modBuild(bot, *blackboard);
+	return modBuild(bot);
 }
 
 void BotBuilder::onFrame() {

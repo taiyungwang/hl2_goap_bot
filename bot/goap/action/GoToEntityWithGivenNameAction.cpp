@@ -1,12 +1,11 @@
 #include "GoToEntityWithGivenNameAction.h"
 #include <player/Bot.h>
-#include <player/Blackboard.h>
 #include <util/EntityUtils.h>
 #include <edict.h>
 
-GoToEntityWithGivenNameAction::GoToEntityWithGivenNameAction(Blackboard &blackboard,
+GoToEntityWithGivenNameAction::GoToEntityWithGivenNameAction(Bot *self,
 		const char *itemName) :
-		GoToEntityAction(blackboard) {
+		GoToEntityAction(self) {
 	findEntWithMatchingName(itemName, items);
 
 }
@@ -51,5 +50,5 @@ bool GoToEntityWithGivenNameAction::isDepleted() {
 
 void GoToEntityWithGivenNameAction::selectFromActive(CUtlLinkedList<edict_t*>& active) {
 	item = findNearestEntity(active,
-			blackboard.getSelf()->getCurrentPosition());
+			self->getCurrentPosition());
 }

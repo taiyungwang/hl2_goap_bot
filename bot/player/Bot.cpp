@@ -1,6 +1,5 @@
 #include "Bot.h"
 
-#include "Blackboard.h"
 #include "Vision.h"
 #include "World.h"
 #include "FilterSelfAndEnemies.h"
@@ -32,12 +31,12 @@ Bot::Bot(edict_t* ent, const WeaponBuilders& arsenal,
 	const std::unordered_map<unsigned int, std::string> &messages) :
 	Player(ent, arsenal), Receiver(commandHandler),
 	messages(messages) {
+	navigator = std::make_shared<Navigator>(this);
 	listenForGameEvent({"player_hurt"});
 }
 
 Bot::~Bot() {
 	delete planner;
-	delete blackboard;
 	delete world;
 	if (playerClassVar != nullptr) {
 		delete playerClassVar;
@@ -47,9 +46,8 @@ Bot::~Bot() {
 void Bot::think() {
 	try {
 		Player::think();
-		CBotCmd& cmd = blackboard->getCmd();
 		if (!inGame) {
-			blackboard->getButtons().tap(IN_ATTACK);
+			buttons.tap(IN_ATTACK);
 		} else if (getPlayerClass() != desiredClassId) {
 			extern IServerPluginHelpers* helpers;
 			helpers->ClientCommand(getEdict(), (*CLASSES)[getTeam() - 2][desiredClassId]);
@@ -57,7 +55,7 @@ void Bot::think() {
 			vision.updateVisiblity(this);
 			wantToListen = true;
 			cmd.Reset();
-			if ((world->think(*blackboard) || resetPlanner)
+			if ((world->think(this) || resetPlanner)
 					&& !isOnLadder()) {
 				resetPlanner = false;
 				planner->resetPlanning(false);
@@ -78,7 +76,7 @@ void Bot::think() {
 			}
 			rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle());
 		}
-		cmd.buttons = blackboard->getButtons().getPressed();
+		cmd.buttons = buttons.getPressed();
 		extern CGlobalVars *gpGlobals;
 		cmd.tick_count = gpGlobals->tickcount;
 		if (mybot_mimic.GetBool()) {
@@ -102,7 +100,7 @@ void Bot::FireGameEvent(IGameEvent* event) {
 	}
 	// bot owns this event.
 	if (name == "player_spawn") {
-		blackboard->reset();
+		blocker = nullptr;
 		vision.reset();
 		world->reset();
 		planner->resetPlanning(true);
@@ -162,10 +160,6 @@ bool Bot::receive(edict_t* sender, const CCommand& command) {
 
 void Bot::setWorld(World* world) {
 	this->world = world;
-}
-
-const CBotCmd &Bot::getCmd() const {
-	return blackboard->getCmd();
 }
 
 int Bot::getPlayerClass() const {
@@ -281,11 +275,11 @@ void Bot::listen() {
 }
 
 void Bot::consoleMsg(const std::string& message) const {
-	Msg((std::string(getName()) + ": " + message + "\n").c_str());
+	Msg("%s: %s\n", getName(), message.c_str());
 }
 
 void Bot::consoleWarn(const std::string& message) const {
-	Warning((std::string(getName()) + ": " + message + "\n").c_str());
+	Warning("%s: %s\n", getName(), message.c_str());
 }
 
 int Bot::getBestWeapon() const {
@@ -293,8 +287,8 @@ int Bot::getBestWeapon() const {
 	edict_t* target = nullptr;
 	if (targetedPlayer > 0) {
 		target = Player::getPlayer(targetedPlayer)->getEdict();
-	} else if (blackboard->getBlocker() != nullptr) {
-		target = blackboard->getBlocker();
+	} else if (blocker != nullptr) {
+		target = blocker;
 	}
 	return Player::getBestWeapon(target);
 }

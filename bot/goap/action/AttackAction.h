@@ -7,7 +7,7 @@ struct edict_t;
 
 class AttackAction: public Action {
 public:
-	AttackAction(Blackboard& blackboard);
+	AttackAction(Bot *blackboard);
 
 	virtual ~AttackAction();
 

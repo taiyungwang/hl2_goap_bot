@@ -1,6 +1,5 @@
 #include "UseGravityGunAction.h"
 
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <player/Vision.h>
 #include <weapon/Weapon.h>
@@ -8,22 +7,21 @@
 
 bool UseGravityGunAction::precondCheck() {
 	return UseSpecificWeaponAction::precondCheck()
-			&& Q_stristr(blackboard.getBlocker()->GetClassName(), "physics")
+			&& Q_stristr(self->getBlocker()->GetClassName(), "physics")
 					!= nullptr;
 }
 
 bool UseGravityGunAction::execute() {
-	edict_t* blocker = blackboard.getBlocker();
+	edict_t* blocker = self->getBlocker();
 	if (blocker == nullptr) {
 		return true;
 	}
-	Bot* self = blackboard.getSelf();
 	float dist = self->getViewTarget().DistTo(self->getCurrentPosition());
 	if (dist > 130.0f) {
-		blackboard.setBlocker(nullptr);
+		self->setBlocker(nullptr);
 		return true;
 	}
-	self->getCurrWeapon()->getPrimary()->attack(blackboard.getButtons(),
+	self->getCurrWeapon()->getPrimary()->attack(self->getButtons(),
 				dist);
 	return false;
 }

@@ -2,7 +2,6 @@
 
 #include "MoveStateContext.h"
 #include "RotationManager.h"
-#include "player/Blackboard.h"
 #include <player/Buttons.h>
 #include <player/Bot.h>
 #include <util/BasePlayer.h>
@@ -12,10 +11,10 @@
 void MoveState::moveStraight(const Vector& destination) const {
 	// get distance from current position to destination.
 	int mvType = ctx.getType();
-	Blackboard& blackboard = ctx.getBlackboard();
-	Vector pos = blackboard.getSelf()->getCurrentPosition();
+	Bot *self = ctx.getSelf();
+	Vector pos = self->getCurrentPosition();
 	Vector path = destination - pos;
-	Buttons& buttons = blackboard.getButtons();
+	Buttons& buttons = self->getButtons();
 	float speed = 450.0f; // jog speed
 	if (mvType & NAV_MESH_WALK) {
 		buttons.hold(IN_WALK); // walk speed
@@ -26,8 +25,8 @@ void MoveState::moveStraight(const Vector& destination) const {
 	if (mvType & NAV_MESH_RUN) {
 		buttons.hold(IN_SPEED);
 	}
-	CBotCmd& cmd = blackboard.getCmd();
-	SinCos(RotationManager::clamp180(blackboard.getSelf()->getAbsoluteAngle().y
+	CBotCmd& cmd = self->getCmd();
+	SinCos(RotationManager::clamp180(self->getAbsoluteAngle().y
 			- RotationManager::clamp180(pathAngle.y)) * M_PI / 180.0f,
 			&cmd.sidemove, &cmd.forwardmove);
 	cmd.forwardmove *= speed;

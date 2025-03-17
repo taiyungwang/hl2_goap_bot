@@ -4,7 +4,7 @@
 
 class DODBombTargetAction: public DODDefuseBombAction {
 public:
-	DODBombTargetAction(Blackboard& blackboard);
+	DODBombTargetAction(Bot *self);
 
 private:
 	bool isAvailable(const DODObjective& obj);

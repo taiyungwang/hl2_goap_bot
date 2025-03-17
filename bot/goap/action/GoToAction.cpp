@@ -2,17 +2,15 @@
 
 #include <move/Navigator.h>
 #include <move/NavMeshPathBuilderWithGoal.h>
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <nav_mesh/nav_area.h>
 #include <ivdebugoverlay.h>
 
 float GoToAction::getCost() {
-	return targetLoc.DistTo(blackboard.getSelf()->getCurrentPosition());
+	return targetLoc.DistTo(self->getCurrentPosition());
 }
 
 bool GoToAction::init() {
-	auto self = blackboard.getSelf();
 	Navigator::Path path;
 	int team = self->getTeam();
 	extern ConVar mybot_debug;
@@ -45,12 +43,12 @@ bool GoToAction::init() {
 }
 
 bool GoToAction::execute() {
-	canAbort = !blackboard.getSelf()->isOnLadder();
-	return blackboard.getSelf()->getNavigator()->step();
+	canAbort = !self->isOnLadder();
+	return self->getNavigator()->step();
 }
 
 bool GoToAction::goalComplete() {
-	return blackboard.getSelf()->getNavigator()->reachedGoal();
+	return self->getNavigator()->reachedGoal();
 }
 
 /**
@@ -74,7 +72,7 @@ edict_t* GoToAction::randomChoice(CUtlLinkedList<edict_t*>& active) {
 		}
 		choices.AddToTail();
 		choices.Tail().m_key = active[i];
-		choices.Tail().m_value = 1.0f / collide->GetCollisionOrigin().DistTo(blackboard.getSelf()->getCurrentPosition());
+		choices.Tail().m_value = 1.0f / collide->GetCollisionOrigin().DistTo(self->getCurrentPosition());
 		totalDist += choices.Tail().m_value;
 	}
 	FOR_EACH_VEC(choices, i) {

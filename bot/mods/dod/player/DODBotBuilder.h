@@ -15,13 +15,13 @@ public:
 private:
 	DODObjectives objectives;
 
-	void updatePlanner(GoalManager& planner, Blackboard& blackboard) const;
+	void updatePlanner(GoalManager& planner, Bot *self) const;
 
 	World* buildWorld() const;
 
 	void modHandleCommand(const CCommand &command, Bot* bot) const;
 
-	Bot *modBuild(Bot *bot, Blackboard& blackboard) override;
+	Bot *modBuild(Bot *bot) override;
 
 	template<typename _Tp, typename... _Args>
 	void addPair(const char* name1, const char* name2, _Args&&... args);

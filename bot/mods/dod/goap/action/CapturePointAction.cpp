@@ -2,15 +2,14 @@
 
 #include <mods/dod/player/DODObjectives.h>
 #include <mods/dod/player/DODObjective.h>
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <util/EntityUtils.h>
 #include <nav_mesh/nav_entities.h>
 #include <vstdlib/random.h>
 #include <in_buttons.h>
 
-CapturePointAction::CapturePointAction(Blackboard& blackboard) :
-		GoToEntityWithGivenNameAction(blackboard, "dod_control_point") {
+CapturePointAction::CapturePointAction(Bot *self) :
+		GoToEntityWithGivenNameAction(self, "dod_control_point") {
 	precond[WorldProp::ROUND_STARTED] = true;
 	effects = {WorldProp::ALL_POINTS_CAPTURED, true};
 	allItemsVisible = true;
@@ -23,8 +22,8 @@ bool CapturePointAction::execute() {
 	if (!GoToAction::goalComplete() || isDepleted()) {
 		return true;
 	}
-	blackboard.getSelf()->lookStraight();
-	blackboard.getButtons().hold(IN_DUCK);
+	self->lookStraight();
+	self->getButtons().hold(IN_DUCK);
 	return false;
 }
 
@@ -44,5 +43,5 @@ bool CapturePointAction::precondCheck() {
 
 bool CapturePointAction::isAvailable(const DODObjective& obj) {
 	return !objectives->isDetonation()
-			&& obj.getOwner() != blackboard.getSelf()->getTeam();
+			&& obj.getOwner() != self->getTeam();
 }

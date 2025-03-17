@@ -5,7 +5,6 @@
 #include "Stopped.h"
 #include "Jump.h"
 #include "MoveStateContext.h"
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 
 MoveState* StepLeft::buildFailedState(const Vector& currPos) const {

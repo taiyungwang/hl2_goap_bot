@@ -2,7 +2,6 @@
 
 #include <move/Navigator.h>
 #include <move/MoveStateContext.h>
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <player/Vision.h>
 #include <weapon/Weapon.h>
@@ -15,9 +14,8 @@
 #include <in_buttons.h>
 #include <edict.h>
 
-AttackAction::AttackAction(Blackboard& blackboard) :
-		Action(blackboard) {
-	moveCtx = new MoveStateContext(blackboard);
+AttackAction::AttackAction(Bot *self): Action(self) {
+	moveCtx = new MoveStateContext(self);
 	effects = {WorldProp::IS_BLOCKED, false};
 	precond[WorldProp::WEAPON_IN_RANGE] = true;
 	precond[WorldProp::WEAPON_LOADED] = true;
@@ -28,7 +26,7 @@ AttackAction::~AttackAction() {
 }
 
 bool AttackAction::precondCheck() {
-	edict_t* blocker = blackboard.getBlocker();
+	edict_t* blocker = self->getBlocker();
 	if (blocker == nullptr) {
 		return false;
 	}
@@ -41,7 +39,6 @@ bool AttackAction::precondCheck() {
 }
 
 bool AttackAction::execute() {
-	Bot* self = blackboard.getSelf();
 	Vector targetLoc = self->getViewTarget();
 	float dist = targetLoc.DistTo(self->getCurrentPosition());
 	auto weapon = self->getCurrWeapon();
@@ -50,7 +47,7 @@ bool AttackAction::execute() {
 	}
 	edict_t* selfEnt = self->getEdict();
 	if (weapon->getDeployer() != nullptr && weapon->getMinDeployRange() < dist) {
-		if (!weapon->getDeployer()->execute(blackboard)) {
+		if (!weapon->getDeployer()->execute(self)) {
 			return false;
 		}
 		if (!weapon->isDeployed()) {
@@ -70,7 +67,7 @@ bool AttackAction::execute() {
 		targetLoc = weapFunc->getAim(targetLoc, eyes);
 		adjustAim = false;
 	}
-	Buttons& buttons = blackboard.getButtons();
+	Buttons& buttons = self->getButtons();
 	self->setWantToListen(false);
 	self->setViewTarget(targetLoc);
 	if (weapFunc->isMelee() && eyes.z - targetLoc.z > 20.0f
@@ -94,29 +91,29 @@ bool AttackAction::execute() {
 
 bool AttackAction::goalComplete() {
 	abort();
-	blackboard.getSelf()->setAimOffset(0.0f);
-	blackboard.setBlocker(nullptr);
+	self->setAimOffset(0.0f);
+	self->setBlocker(nullptr);
 	return targetDestroyed();
 }
 
 
 void AttackAction::abort() {
-	auto self = blackboard.getSelf();
 	self->setAimOffset(0.0f);
 	auto weapon = self->getCurrWeapon();
 	if (weapon) {
-		weapon->undeploy(blackboard);
+		weapon->undeploy(self);
 	}
 	moveCtx->stop();
 }
 
 bool AttackAction::targetDestroyed() const {
-	return blackboard.getBlocker() == nullptr
-			|| BaseEntity(blackboard.getBlocker()).isDestroyedOrUsed()
-			|| blackboard.getBlocker()->GetCollideable()->GetCollisionOrigin().DistTo(
-					blackboard.getSelf()->getCurrentPosition()) > 130.0f;
+	edict_t *blocker = self->getBlocker();
+	return blocker == nullptr
+			|| BaseEntity(blocker).isDestroyedOrUsed()
+			|| blocker->GetCollideable()->GetCollisionOrigin().DistTo(
+					self->getCurrentPosition()) > 130.0f;
 }
 
 edict_t* AttackAction::getTargetedEdict() const {
-	return blackboard.getBlocker();
+	return self->getBlocker();
 }

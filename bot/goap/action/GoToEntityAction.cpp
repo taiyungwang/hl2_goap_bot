@@ -1,6 +1,5 @@
 #include "GoToEntityAction.h"
 
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <nav_mesh/nav.h>
 #include <util/UtilTrace.h>
@@ -11,13 +10,13 @@ bool GoToEntityAction::init() {
 	if (!GoToAction::init()) {
 		return false;
 	}
-	blackboard.setTarget(item);
+	self->setTarget(item);
 	return true;
 }
 
 bool GoToEntityAction::execute() {
 	if (GoToAction::execute()) {
-		blackboard.getSelf()->setAimOffset(0.0f);
+		self->setAimOffset(0.0f);
 		return true;
 	}
 	return false;
@@ -47,12 +46,12 @@ void GoToEntityAction::setTargetLocAndRadius(edict_t* target) {
 }
 
 void GoToEntityAction::useItem(bool isActive) {
-	blackboard.getButtons().hold(IN_USE);
+	self->getButtons().hold(IN_USE);
 	if (isActive) {
 		return;
 	}
-	blackboard.getSelf()->setAimOffset(5.0f);
+	self->setAimOffset(5.0f);
 	Vector itemPos(targetLoc);
 	itemPos.z += HumanEyeHeight - 10.0f;
-	blackboard.getSelf()->setViewTarget(itemPos);
+	self->setViewTarget(itemPos);
 }

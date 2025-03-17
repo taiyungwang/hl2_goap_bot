@@ -2,7 +2,6 @@
 
 #include "Stopped.h"
 #include <player/Bot.h>
-#include <player/Blackboard.h>
 #include <util/UtilTrace.h>
 
 const float MoveStateContext::TARGET_OFFSET = 9.0f;
@@ -24,7 +23,6 @@ void MoveStateContext::stop() {
 
 void MoveStateContext::move(int type) {
 	this->type = type;
-	auto self = blackboard.getSelf();
 	Vector pos = self->getCurrentPosition();
 	MoveState* newState = state->move(pos);
 	if (newState != nullptr) {
@@ -38,7 +36,7 @@ const bool MoveStateContext::hasGoal() const {
 }
 
 bool MoveStateContext::isAtTarget(const Vector& target, float targetOffset) const {
-	Vector pos = blackboard.getSelf()->getCurrentPosition();
+	Vector pos = self->getCurrentPosition();
 	if (std::abs(target.z - pos.z) > JumpCrouchHeight) {
 		return false;
 	}
@@ -75,15 +73,15 @@ private:
 
 const trace_t& MoveStateContext::trace(const Vector& pos, const Vector& goal, bool crouch) {
 	return trace(pos, goal, crouch,
-			FilterSelfAndTarget(blackboard.getSelf()->getEdict(), blackboard.getTarget()));
+			FilterSelfAndTarget(self->getEdict(), self->getTarget()));
 }
 
 const trace_t& MoveStateContext::trace(const Vector& goal, bool crouch) {
-	return trace(blackboard.getSelf()->getCurrentPosition(), goal, crouch);
+	return trace(self->getCurrentPosition(), goal, crouch);
 }
 
 const trace_t& MoveStateContext::trace(const Vector& start, const Vector& goal, bool crouch,
 		const ITraceFilter& filter) {
-	blackboard.getSelf()->traceMove(traceResult, start, goal, crouch, filter);
+	self->traceMove(traceResult, start, goal, crouch, filter);
 	return traceResult;
 }

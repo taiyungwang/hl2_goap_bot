@@ -1,6 +1,5 @@
 #include "WeaponFunction.h"
 
-#include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <util/BasePlayer.h>
 #include <in_buttons.h>

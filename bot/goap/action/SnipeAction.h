@@ -10,7 +10,7 @@ public:
 		selector = sel;
 	}
 
-	SnipeAction(Blackboard& blackboard);
+	SnipeAction(Bot *self);
 
 	virtual bool precondCheck() override;
 

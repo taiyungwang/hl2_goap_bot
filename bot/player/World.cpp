@@ -1,6 +1,5 @@
 #include "World.h"
 
-#include "Blackboard.h"
 #include "Bot.h"
 #include <weapon/Weapon.h>
 #include <util/BaseEntity.h>
@@ -23,18 +22,17 @@ void World::reset() {
 	addStates();
 }
 
-bool World::think(Blackboard& blackboard) {
+bool World::think(Bot *self) {
 	updateState(WorldProp::EXPLOSIVE_NEAR, false);
-	Bot* self = blackboard.getSelf();
 	updateState(WorldProp::MULTIPLE_ENEMY_SIGHTED,
 			self->getVision().getVisibleEnemies().size() > 1);
-	edict_t* blocker = blackboard.getBlocker();
+	edict_t* blocker = self->getBlocker();
 	if (blocker != nullptr && (BaseEntity(blocker).isDestroyedOrUsed()
 			|| (self->getFacing().Dot(blocker->GetCollideable()->GetCollisionOrigin()
 					- self->getCurrentPosition()) > 0.0f
 					&& !self->canSee(blocker)))) {
 		blocker = nullptr;
-		blackboard.setBlocker(nullptr);
+		self->setBlocker(nullptr);
 	}
 	bool inRange = true;
 	const auto weap = self->getCurrWeapon();
@@ -49,7 +47,7 @@ bool World::think(Blackboard& blackboard) {
 			auto player = players.find(engine->IndexOfEdict(blocker));
 			if (player != players.end()) {
 				if (!self->isEnemy(*player->second)) {
-					blackboard.setBlocker(nullptr);
+					self->setBlocker(nullptr);
 				} else {
 					self->setWantToListen(false);
 					self->setViewTarget(player->second->getEyesPos());
@@ -59,7 +57,7 @@ bool World::think(Blackboard& blackboard) {
 				target.z += blocker->GetCollideable()->OBBMaxs().z / 2.0f;
 				self->setViewTarget(target);
 			}
-			if (blackboard.getBlocker() != nullptr) {
+			if (self->getBlocker() != nullptr) {
 				inRange = weap->isInRange(pos.DistTo(self->getViewTarget()));
 			}
 		}
@@ -70,11 +68,11 @@ bool World::think(Blackboard& blackboard) {
 	updateState(WorldProp::HEALTH_FULL, self->getHealth() >= self->getMaxHealth());
 	bool hurt = states[WorldProp::HURT];
 	updateState(WorldProp::HURT, false);
-	updateState(WorldProp::IS_BLOCKED, blackboard.getBlocker() != nullptr);
+	updateState(WorldProp::IS_BLOCKED, self->getBlocker() != nullptr);
 	// reset planner if this is first time we see enemy.
 	bool sawEnemy = states[WorldProp::ENEMY_SIGHTED];
 	states[WorldProp::ENEMY_SIGHTED] = enemy != nullptr;
-	bool shouldReset = update(blackboard);
+	bool shouldReset = update(self);
 	if (!sawEnemy && states[WorldProp::ENEMY_SIGHTED]) {
 		self->sendVoiceMessage(VoiceMessage::ENEMY_SIGHTED);
 		return true;

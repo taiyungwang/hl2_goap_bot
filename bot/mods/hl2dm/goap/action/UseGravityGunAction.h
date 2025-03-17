@@ -4,7 +4,7 @@
 
 class UseGravityGunAction: public UseSpecificWeaponAction {
 public:
-	UseGravityGunAction(Blackboard& blackboard): UseSpecificWeaponAction(blackboard) {
+	UseGravityGunAction(Bot *self): UseSpecificWeaponAction(self) {
 		effects = {WorldProp::IS_BLOCKED, false};
 	}
 

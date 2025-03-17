@@ -7,7 +7,7 @@
  */
 class SwitchWeaponAction: public SwitchToDesiredWeaponAction {
 public:
-	SwitchWeaponAction(Blackboard& blackboard);
+	SwitchWeaponAction(Bot *self);
 
 	bool precondCheck();
 };

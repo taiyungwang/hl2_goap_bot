@@ -2,14 +2,13 @@
 
 #include "Planner.h"
 #include "action/Action.h"
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <convar.h>
 #include <vstdlib/random.h>
 #include <algorithm>
 
-GoalManager::GoalManager(const WorldState& worldState, Blackboard& blackboard) :
-		blackboard(blackboard), worldState(worldState) {
+GoalManager::GoalManager(const WorldState& worldState, Bot *self) :
+		self(self), worldState(worldState) {
 	planBuilder = new Planner(worldState);
 }
 
@@ -56,7 +55,7 @@ void GoalManager::execute() {
 			if (plan.empty() || !actions[plan.front()]->init()) {
 				extern ConVar mybot_debug;
 				if (mybot_debug.GetBool()) {
-					blackboard.getSelf()->consoleMsg("No more plans.");
+					self->consoleMsg("No more plans.");
 				}
 				reset();
 			}
@@ -76,7 +75,7 @@ bool GoalManager::getNextGoal() {
 		}
 	}
 	if (noGoalsFound) {
-		blackboard.getSelf()->consoleWarn("Unable to find a goal.\n");
+		self->consoleWarn("Unable to find a goal.\n");
 	}
 	reset();
 	return false;

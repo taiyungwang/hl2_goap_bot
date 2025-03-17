@@ -11,9 +11,9 @@ public:
 	DODMGDeployer(const Weapon& weapon): Deployer(weapon) {
 	}
 
-	bool execute(Blackboard& blackboard);
+	bool execute(Bot *self);
 
-	void undeploy(Blackboard& blackboard);
+	void undeploy(Bot *self);
 
 	const Weapon &getWeapon() const {
 		return weapon;

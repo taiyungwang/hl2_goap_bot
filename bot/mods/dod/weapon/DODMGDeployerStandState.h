@@ -8,5 +8,5 @@ public:
 			DODMGDeployerStartState(ctx) {
 	}
 
-	void deploy(Blackboard &blackboard) override;
+	void deploy(Bot *self) override;
 };

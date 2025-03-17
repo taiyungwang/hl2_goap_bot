@@ -7,8 +7,8 @@ class Player;
 
 class ThrowGrenadeAction: public UseSpecificWeaponAction {
 public:
-	ThrowGrenadeAction(Blackboard &blackboard) :
-			UseSpecificWeaponAction(blackboard) {
+	ThrowGrenadeAction(Bot *self) :
+			UseSpecificWeaponAction(self) {
 		effects = {WorldProp::MULTIPLE_ENEMY_SIGHTED, false};
 	}
 

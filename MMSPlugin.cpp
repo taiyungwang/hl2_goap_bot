@@ -3,8 +3,6 @@
 #include "player/Bot.h"
 #include <shareddefs.h>
 #include <usercmd.h>
-#include <eiface.h>
-#include <iplayerinfo.h>
 #include <filesystem.h>
 #include <ivdebugoverlay.h>
 #include <IEngineTrace.h>
@@ -203,7 +201,7 @@ void MMSPlugin::Hook_PlayerRunCmd(CUserCmd *pCmd, IMoveHelper *moveHelper) {
 	Bot *bot = dynamic_cast<Bot*>(Player::getPlayer(
 			servergameents->BaseEntityToEdict(META_IFACEPTR(CBaseEntity))));
 	if (bot != nullptr) {
-		auto cmd = bot->getCmd();
+		const auto cmd = bot->getCmd();
 			// put the bot's commands into this move frame
 		pCmd->buttons = cmd.buttons;
 		pCmd->forwardmove = cmd.forwardmove;

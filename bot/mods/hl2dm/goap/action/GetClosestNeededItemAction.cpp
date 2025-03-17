@@ -2,7 +2,6 @@
 #include "ItemMap.h"
 #include "Item.h"
 #include <player/Bot.h>
-#include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <move/Navigator.h>
 #include <nav_mesh/nav_area.h>
@@ -12,9 +11,9 @@
 
 const ItemMap *GetClosestNeededItemAction::itemMap = nullptr;
 
-GetClosestNeededItemAction::GetClosestNeededItemAction(Blackboard &blackboard) :
-		GoToEntityAction(blackboard),
-		NavMeshPathBuilder(blackboard.getSelf()->getTeam()) {
+GetClosestNeededItemAction::GetClosestNeededItemAction(Bot *self) :
+		GoToEntityAction(self),
+		NavMeshPathBuilder(self->getTeam()) {
 	effects = { WorldProp::NEED_ITEM, false };
 }
 
@@ -31,7 +30,6 @@ bool GetClosestNeededItemAction::execute() {
 	if (!GoToAction::execute()) {
 		return false;
 	}
-	auto self = blackboard.getSelf();
 	if (animationCycleUnchangedFrames > 10 || !GoToAction::goalComplete() || !resource->isCharger()
 			|| (self->getHealth() > 99 && self->getArmor() > 199)) {
 		return true;
@@ -48,30 +46,29 @@ bool GetClosestNeededItemAction::execute() {
 
 bool GetClosestNeededItemAction::goalComplete() {
 	return GoToAction::goalComplete() || (!resource->isAvailable()
-			&& blackboard.getSelf()->getCurrentPosition().DistTo(targetLoc) < targetRadius + HalfHumanWidth);
+			&& self->getCurrentPosition().DistTo(targetLoc) < targetRadius + HalfHumanWidth);
 }
 
 void GetClosestNeededItemAction::selectItem() {
-	auto self = blackboard.getSelf();
 	NavMeshPathBuilder::Path path;
 	build(path, self->getArea());
 	self->getNavigator()->getPath().swap(path);
 }
 
 float GetClosestNeededItemAction::getHeuristicCost(CNavArea *area) const  {
-	return area->GetCenter().DistTo(blackboard.getSelf()->getCurrentPosition());
+	return area->GetCenter().DistTo(self->getCurrentPosition());
 }
 
 bool GetClosestNeededItemAction::foundGoal(CNavArea *area) {
 	item = nullptr;
-	resource = itemMap->getClosestNeededItem(area, *blackboard.getSelf());
+	resource = itemMap->getClosestNeededItem(area, *self);
 	if (!resource) {
 		return false;
 	}
 	item = resource->getEnt();
 	extern ConVar mybot_debug;
 	if (mybot_debug.GetBool()) {
-		blackboard.getSelf()->consoleMsg(std::string("Getting item: ") + item->GetClassName());
+		self->consoleMsg(std::string("Getting item: ") + item->GetClassName());
 	}
 	return true;
 }

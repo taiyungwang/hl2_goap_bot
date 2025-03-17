@@ -3,12 +3,10 @@
 #include "MoveStateContext.h"
 #include "Avoid.h"
 #include "Stopped.h"
-#include "player/Blackboard.h"
 #include "player/Bot.h"
 
-StepBack::StepBack(MoveStateContext& ctx) :
-		MoveState(ctx) {
-	startPos = ctx.getBlackboard().getSelf()->getCurrentPosition();
+StepBack::StepBack(MoveStateContext& ctx): MoveState(ctx) {
+	startPos = ctx.getSelf()->getCurrentPosition();
 }
 
 MoveState* StepBack::move(const Vector& currPos) {

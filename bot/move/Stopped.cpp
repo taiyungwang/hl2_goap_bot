@@ -5,13 +5,12 @@
 #include "Avoid.h"
 #include "StepBack.h"
 #include "Jump.h"
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <player/Buttons.h>
 #include <in_buttons.h>
 
 MoveState* Stopped::move(const Vector& currPos) {
-	if (ctx.getBlackboard().getSelf()->isOnLadder()) {
+	if (ctx.getSelf()->isOnLadder()) {
 		float delta = ctx.getLadderEnd().z - currPos.z;
 		if (delta > HumanHeight + ctx.getTargetOffset() || delta < 0.0f) {
 			// bot is not at the end of the ladder.
@@ -25,7 +24,7 @@ MoveState* Stopped::move(const Vector& currPos) {
 		return new Avoid(ctx, new Jump(ctx));
 	}
 	if (ctx.getType() & NAV_MESH_CROUCH) {
-		ctx.getBlackboard().getButtons().hold(IN_DUCK);
+		ctx.getSelf()->getButtons().hold(IN_DUCK);
 	}
 	return nullptr;
 }

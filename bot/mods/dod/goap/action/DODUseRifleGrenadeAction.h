@@ -4,8 +4,8 @@
 
 class DODUseRifleGrenadeAction: public DODUseSmokeGrenadeAction {
 public:
-	DODUseRifleGrenadeAction(Blackboard& blackboard) :
-			DODUseSmokeGrenadeAction(blackboard) {
+	DODUseRifleGrenadeAction(Bot *self) :
+			DODUseSmokeGrenadeAction(self) {
 	}
 
 	virtual bool execute() override;

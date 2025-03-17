@@ -2,7 +2,6 @@
 
 #include "Stopped.h"
 #include "MoveStateContext.h"
-#include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
 #include <eiface.h>
@@ -16,8 +15,7 @@ MoveLadder::MoveLadder(MoveStateContext& ctx) :
 }
 
 MoveState* MoveLadder::move(const Vector& currPos) {
-	auto &bb = ctx.getBlackboard();
-	auto self = bb.getSelf();
+	Bot *self = ctx.getSelf();
 	float prevDist = remainingDist;
 	if (self->isOnLadder()) {
 		remainingDist = std::abs(currPos.z - ctx.getLadderEnd().z);
@@ -34,7 +32,7 @@ MoveState* MoveLadder::move(const Vector& currPos) {
 		lookAt.z += 3.0f * HumanHeight;
 	}
 	self->setViewTarget(lookAt);
-	Buttons& buttons = bb.getButtons();
+	Buttons& buttons = self->getButtons();
 	if (self->isOnLadder()) {
 		if (!moved) {
 			if (startedClimbing) {

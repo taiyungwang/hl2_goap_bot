@@ -4,8 +4,8 @@
 
 class DODPickUpGrenadeAction: public Action {
 public:
-	DODPickUpGrenadeAction(Blackboard &blackboard) :
-			Action(blackboard) {
+	DODPickUpGrenadeAction(Bot *self) :
+			Action(self) {
 		effects = { WorldProp::EXPLOSIVE_NEAR, false };
 	}
 

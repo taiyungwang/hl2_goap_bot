@@ -10,7 +10,7 @@ public:
 	virtual ~Deployer() {
 	}
 
-	virtual bool execute(Blackboard& blackboard);
+	virtual bool execute(Bot *self);
 
-	virtual void undeploy(Blackboard& blackboard);
+	virtual void undeploy(Bot *self);
 };

@@ -1,6 +1,5 @@
 #include "ThrowGrenadeAction.h"
 
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <weapon/WeaponFunction.h>
 #include <weapon/Weapon.h>
@@ -8,7 +7,6 @@
 #include <in_buttons.h>
 
 bool ThrowGrenadeAction::precondCheck() {
-	auto self = blackboard.getSelf();
 	auto weapon = self->getWeapon(weapIdx);
 	if (!weapon || !UseSpecificWeaponAction::precondCheck() || self->getWeapon(weapIdx) == nullptr
 			|| weapon->isOutOfAmmo(self->getEdict())) {
@@ -25,19 +23,18 @@ bool ThrowGrenadeAction::precondCheck() {
 }
 
 bool ThrowGrenadeAction::execute() {
-	auto self = blackboard.getSelf();
 	if (self->getAimAccuracy() < 0.9f) {
 		self->setViewTarget(target);
 		return false;
 	}
-	blackboard.getButtons().tap(IN_ATTACK);
+	self->getButtons().tap(IN_ATTACK);
 	return true;
 }
 
 const Player* ThrowGrenadeAction::chooseTarget() const {
-	auto grenade = blackboard.getSelf()->getWeapon(weapIdx);
+	auto grenade = self->getWeapon(weapIdx);
 	const Player *target = nullptr;
-	auto &vision = blackboard.getSelf()->getVision();
+	auto &vision = self->getVision();
 	auto enemies = vision.getVisibleEnemies();
 	int maxInRange = 0;
 	for (int i : enemies) {
@@ -47,7 +44,7 @@ const Player* ThrowGrenadeAction::chooseTarget() const {
 		}
 		Vector targetPos = enemy->getCurrentPosition();
 		if (!grenade->isInRange(
-				targetPos.DistTo(blackboard.getSelf()->getCurrentPosition()))) {
+				targetPos.DistTo(self->getCurrentPosition()))) {
 			continue;
 		}
 		int inRange = 0;

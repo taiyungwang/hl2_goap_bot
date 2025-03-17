@@ -7,7 +7,7 @@ class DODObjective;
 
 class CapturePointAction: public GoToEntityWithGivenNameAction {
 public:
-	CapturePointAction(Blackboard& blackboard);
+	CapturePointAction(Bot *self);
 
 	virtual bool precondCheck() override;
 

@@ -2,7 +2,6 @@
 
 #include <mods/dod/player/DODObjectives.h>
 #include <mods/dod/player/DODObjective.h>
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <player/HidingSpotSelector.h>
 #include <util/EntityUtils.h>
@@ -11,8 +10,8 @@
 
 static ConVar dodDefendChance("mybot_dod_defend_chance", "0.2");
 
-DODDefendPointAction::DODDefendPointAction(Blackboard &blackboard) :
-		SnipeAction(blackboard) {
+DODDefendPointAction::DODDefendPointAction(Bot *self) :
+		SnipeAction(self) {
 	precond[WorldProp::ROUND_STARTED] = true;
 	effects = { WorldProp::POINTS_DEFENDED, true };
 }
@@ -35,7 +34,7 @@ bool DODDefendPointAction::precondCheck() {
 		// TODO: should we randomize spot selection?
 		for (auto spot: spots)
 		{
-			if (!selector->isInUse(spot, blackboard.getSelf()->getTeam())) {
+			if (!selector->isInUse(spot, self->getTeam())) {
 				guardTarget = choice->GetCollideable()->GetCollisionOrigin();
 				selectorId = spot;
 				targetLoc = selector->getSpotPos(selectorId);
@@ -45,7 +44,7 @@ bool DODDefendPointAction::precondCheck() {
 					selectorId = -1;
 					continue;
 				}
-				selector->setInUse(selectorId, blackboard.getSelf()->getTeam(),
+				selector->setInUse(selectorId, self->getTeam(),
 						true);
 				return true;
 			}
@@ -59,7 +58,7 @@ float DODDefendPointAction::getChanceToExec() const {
 }
 
 bool DODDefendPointAction::isTargetValid() const {
-	bool ours = target->getOwner() == blackboard.getSelf()->getTeam();
+	bool ours = target->getOwner() == self->getTeam();
 	if (!objectives->isDetonation()) {
 		return !ours;
 	}

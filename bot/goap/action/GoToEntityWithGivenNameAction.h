@@ -7,7 +7,7 @@
  */
 class GoToEntityWithGivenNameAction: public GoToEntityAction {
 public:
-	GoToEntityWithGivenNameAction(Blackboard& blackboard, const char* itemName);
+	GoToEntityWithGivenNameAction(Bot *self, const char* itemName);
 
 	virtual bool execute();
 

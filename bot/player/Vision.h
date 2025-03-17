@@ -3,7 +3,6 @@
 #include <set>
 #include <string>
 
-class Blackboard;
 class Bot;
 class Vector;
 struct edict_t;

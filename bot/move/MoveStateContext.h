@@ -5,7 +5,7 @@
 
 class MoveState;
 class EntityInstance;
-class Blackboard;
+class Bot;
 class ITraceFilter;
 class CBotCmd;
 
@@ -20,8 +20,7 @@ public:
 	/**
 	 * @param pos Current position
 	 */
-	MoveStateContext(Blackboard& blackboard) :
-			blackboard(blackboard) {
+	MoveStateContext(Bot *self): self(self) {
 		stop();
 	}
 
@@ -81,8 +80,8 @@ public:
 		return ladderDir;
 	}
 
-	Blackboard& getBlackboard() {
-		return blackboard;
+	Bot *getSelf() {
+		return self;
 	}
 
 	void setStuck(bool stuck) {
@@ -122,7 +121,7 @@ public:
 
 private:
 	float targetOffset;
-	Blackboard& blackboard;
+	Bot *self;
 	bool stuck;
 	int type;
 	Vector goal, ladderEnd;

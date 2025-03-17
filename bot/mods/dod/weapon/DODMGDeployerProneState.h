@@ -10,7 +10,7 @@ public:
 	DODMGDeployerProneState(DODMGDeployer *ctx): DODMGDeployerStartState(ctx) {
 	}
 
-	void deploy(Blackboard& blackboard) override;
+	void deploy(Bot *self) override;
 
 private:
 	std::shared_ptr<MoveStateContext> moveCtx;

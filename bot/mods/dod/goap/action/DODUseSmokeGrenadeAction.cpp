@@ -1,10 +1,9 @@
 #include "DODUseSmokeGrenadeAction.h"
 
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 
 bool DODUseSmokeGrenadeAction::precondCheck() {
-	return !blackboard.getSelf()->getVision().getNearbyTeammates().empty()
+	return !self->getVision().getNearbyTeammates().empty()
 			&& ThrowGrenadeAction::precondCheck();
 }
 

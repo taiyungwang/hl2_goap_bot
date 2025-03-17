@@ -1,14 +1,13 @@
 #include "FindCoverAction.h"
 
-#include <player/Blackboard.h>
 #include <player/FilterSelfAndEnemies.h>
 #include <player/Bot.h>
 #include <player/Vision.h>
 #include <move/Navigator.h>
 #include <nav_mesh/nav_area.h>
 
-FindCoverAction::FindCoverAction(Blackboard& blackboard) :
-		GoToAction(blackboard), NavMeshPathBuilder(blackboard.getSelf()->getTeam()) {
+FindCoverAction::FindCoverAction(Bot *self) :
+		GoToAction(self), NavMeshPathBuilder(self->getTeam()) {
 	effects = {WorldProp::MULTIPLE_ENEMY_SIGHTED, false};
 	// this is needed so that hl2dm bots aren't trying to find cover when their weapon is out of ammo.
 	precond[WorldProp::OUT_OF_AMMO] = false;
@@ -18,7 +17,6 @@ FindCoverAction::FindCoverAction(Blackboard& blackboard) :
 bool FindCoverAction::foundGoal(CNavArea *area) {
 	Vector eyes(area->GetCenter());
 	eyes.z += HumanEyeHeight;
-	Bot* self = blackboard.getSelf();
 	FilterSelfAndEnemies filter(self->getEdict());
 	for (auto avoid: areasToAvoid) {
 		if (area->GetCenter().DistTo(std::get<1>(avoid)->GetCollideable()->GetCollisionOrigin()) > maxRange) {
@@ -40,7 +38,7 @@ bool FindCoverAction::foundGoal(CNavArea *area) {
 }
 
 void FindCoverAction::setAvoidAreas() {
-	for (auto i: blackboard.getSelf()->getVision().getVisibleEnemies()) {
+	for (auto i: self->getVision().getVisibleEnemies()) {
 		const Player* player = Player::getPlayer(i);
 		CNavArea* area = player->getArea();
 		if (area != nullptr) {
@@ -59,7 +57,6 @@ bool FindCoverAction::precondCheck() {
 	if (areasToAvoid.empty()) {
 		return false;
 	}
-	auto self = blackboard.getSelf();
 	NavMeshPathBuilder::Path path;
 	build(path, self->getArea());
 	if (path.empty()) {
@@ -71,7 +68,7 @@ bool FindCoverAction::precondCheck() {
 }
 
 float FindCoverAction::getHeuristicCost(CNavArea *area) const {
-	float cost = area->GetCenter().DistTo(blackboard.getSelf()->getCurrentPosition());
+	float cost = area->GetCenter().DistTo(self->getCurrentPosition());
 	Vector eyes(area->GetCenter());
 	for (auto avoid: areasToAvoid) {
 		Vector enemyEyes;
@@ -83,7 +80,7 @@ float FindCoverAction::getHeuristicCost(CNavArea *area) const {
 		}
 		cost /= area->GetCenter().DistTo(std::get<1>(avoid)->GetCollideable()->GetCollisionOrigin());
 	}
-	for (auto i: blackboard.getSelf()->getVision().getNearbyTeammates()) {
+	for (auto i: self->getVision().getNearbyTeammates()) {
 		cost *= area->GetCenter().DistTo(Player::getPlayer(i)->getCurrentPosition()) / 2.0f;
 	}
 	return cost;

@@ -3,18 +3,17 @@
 #include <mods/dod/player/DODObjectives.h>
 #include <mods/dod/player/DODObjective.h>
 #include <mods/dod/util/DodPlayer.h>
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 
-DODBombTargetAction::DODBombTargetAction(Blackboard &blackboard) :
-		DODDefuseBombAction(blackboard) {
+DODBombTargetAction::DODBombTargetAction(Bot *self) :
+		DODDefuseBombAction(self) {
 	effects = { WorldProp::ALL_POINTS_CAPTURED, true };
 	precond[WorldProp::HAS_BOMB] = true;
 }
 
 bool DODBombTargetAction::isAvailable(const DODObjective &obj) {
 	return objectives->isDetonation()
-			&& blackboard.getSelf()->getTeam() != obj.getOwner()
+			&& self->getTeam() != obj.getOwner()
 			&& obj.hasBombs() && obj.hasBombTargetInState(DODObjective::BombState::AVAILABLE);
 }
 

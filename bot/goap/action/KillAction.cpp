@@ -1,6 +1,5 @@
 #include "KillAction.h"
 
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <weapon/Weapon.h>
 #include <limits>
@@ -10,8 +9,8 @@ static ConVar mybotAttackDelay("mybot_attack_delay", "60");
 static ConVar mybotAimVar("mybot_aim_variance", "1.0f", 0,
 		"range of randomness for a bot's aim");
 
-KillAction::KillAction(Blackboard &blackboard) :
-		AttackAction(blackboard) {
+KillAction::KillAction(Bot *self) :
+		AttackAction(self) {
 	effects = { WorldProp::ENEMY_SIGHTED, false };
 }
 
@@ -19,16 +18,15 @@ bool KillAction::precondCheck() {
 	framesToWait = mybotAttackDelay.GetInt();
 	adjustAim = true;
 	dur = UINT_MAX;
-	target = blackboard.getSelf()->getVision().getTargetedPlayer();
+	target = self->getVision().getTargetedPlayer();
 	if (target > 0) {
-		blackboard.getSelf()->setAimOffset(mybotAimVar.GetFloat());
+		self->setAimOffset(mybotAimVar.GetFloat());
 		return true;
 	}
 	return false;
 }
 
 bool KillAction::execute()  {
-	auto self = blackboard.getSelf();
 	int visionTarget = self->getVision().getTargetedPlayer();
 	if (target != visionTarget) {
 		target = visionTarget;

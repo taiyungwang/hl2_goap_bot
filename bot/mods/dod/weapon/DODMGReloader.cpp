@@ -3,7 +3,7 @@
 #include <weapon/Deployer.h>
 #include <weapon/Weapon.h>
 
-bool DODMGReloader::execute(Blackboard &blackboard) {
-	return weapon.getDeployer()->execute(blackboard)
-			&& Reloader::execute(blackboard);
+bool DODMGReloader::execute(Bot *self) {
+	return weapon.getDeployer()->execute(self)
+			&& Reloader::execute(self);
 }

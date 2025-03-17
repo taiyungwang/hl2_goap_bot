@@ -7,7 +7,7 @@
 
 class FindCoverAction: public GoToAction, private NavMeshPathBuilder {
 public:
-	FindCoverAction(Blackboard& blackboard);
+	FindCoverAction(Bot *self);
 
 	bool precondCheck() override;
 

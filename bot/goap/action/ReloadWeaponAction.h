@@ -4,7 +4,7 @@
 
 class ReloadWeaponAction: public Action {
 public:
-	ReloadWeaponAction(Blackboard& blackboard);
+	ReloadWeaponAction(Bot *self);
 
 	bool precondCheck();
 

@@ -1,12 +1,11 @@
 #include "DODUseRifleGrenadeAction.h"
 
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <weapon/Weapon.h>
 #include <util/BaseGrenade.h>
 
 bool DODUseRifleGrenadeAction::execute() {
-	auto weapon = blackboard.getSelf()->getCurrWeapon();
+	auto weapon = self->getCurrWeapon();
 	return !weapon || weapon->isClipEmpty() || ThrowGrenadeAction::execute();
 }
 

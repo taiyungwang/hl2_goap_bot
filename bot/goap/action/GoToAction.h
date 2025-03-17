@@ -32,7 +32,7 @@ protected:
 
 	float targetRadius = 0.0f;
 
-	GoToAction(Blackboard& blackboard): Action(blackboard) {
+	GoToAction(Bot *self): Action(self) {
 	}
 
 	/**

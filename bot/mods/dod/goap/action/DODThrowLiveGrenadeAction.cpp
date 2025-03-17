@@ -1,12 +1,10 @@
 #include "DODThrowLiveGrenadeAction.h"
 
 #include <mods/dod/weapon/DODLiveGrenadeBuilder.h>
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 
 const Player* DODThrowLiveGrenadeAction::chooseTarget() const {
 	float closest = INFINITY;
-	auto self = blackboard.getSelf();
 	const Player *target = nullptr;
 	for (auto i: self->getVision().getVisibleEnemies()) {
 		auto enemy = Player::getPlayer(i);

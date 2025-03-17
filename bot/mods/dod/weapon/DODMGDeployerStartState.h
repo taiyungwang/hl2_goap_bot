@@ -6,7 +6,7 @@ public:
 	DODMGDeployerStartState(DODMGDeployer *context): DODMGDeployerState(context) {
 	}
 
-	void deploy(Blackboard& blackboard) override;
+	void deploy(Bot *self) override;
 
 protected:
 	static const int PRONE_TIMEOUT, DEPLOY_TIMEOUT;

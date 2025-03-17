@@ -3,15 +3,14 @@
 #include <mods/dod/player/DODObjectives.h>
 #include <mods/dod/player/DODObjective.h>
 #include <mods/dod/util/DodPlayer.h>
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <voice/VoiceMessage.h>
 #include <nav_mesh/nav.h>
 #include <util/UtilTrace.h>
 #include <in_buttons.h>
 
-DODDefuseBombAction::DODDefuseBombAction(Blackboard& blackboard) :
-	CapturePointAction(blackboard) {
+DODDefuseBombAction::DODDefuseBombAction(Bot *self) :
+	CapturePointAction(self) {
 	effects = {WorldProp::BOMB_DEFUSED, true};
 }
 
@@ -35,7 +34,6 @@ bool DODDefuseBombAction::execute() {
 		return true;
 	}
 	interruptable = false;
-	Bot *self = blackboard.getSelf();
 	self->sendVoiceMessage(VoiceMessage::NEED_BACKUP);
 	useItem(isActingOnBomb(self->getEdict()));
 	return false;
@@ -46,8 +44,8 @@ bool DODDefuseBombAction::isAvailable(edict_t* ent) {
 		return false;
 	}
 	for (auto player: Player::getPlayers()) {
-		if (player.second != blackboard.getSelf()
-				&& player.second->getTeam() == blackboard.getSelf()->getTeam()
+		if (player.second != self
+				&& player.second->getTeam() == self->getTeam()
 				&& player.second->getCurrentPosition().DistTo(ent->GetCollideable()->GetCollisionOrigin()) < 100.0f
 				&& isActingOnBomb(player.second->getEdict())) {
 			return false;
@@ -58,7 +56,7 @@ bool DODDefuseBombAction::isAvailable(edict_t* ent) {
 
 bool DODDefuseBombAction::isAvailable(const DODObjective& obj) {
 	return objectives->isDetonation()
-			&& blackboard.getSelf()->getTeam() == obj.getOwner()
+			&& self->getTeam() == obj.getOwner()
 			&& obj.hasBombs()
 			&& obj.hasBombTargetInState(DODObjective::BombState::ACTIVE);
 }

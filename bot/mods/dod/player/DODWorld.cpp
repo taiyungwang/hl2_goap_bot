@@ -3,7 +3,6 @@
 #include <mods/dod/voice/DODVoiceMessage.h>
 #include <mods/dod/weapon/DODLiveGrenadeBuilder.h>
 #include <weapon/Weapon.h>
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <nav_mesh/nav.h>
 #include <util/EntityUtils.h>
@@ -36,8 +35,7 @@ void DODWorld::addStates() {
 	states[WorldProp::ROUND_STARTED] = roundStarted;
 }
 
-bool DODWorld::update(Blackboard& blackboard) {
-	Bot *self = blackboard.getSelf();
+bool DODWorld::update(Bot *self) {
 	int team = self->getTeam();
 	if (teamWithDeadDefuserOrPlanter > 0) {
 		if (team == teamWithDeadDefuserOrPlanter) {

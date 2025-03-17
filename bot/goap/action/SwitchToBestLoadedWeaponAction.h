@@ -7,7 +7,7 @@
  */
 class SwitchToBestLoadedWeaponAction: public SwitchToDesiredWeaponAction {
 public:
-	SwitchToBestLoadedWeaponAction(Blackboard& blackboard);
+	SwitchToBestLoadedWeaponAction(Bot *self);
 
 	bool precondCheck();
 

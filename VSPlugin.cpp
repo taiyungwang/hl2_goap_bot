@@ -9,7 +9,6 @@
 #include <shareddefs.h>
 #include <usercmd.h>
 #include <IEngineTrace.h>
-#include <eiface.h>
 #include <ivdebugoverlay.h>
 #include <filesystem.h>
 #include <tier1.h>

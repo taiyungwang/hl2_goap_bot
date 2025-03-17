@@ -2,7 +2,6 @@
 
 #include <move/MoveStateContext.h>
 #include <move/MoveLadder.h>
-#include <player/Blackboard.h>
 #include <player/Buttons.h>
 #include <player/Bot.h>
 #include <weapon/Weapon.h>
@@ -23,9 +22,8 @@ static ConVar maxAreaTime("my_bot_max_area_time", "80");
 
 static const float MIN_LOOK_DIST = 50.0f;
 
-Navigator::Navigator(Blackboard& blackboard) :
-		blackboard(blackboard) {
-	moveCtx = new MoveStateContext(blackboard);
+Navigator::Navigator(Bot *self) {
+	moveCtx = new MoveStateContext(self);
 }
 
 Navigator::~Navigator() {
@@ -42,14 +40,14 @@ void Navigator::start(const Vector &goal, float targetRadius, bool sprint) {
 }
 
 bool Navigator::step() {
-	if (moveCtx->isStuck() || reachedGoal() || blackboard.getBlocker() != nullptr
+	Bot *self = moveCtx->getSelf();
+	if (moveCtx->isStuck() || reachedGoal() || self->getBlocker() != nullptr
 			|| (lastAreaId < 0 && path.empty())) {
 		return true;
 	}
 	if (!checkCanMove()) {
 		return false;
 	}
-	Bot* self = blackboard.getSelf();
 	Vector loc = self->getCurrentPosition();
 	CNavArea *topArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.back()));
 	if (canGetNextArea(loc)) {
@@ -107,21 +105,21 @@ bool Navigator::step() {
 		areaTime = 0;
 	}
 	if (areaTime > maxTime) {
-		blackboard.getSelf()->consoleWarn(std::string("Unable to get to next area from: ") + std::to_string(lastAreaId));
+		self->consoleWarn(std::string("Unable to get to next area from: ") + std::to_string(lastAreaId));
 		areaTime = 0;
 		moveCtx->setStuck(true);
 	}
 	float goalDist = moveCtx->getGoal().DistTo(loc);
 	if (moveCtx->hasGoal() && goalDist > 1000.0f
 			&& !canMoveTo(moveCtx->getGoal(), attributes & NAV_MESH_CROUCH)) {
-		blackboard.getSelf()->consoleWarn(std::string("Goal is too far from current position: ") + std::to_string(goalDist));
+		self->consoleWarn(std::string("Goal is too far from current position: ") + std::to_string(goalDist));
 		return true;
 	}
 	if (path.empty()) {
 		moveCtx->setTargetOffset(targetRadius);
 	}
 	if (sprint) {
-		blackboard.getButtons().hold(IN_SPEED);
+		self->getButtons().hold(IN_SPEED);
 	}
 	moveCtx->move(attributes);
 	if (mybot_debug.GetBool()) {
@@ -131,13 +129,13 @@ bool Navigator::step() {
 				NDEBUG_PERSIST_TILL_NEXT_SERVER);
 	}
 	// do look
-	if (sprint || (blackboard.getBlocker() == nullptr
-			&& blackboard.getSelf()->getVision().getTargetedPlayer() == 0
+	if (sprint || (self->getBlocker() == nullptr
+			&& self->getVision().getTargetedPlayer() == 0
 			&& !self->isOnLadder()
 			&& moveCtx->getLadderDir() == CNavLadder::NUM_LADDER_DIRECTIONS)) {
 		Vector look = moveCtx->getGoal();
 		look.z += HumanEyeHeight;
-		if (look.DistTo(blackboard.getSelf()->getEyesPos()) > MIN_LOOK_DIST) {
+		if (look.DistTo(self->getEyesPos()) > MIN_LOOK_DIST) {
 			self->setViewTarget(look);
 		} else {
 			lookAtFurthestVisibleArea();
@@ -147,9 +145,9 @@ bool Navigator::step() {
 }
 
 bool Navigator::checkCanMove() {
-	auto weapon = blackboard.getSelf()->getCurrWeapon();
+	auto weapon = moveCtx->getSelf()->getCurrWeapon();
 	if (weapon != nullptr && weapon->isDeployed()) {
-		weapon->undeploy(blackboard);
+		weapon->undeploy(moveCtx->getSelf());
 		return false;
 	}
 	return true;
@@ -164,8 +162,9 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 	if (topArea == nullptr || moveCtx->nextGoalIsLadderStart()) {
 		return false;
 	}
+	Bot *self = moveCtx->getSelf();
 	if (lastAreaId < 0
-			|| (moveCtx->nextGoalIsLadderStart() && blackboard.getSelf()->isOnLadder())
+			|| (moveCtx->nextGoalIsLadderStart() && self->isOnLadder())
 			|| (!moveCtx->hasGoal()
 					&& (moveCtx->getGoal() == topArea->GetCenter()
 							// close to next path.top()
@@ -184,7 +183,6 @@ bool Navigator::canGetNextArea(const Vector& loc) {
 	lastAreaId = std::get<0>(path.back());
 	auto top = path.back();
 	path.pop_back();
-	auto self = blackboard.getSelf();
 	topArea = path.empty() ? nullptr : TheNavMesh->GetNavAreaByID(std::get<0>(path.back()));
 	bool canSkip = topArea != nullptr && ((path.empty() && canMoveTo(finalGoal, false))
 		|| (!path.empty() && getPortalToTopArea(goal) && canMoveTo(goal, false))
@@ -281,7 +279,7 @@ bool Navigator::canMoveTo(const Vector& loc, Vector goal, float targetRadius, bo
 }
 
 bool Navigator::canMoveTo(Vector goal, bool crouch) const {
-	return canMoveTo(blackboard.getSelf()->getCurrentPosition(),
+	return canMoveTo(moveCtx->getSelf()->getCurrentPosition(),
 			goal, path.size() > 1 ? 0.0f : targetRadius, crouch);
 }
 
@@ -315,7 +313,7 @@ bool Navigator::setLadderStart() {
 				end.x = ladder->m_top.x;
 				end.y = ladder->m_top.y;
 			}
-			float delta = end.z - blackboard.getSelf()->getCurrentPosition().z;
+			float delta = end.z - moveCtx->getSelf()->getCurrentPosition().z;
 			if (delta == 0.0f || (delta < 0.0f && delta >= -StepHeight)
 					|| (delta > 0.0f && delta <= HumanHeight + MoveLadder::TARGET_OFFSET)) {
 				// bot already got off the ladder
@@ -333,12 +331,12 @@ bool Navigator::setLadderStart() {
 void Navigator::lookAtFurthestVisibleArea() const {
 	Vector look = finalGoal;
 	look.z += HumanEyeHeight;
+	Bot *self = moveCtx->getSelf();
 	if (path.size() == 1) {
-		blackboard.getSelf()->setViewTarget(look);
+		self->setViewTarget(look);
 		return;
 	}
 	CNavArea *furthest = nullptr;
-	Bot *self = blackboard.getSelf();
 	for (auto itr = path.rbegin(); itr != path.rend(); itr++) {
 		furthest = TheNavMesh->GetNavAreaByID(std::get<0>(*itr));
 		if (furthest == nullptr) {

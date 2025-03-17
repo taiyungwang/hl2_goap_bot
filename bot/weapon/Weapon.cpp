@@ -30,9 +30,9 @@ bool Weapon::isDeployed() const {
 	return deployedVarName != nullptr && BaseCombatWeapon(weap).get<bool>(deployedVarName, false);
 }
 
-void Weapon::undeploy(Blackboard& blackboard) {
+void Weapon::undeploy(Bot *self) {
 	 if (deployer) {
-		 deployer->undeploy(blackboard);
+		 deployer->undeploy(self);
 	 }
 }
 

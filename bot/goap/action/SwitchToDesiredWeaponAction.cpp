@@ -1,17 +1,16 @@
 #include "SwitchToDesiredWeaponAction.h"
 
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 
 bool SwitchToDesiredWeaponAction::precondCheck() {
-	return !blackboard.getSelf()->isOnLadder();
+	return !self->isOnLadder();
 }
 
 bool SwitchToDesiredWeaponAction::execute() {
-	int desiredWeapIdx = blackboard.getSelf()->getDesiredWeapon();
-	if (desiredWeapIdx == blackboard.getSelf()->getCurrWeaponIdx()) {
+	int desiredWeapIdx = self->getDesiredWeapon();
+	if (desiredWeapIdx == self->getCurrWeaponIdx()) {
 		return true;
 	}
-	blackboard.getCmd().weaponselect = desiredWeapIdx;
+	self->getCmd().weaponselect = desiredWeapIdx;
 	return false;
 }

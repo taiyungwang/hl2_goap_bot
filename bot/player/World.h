@@ -2,7 +2,7 @@
 
 #include <goap/WorldCond.h>
 
-class Blackboard;
+class Bot;
 
 class World {
 public:
@@ -15,7 +15,7 @@ public:
 		return states.at(prop);
 	}
 
-	bool think(Blackboard& blackboard);
+	bool think(Bot *self);
 
 	void updateState(WorldProp name, bool cond) {
 		states[name] = cond;
@@ -30,5 +30,5 @@ protected:
 
 	virtual void addStates() = 0;
 
-	virtual bool update(Blackboard& blackboard) = 0;
+	virtual bool update(Bot *self) = 0;
 };

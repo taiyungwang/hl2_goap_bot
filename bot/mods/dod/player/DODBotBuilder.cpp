@@ -14,7 +14,6 @@
 #include <mods/dod/util/DodPlayer.h>
 #include <goap/action/AttackAction.h>
 #include <player/Bot.h>
-#include <player/Blackboard.h>
 #include <weapon/SimpleWeaponBuilder.h>
 #include <weapon/GrenadeLauncherFunction.h>
 #include <weapon/DeployableWeaponBuilder.h>
@@ -23,6 +22,7 @@
 #include <weapon/UtilityToolBuilder.h>
 #include <voice/VoiceMessage.h>
 #include <move/Navigator.h>
+#include <move/MoveStateContext.h>
 #include <eiface.h>
 #include <goap/GoalManager.h>
 #include <vstdlib/random.h>
@@ -123,12 +123,12 @@ void DODBotBuilder::FireGameEvent(IGameEvent* event) {
 }
 
 void DODBotBuilder::updatePlanner(GoalManager &planner,
-		Blackboard &blackboard) const {
+		Bot *bot) const {
 
 	class DODDestroyObjectAction: public AttackAction {
 	public:
-		DODDestroyObjectAction(Blackboard &blackboard) :
-				AttackAction(blackboard) {
+		DODDestroyObjectAction(Bot *bot) :
+				AttackAction(bot) {
 		}
 	private:
 		bool isBreakable(edict_t *object) const {
@@ -138,8 +138,8 @@ void DODBotBuilder::updatePlanner(GoalManager &planner,
 
 	class DODGetBombAction: public GoToEntityWithGivenNameAction {
 	public:
-		DODGetBombAction(Blackboard &blackboard) :
-			GoToEntityWithGivenNameAction(blackboard, "dod_bomb_dispenser") {
+		DODGetBombAction(Bot *bot) :
+			GoToEntityWithGivenNameAction(self, "dod_bomb_dispenser") {
 			effects = { WorldProp::HAS_BOMB, true };
 			allItemsVisible = true;
 		}
@@ -177,8 +177,8 @@ void DODBotBuilder::modHandleCommand(const CCommand &command, Bot* bot) const {
 
 class DODNavigator: public Navigator {
 public:
-	DODNavigator(Blackboard &blackboard) :
-			Navigator(blackboard) {
+	DODNavigator(Bot *bot) :
+			Navigator(bot) {
 	}
 
 private:
@@ -188,9 +188,9 @@ private:
 		if (!Navigator::checkCanMove()) {
 			return false;
 		}
-		if (DodPlayer(blackboard.getSelf()->getEdict()).isProne()) {
+		if (DodPlayer(moveCtx->getSelf()->getEdict()).isProne()) {
 			if (!unproned) {
-				blackboard.getButtons().tap(IN_ALT1);
+				moveCtx->getSelf()->getButtons().tap(IN_ALT1);
 				unproned = true;
 			}
 			return true;
@@ -200,8 +200,8 @@ private:
 	}
 };
 
-Bot *DODBotBuilder::modBuild(Bot *bot, Blackboard& blackboard) {
-	bot->setNavigator(std::make_shared<DODNavigator>(blackboard));
+Bot *DODBotBuilder::modBuild(Bot *bot) {
+	bot->setNavigator(std::make_shared<DODNavigator>(bot));
 	bot->getVision().setMiniMapRange(500.0f);
 	bot->getVision().addClassName("grenade_frag_ger");
 	bot->getVision().addClassName("grenade_frag_us");

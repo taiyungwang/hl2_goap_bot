@@ -2,10 +2,12 @@
 
 #include "Player.h"
 #include "Vision.h"
+#include "Buttons.h"
 #include "CommandHandler.h"
 #include "move/RotationManager.h"
+#include <eiface.h>
+#include <iplayerinfo.h>
 
-class Blackboard;
 class GoalManager;
 class Action;
 class BasePlayer;
@@ -40,10 +42,6 @@ public:
 
 	void think();
 
-	void setBlackboard(Blackboard *blackboard) {
-		this->blackboard = blackboard;
-	}
-
 	void setWorld(World *world);
 
 	void setPlanner(GoalManager *planner) {
@@ -54,7 +52,17 @@ public:
 
 	bool receive(edict_t* sender, const CCommand&) override;
 
-	const CBotCmd &getCmd() const;
+	const CBotCmd &getCmd() const {
+		return cmd;
+	}
+
+	CBotCmd &getCmd() {
+		return cmd;
+	}
+
+	Buttons &getButtons() {
+		return buttons;
+	}
 
 	void setHookEnabled(bool hookEnabled) {
 		this->hookEnabled = hookEnabled;
@@ -143,6 +151,22 @@ public:
 
 	int getBestWeapon() const;
 
+	edict_t *getBlocker() const {
+		return blocker;
+	}
+
+	void setBlocker(edict_t *blocker) {
+		this->blocker = blocker;
+	}
+
+	edict_t *getTarget() const {
+		return target;
+	}
+
+	void setTarget(edict_t *target) {
+		this->target = target;
+	}
+
 private:
 	static PlayerClasses CLASSES;
 
@@ -154,9 +178,14 @@ private:
 
 	Vision vision;
 
+	Buttons buttons;
+
+	CBotCmd cmd;
+
 	BasePlayer *playerClassVar = nullptr;
 
-	Blackboard *blackboard = nullptr;
+	edict_t *blocker = nullptr,
+			*target = nullptr;
 
 	std::shared_ptr<Navigator> navigator;
 

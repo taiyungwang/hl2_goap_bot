@@ -5,7 +5,6 @@
 #include <string>
 #include <list>
 
-class Blackboard;
 class Bot;
 class BasePlayer;
 class CommandHandler;
@@ -44,7 +43,7 @@ protected:
 	WeaponBuilders weaponBuilders;
 
 	virtual void updatePlanner(GoalManager& planner,
-			Blackboard& blackboard) const = 0;
+			Bot *self) const = 0;
 
 	virtual World* buildWorld() const = 0;
 
@@ -53,7 +52,7 @@ protected:
 	virtual void modHandleCommand(const CCommand &command, Bot* bot) const {
 	}
 
-	virtual Bot* modBuild(Bot *bot, Blackboard& blackboard) {
+	virtual Bot* modBuild(Bot *bot) {
 		return bot;
 	}
 

@@ -6,7 +6,7 @@
 class Blackboard;
 class MoveStateContext;
 class CNavArea;
-class Player;
+class Bot;
 struct edict_t;
 
 /**
@@ -23,7 +23,7 @@ public:
 
 	static CNavArea* getArea(const Vector& pos, int team);
 
-	Navigator(Blackboard& blackboard);
+	Navigator(Bot *self);
 
 	virtual ~Navigator();
 
@@ -50,7 +50,7 @@ public:
 	}
 
 protected:
-	Blackboard& blackboard;
+	MoveStateContext* moveCtx;
 
 	bool canMoveTo(const Vector& start, Vector to, float targetRadius, bool crouch) const;
 
@@ -62,8 +62,6 @@ private:
 	Path path;
 
 	int lastAreaId = -1, areaTime = 0;
-
-	MoveStateContext* moveCtx;
 
 	float targetRadius = 0.0f;
 

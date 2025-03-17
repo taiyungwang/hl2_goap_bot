@@ -22,5 +22,5 @@ private:
 
 	void addStates();
 
-	bool update(Blackboard& blackboard);
+	bool update(Bot *self);
 };

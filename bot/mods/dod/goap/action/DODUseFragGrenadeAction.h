@@ -6,8 +6,8 @@ class Player;
 
 class DODUseFragGrenadeAction: public DODUseRifleGrenadeAction {
 public:
-	DODUseFragGrenadeAction(Blackboard& blackboard) :
-			DODUseRifleGrenadeAction(blackboard) {
+	DODUseFragGrenadeAction(Bot *self) :
+			DODUseRifleGrenadeAction(self) {
 	}
 
 	bool init() {

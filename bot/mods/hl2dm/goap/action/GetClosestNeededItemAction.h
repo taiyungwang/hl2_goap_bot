@@ -13,7 +13,7 @@ public:
 		itemMap = m;
 	}
 
-	GetClosestNeededItemAction(Blackboard& blackboard);
+	GetClosestNeededItemAction(Bot *self);
 
 	virtual bool init();
 

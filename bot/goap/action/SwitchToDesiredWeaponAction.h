@@ -4,8 +4,8 @@
 
 class SwitchToDesiredWeaponAction: public Action {
 public:
-	SwitchToDesiredWeaponAction(Blackboard& blackboard) :
-			Action(blackboard) {
+	SwitchToDesiredWeaponAction(Bot *self) :
+			Action(self) {
 		effects = {WorldProp::USING_DESIRED_WEAPON, true};
 	}
 

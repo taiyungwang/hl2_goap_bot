@@ -1,22 +1,21 @@
 #include "UseSpecificWeaponAction.h"
 
-#include <player/Blackboard.h>
 #include <player/Bot.h>
 #include <weapon/Weapon.h>
 #include <eiface.h>
 
-UseSpecificWeaponAction::UseSpecificWeaponAction(Blackboard& blackboard) : SwitchToDesiredWeaponAction(blackboard) {
+UseSpecificWeaponAction::UseSpecificWeaponAction(Bot *self) : SwitchToDesiredWeaponAction(self) {
 	precond[WorldProp::USING_DESIRED_WEAPON] = true;
 }
 
 bool UseSpecificWeaponAction::precondCheck() {
 	weapIdx = 0;
-	blackboard.getSelf()->forMyWeapons([this](edict_t *weaponEnt) mutable -> bool {
+	self->forMyWeapons([this](edict_t *weaponEnt) mutable -> bool {
 		extern IVEngineServer* engine;
 		int i = engine->IndexOfEdict(weaponEnt);
 		if (this->canUse(i)) {
 			weapIdx = i;
-			blackboard.getSelf()->setDesiredWeapon(weapIdx);
+			self->setDesiredWeapon(weapIdx);
 			return true;
 		}
 		return false;
@@ -25,5 +24,5 @@ bool UseSpecificWeaponAction::precondCheck() {
 }
 
 bool UseSpecificWeaponAction::canUse(int i) const {
-	return !blackboard.getSelf()->getWeapon(i)->isOutOfAmmo(blackboard.getSelf()->getEdict());
+	return !self->getWeapon(i)->isOutOfAmmo(self->getEdict());
 }
