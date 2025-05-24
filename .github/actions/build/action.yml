@@ -19,8 +19,8 @@ runs:
     - name: Checkout HL2SDK 
       uses: actions/checkout@v4
       with:
-        repository: alliedmodders/hl2sdk      
-        ref: tf2_sdk2013
+        repository: ValveSoftware/source-sdk-2013
+        ref: master
         path: hl2sdk
     - name: Checkout Plugin Navmesh lib
       uses: actions/checkout@v4
