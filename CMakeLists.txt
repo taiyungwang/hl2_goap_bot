@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 3.28.3)
 
 project (PluginBot)
 
+set(CMAKE_CXX_STANDARD 17)
+
 add_definitions(-DPLATFORM_64BITS -DX64BITS -DRAD_TELEMETRY_DISABLED)
 find_package (Python COMPONENTS Interpreter Development)
 set(DRIVE C CACHE STRING "User specified drive for Windows")
