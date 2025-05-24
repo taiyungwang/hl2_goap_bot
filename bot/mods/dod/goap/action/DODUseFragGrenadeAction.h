@@ -4,21 +4,21 @@
 
 class Player;
 
-class DODUseFragGrenadeAction: public DODUseRifleGrenadeAction {
+class DODUseFragGrenadeAction final : public DODUseRifleGrenadeAction {
 public:
-	DODUseFragGrenadeAction(Bot *self) :
+	explicit DODUseFragGrenadeAction(Bot *self) :
 			DODUseRifleGrenadeAction(self) {
 	}
 
-	bool init() {
+	bool init() override {
 		primeDuration = 0;
 		return true;
 	}
 
-	bool execute();
-
 private:
 	int primeDuration = 0;
 
-	bool canUse(const char* weaponName) const;
+	bool use() override;
+
+	bool canUse(const char* weaponName) const override;
 };

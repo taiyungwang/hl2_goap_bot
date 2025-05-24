@@ -11,7 +11,7 @@ bool UseGravityGunAction::precondCheck() {
 					!= nullptr;
 }
 
-bool UseGravityGunAction::execute() {
+bool UseGravityGunAction::use() {
 	edict_t* blocker = self->getBlocker();
 	if (blocker == nullptr) {
 		return true;

@@ -25,7 +25,7 @@ bool FindCoverAction::foundGoal(CNavArea *area) {
 		if (area->IsPotentiallyVisible(std::get<0>(avoid))) {
 			return false;
 		}
-		Vector enemyEyes;
+		Vector enemyEyes{};
 		getAvoidPosition(enemyEyes, std::get<1>(avoid));
 		trace_t result;
 		Bot::canSee(result, eyes, enemyEyes);

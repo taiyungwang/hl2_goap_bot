@@ -72,7 +72,7 @@ class KillAction: public TestAction {
 public:
 	KillAction() :
 			TestAction( { WorldProp::ENEMY_SIGHTED, false }) {
-		precond[WorldProp::WEAPON_IN_RANGE] = true;
+		precond[WorldProp::OUT_OF_AMMO] = false;
 		precond[WorldProp::WEAPON_LOADED] = true;
 	}
 } killEnemy;
@@ -88,7 +88,6 @@ void PlannerTest::setUp() {
 	worldState[WorldProp::USING_BEST_WEAP] = false;
 	worldState[WorldProp::OUT_OF_AMMO] = false;
 	worldState[WorldProp::WEAPON_LOADED] = false;
-	worldState[WorldProp::WEAPON_IN_RANGE] = true;
 	worldState[WorldProp::MULTIPLE_ENEMY_SIGHTED] = false;
 	worldState[WorldProp::ENEMY_SIGHTED] = true;
 }

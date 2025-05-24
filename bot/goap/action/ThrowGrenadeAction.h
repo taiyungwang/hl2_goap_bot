@@ -12,9 +12,7 @@ public:
 		effects = {WorldProp::MULTIPLE_ENEMY_SIGHTED, false};
 	}
 
-	virtual bool precondCheck() override;
-
-	virtual bool execute() override;
+	bool precondCheck() override;
 
 protected:
 	Vector target;
@@ -22,6 +20,8 @@ protected:
 	virtual const Player *chooseTarget() const;
 
 	virtual bool canUse(const char *weapName) const = 0;
+
+	bool use() override;
 
 private:
 	bool canUse(int weapIndx) const override;

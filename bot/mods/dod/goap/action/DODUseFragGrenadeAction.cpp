@@ -7,7 +7,7 @@
 #include <weapon/Weapon.h>
 #include <in_buttons.h>
 
-bool DODUseFragGrenadeAction::execute() {
+bool DODUseFragGrenadeAction::use() {
 	self->setViewTarget(target);
 	if (self->getVision().getVisibleEnemies().size() < 2 || primeDuration++ >= 300) {
 		extern IVEngineServer *engine;

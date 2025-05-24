@@ -64,10 +64,9 @@ public:
 
 	bool isClipEmpty() const;
 	/**
-	 * Returns the damage rating based on ammo count,
-	 * target distance, and function damage rating.
+	 * Returns the damage rating based on target.
 	 */
-	float getDamage(edict_t* player, float dist) const;
+	float getDamage(edict_t* player, edict_t *target) const;
 
 	/**
 	 * @return True if distance is within weapon range.

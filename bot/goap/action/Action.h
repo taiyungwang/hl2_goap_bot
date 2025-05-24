@@ -10,11 +10,10 @@ class Bot;
 class Action {
 public:
 
-	Action(Bot *self): self(self) {
+	explicit Action(Bot *self): self(self) {
 	}
 
-	virtual ~Action() {
-	}
+	virtual ~Action() = default;
 
 	virtual bool execute() = 0;
 

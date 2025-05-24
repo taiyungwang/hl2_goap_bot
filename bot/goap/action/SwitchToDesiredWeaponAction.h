@@ -9,7 +9,10 @@ public:
 		effects = {WorldProp::USING_DESIRED_WEAPON, true};
 	}
 
-	virtual bool precondCheck();
+	bool precondCheck() override;
+	
+	bool execute() override;
 
-	bool execute();
+protected:
+	int weapIdx = 0;
 };

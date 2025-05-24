@@ -4,12 +4,18 @@
 
 class UseSpecificWeaponAction: public SwitchToDesiredWeaponAction {
 public:
-	UseSpecificWeaponAction(Bot *self);
+	explicit UseSpecificWeaponAction(Bot *self): SwitchToDesiredWeaponAction(self) {
+	}
 
 	bool precondCheck() override;
 
-protected:
-	int weapIdx = 0;
+	bool execute() final {
+		return SwitchToDesiredWeaponAction::execute() && use();
 
+	}
+
+protected:
 	virtual bool canUse(int weapIdx) const;
+
+	virtual bool use() = 0;
 };

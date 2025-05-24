@@ -3,5 +3,7 @@
 # visual studio
 .vs
 out
+# intellij
+.idea
 # cmake config
 CMakeSettings.json

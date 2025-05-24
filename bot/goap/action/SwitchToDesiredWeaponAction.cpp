@@ -7,10 +7,9 @@ bool SwitchToDesiredWeaponAction::precondCheck() {
 }
 
 bool SwitchToDesiredWeaponAction::execute() {
-	int desiredWeapIdx = self->getDesiredWeapon();
-	if (desiredWeapIdx == self->getCurrWeaponIdx()) {
-		return true;
+	if (self->getDesiredWeapon() != weapIdx) {
+		self->setDesiredWeapon(weapIdx);
+		return false;
 	}
-	self->getCmd().weaponselect = desiredWeapIdx;
-	return false;
+	return self->getDesiredWeapon() == self->getCurrWeaponIdx();
 }

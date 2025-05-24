@@ -7,11 +7,11 @@
 
 class FindCoverAction: public GoToAction, private NavMeshPathBuilder {
 public:
-	FindCoverAction(Bot *self);
+	explicit FindCoverAction(Bot *self);
 
 	bool precondCheck() override;
 
-	bool init() {
+	bool init() override {
 		return true;
 	}
 

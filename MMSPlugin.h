@@ -12,75 +12,65 @@ class PluginAdaptor;
 class MMSPlugin : public ISmmPlugin, public IMetamodListener
 {
 public:
-	bool Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late);
-	bool Unload(char *error, size_t maxlen);
-	bool Pause(char *error, size_t maxlen) {
+	bool Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late) override;
+	bool Unload(char *error, size_t maxlen) override;
+	bool Pause(char *error, size_t maxlen) override {
 		return true;
 	}
-	bool Unpause(char *error, size_t maxlen) {
+	bool Unpause(char *error, size_t maxlen) override {
 		return true;
 	}
-	void AllPluginsLoaded() {
+	void AllPluginsLoaded() override {
 	}
 	//IMetamodListener stuff
-	void OnVSPListening(IServerPluginCallbacks *iface) {
-	}
-	//hooks
-	void Hook_ServerActivate(edict_t *pEdictList, int edictCount, int clientMax) {
+	void OnVSPListening(IServerPluginCallbacks *iface) override {
 	}
 
+	//hooks
 	bool Hook_LevelInit(const char *pMapName,
 		char const *pMapEntities,
 		char const *pOldLevel,
 		char const *pLandmarkName,
 		bool loadGame,
-		bool background);
+		bool background) const;
 	void Hook_GameFrame(bool simulating);
-	void Hook_LevelShutdown(void);
-	void Hook_ClientActive(edict_t *pEntity, bool bLoadGame) {
-	}
+	void Hook_LevelShutdown();
+
 	void Hook_ClientDisconnect(edict_t *pEntity);
+
 	void Hook_ClientPutInServer(edict_t *pEntity, char const *playername);
-	void Hook_SetCommandClient(int index) {
-	}
-	void Hook_ClientSettingsChanged(edict_t *pEdict) {
-	}
-	bool Hook_ClientConnect(edict_t *pEntity,
-		const char *pszName,
-		const char *pszAddress,
-		char *reject,
-		int maxrejectlen);
+
 #if SOURCE_ENGINE >= SE_ORANGEBOX
 	void Hook_ClientCommand(edict_t *pEntity, const CCommand &args);
 #else
 	void Hook_ClientCommand(edict_t *pEntity);
 #endif
 public:
-	const char *GetAuthor() {
+	const char *GetAuthor() override {
 		return "taiyungwang";
 	}
-	const char *GetName() {
+	const char *GetName() override {
 		return "HL2 GOAP Bot";
 	}
-	const char *GetDescription() {
+	const char *GetDescription() override {
 		return "A bot that supports DODS and HL2DM.";
 	}
-	const char *GetURL() {
+	const char *GetURL() override {
 		return "https://github.com/taiyungwang/hl2_goap_bot";
 	}
-	const char *GetLicense() {
+	const char *GetLicense() override {
 		return "GPL2";
 	}
 
-	const char *GetVersion() {
+	const char *GetVersion() override {
 		return "1.3.2";
 	}
 
-	const char *GetDate() {
+	const char *GetDate() override {
 		return __DATE__;
 	}
 
-	const char *GetLogTag() {
+	const char *GetLogTag() override {
 		return "mybot";
 	}
 

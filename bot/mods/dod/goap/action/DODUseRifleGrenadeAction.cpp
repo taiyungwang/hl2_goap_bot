@@ -4,9 +4,9 @@
 #include <weapon/Weapon.h>
 #include <util/BaseGrenade.h>
 
-bool DODUseRifleGrenadeAction::execute() {
+bool DODUseRifleGrenadeAction::use() {
 	auto weapon = self->getCurrWeapon();
-	return !weapon || weapon->isClipEmpty() || ThrowGrenadeAction::execute();
+	return !weapon || weapon->isClipEmpty() || ThrowGrenadeAction::use();
 }
 
 bool DODUseRifleGrenadeAction::canUse(const char* weaponName) const {

@@ -17,7 +17,6 @@ void World::reset() {
 	states[WorldProp::USING_BEST_WEAP] = false;
 	states[WorldProp::WEAPON_LOADED] = true;
 	states[WorldProp::OUT_OF_AMMO] = false;
-	states[WorldProp::WEAPON_IN_RANGE] = false;
 	states[WorldProp::EXPLOSIVE_NEAR] = false;
 	addStates();
 }
@@ -34,14 +33,11 @@ bool World::think(Bot *self) {
 		blocker = nullptr;
 		self->setBlocker(nullptr);
 	}
-	bool inRange = true;
 	const auto weap = self->getCurrWeapon();
 	const Player* enemy = Player::getPlayer(self->getVision().getTargetedPlayer());
 	if (weap) {
 		const Vector& pos = self->getEyesPos();
-		if (enemy != nullptr) {
-			inRange = weap->isInRange(enemy->getEyesPos().DistTo(pos));
-		} else if (blocker != nullptr) {
+		if (blocker != nullptr) {
 			extern IVEngineServer* engine;
 			auto& players = Player::getPlayers();
 			auto player = players.find(engine->IndexOfEdict(blocker));
@@ -57,11 +53,8 @@ bool World::think(Bot *self) {
 				target.z += blocker->GetCollideable()->OBBMaxs().z / 2.0f;
 				self->setViewTarget(target);
 			}
-			if (self->getBlocker() != nullptr) {
-				inRange = weap->isInRange(pos.DistTo(self->getViewTarget()));
-			}
 		}
-		updateState(WorldProp::WEAPON_IN_RANGE, inRange);
+		updateState(WorldProp::USING_BEST_WEAP, self->getBestWeapon() == self->getCurrWeaponIdx());
 		updateState(WorldProp::WEAPON_LOADED, !weap->isClipEmpty());
 		updateState(WorldProp::OUT_OF_AMMO, weap->isOutOfAmmo(self->getEdict()));
 	}

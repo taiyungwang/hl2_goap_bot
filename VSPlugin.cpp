@@ -68,8 +68,7 @@ bool loadUndefined(type*& var, CreateInterfaceFn gameServerFactory,
 
 template<typename T>
 bool load(T*& ptr, CreateInterfaceFn interfaceFactory, const char *ver) {
-	ptr = reinterpret_cast<T*>(interfaceFactory(ver, nullptr));
-	if (ptr == nullptr) {
+	if ((ptr = static_cast<T*>(interfaceFactory(ver, nullptr))) == nullptr) {
 		Warning("Unable to load %s.\n", ver);
 		return false;
 	}
@@ -109,8 +108,8 @@ bool VSPlugin::Load(CreateInterfaceFn interfaceFactory,
 	return true;
 }
 
-const char *VSPlugin::GetPluginDescription(void) {
-	return adaptor->getPluginDescription();
+const char *VSPlugin::GetPluginDescription() {
+	return PluginAdaptor::getPluginDescription();
 }
 
 void VSPlugin::LevelInit(char const *pMapName) {

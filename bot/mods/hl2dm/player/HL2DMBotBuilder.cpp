@@ -12,14 +12,12 @@
 
 #include <mods/hl2dm/util/HL2MPPlayer.h>
 #include <player/Bot.h>
-#include <goap/action/GoToAction.h>
 #include <goap/action/ThrowGrenadeAction.h>
 #include <goap/GoalManager.h>
 #include <weapon/Weapon.h>
 #include <weapon/WeaponFunction.h>
 #include <weapon/MeleeWeaponBuilder.h>
 #include <weapon/PistolBuilder.h>
-#include <weapon/MeleeWeaponBuilder.h>
 #include <weapon/SimpleWeaponBuilder.h>
 #include <weapon/GrenadeBuilder.h>
 #include <weapon/RPGBuilder.h>
@@ -67,11 +65,11 @@ private:
 
 class ItemWeaponBuilder: public ItemBuilder {
 public:
-	ItemWeaponBuilder(const char *weapon): WEAPON_NAME(weapon) {
+	explicit ItemWeaponBuilder(const char *weapon): WEAPON_NAME(weapon) {
 	}
 
 	bool need(const Bot &bot) const override {
-		return !bot.getWeapon(WEAPON_NAME.c_str());
+		return !bot.getWeapon(WEAPON_NAME);
 	}
 
 protected:

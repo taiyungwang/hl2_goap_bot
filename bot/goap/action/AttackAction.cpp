@@ -17,8 +17,7 @@
 AttackAction::AttackAction(Bot *self): Action(self) {
 	moveCtx = new MoveStateContext(self);
 	effects = {WorldProp::IS_BLOCKED, false};
-	precond[WorldProp::WEAPON_IN_RANGE] = true;
-	precond[WorldProp::WEAPON_LOADED] = true;
+	precond[WorldProp::USING_BEST_WEAP] = true;
 }
 
 AttackAction::~AttackAction() {
@@ -99,8 +98,7 @@ bool AttackAction::goalComplete() {
 
 void AttackAction::abort() {
 	self->setAimOffset(0.0f);
-	auto weapon = self->getCurrWeapon();
-	if (weapon) {
+	if (const auto weapon = self->getCurrWeapon()) {
 		weapon->undeploy(self);
 	}
 	moveCtx->stop();

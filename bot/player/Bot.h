@@ -207,4 +207,7 @@ private:
 	bool canShoot(CGameTrace &result, const Vector &vecAbsEnd) const;
 
 	void listen();
+	
+	int getBestWeapon(edict_t *target) const;
+
 };

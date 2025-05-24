@@ -17,17 +17,17 @@ public:
 protected:
 	Vector startPos;
 
-	bool arrived(const Vector& currPos, float expectedDist) const;
+	[[nodiscard]] bool arrived(const Vector& currPos, float expectedDist) const;
 
-	Avoid* buildAvoidState(const Vector& currPos) const;
+	[[nodiscard]] Avoid* buildAvoidState(const Vector& currPos) const;
 
 	/**
 	 * Defines the state to transition to if the current move failed.
 	 */
-	virtual MoveState* buildFailedState(const Vector& currPos) const;
+	[[nodiscard]] virtual MoveState* buildFailedState(const Vector& currPos) const;
 
 	/**
 	 * Builds the direction of the move.
 	 */
-	virtual Vector buildDir(const Vector& currPos) const;
+	[[nodiscard]] virtual Vector buildDir(const Vector& currPos) const;
 };

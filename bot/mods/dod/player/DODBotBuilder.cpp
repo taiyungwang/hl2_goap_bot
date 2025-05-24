@@ -28,7 +28,7 @@
 #include <vstdlib/random.h>
 #include <in_buttons.h>
 
-static const int CLASS_COUNT = 6;
+static constexpr int CLASS_COUNT = 6;
 static const char *CLASSES[2][CLASS_COUNT] { { "cls_garand", "cls_tommy",
 		"cls_bar", "cls_spring", "cls_30cal", "cls_bazooka" }, { "cls_mk98",
 		"cls_mp40", "cls_mp44", "cls_k98s", "cls_mg42", "cls_pschreck" } };
@@ -39,11 +39,11 @@ const std::set<std::string> DODLiveGrenadeBuilder::NAMES {
 
 class GrenadeLauncherBuilder: public SimpleWeaponBuilder<GrenadeLauncherFunction> {
 public:
-	GrenadeLauncherBuilder(float velocity) :
+	explicit GrenadeLauncherBuilder(float velocity) :
 		velocity(velocity) {
 	}
 
-	virtual std::shared_ptr<Weapon> build(edict_t *weap) const override {
+	std::shared_ptr<Weapon> build(edict_t *weap) const override {
 		auto weapon = SimpleWeaponBuilder<GrenadeLauncherFunction>::build(weap);
 		weapon->setGrenade(true);
 		dynamic_cast<GrenadeLauncherFunction*>(weapon->getPrimary())->setInitialVelocity(
@@ -56,7 +56,7 @@ private:
 	float velocity;
 };
 
-class AntiTankBuilder: public DeployableWeaponBuilder<Reloader> {
+class AntiTankBuilder final : public DeployableWeaponBuilder<Reloader> {
 public:
 	AntiTankBuilder() :
 			DeployableWeaponBuilder<Reloader>(0.9f, 500.0f, 2000.0f,
@@ -76,7 +76,7 @@ public:
 			PistolBuilder(0.2f) {
 	}
 
-	std::shared_ptr<Weapon> build(edict_t *weap) const {
+	std::shared_ptr<Weapon> build(edict_t *weap) const override {
 		auto weapon = PistolBuilder::build(weap);
 		weapon->getPrimary()->setFullAuto(true);
 		return weapon;
@@ -127,11 +127,11 @@ void DODBotBuilder::updatePlanner(GoalManager &planner,
 
 	class DODDestroyObjectAction: public AttackAction {
 	public:
-		DODDestroyObjectAction(Bot *bot) :
+		explicit DODDestroyObjectAction(Bot *bot) :
 				AttackAction(bot) {
 		}
 	private:
-		bool isBreakable(edict_t *object) const {
+		bool isBreakable(edict_t *object) const override {
 			return Q_stristr(object->GetClassName(), "physics") != nullptr;
 		}
 	};

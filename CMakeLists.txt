@@ -89,9 +89,9 @@ target_link_libraries(${PLUGIN_NAME}_mm
 	 goap goap_actions weapon_sys bot_move valve_navmesh plugin_util bot_util
 	 tier1 mathlib vstdlib publiclib tier0)
 #find installed mods on system.
-set (mods "tf;dod;hl2mp")
-set( steam_dir steamapps/common )
-FILE(GLOB games ${steam_root}/${steam_dir}/*)
+set (mods "dod;hl2mp")
+set( steam_dir ${steam_root}/steamapps/common )
+FILE(GLOB games ${steam_dir}/*)
 foreach(GAME ${games})
 	foreach(mod ${mods})
 		if (EXISTS ${GAME}/${mod})

@@ -14,15 +14,16 @@ struct edict_t;
 /**
  * Allows the use of either the VSDK Plugin or MetaMod Plugin.
  */
-class PluginAdaptor : public GameEventListener {
+class PluginAdaptor final : public GameEventListener {
 public:
 	static int getPlayerruncommandOffset();
 
 	PluginAdaptor();
 
-	~PluginAdaptor();
+	~PluginAdaptor() override;
 
-	const char *getPluginDescription(void) const {
+	[[nodiscard]] static const char *getPluginDescription()
+	{
 		return "MyBot";
 	}
 
@@ -34,11 +35,11 @@ public:
 		newPlayers.push_back(pEntity);
 	}
 
-	void clientDisconnect(edict_t *pEntity);
+	static void clientDisconnect(edict_t *pEntity);
 
 	void levelShutdown();
 
-	void FireGameEvent(IGameEvent* event);
+	void FireGameEvent(IGameEvent* event) override;
 
 	void clientCommand(edict_t* player, const CCommand& command) {
 		commandHandler.handle(player, command);

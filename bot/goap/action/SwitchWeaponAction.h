@@ -5,9 +5,12 @@
 /**
  * Switches to the best weapon ignoring clip status.
  */
-class SwitchWeaponAction: public SwitchToDesiredWeaponAction {
+class SwitchWeaponAction final : public SwitchToDesiredWeaponAction {
 public:
-	SwitchWeaponAction(Bot *self);
+	explicit SwitchWeaponAction(Bot *self) :
+		SwitchToDesiredWeaponAction(self) {
+		effects = {WorldProp::USING_BEST_WEAP, true};
+	}
 
-	bool precondCheck();
+	bool precondCheck() override;
 };

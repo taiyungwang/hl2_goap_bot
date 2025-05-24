@@ -6,7 +6,7 @@
 #include <util/BaseCombatWeapon.h>
 #include <edict.h>
 
-float Weapon::MELEE_RANGE = 50.0f;
+float Weapon::MELEE_RANGE = 32.0f; // 2x HalfHumanWidth
 
 Weapon::Weapon(edict_t* ent) :
 		weap(ent) {
@@ -48,7 +48,12 @@ bool Weapon::isClipEmpty() const {
 	});
 }
 
-float Weapon::getDamage(edict_t* player, float dist) const {
+float Weapon::getDamage(edict_t* player, edict_t* target) const {
+	if (isOutOfAmmo(player)) {
+		return 0.0f;
+	}
+	float dist = target == nullptr || target->IsFree() ? -1.0f:
+			target->GetCollideable()->GetCollisionOrigin().DistTo(player->GetCollideable()->GetCollisionOrigin());
 	return MAX(function[0]->getDamageRating(player, dist),
 			function[1] == nullptr ?
 					0.0f : function[1]->getDamageRating(player, dist));

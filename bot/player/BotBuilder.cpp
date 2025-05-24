@@ -8,12 +8,9 @@
 #include <goap/action/FindCoverAction.h>
 #include <goap/action/ReloadWeaponAction.h>
 #include <goap/action/SnipeAction.h>
-#include <goap/action/SwitchToDesiredWeaponAction.h>
-#include <goap/action/SwitchToBestLoadedWeaponAction.h>
 #include <goap/action/FindCoverFromGrenadesAction.h>
 #include <goap/action/SwitchWeaponAction.h>
 #include <goap/GoalManager.h>
-#include <util/BasePlayer.h>
 
 extern IVEngineServer* engine;
 extern CGlobalVars *gpGlobals;
@@ -72,13 +69,6 @@ void BotBuilder::kickAllExcept(const CCommand &command) {
 	}
 }
 
-class SwitchToBestInRangeWeaponAction: public SwitchToBestLoadedWeaponAction {
-public:
-	SwitchToBestInRangeWeaponAction(Bot *self): SwitchToBestLoadedWeaponAction(self) {
-		effects = { WorldProp::WEAPON_IN_RANGE, true };
-	}
-};
-
 Bot* BotBuilder::build(edict_t* ent) {
 	Bot* bot = new Bot(ent, weaponBuilders, commandHandler,
 			messages);
@@ -93,9 +83,6 @@ Bot* BotBuilder::build(edict_t* ent) {
 	planner->addAction<SwitchWeaponAction>(0.83f);
 	planner->addAction<FindCoverAction>(0.81f);
 	planner->addAction<SnipeAction>(0.7f);
-	planner->addAction<SwitchToDesiredWeaponAction>(0.0f);
-	planner->addAction<SwitchToBestLoadedWeaponAction>(0.0f);
-	planner->addAction<SwitchToBestInRangeWeaponAction>(0.0f);
 	updatePlanner(*planner, bot);
 	bot->setPlanner(planner);
 	return modBuild(bot);

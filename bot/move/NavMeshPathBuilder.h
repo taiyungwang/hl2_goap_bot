@@ -11,12 +11,11 @@ class NavMeshPathBuilder {
 public:
 	using Path = std::vector<std::pair<int, int>>;
 
-	NavMeshPathBuilder(int team) :
+	explicit NavMeshPathBuilder(const int team) :
 			team(team) {
 	}
 
-	virtual ~NavMeshPathBuilder() {
-	}
+	virtual ~NavMeshPathBuilder() = default;
 
 	/**
 	 * Builds the path from the given area to the goal area.

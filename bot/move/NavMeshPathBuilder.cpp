@@ -16,7 +16,7 @@ void NavMeshPathBuilder::build(Path& path, CNavArea *start) {
 		CNavArea *area = CNavArea::PopOpenList();
 		if (foundGoal(area)) {
 			for (; area != nullptr; area = area->GetParent()) {
-				path.push_back(std::make_pair(area->GetID(), area->GetParentHow()));
+				path.emplace_back(area->GetID(), area->GetParentHow());
 			}
 			return;
 		}
@@ -42,8 +42,8 @@ void NavMeshPathBuilder::build(Path& path, CNavArea *start) {
 			auto &connections = *area->GetLadders(static_cast<CNavLadder::LadderDirectionType>(i));
 			FOR_EACH_VEC(connections, j)
 			{
-				auto ladder = connections[j].ladder;
-				auto how = static_cast<NavTraverseType>(i + GO_LADDER_UP);
+				const auto ladder = connections[j].ladder;
+				const auto how = static_cast<NavTraverseType>(i + GO_LADDER_UP);
 				if (i > CNavLadder::LADDER_UP) {
 					float length = ladder->m_length + area->GetCenter().DistTo(ladder->m_top);
 					if (ladder->m_bottomArea != nullptr) {
@@ -68,7 +68,7 @@ void NavMeshPathBuilder::build(Path& path, CNavArea *start) {
 		}
 		auto connections = area->GetElevatorAreas();
 		FOR_EACH_VEC(connections, i) {
-			auto neighbor = connections[i].area;
+			const auto neighbor = connections[i].area;
 			considerNeighbor(area, neighbor,
 					neighbor->GetCenter().z > area->GetCenter().z ? GO_ELEVATOR_UP : GO_ELEVATOR_DOWN,
 					connections[i].length);
@@ -86,12 +86,12 @@ bool NavMeshPathBuilder::shouldSearch(CNavArea *area) const {
 }
 
 void NavMeshPathBuilder::considerNeighbor(CNavArea *area, CNavArea *neighbor,
-		NavTraverseType how, float length) const {
+		const NavTraverseType how, const float length) const {
 	if (neighbor == nullptr) {
 		return;
 	}
-	float tentativePathLength = area->GetPathLengthSoFar() + length + getCost(neighbor);
-	bool isNeighborOpen = neighbor->IsOpen();
+	const float tentativePathLength = area->GetPathLengthSoFar() + length + getCost(neighbor);
+	const bool isNeighborOpen = neighbor->IsOpen();
 	if (!shouldSearch(neighbor)
 		|| tentativePathLength >= (isNeighborOpen || neighbor->IsClosed() ? neighbor->GetPathLengthSoFar() : INFINITY)) {
 		return;

@@ -7,28 +7,27 @@ class KeyValues;
 class CCommand;
 struct edict_t;
 
-class VSPlugin: public IServerPluginCallbacks {
+class VSPlugin final : public IServerPluginCallbacks {
 public:
 	VSPlugin();
 
-	virtual ~VSPlugin() {
-	}
+	virtual ~VSPlugin() = default;
 
 	// IServerPluginCallbacks methods
 	bool Load(CreateInterfaceFn interfaceFactory,
 			CreateInterfaceFn gameServerFactory);
 
-	void Unload(void);
+	void Unload() override;
 
-	void Pause(void) {
+	void Pause() override {
 	}
 
-	void UnPause(void) {
+	void UnPause() override {
 	}
 
-	const char *GetPluginDescription(void);
+	const char *GetPluginDescription() override;
 
-	void LevelInit(char const *pMapName);
+	void LevelInit(char const *pMapName) override;
 
 	void ServerActivate(edict_t *pEdictList, int edictCount,
 			int clientMax) {

@@ -4,14 +4,14 @@
 
 class DODUseRifleGrenadeAction: public DODUseSmokeGrenadeAction {
 public:
-	DODUseRifleGrenadeAction(Bot *self) :
+	explicit DODUseRifleGrenadeAction(Bot *self) :
 			DODUseSmokeGrenadeAction(self) {
 	}
 
-	virtual bool execute() override;
-
 protected:
-	virtual bool canUse(const char* weaponName) const;
+	bool canUse(const char* weaponName) const override;
+
+	bool use() override;
 
 private:
 	const Player *chooseTarget() const override {

@@ -107,16 +107,15 @@ public:
 
 protected:
 	static std::unordered_map<int, Player*> players;
+	
+	const WeaponBuilders& weaponBuilders;
 
 	bool inGame = true;
 
-	int getBestWeapon(edict_t *target) const;
 private:
 	IPlayerInfo* info;
 
 	edict_t* ent;
-
-	const WeaponBuilders& weaponBuilders;
 
 	int currWeapIdx = 0;
 

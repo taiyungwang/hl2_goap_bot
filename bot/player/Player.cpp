@@ -110,7 +110,7 @@ int Player::getUserId() const {
 }
 
 Vector Player::getEyesPos() const {
-	Vector pos;
+	Vector pos{};
 	extern IServerGameClients* gameclients;
 	gameclients->ClientEarPosition(ent, &pos);
 	return pos;
@@ -138,11 +138,10 @@ void Player::FireGameEvent(IGameEvent* event) {
 	if (name == "player_spawn") {
 		inGame = true;
 	}  else if (name == "player_death") {
-		inGame = false;
-		auto area = getArea();
-		if (area != nullptr) {
+		if (const auto area = getArea(); area != nullptr) {
 			area->IncreaseDanger(getTeam(), mybotDangerAmt.GetFloat());
 		}
+		inGame = false;
 	}
 }
 
@@ -230,36 +229,8 @@ std::shared_ptr<Weapon> Player::getWeapon(const std::string& name) const {
 			std::shared_ptr<Weapon>();
 }
 
-int Player::getBestWeapon(edict_t *target) const {
-	edict_t *best = nullptr;
-	float targetDist = target == nullptr || target->IsFree() ? -1.0f:
-			target->GetCollideable()->GetCollisionOrigin().DistTo(getEyesPos());
-	bool underWater = BasePlayer(getEdict()).isUnderWater();
-	forMyWeapons([&best, targetDist, underWater, target, this](edict_t *weaponEnt) mutable
-			-> bool {
-		auto weapon = weaponBuilders.at(weaponEnt->GetClassName()).get()->build(weaponEnt);
-		std::shared_ptr<Weapon> bestWeap;
-		if (best != nullptr) {
-			bestWeap = weaponBuilders.at(best->GetClassName()).get()->build(best);
-		}
-		if (weapon && !weapon->isUnderWater() && !underWater
-				&& !(targetDist < 0.0f && weapon->getPrimary()->isMelee() && !underWater)
-				// TODO: assumes primary and secondary weapons have similar ranges.
-				&& !weapon->isGrenade() && !weapon->isOutOfAmmo(getEdict())
-				&& (target == nullptr
-				 || !weapon->isClipEmpty() && weapon->isInRange(targetDist))
-				&& !(best && weapon->getDamage(getEdict(), targetDist)
-								<= bestWeap->getDamage(getEdict(), targetDist))) {
-			best = weaponEnt;
-		}
-		return false;
-	});
-	return engine->IndexOfEdict(best);
-
-}
-
 void Player::forMyWeapons(const std::function<bool(edict_t*)>& func) const {
-	CBaseHandle* weapList = BaseEntity(ent).getPtr<CBaseHandle>("m_hMyWeapons");
+	auto* weapList = BaseEntity(ent).getPtr<CBaseHandle>("m_hMyWeapons");
 	for (int i = 0; i < MAX_WEAPONS && weapList[i].IsValid(); i++) {
 		int entIdx = weapList[i].GetEntryIndex();
 		extern IVEngineServer* engine;

@@ -63,8 +63,8 @@ void PluginAdaptor::levelInit(const char* mapName) {
 	navMeshLoadAttempted = false;
 }
 
-void PluginAdaptor::gameFrame(bool simulating) {
-	if (!simulating) {
+void PluginAdaptor::gameFrame(bool isSimulating) {
+	if (!isSimulating) {
 		return;
 	}
 	if (!navMeshLoadAttempted) {
@@ -83,7 +83,7 @@ void PluginAdaptor::gameFrame(bool simulating) {
 		}
 		return false;
 	});
-	if (navMeshLoadAttempted && TheNavMesh != nullptr) {
+	if (TheNavMesh != nullptr) {
 		for (auto itr = blockers.begin(); itr != blockers.end();) {
 			if (itr->second.getEntity()->IsFree()) {
 				itr->second.InputDisable();
@@ -107,7 +107,7 @@ void PluginAdaptor::clientDisconnect(edict_t *pEntity) {
 
 void PluginAdaptor::levelShutdown() {
 	auto& players = Player::getPlayers();
-	while(players.size() > 0) {
+	while(!players.empty()) {
 		delete players.begin()->second;
 	}
 	blockers.clear();

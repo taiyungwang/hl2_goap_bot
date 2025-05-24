@@ -4,14 +4,14 @@
 
 class UseGravityGunAction: public UseSpecificWeaponAction {
 public:
-	UseGravityGunAction(Bot *self): UseSpecificWeaponAction(self) {
+	explicit UseGravityGunAction(Bot *self): UseSpecificWeaponAction(self) {
 		effects = {WorldProp::IS_BLOCKED, false};
 	}
 
-	bool precondCheck();
+	bool precondCheck() override;
 
-	bool execute();
+private:
+	bool use() override;
 
-protected:
-	virtual bool canUse(int weaponIdx) const;
+	bool canUse(int weaponIdx) const override;
 };

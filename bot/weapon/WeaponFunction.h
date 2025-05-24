@@ -50,9 +50,7 @@ public:
 	int getAmmo(edict_t* player) const;
 
 	float getDamageRating(edict_t* player, float dist) const {
-		return isInRange(dist)
-				&& (melee || clipId == -1 || getAmmo(player) > 0) ?
-				damageRating : 0.0f;
+		return dist < 0.0f || (isInRange(dist) && (clipId <= -1 || getAmmo(player) > 0.0f)) ? damageRating: 0.0f;
 	}
 
 	void setDamageRating(float damageRating) {

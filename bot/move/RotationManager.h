@@ -26,7 +26,7 @@ private:
 	static void normalize(QAngle& angle);
 
 	static bool isSameDir(float f1, float f2) {
-		return f1 >= 0 == f2 >= 0;
+		return (f1 >= 0) == (f2 >= 0);
 	}
 
 	/**

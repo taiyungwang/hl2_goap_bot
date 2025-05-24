@@ -7,8 +7,8 @@ GameEventListener::~GameEventListener() {
 }
 
 void GameEventListener::listenForGameEvent(
-		std::initializer_list<const char*> events) {
-	for (auto event : events) {
+		const std::initializer_list<const char*> events) {
+	for (const auto event : events) {
 		gameeventmanager->AddListener(this, event, true);
 	}
 }

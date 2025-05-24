@@ -77,6 +77,7 @@ void Bot::think() {
 			rotation.getUpdatedPosition(cmd.viewangles, getFacingAngle());
 		}
 		cmd.buttons = buttons.getPressed();
+		cmd.weaponselect = desiredWeapon;
 		extern CGlobalVars *gpGlobals;
 		cmd.tick_count = gpGlobals->tickcount;
 		if (mybot_mimic.GetBool()) {
@@ -290,5 +291,20 @@ int Bot::getBestWeapon() const {
 	} else if (blocker != nullptr) {
 		target = blocker;
 	}
-	return Player::getBestWeapon(target);
+	edict_t *best = nullptr;
+	bool underWater = BasePlayer(getEdict()).isUnderWater();
+	forMyWeapons([&best, underWater, target, this](edict_t *weaponEnt) mutable
+			-> bool {
+		auto weapon = weaponBuilders.at(weaponEnt->GetClassName()).get()->build(weaponEnt);
+		std::shared_ptr<Weapon> bestWeap;
+		if (best != nullptr) {
+			bestWeap = weaponBuilders.at(best->GetClassName()).get()->build(best);
+		}
+		if (weapon && !weapon->isUnderWater() && !underWater && !weapon->isGrenade() 				
+				&& (best == nullptr || weapon->getDamage(getEdict(), target) > bestWeap->getDamage(getEdict(), target))) {
+			best = weaponEnt;
+		}
+		return false;
+	});
+	return best == nullptr ? -1 : engine->IndexOfEdict(best);
 }

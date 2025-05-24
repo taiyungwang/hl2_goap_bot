@@ -22,7 +22,7 @@ bool ThrowGrenadeAction::precondCheck() {
 	return true;
 }
 
-bool ThrowGrenadeAction::execute() {
+bool ThrowGrenadeAction::use() {
 	if (self->getAimAccuracy() < 0.9f) {
 		self->setViewTarget(target);
 		return false;

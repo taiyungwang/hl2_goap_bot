@@ -1,14 +1,14 @@
 #include "MMSPlugin.h"
 #include "bot/PluginAdaptor.h"
 #include "player/Bot.h"
-#include <shareddefs.h>
-#include <usercmd.h>
 #include <filesystem.h>
 #include <ivdebugoverlay.h>
 #include <IEngineTrace.h>
 #include <igameevents.h>
 #include <datacache/imdlcache.h>
 #include <vphysics_interface.h>
+#include <shareddefs.h>
+#include <usercmd.h>
 
 IBotManager *botmanager = nullptr;
 IVDebugOverlay *debugoverlay = nullptr;
@@ -148,12 +148,12 @@ bool MMSPlugin::Unload(char *error, size_t maxlen) {
 
 bool MMSPlugin::Hook_LevelInit(const char *pMapName,
 		char const *pMapEntities, char const *pOldLevel,
-		char const *pLandmarkName, bool loadGame, bool background) {
+		char const *pLandmarkName, bool loadGame, bool background) const {
 	adaptor->levelInit(pMapName);
 	return true;
 }
 
-void MMSPlugin::Hook_GameFrame(bool simulating) {
+void MMSPlugin::Hook_GameFrame(const bool simulating) {
 	/**
 	 * simulating:
 	 * ***********

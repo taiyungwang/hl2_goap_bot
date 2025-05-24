@@ -7,17 +7,17 @@ struct edict_t;
 
 class AttackAction: public Action {
 public:
-	AttackAction(Bot *blackboard);
+	explicit AttackAction(Bot *blackboard);
 
-	virtual ~AttackAction();
+	~AttackAction() override;
 
-	virtual bool precondCheck();
+	bool precondCheck() override;
 
-	virtual bool execute() override;
+	bool execute() override;
 
-	bool goalComplete();
+	bool goalComplete() override;
 
-	void abort();
+	void abort() override;
 
 protected:
 
