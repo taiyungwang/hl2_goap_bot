@@ -5,10 +5,10 @@ The navigation mesh generated contains hiding spots based on various geometric f
 The bot currently supports Valve's [Day of Defeat Source](https://store.steampowered.com/app/300/Day_of_Defeat_Source/) and [Half-Life 2 Deathmatch](https://store.steampowered.com/app/320/HalfLife_2_Deathmatch/).
 
 ## Installing the Bot ##
-Extract the tgz files into desired game directory, e.g. ```C:\program files (x86)\steam\steamapps\common\day of defeat source\dod```.  The release package also includes a [Metamod Source](https://github.com/alliedmodders/metamod-source) version of the bots.  To run the bot as a Metamod Source plugin, rename mybot.vdf to mybot.vdf.bak, and add ```addons/mybot/my_bot_mm``` to the metaplugins.ini file.
+Extract the tgz files into desired game directory, e.g. ```C:\program files (x86)\steam\steamapps\common\day of defeat source\dod```.  The release package also includes a [Metamod Source](https://github.com/alliedmodders/metamod-source) version of the bots.  To run the bot as a Metamod Source plugin (works only against 2.x builds only), rename mybot.vdf to mybot.vdf.bak, and add ```addons/mybot/my_bot_mm``` to the metaplugins.ini file.
 
 ## Running the Bot from the Desktop (Listen Server) ##
-On Windows, you would need to launch the game with the -insecure option.  For Linux, execute the following from console:
+This plugin is built against X64, which means that it will only work against the x64 installations of the game.  On Windows, you would need to launch the game with the -insecure option.  For Linux, execute the following from console:
 ```
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/i386/lib/i386-linux-gnu:$HOME/.local/share/Steam/ubuntu12_32/steam-runtime/i386/usr/lib/i386-linux-gnu:bin $HOME/.local/share/Steam/steamapps/common/<game dir>/hl2_linux -game <mod dir>
 ```
