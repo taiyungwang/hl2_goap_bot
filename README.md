@@ -27,5 +27,10 @@ Where "game dir" is either "Day of Defeat Source" or "Half-Life 2 Deathmatch" an
   * For example, setting this value to 30 in a map with no players will create 30 bots.  If a player joins, a bot will drop automatically.  Bots dropped and added will attempt to keep the team balanced.
   * Setting the value to the default, -1, will disable the algorithm.
 
-## Compiling the Bot ##
+## Developers ##
+
+## Compiling
 The bot can be built on Windows (Visual Studio 2012 or higher) and LINUX with [CMake](https://cmake.org/) and [Valve's latest Source SDK](alliedmodders/hl2sdk). The toplevel CMakeList.txt assumes that hl2sdk and valve_plugin_navmesh metamod-source repos are in the same subdirectory as this repo.  It assumes that [CxxTest](https://cxxtest.com/) is installed via apt in LINUX, and in Windows it is installed in the root of drive that is specified (defaults to C:). It is also assumed that [Steam](https://store.steampowered.com/about/) is installed within the `HOMEPATH` for the LINUX build environment.  Please see the [Valve Source SDK Wiki on compiling](https://developer.valvesoftware.com/wiki/Source_SDK_2013) for all other platform specific dependencies.  
+
+## Debugging
+- On Linux, this is done through [gdbserver with steam runtime](https://gitlab.steamos.cloud/steamrt/steam-runtime-tools/-/blob/main/docs/slr-for-game-developers.md#attaching-a-debugger-by-using-gdbserver).  A couple of helper scripts have been created to run the game through the debugger.
