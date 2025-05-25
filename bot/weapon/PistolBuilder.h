@@ -9,5 +9,4 @@ public:
 	}
 
 	virtual std::shared_ptr<Weapon> build(edict_t* weap) const;
-
 };

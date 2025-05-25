@@ -6,10 +6,8 @@
 #include "player/Bot.h"
 #include "player/HidingSpotSelector.h"
 #include <nav_mesh/nav_entities.h>
-#include <util/EntityUtils.h>
 #include <util/common_util.h>
 #include <eiface.h>
-#include <iplayerinfo.h>
 
 ConVar mybot_debug("my_bot_debug", "0");
 ConVar mybot_var("mybot_var", "0.5");
@@ -69,7 +67,7 @@ void PluginAdaptor::gameFrame(bool isSimulating) {
 	}
 	if (!navMeshLoadAttempted) {
 		if (TheNavMesh->Load() == NAV_OK) {
-			hidingSpotSelector = std::make_shared<HidingSpotSelector>(commandHandler);
+			hidingSpotSelector = std::make_unique<HidingSpotSelector>(commandHandler);
 			SnipeAction::setSpotSelector(hidingSpotSelector.get());
 			Msg("Loaded Navigation mesh.\n");
 		}

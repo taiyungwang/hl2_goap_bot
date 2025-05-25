@@ -72,7 +72,7 @@ void BotBuilder::kickAllExcept(const CCommand &command) {
 Bot* BotBuilder::build(edict_t* ent) {
 	Bot* bot = new Bot(ent, weaponBuilders, commandHandler,
 			messages);
-	bot->setNavigator(std::make_shared<Navigator>(bot));
+	bot->setNavigator<Navigator>();
 	World* world = buildWorld();
 	world->reset();
 	bot->setWorld(world);
@@ -140,6 +140,6 @@ void BotBuilder::addAllBots(const CCommand &command) {
 }
 
 void BotBuilder::addCommand(const char* name, const char* description, CmdFuncPtr ptr) {
-	commands.push_back(std::make_shared<ConCommand>(name, this, description));
+	commands.push_back(std::make_unique<ConCommand>(name, this, description));
 	cmdCallbacks[commands.back()->GetName()] = ptr;
 }

@@ -115,12 +115,13 @@ public:
 		aimOffset = aiming;
 	}
 
-	void setNavigator(const std::shared_ptr<Navigator>& navigator) {
-		this->navigator = navigator;
+	template<typename T>
+	void setNavigator() {
+		navigator = std::make_unique<T>(this);
 	}
-
-	std::shared_ptr<Navigator> getNavigator() {
-		return navigator;
+	
+	Navigator *getNavigator() const {
+		return navigator.get();
 	}
 
 	void setResetPlanner(bool reset) {
@@ -187,7 +188,7 @@ private:
 	edict_t *blocker = nullptr,
 			*target = nullptr;
 
-	std::shared_ptr<Navigator> navigator;
+	std::unique_ptr<Navigator> navigator;
 
 	int desiredClassId = -1, desiredWeapon = 0;
 
@@ -207,7 +208,4 @@ private:
 	bool canShoot(CGameTrace &result, const Vector &vecAbsEnd) const;
 
 	void listen();
-	
-	int getBestWeapon(edict_t *target) const;
-
 };

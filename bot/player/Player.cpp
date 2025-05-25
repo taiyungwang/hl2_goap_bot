@@ -186,7 +186,7 @@ int Player::getCurrWeaponIdx() const {
 	return index;
 }
 
-std::shared_ptr<Weapon> Player::getCurrWeapon() {
+Weapon *Player::getCurrWeapon() {
 	int index = getCurrWeaponIdx();
 	if (index == 0) {
 		return nullptr;
@@ -194,9 +194,9 @@ std::shared_ptr<Weapon> Player::getCurrWeapon() {
 	if (index != currWeapIdx) {
 		currWeapIdx = index;
 		edict_t* weaponEnt = engine->PEntityOfEntIndex(currWeapIdx);
-		currentWeapon = weaponBuilders.at(weaponEnt->GetClassName()).get()->build(weaponEnt);
+		currentWeapon.reset(weaponBuilders.at(weaponEnt->GetClassName()).get()->build(weaponEnt).get());
 	}
-	return currentWeapon;
+	return currentWeapon.get();
 }
 
 std::shared_ptr<Weapon> Player::getWeapon(int id) const {

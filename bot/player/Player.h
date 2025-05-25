@@ -95,7 +95,7 @@ public:
 
 	int getCurrWeaponIdx() const;
 
-	std::shared_ptr<Weapon> getCurrWeapon();
+	Weapon *getCurrWeapon();
 
 	std::shared_ptr<Weapon> getWeapon(int id) const;
 
@@ -122,7 +122,7 @@ private:
 	/**
 	 * Cache current weapon, since some weapons have state information.
 	 */
-	std::shared_ptr<Weapon> currentWeapon;
+	std::unique_ptr<Weapon> currentWeapon;
 
 	float noiseRange = 0.0f;
 };

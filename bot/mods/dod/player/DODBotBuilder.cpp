@@ -201,7 +201,7 @@ private:
 };
 
 Bot *DODBotBuilder::modBuild(Bot *bot) {
-	bot->setNavigator(std::make_shared<DODNavigator>(bot));
+	bot->setNavigator<DODNavigator>();
 	bot->getVision().setMiniMapRange(500.0f);
 	bot->getVision().addClassName("grenade_frag_ger");
 	bot->getVision().addClassName("grenade_frag_us");

@@ -77,5 +77,5 @@ public:
 	void Hook_PlayerRunCmd(CUserCmd *ucmd, IMoveHelper *moveHelper);
 
 private:
-	std::shared_ptr<PluginAdaptor> adaptor;
+	std::unique_ptr<PluginAdaptor> adaptor;
 };

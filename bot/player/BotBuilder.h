@@ -15,13 +15,11 @@ struct edict_t;
 
 class BotBuilder: public ICommandCallback {
 public:
-	static std::shared_ptr<BotBuilder> factory(CommandHandler& commandHandler);
-
 	BotBuilder(CommandHandler& commandHandler);
 
 	virtual ~BotBuilder();
 
-	void CommandCallback(const CCommand &command) {
+	void CommandCallback(const CCommand &command) override {
 		(this->*cmdCallbacks.at(command.Arg(0)))(command);
 	}
 
@@ -63,7 +61,7 @@ private:
 
 	std::unordered_map<std::string, CmdFuncPtr> cmdCallbacks;
 
-	std::list<std::shared_ptr<ConCommand>> commands;
+	std::list<std::unique_ptr<ConCommand>> commands;
 
 	Bot* build(edict_t* ent);
 

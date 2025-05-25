@@ -6,7 +6,6 @@
 
 class Thinker;
 class BotBuilder;
-class VoiceCommand;
 class HidingSpotSelector;
 class CBasePlayer;
 struct edict_t;
@@ -56,9 +55,7 @@ private:
 
 	BotBuilder* botBuilder;
 
-	std::shared_ptr<VoiceCommand> voiceCommand;
-
-	std::shared_ptr<HidingSpotSelector> hidingSpotSelector;
+	std::unique_ptr<HidingSpotSelector> hidingSpotSelector;
 
 	std::list<edict_t*> newPlayers;
 };

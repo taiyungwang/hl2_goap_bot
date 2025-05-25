@@ -7,7 +7,6 @@
 #include <nav_mesh/nav_area.h>
 #include <util/BaseEntity.h>
 #include <util/UtilTrace.h>
-#include <in_buttons.h>
 
 const ItemMap *GetClosestNeededItemAction::itemMap = nullptr;
 
@@ -50,7 +49,7 @@ bool GetClosestNeededItemAction::goalComplete() {
 }
 
 void GetClosestNeededItemAction::selectItem() {
-	NavMeshPathBuilder::Path path;
+	Path path;
 	build(path, self->getArea());
 	self->getNavigator()->getPath().swap(path);
 }

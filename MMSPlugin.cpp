@@ -127,7 +127,7 @@ bool MMSPlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen,
 #endif
 	ENGINE_CALL(LogPrint)("All hooks started!\n");
 	MathLib_Init();
-	adaptor = std::make_shared<PluginAdaptor>();
+	adaptor = std::make_unique<PluginAdaptor>();
 	if (PluginAdaptor::getPlayerruncommandOffset() > 0) {
 		SH_MANUALHOOK_RECONFIGURE(MHook_PlayerRunCmd,
 				PluginAdaptor::getPlayerruncommandOffset(), 0, 0);

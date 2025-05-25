@@ -26,7 +26,7 @@ public:
 		weapon->setPrimary(std::make_shared<WeaponFunction>(damage));
 		weapon->getPrimary()->getRange()[1] = 1000.0f;
 		weapon->setDeployable(deployableCheck.c_str(), zoomDist);
-		weapon->setDeployer(std::make_shared<U>(*weapon));
+		weapon->template setDeployer<U>();
 		float* ranges = weapon->getPrimary()->getRange();
 		ranges[0] = minRange;
 		ranges[1] = maxRange;

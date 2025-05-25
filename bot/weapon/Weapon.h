@@ -91,16 +91,18 @@ public:
 		return deployer.get();
 	}
 
-	void setDeployer(const std::shared_ptr<Deployer>& deployer) {
-		this->deployer = deployer;
+	template<typename T>
+	void setDeployer() {
+		this->deployer = std::make_shared<T>(*this);
 	}
 
 	Reloader* getReloader() const {
 		return reloader.get();
 	}
 
-	void setReloader(const std::shared_ptr<Reloader>& reloader) {
-		this->reloader = reloader;
+	template<typename T>
+	void setReloader() {
+		this->reloader = std::make_shared<T>(*this);
 	}
 
 private:

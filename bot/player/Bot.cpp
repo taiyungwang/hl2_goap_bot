@@ -31,7 +31,7 @@ Bot::Bot(edict_t* ent, const WeaponBuilders& arsenal,
 	const std::unordered_map<unsigned int, std::string> &messages) :
 	Player(ent, arsenal), Receiver(commandHandler),
 	messages(messages) {
-	navigator = std::make_shared<Navigator>(this);
+	navigator = std::make_unique<Navigator>(this);
 	listenForGameEvent({"player_hurt"});
 }
 
